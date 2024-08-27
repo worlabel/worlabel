@@ -2,7 +2,7 @@ import { useState } from 'react';
 import CloseButton from './CloseButton';
 import Button from './Button';
 import FileList from './FileList';
-import axios, { AxiosProgressEvent } from 'axios';
+import { uploadFiles } from '@/api/upload';
 
 interface ImageUploadModalProps {
   title: string;
@@ -37,42 +37,24 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
   };
 
   const handleUpload = async () => {
-    // 개발 중 알림
-    alert('파일 업로드 기능은 현재 개발 중입니다.');
+    setIsUploading(true);
 
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('files', file);
-    });
-
-    try {
-      const response = await axios.post('/api/projects/{project_id}', formData, {
-        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-          if (progressEvent.total) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            setUploadProgress(progress);
-          }
-        },
-      });
-
-      if (response.status === 200) {
+    await uploadFiles(
+      files,
+      setUploadProgress,
+      () => {
         setIsUploading(false);
         setUploadProgress(100);
         setTimeout(() => {
           setFiles([]);
           onClose();
         }, 2000);
-      } else {
-        throw new Error('Upload failed');
+      },
+      (error: Error) => {
+        console.error('Upload error:', error);
+        setIsUploading(false);
       }
-    } catch (error) {
-      console.error('Upload error:', error);
-    }
-  };
-
-  const startUpload = async () => {
-    setIsUploading(true);
-    await handleUpload();
+    );
   };
 
   const handleClose = () => {
@@ -82,7 +64,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
 
   return (
     <div className="mx-auto w-[610px]">
-      <div className="relative flex flex-col gap-5 p-5 bg-white border border-gray-200 shadow-md rounded-2xl">
+      <div className="relative flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-md">
         <div className="flex items-center justify-between">
           <span className="font-sans text-2xl font-bold leading-tight text-gray-1000">{title}</span>
           <CloseButton onClick={handleClose} />
@@ -97,7 +79,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
               <input
                 type="file"
                 multiple
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 onChange={handleFilesUpload}
               />
               <p className="font-sans text-base font-normal leading-relaxed text-gray-500">
@@ -120,7 +102,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
           <Button
             isActive={files.length > 0 && !isUploading}
             text={isUploading ? `업로드 중... (${uploadProgress}%)` : buttonText}
-            onClick={startUpload}
+            onClick={handleUpload}
             progress={uploadProgress}
           />
         </div>
