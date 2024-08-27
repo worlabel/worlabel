@@ -23,6 +23,11 @@ public abstract class BaseResponse<T> {
     private boolean isSuccess;
 
     /**
+     * 상태 코드
+     */
+    private int status;
+
+    /**
      * 응답 코드
      */
     private int code;
@@ -42,8 +47,9 @@ public abstract class BaseResponse<T> {
      */
     protected List<CustomError> errors;
 
-    public BaseResponse(boolean isSuccess, int code, String message) {
+    public BaseResponse(boolean isSuccess, int status, int code, String message) {
         this.isSuccess = isSuccess;
+        this.status = status;
         this.code = code;
         this.message = message;
         this.data = null;
