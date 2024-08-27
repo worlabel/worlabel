@@ -1,6 +1,7 @@
 package com.worlabel.global.response;
 
 import com.worlabel.global.exception.CustomException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.Errors;
@@ -16,19 +17,22 @@ import java.util.stream.Collectors;
  * 에러 발생시 리턴 할 에러 응답 객체
  */
 @Slf4j
-public class ErrorResponse extends BaseResponse<Void> {
+@Getter
+public class ErrorResponse extends BaseResponse<CustomError> {
 
-    public ErrorResponse(boolean isSuccess, int code, String message, Errors errors) {
-        super(isSuccess, code, message);
+
+
+    public ErrorResponse(boolean isSuccess, int status, int code, String message, Errors errors) {
+        super(isSuccess, status, code, message);
         super.errors = parseErrors(errors);
     }
 
     public ErrorResponse(CustomException exception) {
-        this(false, exception.getErrorCode().getCode(), exception.getMessage(), exception.getErrors());
+        this(false, exception.getErrorCode().getStatus().value(), exception.getErrorCode().getCode(), exception.getMessage(), exception.getErrors());
     }
 
     public ErrorResponse(CustomException exception, String message) {
-        this(false, 1, message, exception.getErrors());
+        this(false, exception.getErrorCode().getStatus().value(), 1, message, exception.getErrors());
     }
 
     public static ErrorResponse of(CustomException exception) {
@@ -40,7 +44,7 @@ public class ErrorResponse extends BaseResponse<Void> {
     }
 
     public static ErrorResponse of(Exception exception) {
-        return new ErrorResponse(false, HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage(), null);
+        return new ErrorResponse(false, HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage(), null);
     }
 
     /**
@@ -59,8 +63,8 @@ public class ErrorResponse extends BaseResponse<Void> {
         // 글로벌 에러 리스트 생성
         List<CustomError> globalErrors = errors.getGlobalErrors().stream()
                 .map(e -> new CustomError(null, // 필드 이름이 없으므로 null
-                         e.getCode(),
-                         e.getDefaultMessage(),
+                        e.getCode(),
+                        e.getDefaultMessage(),
                         e.getObjectName()
                 ))
                 .toList();

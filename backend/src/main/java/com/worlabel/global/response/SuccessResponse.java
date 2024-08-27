@@ -17,7 +17,7 @@ public class SuccessResponse<T> extends BaseResponse<T> {
      * 성공 응답 객체 생성자
      */
     public SuccessResponse() {
-        super(true, HttpStatus.OK.value(), "success");
+        super(true, HttpStatus.OK.value(), 200, "success");
     }
 
     /**
@@ -26,7 +26,7 @@ public class SuccessResponse<T> extends BaseResponse<T> {
      * @param data 성공시 반환하는 데이터
      */
     public SuccessResponse(T data) {
-        super(true, 200, "success");
+        super(true, 200, 200, "success");
         super.data = data;
     }
 
