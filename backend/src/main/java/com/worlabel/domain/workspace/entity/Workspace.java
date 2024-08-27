@@ -1,11 +1,15 @@
 package com.worlabel.domain.workspace.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,21 +29,32 @@ public class Workspace extends BaseEntity {
     private Integer id;
 
     /**
+     * 만든 사용자
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Member member;
+
+    /**
      * 워크 스페이스 제목
      */
-    @Column(name = "title",nullable = false, length = 50)
+    @Column(name = "title", nullable = false, length = 50)
     private String title;
 
     /**
      * 워크 스페이스 설명
      */
-    @Column(name = "description", nullable = false,length = 255)
+    @Column(name = "description", nullable = false, length = 255)
     private String description;
 
-    /**
-     * 워크 스페이스에 속한 프로젝트
-     */
-    @OneToMany(mappedBy = "workspace", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Project> projectList = new ArrayList<>();
+    public Workspace(final Member member, final String title, final String description) {
+        this.member = member;
+        this.title = title;
+        this.description = description;
+    }
 
+    public static Workspace of(final Member member, final String title, final String description) {
+        return new Workspace(member, title, description);
+    }
 }

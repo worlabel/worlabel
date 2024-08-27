@@ -23,6 +23,9 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2004, "유효하지 않은 리프레시 토큰입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 2005, "인증에 실패하였습니다."),
 
+    // Workspace - 3000
+    NOT_AUTHOR(HttpStatus.FORBIDDEN, 3001, "작성자가 아닙니다. 이 작업을 수행할 권한이 없습니다."),
+    WORKSPACE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3002, "해당 워크스페이스는 존재하지 않습니다."),
     ;
 
     private final HttpStatus status;
