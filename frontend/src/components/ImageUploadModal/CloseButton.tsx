@@ -1,20 +1,28 @@
+import { cn } from '@/lib/utils';
+
 interface CloseButtonProps {
   color?: string;
   onClick?: () => void;
-  className?: string; // 추가된 prop
+  className?: string;
+  size?: number;
 }
 
-export default function CloseButton({ color = 'currentColor', onClick, className }: CloseButtonProps): JSX.Element {
+export default function CloseButton({
+  color = 'currentColor',
+  onClick,
+  className,
+  size = 32,
+}: CloseButtonProps): JSX.Element {
   return (
     <button
-      className={`cursor-pointer border-none bg-none p-1 ${className}`}
+      className={cn('cursor-pointer border-none bg-none p-1', className)}
       onClick={onClick}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
         fill="none"
         stroke={color}
         strokeWidth="2"
@@ -22,16 +30,16 @@ export default function CloseButton({ color = 'currentColor', onClick, className
         strokeLinejoin="round"
       >
         <line
-          x1="18"
-          y1="6"
-          x2="6"
-          y2="18"
+          x1={size * 0.75}
+          y1={size * 0.25}
+          x2={size * 0.25}
+          y2={size * 0.75}
         ></line>
         <line
-          x1="6"
-          y1="6"
-          x2="18"
-          y2="18"
+          x1={size * 0.25}
+          y1={size * 0.25}
+          x2={size * 0.75}
+          y2={size * 0.75}
         ></line>
       </svg>
     </button>

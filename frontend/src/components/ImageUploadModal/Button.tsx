@@ -1,3 +1,6 @@
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+
 interface ButtonProps {
   isActive: boolean;
   text: string;
@@ -10,7 +13,12 @@ export default function Button({ isActive, text, onClick, progress = 0 }: Button
 
   return (
     <button
-      className={`relative flex h-12 w-full items-center justify-center rounded-lg border-2 px-5 py-2.5 transition-all duration-300 ${isActive ? 'cursor-pointer border-primary bg-primary text-white' : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500'}`}
+      className={cn(
+        'relative flex h-12 w-full items-center justify-center rounded-lg border-2 px-5 py-2.5 transition-all duration-300',
+        isActive
+          ? 'cursor-pointer border-primary bg-primary text-white'
+          : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500'
+      )}
       disabled={!isActive}
       onClick={isActive ? onClick : undefined}
       style={{ '--progress-width': `${progress}%` } as React.CSSProperties}

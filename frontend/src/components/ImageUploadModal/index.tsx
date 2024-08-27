@@ -1,4 +1,6 @@
+import * as React from 'react';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import CloseButton from './CloseButton';
 import Button from './Button';
 import FileList from './FileList';
@@ -64,7 +66,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
 
   return (
     <div className="mx-auto w-[610px]">
-      <div className="relative flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-md">
+      <div className={cn('relative flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-md')}>
         <div className="flex items-center justify-between">
           <span className="font-sans text-2xl font-bold leading-tight text-gray-1000">{title}</span>
           <CloseButton onClick={handleClose} />
@@ -72,14 +74,16 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
         <div className="flex flex-col gap-5">
           <div className="flex justify-center">
             <div
-              className="relative flex h-44 w-full max-w-[570px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-primary bg-gray-100 p-5 text-center"
+              className={cn(
+                'relative flex h-44 w-full max-w-[570px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-primary bg-gray-100 p-5 text-center'
+              )}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
             >
               <input
                 type="file"
                 multiple
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 onChange={handleFilesUpload}
               />
               <p className="font-sans text-base font-normal leading-relaxed text-gray-500">
