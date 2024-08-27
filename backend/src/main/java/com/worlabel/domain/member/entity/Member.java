@@ -39,6 +39,18 @@ public class Member extends BaseEntity {
     private ProviderType provider = ProviderType.GOOGLE;
 
     /**
+     * 사용자 이메일
+     */
+    @Column(name = "email",nullable = false, length = 40)
+    private String email;
+
+    /**
+     * 사용자 닉네임
+     */
+    @Column(name = "nickname",nullable = false, length = 20)
+    private String nickname;
+
+    /**
      * 사용자 역할
      */
     @Column(name = "user_role", nullable = false)
@@ -56,4 +68,13 @@ public class Member extends BaseEntity {
      */
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> commentList = new ArrayList<>();
+    
+    public static Member of(String providerMemberId, String email, String nickname, String profileImage) {
+        Member member = new Member();
+        member.providerMemberId = providerMemberId;
+        member.email = email;
+        member.nickname = nickname;
+        member.profileImage = profileImage;
+        return member;
+    }
 }
