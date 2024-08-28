@@ -6,7 +6,6 @@ import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
-import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +79,6 @@ public class WorkspaceService {
      */
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND, "Workspace not found"));
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
     }
 }

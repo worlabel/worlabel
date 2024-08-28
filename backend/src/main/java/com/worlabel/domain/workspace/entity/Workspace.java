@@ -1,18 +1,15 @@
 package com.worlabel.domain.workspace.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.worlabel.domain.member.entity.Member;
-import com.worlabel.domain.project.entity.Project;
 import com.worlabel.global.common.BaseEntity;
+import com.worlabel.global.exception.CustomException;
+import com.worlabel.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
@@ -48,7 +45,8 @@ public class Workspace extends BaseEntity {
     @Column(name = "description", nullable = false, length = 255)
     private String description;
 
-    public Workspace(final Member member, final String title, final String description) {
+    private Workspace(final Member member, final String title, final String description) {
+        validateInputs(member, title, description);
         this.member = member;
         this.title = title;
         this.description = description;
@@ -59,8 +57,15 @@ public class Workspace extends BaseEntity {
     }
 
     public void updateWorkspace(final String title, final String description) {
+        validateInputs(member, title, description);
         this.title = title;
         this.description = description;
+    }
+
+    private void validateInputs(final Member member, final String title, final String description) {
+        if (member == null || title.isBlank() || description.isBlank()) {
+            throw new CustomException(ErrorCode.BAD_REQUEST);
+        }
     }
 }
 
