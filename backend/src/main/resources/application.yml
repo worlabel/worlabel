@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: worlabel
+
+  # MYSQL 데이터베이스 설정
+  datasource:
+    url: jdbc:mysql://localhost:3306/worlabel?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  #  하이버네이트 설정
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # MultiPartFile MAXSIZE 설정(추후 구현)
+  servlet:
+    multipart:
+    # max-file-size: 10MB
+    # max-request-size: 10MB
+
+  # OAuth 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: google
+            client-id: 1044731352382-tphfhlmjit95c6k8ac5753e6g197acg2.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:8080/api/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+  # JWT 설정
+  jwt:
+    secret: 9fsVIzHXKXAYkls8RaGmwex4PB7tNxqj
+
+# 로깅 레벨 설정
+logging:
+  level:
+    com.worlabel: DEBUG
+
+
+# Frontend 도메인(추후 변경 예정)
+frontend:
+  url: http://localhost:8080

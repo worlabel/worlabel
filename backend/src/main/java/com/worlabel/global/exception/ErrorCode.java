@@ -13,7 +13,7 @@ public enum ErrorCode {
     EMPTY_FILE(HttpStatus.BAD_REQUEST, 1001, "빈 파일입니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, 1002, "잘못된 요청입니다. 요청을 확인해주세요."),
     EMPTY_REQUEST_PARAMETER(HttpStatus.BAD_REQUEST, 1003, "필수 요청 파라미터가 입력되지 않았습니다."),
-
+    INVALID_URL(HttpStatus.BAD_REQUEST, 1004, "제공하지 않는 주소입니다. 확인해주세요"),
 
     // Auth & User - 2000
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "해당 ID의 사용자를 찾을 수 없습니다."),
