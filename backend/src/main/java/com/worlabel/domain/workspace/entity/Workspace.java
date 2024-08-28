@@ -57,4 +57,10 @@ public class Workspace extends BaseEntity {
     public static Workspace of(final Member member, final String title, final String description) {
         return new Workspace(member, title, description);
     }
+
+    public void updateWorkspace(final String title, final String description) {
+        this.title = title;
+        this.description = description;
+    }
 }
+

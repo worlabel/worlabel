@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Schema(name = "워크스페이스 request dto", description = "워크스페이스 작성시 필요한 정보")
+@Schema(name = "워크스페이스 요청 dto", description = "워크스페이스 작성시 필요한 정보")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter
