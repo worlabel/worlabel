@@ -1,4 +1,4 @@
-package com.worlabel.global.handler;
+package com.worlabel.domain.auth.handler;
 
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -21,7 +21,7 @@ public class CustomAuthenticationDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.debug("오류 : {}", request.getAttribute("error-message"));
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        CustomException exception = new CustomException(ErrorCode.Access_DENIED);
+        CustomException exception = new CustomException(ErrorCode.ACCESS_DENIED);
         ErrorResponse errorResponse = new ErrorResponse(exception, request.getAttribute("error-message").toString());
         response.setContentType("application/json;charset=utf-8");
         response.getWriter().write(errorResponse.toJson());

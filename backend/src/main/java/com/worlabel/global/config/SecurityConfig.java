@@ -2,9 +2,9 @@ package com.worlabel.global.config;
 
 import com.worlabel.domain.auth.service.CustomOAuth2UserService;
 import com.worlabel.global.filter.JwtAuthenticationFilter;
-import com.worlabel.global.handler.CustomAuthenticationDeniedHandler;
-import com.worlabel.global.handler.CustomAuthenticationEntryPoint;
-import com.worlabel.global.handler.OAuth2SuccessHandler;
+import com.worlabel.domain.auth.handler.CustomAuthenticationDeniedHandler;
+import com.worlabel.domain.auth.handler.CustomAuthenticationEntryPoint;
+import com.worlabel.domain.auth.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -71,7 +71,7 @@ public class SecurityConfig {
         http
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization.baseUri("/api/login/oauth2/authorization"))
-                        .redirectionEndpoint(redirection  -> redirection .baseUri("/api/login/oauth2/code/*"))
+                        .redirectionEndpoint(redirection  -> redirection.baseUri("/api/login/oauth2/code/*"))
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                 );
@@ -102,3 +102,8 @@ public class SecurityConfig {
         return source;
     }
 }
+
+/*
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5czAxMDcxODUxNjUxQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJhdXRob3JpdGllcyI6W3siYXV0aG9yaXR5IjoiVVNFUiJ9XSwiZXhwIjoxNzI0ODU1NzQ2fQ.tIo9e40nY1KjhBwYcw0BG18Q9qeTYAoXefezYM9YQiY
+
+ */

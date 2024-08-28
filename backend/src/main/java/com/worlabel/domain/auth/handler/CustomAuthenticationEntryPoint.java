@@ -1,4 +1,4 @@
-package com.worlabel.global.handler;
+package com.worlabel.domain.auth.handler;
 
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;

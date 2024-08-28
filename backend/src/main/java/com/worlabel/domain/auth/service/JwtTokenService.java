@@ -6,14 +6,21 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class JwtTokenService {
 
@@ -31,38 +38,66 @@ public class JwtTokenService {
         refreshTokenExpiration = refreshExpiry;
     }
 
-    public JwtToken generateToken(int memberId){
+    public JwtToken generateTokenByOAuth2User(CustomOAuth2User user) {
+        List<String> authorities = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        return generateToken(user.getName(), user.getId(), authorities);
+    }
+
+    public JwtToken generateTokenByRefreshToken(String refreshToken) throws Exception{
+        if (!isTokenExpired(refreshToken) && isRefreshToken(refreshToken)) {
+            Claims claims = parseClaims(refreshToken);
+            String username = claims.getSubject();
+            int memberId = claims.get("id", Integer.class);
+            List<String> authorities = parseAuthorities(refreshToken).stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+            return generateToken(username, memberId, authorities);
+        }
+        throw new Exception("유효하지 않은 토큰입니다.");
+    }
+
+    private JwtToken generateToken(String username, int memberId, List<String> authorities){
         long now = System.currentTimeMillis();
 
         Date accessTokenExpire = new Date(now + tokenExpiration);
         Date refreshTokenExpire = new Date(now + refreshTokenExpiration);
 
         String accessToken = Jwts.builder()
-                .claim("id",memberId)
-                .claim("type","access")
+                .subject(username)
+                .claim("type", "access")
+                .claim("id", memberId)
+                .claim("authorities", authorities)  // 권한 정보 추가
                 .expiration(accessTokenExpire)
                 .signWith(secretKey)
                 .compact();
 
         String refreshToken = Jwts.builder()
-                .claim("id",memberId)
+                .subject(username)
                 .claim("type","refresh")
+                .claim("authorities", memberId)
+                .claim("authorities", authorities)  // 권한 정보 추가
                 .expiration(refreshTokenExpire)
                 .signWith(secretKey)
                 .compact();
 
+        log.debug("액세스 발급: {}",accessToken);
         return new JwtToken(accessToken, refreshToken);
     }
 
-    public JwtToken generateTokenByRefreshToken(String refreshToken) throws Exception{
-        if(isTokenExpired(refreshToken) && isRefreshToken(refreshToken)){
-            return generateToken(Integer.parseInt(refreshToken));
-        }
-        throw new Exception("유효하지 않은 토큰입니다.");
+    public String parseUsername(String token) throws Exception {
+        return parseClaims(token).getSubject();
     }
 
     public int parseId(String token) throws Exception {
         return parseClaims(token).get("id", Integer.class);
+    }
+
+    public List<SimpleGrantedAuthority> parseAuthorities(String token) throws Exception {
+        Claims claims = parseClaims(token);
+        List<String> authorities = claims.get("authorities", List.class); // JWT에서 권한 정보 추출
+        return authorities.stream()
+                .map(SimpleGrantedAuthority::new)
+                .toList();
     }
 
     // 토큰 만료 여부 확인
@@ -88,15 +123,13 @@ public class JwtTokenService {
     private boolean isTokenType(String token, String expectedType) {
         try {
             Claims claims = parseClaims(token);
+            log.debug("claims : {}",claims);
             String tokenType = claims.get("type", String.class);
             return expectedType.equals(tokenType);
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
-    }
-
-    public long getRefreshTokenExpiration(){
-        return refreshTokenExpiration;
     }
 
     private Claims parseClaims(String token) throws Exception {
@@ -118,5 +151,4 @@ public class JwtTokenService {
         }
         throw new Exception(message);
     }
-
 }
