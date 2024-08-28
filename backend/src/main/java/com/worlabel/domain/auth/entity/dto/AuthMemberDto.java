@@ -1,4 +1,4 @@
-package com.worlabel.domain.auth.dto;
+package com.worlabel.domain.auth.entity.dto;
 
 import com.worlabel.domain.member.entity.Member;
 import lombok.Getter;

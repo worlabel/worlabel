@@ -1,6 +1,5 @@
 package com.worlabel.domain.auth.controller;
 
-import com.worlabel.domain.auth.dto.AuthMemberDto;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     // TODO: 리이슈 처리
+    @GetMapping("/")
+    public String login() {
+        return "로그인 성공";
+    }
 
     @GetMapping("/user-info")
-    public SuccessResponse<AuthMemberDto> getMemberInfo(@CurrentUser AuthMemberDto currentMember){
+    public SuccessResponse<Integer> getMemberInfo(@CurrentUser Integer currentMember){
         return SuccessResponse.of(currentMember);
     }
 }

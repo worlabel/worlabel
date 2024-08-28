@@ -1,7 +1,6 @@
 package com.worlabel.global.resolver;
 
-import com.worlabel.domain.auth.dto.AuthMemberDto;
-import com.worlabel.domain.auth.entity.CustomOAuth2Member;
+import com.worlabel.domain.auth.entity.dto.AuthMemberDto;
 import com.worlabel.global.annotation.CurrentUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -24,9 +23,8 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(principal instanceof AuthMemberDto){
-            return principal;
+            return ((AuthMemberDto) principal).getId();
         }
-
         return null;
     }
 }
