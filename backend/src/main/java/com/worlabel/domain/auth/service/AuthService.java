@@ -1,6 +1,7 @@
 package com.worlabel.domain.auth.service;
 
 import com.worlabel.domain.auth.entity.dto.JwtToken;
+import com.worlabel.domain.auth.repository.AuthCacheRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +15,13 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AuthService {
     private final JwtTokenService jwtTokenService;
+    private final AuthCacheRepository authCacheRepository;
 
     public JwtToken reissue(String refreshToken) throws Exception {
-        String username = jwtTokenService.parseUsername(refreshToken);
-        if(username == null) throw new CustomException(ErrorCode.INVALID_TOKEN);
-
-        // TODO: 레디스 토큰 검사
-        Object redisRefreshToken = null;
-        if(Objects.equals(refreshToken, redisRefreshToken)){
+        int id = jwtTokenService.parseId(refreshToken);
+        Object redisRefreshToken = authCacheRepository.find(id);
+        log.debug("{} == {} ",redisRefreshToken,refreshToken);
+        if(!Objects.equals(refreshToken, redisRefreshToken)){
             throw new CustomException(ErrorCode.USER_ALREADY_SIGN_OUT);
         }
 

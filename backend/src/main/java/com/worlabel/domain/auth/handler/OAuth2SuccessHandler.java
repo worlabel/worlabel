@@ -2,6 +2,7 @@ package com.worlabel.domain.auth.handler;
 
 import com.worlabel.domain.auth.entity.CustomOAuth2User;
 import com.worlabel.domain.auth.entity.dto.JwtToken;
+import com.worlabel.domain.auth.repository.AuthCacheRepository;
 import com.worlabel.domain.auth.service.JwtTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -22,11 +23,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${frontend.url}")
-    private String frontEnd;
-    @Value("${auth.refreshTokenExpiry}")
-    long refreshExpiry;
-
+    @Value("${frontend.url}") private String frontEnd;
+    @Value("${auth.refreshTokenExpiry}") long refreshExpiry;
+    private final AuthCacheRepository authCacheRepository;
     private final JwtTokenService jwtTokenService;
 
     @Override
@@ -45,6 +44,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // 쿠키에 리프레시 토큰 추가
         response.addCookie(createCookie(jwtToken.getRefreshToken()));
+        authCacheRepository.save(customOAuth2User.getId(), jwtToken.getRefreshToken(), refreshExpiry);
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }

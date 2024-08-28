@@ -1,6 +1,7 @@
 package com.worlabel.domain.auth.controller;
 
 import com.worlabel.domain.auth.entity.dto.JwtToken;
+import com.worlabel.domain.auth.repository.AuthCacheRepository;
 import com.worlabel.domain.auth.service.AuthService;
 import com.worlabel.domain.auth.service.JwtTokenService;
 import com.worlabel.global.annotation.CurrentUser;
@@ -27,22 +28,28 @@ import java.util.Arrays;
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthCacheRepository authCacheRepository;
+    private final JwtTokenService jwtTokenService;
 
     @Value("${auth.refreshTokenExpiry}")
     long refreshExpiry;
 
     // TODO: 리이슈 처리, 액세스 어떻게 받았는지 물어보기
     @PostMapping("/reissue")
-    public SuccessResponse<Void> reissue(
+    public SuccessResponse<String> reissue(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        log.info("reissue");
         String refresh = parseRefreshCookie(request);
+        log.info("reissue :{}", refresh);
         try {
             JwtToken newToken = authService.reissue(refresh);
+            log.debug("새로운 토큰 발급 성공");
+            int id = jwtTokenService.parseId(newToken.getAccessToken());
+            log.debug("{}",id);
             response.addCookie(createCookie(newToken.getRefreshToken()));
-            return SuccessResponse.empty();
+            authCacheRepository.save(id, newToken.getRefreshToken(), refreshExpiry);
+            return SuccessResponse.of(newToken.getAccessToken());
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
@@ -68,7 +75,7 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> "refresh".equals(cookie.getName()))
+                    .filter(cookie -> "refreshToken".equals(cookie.getName()))
                     .findFirst()
                     .map(Cookie::getValue)
                     .orElse(null);

@@ -74,7 +74,7 @@ public class JwtTokenService {
         String refreshToken = Jwts.builder()
                 .subject(username)
                 .claim("type","refresh")
-                .claim("authorities", memberId)
+                .claim("id", memberId)
                 .claim("authorities", authorities)  // 권한 정보 추가
                 .expiration(refreshTokenExpire)
                 .signWith(secretKey)
