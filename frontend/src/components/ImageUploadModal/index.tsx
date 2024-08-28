@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CloseButton from './CloseButton';
-import Button from './Button';
+import ProgressButton from './ProgressButton';
 import FileList from './FileList';
 import { uploadFiles } from '@/api/upload';
 
@@ -103,11 +103,13 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
         )}
       </div>
       <div className="flex justify-center">
-        <Button
+        <ProgressButton
           isActive={files.length > 0 && !isUploading}
           text={isUploading ? `업로드 중... (${uploadProgress}%)` : buttonText}
           onClick={handleUpload}
           progress={uploadProgress}
+          type="submit"
+          variant="outlinePrimary"
         />
       </div>
     </div>
