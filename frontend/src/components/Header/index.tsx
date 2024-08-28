@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import bellIcon from '@/assets/icons/bell.svg';
-import userIcon from '@/assets/icons/user.svg';
+import { Bell, User } from 'lucide-react';
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -32,16 +31,8 @@ export default function Header({ className, ...props }: HeaderProps) {
         </nav>
       </div>
       <div className="flex items-center gap-4 md:gap-5">
-        <img
-          className="h-4 w-4 sm:h-5 sm:w-5"
-          src={bellIcon}
-          alt="Bell Icon"
-        />
-        <img
-          className="h-4 w-4 sm:h-5 sm:w-5"
-          src={userIcon}
-          alt="User Icon"
-        />
+        <Bell className="h-4 w-4 text-black sm:h-5 sm:w-5" />
+        <User className="h-4 w-4 text-black sm:h-5 sm:w-5" />
       </div>
     </header>
   );
