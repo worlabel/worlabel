@@ -13,6 +13,7 @@ import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ public class WorkspaceController {
     @SwaggerApiSuccess(description = "워크스페이스를 성공적으로 생성합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping
-    public BaseResponse<WorkspaceResponse> createWorkspace(@CurrentUser final Integer memberId, @RequestBody final WorkspaceRequest workspaceRequest) {
+    public BaseResponse<WorkspaceResponse> createWorkspace(@CurrentUser final Integer memberId, @Valid @RequestBody final WorkspaceRequest workspaceRequest) {
         WorkspaceResponse workspace = workspaceService.createWorkspace(memberId, workspaceRequest);
         return SuccessResponse.of(workspace);
     }
@@ -63,7 +64,7 @@ public class WorkspaceController {
     public BaseResponse<WorkspaceResponse> updateWorkspace(
             @CurrentUser final Integer memberId,
             @PathVariable("workspace_id") final Integer workspaceId,
-            @RequestBody final WorkspaceRequest updatedWorkspace) {
+            @Valid @RequestBody final WorkspaceRequest updatedWorkspace) {
         WorkspaceResponse workspace = workspaceService.updateWorkspace(memberId, workspaceId, updatedWorkspace);
         return SuccessResponse.of(workspace);
     }
