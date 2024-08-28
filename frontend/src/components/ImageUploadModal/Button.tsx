@@ -25,7 +25,7 @@ export default function Button({ isActive, text, onClick, progress = 0 }: Button
     >
       <span className="relative z-10 font-sans text-base font-bold leading-6">{buttonText}</span>
       <div
-        className="absolute top-0 left-0 z-0 h-full duration-300 bg-white transition-width bg-opacity-20"
+        className="transition-width absolute left-0 top-0 z-0 h-full bg-white bg-opacity-20 duration-300"
         style={{ width: `var(--progress-width, 0%)` }}
       ></div>
     </button>

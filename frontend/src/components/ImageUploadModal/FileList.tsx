@@ -8,8 +8,8 @@ interface FileListProps {
 
 export default function FileList({ files, onRemoveFile }: FileListProps): JSX.Element {
   return (
-    <div className="max-w-full overflow-x-hidden overflow-y-auto max-h-52">
-      <ul className="p-0 m-0 list-none">
+    <div className="max-h-52 max-w-full overflow-y-auto overflow-x-hidden">
+      <ul className="m-0 list-none p-0">
         {files.map((file, index) => (
           <li
             key={index}

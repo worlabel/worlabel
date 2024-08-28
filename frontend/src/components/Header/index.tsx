@@ -22,7 +22,7 @@ export default function Header({ className, ...props }: HeaderProps) {
         >
           WorLabel
         </div>
-        <nav className="items-center hidden gap-5 md:flex">
+        <nav className="hidden items-center gap-5 md:flex">
           <div className={cn('text-color-text-default-default', 'font-body-strong', 'text-sm sm:text-base md:text-lg')}>
             workspace
           </div>
@@ -33,12 +33,12 @@ export default function Header({ className, ...props }: HeaderProps) {
       </div>
       <div className="flex items-center gap-4 md:gap-5">
         <img
-          className="w-4 h-4 sm:h-5 sm:w-5"
+          className="h-4 w-4 sm:h-5 sm:w-5"
           src={bellIcon}
           alt="Bell Icon"
         />
         <img
-          className="w-4 h-4 sm:h-5 sm:w-5"
+          className="h-4 w-4 sm:h-5 sm:w-5"
           src={userIcon}
           alt="User Icon"
         />

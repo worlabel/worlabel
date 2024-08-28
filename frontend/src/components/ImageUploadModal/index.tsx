@@ -69,7 +69,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
       <header className="flex items-center justify-between">
         <h1 className="small-title">{title}</h1>
         <button
-          className="flex items-center justify-center w-8 h-8"
+          className="flex h-8 w-8 items-center justify-center"
           onClick={handleClose}
         >
           <CloseButton />
@@ -87,7 +87,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
             <input
               type="file"
               multiple
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
               onChange={handleFilesUpload}
             />
             <p className="font-sans text-base font-normal leading-relaxed text-gray-500">
