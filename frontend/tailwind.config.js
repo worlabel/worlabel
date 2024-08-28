@@ -33,6 +33,10 @@ export default {
       },
     },
     extend: {
+      padding: {
+        0.5: '0.125rem',
+        1.5: '0.375rem',
+      },
       colors: {
         transparent: 'transparent',
         current: 'currentColor',
