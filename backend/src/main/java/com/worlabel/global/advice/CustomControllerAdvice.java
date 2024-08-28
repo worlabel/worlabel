@@ -11,6 +11,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -29,16 +31,23 @@ public class CustomControllerAdvice {
         return ErrorResponse.of(new CustomException(ErrorCode.BAD_REQUEST));
     }
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoHandlerFoundException(NoResourceFoundException e) {
         log.error("", e);
-        return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e));
+        return ErrorResponse.of(new CustomException(ErrorCode.INVALID_URL));
     }
 
     @ExceptionHandler({MissingServletRequestParameterException.class})
     public ErrorResponse handleRequestParameterException(Exception e) {
         log.error("",e);
         return ErrorResponse.of(new CustomException(ErrorCode.EMPTY_REQUEST_PARAMETER));
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+        log.error("", e);
+        return ResponseEntity.status(e.getErrorCode().getStatus())
+                .body(ErrorResponse.of(e));
     }
 }
