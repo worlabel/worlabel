@@ -1,6 +1,4 @@
-import * as React from 'react';
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
 import CloseButton from './CloseButton';
 import Button from './Button';
 import FileList from './FileList';
@@ -78,9 +76,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
       <div className="flex flex-col gap-5">
         <div className="flex justify-center">
           <div
-            className={cn(
-              'relative flex h-44 w-full max-w-[570px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-primary bg-gray-100 p-5 text-center'
-            )}
+            className="relative flex h-44 w-full max-w-[570px] cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-primary bg-gray-100 p-5 text-center"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
           >
