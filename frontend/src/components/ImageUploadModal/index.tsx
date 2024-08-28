@@ -70,7 +70,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
           className="flex h-8 w-8 items-center justify-center"
           onClick={handleClose}
         >
-          <CloseButton />
+          <CloseButton className="self-end" />
         </button>
       </header>
       <div className="flex flex-col gap-5">
