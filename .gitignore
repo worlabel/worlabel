@@ -1,5 +1,6 @@
 .DS_Store
 application.yml
+application.properties
 
 ### STS ###
 .apt_generated
