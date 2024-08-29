@@ -79,8 +79,7 @@ public class AuthController {
             return Arrays.stream(cookies)
                     .filter(cookie -> "refreshToken".equals(cookie.getName()))
                     .findFirst()
-                    .map(Cookie::getValue)
-                    .map(String::trim)
+                    .map(cookie -> cookie.getValue().trim())
                     .orElse(null);
         }
         return null;
