@@ -1,5 +1,6 @@
 package com.worlabel.domain.member.entity;
 
+import com.worlabel.domain.auth.attribute.OAuth2Attribute;
 import com.worlabel.domain.auth.entity.ProviderType;
 import com.worlabel.domain.comment.entity.Comment;
 import com.worlabel.global.common.BaseEntity;
@@ -69,12 +70,13 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> commentList = new ArrayList<>();
     
-    public static Member of(String providerMemberId, String email, String nickname, String profileImage) {
+    public static Member create(OAuth2Attribute attribute, ProviderType provider) {
         Member member = new Member();
-        member.providerMemberId = providerMemberId;
-        member.email = email;
-        member.nickname = nickname;
-        member.profileImage = profileImage;
+        member.providerMemberId = attribute.getId();
+        member.email = attribute.getEmail();
+        member.nickname = attribute.getName();
+        member.profileImage = attribute.getProfileImage();
+        member.provider = provider;
         return member;
     }
 }

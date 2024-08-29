@@ -22,6 +22,9 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, 2003, "리프레시 토큰이 만료되었습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2004, "유효하지 않은 리프레시 토큰입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 2005, "인증에 실패하였습니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, 2006, "접근 권한이 없습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 2007, "올바르지 않는 인증 토큰입니다. 다시 확인 해주세요"),
+    USER_ALREADY_SIGN_OUT(HttpStatus.UNAUTHORIZED, 2008,"이미 로그아웃한 사용자입니다."),
 
     // Workspace - 3000
     NOT_AUTHOR(HttpStatus.FORBIDDEN, 3001, "작성자가 아닙니다. 이 작업을 수행할 권한이 없습니다."),
