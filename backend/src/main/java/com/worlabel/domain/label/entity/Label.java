@@ -1,7 +1,6 @@
 package com.worlabel.domain.label.entity;
 
 import com.worlabel.domain.image.entity.Image;
-import com.worlabel.domain.project.entity.LabelCategory;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

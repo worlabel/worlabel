@@ -20,4 +20,15 @@ public interface WorkspaceRepository extends JpaRepository<Workspace, Integer> {
             "LIMIT :pageSize",
             nativeQuery = true)
     List<Workspace> findWorkspacesByMemberIdAndLastWorkspaceId(@Param("memberId") Integer memberId, @Param("lastWorkspaceId") Integer lastWorkspaceId, @Param("pageSize") Integer pageSize);
+
+    @Query(value = "SELECT w.* FROM workspace w " +
+            "JOIN workspace_participant wp ON w.workspace_id = wp.workspace_id " +
+            "WHERE wp.member_id = :memberId " +
+            "AND (:lastWorkspaceId IS NULL OR w.workspace_id < :lastWorkspaceId) " +
+            "ORDER BY w.workspace_id DESC " +
+            "LIMIT :pageSize", nativeQuery = true)
+    List<Workspace> findWorkspacesByMemberIdWithPagination(
+            @Param("memberId") Integer memberId,
+            @Param("lastWorkspaceId") Integer lastWorkspaceId,
+            @Param("pageSize") Integer pageSize);
 }

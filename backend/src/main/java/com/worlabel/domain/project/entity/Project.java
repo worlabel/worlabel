@@ -8,9 +8,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Entity
 @Table(name = "project")
@@ -40,8 +37,24 @@ public class Project extends BaseEntity {
     private Workspace workspace;
 
     /**
-     * 사용하는 레이블 카테고리
+     * 프로젝트 유형
      */
-    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LabelCategory> labelCategoryList = new ArrayList<>();
+    @Column(name = "project_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ProjectType projectType;
+
+    private Project(final String title, final Workspace workspace, final ProjectType projectType) {
+        this.title = title;
+        this.workspace = workspace;
+        this.projectType = projectType;
+    }
+
+    public static Project of(final String title, final Workspace workspace, final ProjectType projectType) {
+        return new Project(title, workspace, projectType);
+    }
+
+    public void updateProject(final String title, final ProjectType projectType) {
+        this.title = title;
+        this.projectType = projectType;
+    }
 }
