@@ -53,17 +53,12 @@ public class JwtTokenService {
     }
 
     public JwtToken generateTokenByRefreshToken(String refreshToken) throws Exception {
-        log.debug("생성");
-
         if (isTokenExpired(refreshToken)) {
             throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
-
         if (!isRefreshToken(refreshToken)) {
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
-
-        log.debug("유효성 통과");
 
         Claims claims = parseClaims(refreshToken);
         String username = claims.getSubject();
