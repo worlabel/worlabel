@@ -1,6 +1,6 @@
 package com.worlabel.global.filter;
 
-import com.worlabel.domain.auth.entity.dto.LoginMember;
+import com.worlabel.domain.auth.entity.dto.AuthMemberDto;
 import com.worlabel.domain.auth.service.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,9 +36,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token) && !jwtTokenService.isTokenExpired(token) && jwtTokenService.isAccessToken(token)) {
                 String name = jwtTokenService.parseUsername(token);
                 int id = jwtTokenService.parseId(token);
-
                 List<SimpleGrantedAuthority> authorities = jwtTokenService.parseAuthorities(token);
-                Authentication authToken = new UsernamePasswordAuthenticationToken(LoginMember.of(id,name), null, authorities);
+
+                Authentication authToken = new UsernamePasswordAuthenticationToken(
+                        AuthMemberDto.of(id,name,authorities.getFirst().toString()),
+                        null,
+                        authorities
+                );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
                 throw new JwtException("유효한 JWT 토큰이 없습니다.");

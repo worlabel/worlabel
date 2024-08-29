@@ -35,13 +35,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         // HTTP Basic 인증 방식 비활성화
         http.
                 httpBasic((auth) -> auth.disable());
+
         // CSRF 비활성화
         http
                 .csrf((auth) -> auth.disable());
+
         // Form 로그인 방식 비활성화
         http
                 .formLogin((auth) -> auth.disable());
@@ -60,11 +61,10 @@ public class SecurityConfig {
                                 .accessDeniedHandler(authenticationDeniedHandler)
                         );
 
-
         // 경로별 인가 작업
         http
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/auth/reissue").permitAll()
                         .anyRequest().authenticated());
 
         // OAuth2

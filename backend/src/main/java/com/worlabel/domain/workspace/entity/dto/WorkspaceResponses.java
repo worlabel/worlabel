@@ -7,9 +7,9 @@ import lombok.Getter;
 
 import java.util.List;
 
-@Schema(name = "워크스페이스 목록 응답 dto", description = "워크스페이스 목록 응답 DTO")
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Schema(name = "워크스페이스 목록 응답 dto", description = "워크스페이스 목록 응답 DTO")
 public class WorkspaceResponses {
 
     @Schema(description = "워크스페이스 목록", example = "")

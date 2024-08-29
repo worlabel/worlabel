@@ -15,14 +15,23 @@ public class AuthCacheRepository {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void save(int memberId, String token, Long expiredTime) {
-        redisTemplate.opsForValue().set(CacheKey.authenticationKey(memberId), String.valueOf(token), expiredTime, TimeUnit.MILLISECONDS);
+    /**
+     * 리프레시 토큰 저장
+     */
+    public void save(int memberId, String refreshToken, Long expiredTime) {
+        redisTemplate.opsForValue().set(CacheKey.authenticationKey(memberId), String.valueOf(refreshToken), expiredTime, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * 리프레시 토큰 반환
+     */
     public String find(int memberId) {
         return (String) redisTemplate.opsForValue().get(CacheKey.authenticationKey(memberId));
     }
 
+    /**
+     * 리프레시 토큰 삭제
+     */
     public void delete(int memberId){
         redisTemplate.delete(CacheKey.authenticationKey(memberId));
     }
