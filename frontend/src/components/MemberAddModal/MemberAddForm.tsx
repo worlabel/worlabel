@@ -1,28 +1,40 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Select } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+type Role = 'admin' | 'editor' | 'viewer';
+
+const roles: Role[] = ['admin', 'editor', 'viewer'];
+
+const roleToStr: { [key in Role]: string } = {
+  admin: '관리자',
+  editor: '사용자',
+  viewer: '뷰어',
+};
 
 const formSchema = z.object({
-  email: z.string().email({ message: '올바른 이메일 형식을 입력해주세요.' }),
-  role: z.string().min(1, { message: '역할을 선택해주세요.' }),
+  email: z
+    .string()
+    .email({
+      message: '올바른 이메일 형식을 입력해주세요.',
+    })
+    .max(40)
+    .min(1, {
+      message: '초대할 멤버의 이메일 주소를 입력해주세요.',
+    }),
+  role: z.enum(['admin', 'editor', 'viewer']),
 });
 
 export type MemberAddFormValues = z.infer<typeof formSchema>;
 
 const defaultValues: Partial<MemberAddFormValues> = {
   email: '',
-  role: '',
+  role: undefined,
 };
-
-const roleOptions = [
-  { value: 'admin', label: '관리자' },
-  { value: 'viewer', label: '뷰어' },
-  { value: 'editor', label: '에디터' },
-];
 
 export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAddFormValues) => void }) {
   const form = useForm<MemberAddFormValues>({
@@ -44,7 +56,8 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
               <FormLabel className="body-strong">이메일</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="이메일을 입력해주세요."
+                  placeholder="초대할 멤버의 이메일 주소를 입력해주세요."
+                  maxLength={40}
                   {...field}
                 />
               </FormControl>
@@ -60,9 +73,23 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
               <FormLabel className="body-strong">역할</FormLabel>
               <FormControl>
                 <Select
-                  {...field}
-                  options={roleOptions}
-                />
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="초대할 멤버의 역할을 선택해주세요." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roles.map((role) => (
+                      <SelectItem
+                        key={role}
+                        value={role}
+                      >
+                        {roleToStr[role]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
