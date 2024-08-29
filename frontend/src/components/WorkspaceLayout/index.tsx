@@ -1,8 +1,9 @@
 import { Outlet } from 'react-router-dom';
 import Header from '../Header';
-import { Project } from '@/types';
+import { Label, Project } from '@/types';
 import { ResizablePanelGroup, ResizablePanel } from '../ui/resizable';
 import WorkspaceSidebar from '../WorkspaceSidebar';
+import WorkspaceLabelBar from '../WorkspaceLabelBar';
 
 export default function WorkspaceLayout() {
   const workspace: { name: string; projects: Project[] } = {
@@ -59,21 +60,41 @@ export default function WorkspaceLayout() {
       },
     ],
   };
+  const labels: Label[] = [
+    {
+      id: 1,
+      name: 'Label 1',
+      color: '#FFaa33',
+    },
+    {
+      id: 2,
+      name: 'Label 2',
+      color: '#aaFF55',
+    },
+    {
+      id: 3,
+      name: 'Label 3',
+      color: '#77aaFF',
+    },
+  ];
 
   return (
     <>
       <Header className="fixed left-0 top-0" />
-      <main className="mt-16 h-[calc(100vh-64px)] w-screen">
+      <div className="mt-16 h-[calc(100vh-64px)] w-screen">
         <ResizablePanelGroup direction="horizontal">
           <WorkspaceSidebar
             workspaceName={workspace.name}
             projects={workspace.projects}
           />
-          <ResizablePanel className="flex w-full items-center justify-center">
-            <Outlet />
+          <ResizablePanel className="flex w-full items-center">
+            <main className="grow">
+              <Outlet />
+            </main>
+            <WorkspaceLabelBar labels={labels} />
           </ResizablePanel>
         </ResizablePanelGroup>
-      </main>
+      </div>
     </>
   );
 }
