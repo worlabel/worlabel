@@ -30,12 +30,12 @@ export default function ProjectFileItem({
       {item.status === 'idle' ? (
         <Minus
           size={16}
-          className="stroke-gray-400"
+          className="shrink-0 stroke-gray-400"
         />
       ) : (
         <Check
           size={16}
-          className="stroke-green-500"
+          className="shrink-0 stroke-green-500"
         />
       )}
     </button>
