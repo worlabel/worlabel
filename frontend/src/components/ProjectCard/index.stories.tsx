@@ -6,6 +6,7 @@ const meta: Meta<typeof ProjectCard> = {
   component: ProjectCard,
   argTypes: {
     title: { control: 'text' },
+    description: { control: 'text' },
   },
 };
 
@@ -16,5 +17,6 @@ type Story = StoryObj<typeof ProjectCard>;
 export const Default: Story = {
   args: {
     title: '프로젝트 제목',
+    description: '프로젝트 내용',
   },
 };

@@ -3,40 +3,34 @@ import { cn } from '@/lib/utils';
 
 interface ProjectCardProps {
   title: string;
+  description: string;
   imageUrl?: string;
   onClick?: () => void;
 }
 
-export default function ProjectCard({ title, imageUrl, onClick }: ProjectCardProps): JSX.Element {
+export default function ProjectCard({ title, description, imageUrl, onClick }: ProjectCardProps): JSX.Element {
   return (
     <div
       onClick={onClick}
-      className={cn('relative flex h-60 w-[295px] cursor-pointer flex-col items-center gap-3 bg-white')}
+      className={cn(
+        'relative flex w-[327px] cursor-pointer items-start gap-4 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800',
+        'transition-transform hover:scale-105'
+      )}
     >
-      <div className={cn('flex w-full flex-1 items-center justify-center bg-gray-100')}>
+      <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-gray-100">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={title}
-            className={cn('h-36 w-full object-cover')}
+            className="h-full w-full rounded-lg object-cover"
           />
         ) : (
-          <div className={cn('flex h-full w-full items-center justify-center')}>
-            <Compass
-              className="h-12 w-12"
-              color="#757575"
-            />
-          </div>
+          <Compass className="h-8 w-8 text-gray-500" />
         )}
       </div>
-      <div className={cn('flex w-full items-end px-4 pb-4')}>
-        <div
-          className={cn(
-            'font-body mt-[-1px] w-fit whitespace-nowrap text-center text-[length:var(--body-font-size)] font-[number:var(--body-font-weight)] leading-[var(--body-line-height)] tracking-[var(--body-letter-spacing)] text-black'
-          )}
-        >
-          {title}
-        </div>
+      <div className="flex flex-1 flex-col items-start gap-1">
+        <div className="font-sans text-lg leading-tight text-black dark:text-white">{title}</div>
+        <div className="text-sm leading-tight text-gray-500 dark:text-gray-400">{description}</div>
       </div>
     </div>
   );
