@@ -79,9 +79,9 @@ public class ProjectController {
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 삭제합니다.")
     @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @DeleteMapping("/projects/{project_id}")
-    public ResponseEntity<Void> deleteProject(@CurrentUser final Integer memberId,
-                                              @PathVariable("project_id") final Integer projectId) {
+    public BaseResponse<Void> deleteProject(@CurrentUser final Integer memberId,
+                                            @PathVariable("project_id") final Integer projectId) {
         projectService.deleteProject(memberId, projectId);
-        return ResponseEntity.noContent().build();
+        return SuccessResponse.empty();
     }
 }
