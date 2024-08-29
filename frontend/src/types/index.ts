@@ -19,3 +19,9 @@ export type Project = {
   type: 'Classification' | 'Detection' | 'Segmentation';
   children: Array<DirectoryItem | FileItem>;
 };
+
+export type Label = {
+  id: number;
+  name: string;
+  color: string;
+};
