@@ -1,7 +1,7 @@
 import MemberManageForm, { MemberManageFormValues } from './MemberManageForm';
 import XIcon from '@/assets/icons/x.svg?react';
 
-type Role = 'admin' | 'editor' | 'viewer';
+type Role = 'admin' | 'manager' | 'editor' | 'viewer';
 
 interface Member {
   email: string;

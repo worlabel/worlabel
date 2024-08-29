@@ -6,17 +6,17 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-type Role = 'admin' | 'editor' | 'viewer';
+type Role = 'admin' | 'manager' | 'editor' | 'viewer';
 
-const roles: Role[] = ['admin', 'editor', 'viewer'];
+const roles: Role[] = ['admin', 'manager', 'editor', 'viewer'];
 
 const roleToStr: { [key in Role]: string } = {
   admin: '관리자',
+  manager: '매니저',
   editor: '에디터',
   viewer: '뷰어',
 };
 
-// Adjusted form schema to match the required Role type
 const formSchema = z.object({
   members: z.array(
     z.object({
@@ -50,6 +50,12 @@ export default function MemberManageForm({ members, onSubmit }: MemberManageForm
     return acc;
   }, {});
 
+  const roleOrder: Role[] = ['admin', 'manager', 'editor', 'viewer'];
+
+  const sortedGroupedMembers = Object.entries(groupedMembers).sort(
+    ([roleA], [roleB]) => roleOrder.indexOf(roleA as Role) - roleOrder.indexOf(roleB as Role)
+  );
+
   return (
     <Form {...form}>
       <form
@@ -57,7 +63,7 @@ export default function MemberManageForm({ members, onSubmit }: MemberManageForm
         className="flex flex-col gap-5"
       >
         <div className="flex w-[530px] flex-col gap-[var(--size-space-200)]">
-          {Object.entries(groupedMembers).map(([role, groupMembers]) => {
+          {sortedGroupedMembers.map(([role, groupMembers]) => {
             if (!groupMembers || groupMembers.length === 0) return null;
 
             return (
