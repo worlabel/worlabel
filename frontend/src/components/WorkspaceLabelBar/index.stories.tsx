@@ -31,5 +31,9 @@ const labels: Label[] = [
 ];
 
 export const Default = () => {
-  return <WorkspaceLabelBar labels={labels} />;
+  return (
+    <div className="flex h-screen justify-end">
+      <WorkspaceLabelBar labels={labels} />
+    </div>
+  );
 };
