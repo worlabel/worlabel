@@ -68,7 +68,7 @@ public class JwtTokenService {
         Claims claims = parseClaims(refreshToken);
         String username = claims.getSubject();
         int memberId = claims.get("id", Integer.class);
-        List<String> authorities = parseAuthorities(refreshToken).stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+        List<String> authorities = parseAuthorities(refreshToken).stream().map(GrantedAuthority::getAuthority).toList();
         return generateToken(username, memberId, authorities);
     }
 
