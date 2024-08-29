@@ -1,13 +1,17 @@
 package com.worlabel.domain.auth.controller;
 
 import com.worlabel.domain.auth.entity.dto.JwtToken;
-import com.worlabel.domain.auth.repository.AuthCacheRepository;
+import com.worlabel.domain.auth.entity.dto.AccessTokenResponse;
 import com.worlabel.domain.auth.service.AuthService;
 import com.worlabel.domain.auth.service.JwtTokenService;
 import com.worlabel.global.annotation.CurrentUser;
+import com.worlabel.global.config.swagger.SwaggerApiError;
+import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.response.SuccessResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,35 +25,38 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "인증/인가 관련 API")
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    private final AuthService authService;
-    private final AuthCacheRepository authCacheRepository;
-    private final JwtTokenService jwtTokenService;
 
     @Value("${auth.refreshTokenExpiry}")
     long refreshExpiry;
 
-    // TODO: 리이슈 처리, 액세스 어떻게 받았는지 물어보기
+    private final AuthService authService;
+    private final JwtTokenService jwtTokenService;
+
+    @Operation(summary = "JWT 토큰 재발급", description = "Refresh Token을 확인하여 JWT 토큰 재발급")
+    @SwaggerApiSuccess(description = "Return Access Token")
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
     @PostMapping("/reissue")
-    public SuccessResponse<String> reissue(
+    public SuccessResponse<AccessTokenResponse> reissue(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
+        log.debug("reissue request");
         String refresh = parseRefreshCookie(request);
-        log.info("reissue :{}", refresh);
         try {
             JwtToken newToken = authService.reissue(refresh);
-            log.debug("새로운 토큰 발급 성공");
             int id = jwtTokenService.parseId(newToken.getAccessToken());
-            log.debug("{}",id);
+
             response.addCookie(createCookie(newToken.getRefreshToken()));
-            authCacheRepository.save(id, newToken.getRefreshToken(), refreshExpiry);
-            return SuccessResponse.of(newToken.getAccessToken());
+            authService.saveRefreshToken(id, newToken.getRefreshToken(),refreshExpiry);
+
+            return SuccessResponse.of(AccessTokenResponse.from(newToken.getAccessToken()));
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
@@ -57,15 +64,10 @@ public class AuthController {
         }
     }
 
-    private Cookie createCookie(String value) {
-        Cookie cookie = new Cookie("refreshToken", value);
-        cookie.setMaxAge((int) (refreshExpiry / 1000));
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        // cookie.setSecure(true); // 배포 시 HTTPS에서 사용
-        return cookie;
-    }
-
+    // TODO: Member 완성 후 구현
+    @Operation(summary = "로그인 중인 사용자 정보를 반환", description = "현재 로그인중인 사용자의 정보를 반환합니다.")
+    @SwaggerApiSuccess(description = "Return Member Info")
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
     @GetMapping("/user-info")
     public SuccessResponse<Integer> getMemberInfo(@CurrentUser Integer currentMember){
         return SuccessResponse.of(currentMember);
@@ -77,9 +79,18 @@ public class AuthController {
             return Arrays.stream(cookies)
                     .filter(cookie -> "refreshToken".equals(cookie.getName()))
                     .findFirst()
-                    .map(Cookie::getValue)
+                    .map(cookie -> cookie.getValue().trim())
                     .orElse(null);
         }
         return null;
+    }
+
+    private Cookie createCookie(String value) {
+        Cookie cookie = new Cookie("refreshToken", value);
+        cookie.setMaxAge((int) (refreshExpiry / 1000));
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        // cookie.setSecure(true); // 배포 시 HTTPS에서 사용
+        return cookie;
     }
 }

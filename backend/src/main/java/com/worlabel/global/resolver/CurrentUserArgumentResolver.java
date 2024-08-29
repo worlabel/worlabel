@@ -1,6 +1,6 @@
 package com.worlabel.global.resolver;
 
-import com.worlabel.domain.auth.entity.dto.LoginMember;
+import com.worlabel.domain.auth.entity.dto.AuthMemberDto;
 import com.worlabel.global.annotation.CurrentUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -14,6 +14,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Slf4j
 @Component
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentUser.class);
@@ -22,8 +23,8 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(principal instanceof LoginMember){
-            return ((LoginMember) principal).getId();
+        if(principal instanceof AuthMemberDto){
+            return ((AuthMemberDto) principal).getId();
         }
         return null;
     }
