@@ -6,13 +6,12 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-type Role = 'admin' | 'manager' | 'editor' | 'viewer';
+type Role = 'admin' | 'editor' | 'viewer';
 
-const roles: Role[] = ['admin', 'manager', 'editor', 'viewer'];
+const roles: Role[] = ['admin', 'editor', 'viewer'];
 
 const roleToStr: { [key in Role]: string } = {
   admin: '관리자',
-  manager: '매니저',
   editor: '에디터',
   viewer: '뷰어',
 };

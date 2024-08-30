@@ -20,8 +20,6 @@ export const Default: Story = {
     members: [
       { email: 'admin1@example.com', role: 'admin' },
       { email: 'admin2@example.com', role: 'admin' },
-      { email: 'manager1@example.com', role: 'manager' },
-      { email: 'manager2@example.com', role: 'manager' },
       { email: 'viewer3@example.com', role: 'viewer' },
       { email: 'editor1@example.com', role: 'editor' },
       { email: 'editor2@example.com', role: 'editor' },
