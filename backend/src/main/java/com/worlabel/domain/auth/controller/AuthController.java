@@ -68,7 +68,7 @@ public class AuthController {
     @Operation(summary = "로그인 중인 사용자 정보를 반환", description = "현재 로그인중인 사용자의 정보를 반환합니다.")
     @SwaggerApiSuccess(description = "Return Member Info")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
-    @GetMapping("/user-info")
+    @GetMapping("/me")
     public SuccessResponse<Integer> getMemberInfo(@CurrentUser Integer currentMember){
         return SuccessResponse.of(currentMember);
     }

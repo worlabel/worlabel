@@ -96,4 +96,10 @@ public class ProjectService {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }
+
+    private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
+        if (!participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.EDITOR)) {
+            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+        }
+    }
 }

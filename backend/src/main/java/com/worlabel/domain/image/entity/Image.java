@@ -22,14 +22,14 @@ public class Image extends BaseEntity {
      * 프로젝트 이미지 ID
      */
     @Id
-    @Column(name = "project_image_id",nullable = false)
+    @Column(name = "project_image_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * 이미지 URL
      */
-    @Column(name = "image_url", nullable = false,length=255)
+    @Column(name = "image_url", nullable = false, length = 255)
     private String imageUrl;
 
     /**
@@ -42,7 +42,7 @@ public class Image extends BaseEntity {
      * 이미지 레이블링 상태
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "status",nullable = false)
+    @Column(name = "status", nullable = false)
     private LabelStatus status = LabelStatus.Pending;
 
     /**
@@ -56,6 +56,16 @@ public class Image extends BaseEntity {
     /**
      * 이미지에 연결된 레이블
      */
-    @OneToOne(mappedBy = "image",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private Label label;
+
+    private Image(final String imageUrl, final Integer order, final Folder folder) {
+        this.imageUrl = imageUrl;
+        this.order = order;
+        this.folder = folder;
+    }
+
+    public static Image of(final String imageUrl, final Integer order, final Folder folder) {
+        return new Image(imageUrl, order, folder);
+    }
 }
