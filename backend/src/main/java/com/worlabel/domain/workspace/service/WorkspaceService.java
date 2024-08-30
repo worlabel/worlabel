@@ -78,6 +78,14 @@ public class WorkspaceService {
         workspaceRepository.delete(workspace);
     }
 
+    public void addWorkspaceMember(final Integer memberId, final Integer workspaceId, final Integer newMemberId) {
+        Workspace workspace = getWorkspaceWithWriter(memberId, workspaceId);
+        checkWorkspaceMember(workspaceId, newMemberId);
+        Member member = getMember(newMemberId);
+
+        workspaceParticipantRepository.save(WorkspaceParticipant.of(workspace, member));
+    }
+
     private Member getMember(final Integer memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -95,6 +103,12 @@ public class WorkspaceService {
     private void checkWorkspaceAuthorized(final Integer memberId, final Integer workspaceId) {
         if (!workspaceParticipantRepository.existsByMemberIdAndWorkspaceId(memberId, workspaceId)) {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
+        }
+    }
+
+    private void checkWorkspaceMember(final Integer workspaceId, final Integer newMemberId) {
+        if (workspaceParticipantRepository.existsByWorkspaceIdAndMemberId(workspaceId, newMemberId)) {
+            throw new CustomException(ErrorCode.EARLY_ADD_MEMBER);
         }
     }
 }
