@@ -1,5 +1,4 @@
 import { Compass } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ProjectCardProps {
   title: string;
@@ -12,10 +11,7 @@ export default function ProjectCard({ title, description, imageUrl, onClick }: P
   return (
     <div
       onClick={onClick}
-      className={cn(
-        'relative flex w-[327px] cursor-pointer items-start gap-4 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800',
-        'transition-transform hover:scale-105'
-      )}
+      className="relative flex w-[327px] cursor-pointer items-start gap-4 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50"
     >
       <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-gray-100">
         {imageUrl ? (
