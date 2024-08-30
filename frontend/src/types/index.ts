@@ -13,6 +13,11 @@ export type DirectoryItem = {
   children: Array<DirectoryItem | FileItem>;
 };
 
+export type Workspace = {
+  id: number;
+  name: string;
+}
+
 export type Project = {
   id: number;
   name: string;

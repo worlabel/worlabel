@@ -1,5 +1,6 @@
 import PageLayout from '@/components/PageLayout';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+import WorkspaceBrowsePage from '@/pages/WorkspaceBrowsePage';
 import { createBrowserRouter } from 'react-router-dom';
 
 export const webPath = {
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <div>index</div>,
+        element: <WorkspaceBrowsePage />,
       },
     ],
   },
