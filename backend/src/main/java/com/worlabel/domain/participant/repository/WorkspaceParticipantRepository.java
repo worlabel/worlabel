@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 public interface WorkspaceParticipantRepository extends JpaRepository<WorkspaceParticipant, Integer> {
 
     boolean existsByMemberIdAndWorkspaceId(Integer memberId, Integer workspaceId);
+
+    boolean existsByWorkspaceIdAndMemberId(Integer workspaceId, Integer memberId);
 }
 
 

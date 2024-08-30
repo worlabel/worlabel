@@ -77,4 +77,16 @@ public class WorkspaceController {
         workspaceService.deleteWorkspace(memberId, workspaceId);
         return SuccessResponse.empty();
     }
+
+    @Operation(summary = "워크스페이스 멤버 추가", description = "특정 워크스페이스에 멤버를 추가합니다.")
+    @SwaggerApiSuccess(description = "특정 워크스페이스에 멤버를 성공적으로 추가합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    @PostMapping("/{workspace_id}/member/{member_id}")
+    public BaseResponse<Void> addWorkspaceMember(
+            @CurrentUser final Integer memberId,
+            @PathVariable("workspace_id") final Integer workspaceId,
+            @PathVariable("member_id") final Integer newMemberId) {
+        workspaceService.addWorkspaceMember(memberId, workspaceId, newMemberId);
+        return SuccessResponse.empty();
+    }
 }

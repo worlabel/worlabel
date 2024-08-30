@@ -14,7 +14,7 @@ public enum ErrorCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, 1002, "잘못된 요청입니다. 요청을 확인해주세요."),
     EMPTY_REQUEST_PARAMETER(HttpStatus.BAD_REQUEST, 1003, "필수 요청 파라미터가 입력되지 않았습니다."),
     INVALID_URL(HttpStatus.BAD_REQUEST, 1004, "제공하지 않는 주소입니다. 확인해주세요"),
-    FAIL_TO_CREATE_FILE(HttpStatus.BAD_REQUEST,1005 ,"파일 업로드에 실패하였습니다. 다시 한번 확인해주세요"),
+    FAIL_TO_CREATE_FILE(HttpStatus.BAD_REQUEST, 1005, "파일 업로드에 실패하였습니다. 다시 한번 확인해주세요"),
 
     // Auth & User - 2000
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "해당 ID의 사용자를 찾을 수 없습니다."),
@@ -25,17 +25,19 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 2005, "인증에 실패하였습니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, 2006, "접근 권한이 없습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, 2007, "올바르지 않는 인증 토큰입니다. 다시 확인 해주세요"),
-    USER_ALREADY_SIGN_OUT(HttpStatus.UNAUTHORIZED, 2008,"이미 로그아웃한 사용자입니다."),
+    USER_ALREADY_SIGN_OUT(HttpStatus.UNAUTHORIZED, 2008, "이미 로그아웃한 사용자입니다."),
 
     // Workspace - 3000
     NOT_AUTHOR(HttpStatus.FORBIDDEN, 3001, "작성자가 아닙니다. 이 작업을 수행할 권한이 없습니다."),
     WORKSPACE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3002, "해당 워크스페이스는 존재하지 않습니다."),
+    EARLY_ADD_MEMBER(HttpStatus.BAD_REQUEST, 3003, "이미 추가된 멤버입니다."),
 
     // Project - 4000
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, 4000, "프로젝트를 찾을 수 없습니다"),
 
-    // Participant - 5000
+    // Participant - 5000,
     PARTICIPANT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 5000, "해당 프로젝트에 접근 권한이 없습니다."),
+
 
     ;
 
