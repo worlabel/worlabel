@@ -78,12 +78,25 @@ public class WorkspaceService {
         workspaceRepository.delete(workspace);
     }
 
+    /**
+     * 워크스페이스 멤버 추가 - 현재는 워크스페이스 만든 사람만 가능
+     */
     public void addWorkspaceMember(final Integer memberId, final Integer workspaceId, final Integer newMemberId) {
         Workspace workspace = getWorkspaceWithWriter(memberId, workspaceId);
-        checkWorkspaceMember(workspaceId, newMemberId);
+        checkExistWorkspaceMember(workspaceId, newMemberId);
         Member member = getMember(newMemberId);
 
         workspaceParticipantRepository.save(WorkspaceParticipant.of(workspace, member));
+    }
+
+    /**
+     * 워크스페이스 멤버 삭제 - 현재는 워크스페이스 만든 사람만 가능
+     */
+    public void removeWorkspaceMember(final Integer memberId, final Integer workspaceId, final Integer newMemberId) {
+        Workspace workspace = getWorkspaceWithWriter(memberId, workspaceId);
+        WorkspaceParticipant workspaceParticipant = getWorkspaceParticipant(newMemberId, workspace);
+
+        workspaceParticipantRepository.delete(workspaceParticipant);
     }
 
     private Member getMember(final Integer memberId) {
@@ -106,9 +119,14 @@ public class WorkspaceService {
         }
     }
 
-    private void checkWorkspaceMember(final Integer workspaceId, final Integer newMemberId) {
+    private void checkExistWorkspaceMember(final Integer workspaceId, final Integer newMemberId) {
         if (workspaceParticipantRepository.existsByWorkspaceIdAndMemberId(workspaceId, newMemberId)) {
             throw new CustomException(ErrorCode.EARLY_ADD_MEMBER);
         }
+    }
+
+    private WorkspaceParticipant getWorkspaceParticipant(final Integer newMemberId, final Workspace workspace) {
+        return workspaceParticipantRepository.findByMemberIdAndWorkspace(newMemberId, workspace)
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
     }
 }

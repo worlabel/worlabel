@@ -22,6 +22,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, Intege
     boolean doesParticipantUnauthorizedExistByMemberIdAndProjectId(
             @Param("memberId") Integer memberId,
             @Param("projectId") Integer projectId);
+
+    Participant findByMemberIdAndProjectId(Integer memberId, Integer projectId);
 }
 
 
