@@ -59,4 +59,8 @@ public class Participant extends BaseEntity {
     public static Participant of(final Project project, final Member member, final PrivilegeType privilege) {
         return new Participant(project, member, privilege);
     }
+
+    public void updatePrivilege(final PrivilegeType privilege) {
+        this.privilege = privilege;
+    }
 }
