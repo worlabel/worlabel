@@ -1,10 +1,12 @@
 import PageLayout from '@/components/PageLayout';
+import WorkspaceBrowseDetail from '@/components/WorkspaceBrowseDetail';
+import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
-import WorkspaceBrowsePage from '@/pages/WorkspaceBrowsePage';
 import { createBrowserRouter } from 'react-router-dom';
 
 export const webPath = {
   home: () => '/',
+  browse: () => '/browse',
   workspace: () => '/workspace',
 };
 
@@ -15,7 +17,21 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <WorkspaceBrowsePage />,
+        element: <div>home</div>,
+      },
+    ],
+  },
+  {
+    path: webPath.browse(),
+    element: <WorkspaceBrowseLayout />,
+    children: [
+      {
+        index: true,
+        element: <WorkspaceBrowseDetail />,
+      },
+      {
+        path: ':workspaceId',
+        element: <WorkspaceBrowseDetail />,
       },
     ],
   },
