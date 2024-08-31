@@ -3,7 +3,9 @@ import { NavLink, Outlet } from 'react-router-dom';
 import Header from '../Header';
 import Footer from '../Footer';
 import { Workspace } from '@/types';
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Plus } from 'lucide-react';
+import WorkSpaceCreateForm from '../WorkSpaceCreateModal/WorkSpaceCreateForm';
 
 export default function WorkspaceBrowseLayout() {
   const workspaces: Workspace[] = [
@@ -42,14 +44,21 @@ export default function WorkspaceBrowseLayout() {
           <div className="flex w-[280px] flex-col gap-4 border-r border-gray-200 bg-gray-100 px-6 py-4">
             <div className="flex items-center justify-center gap-5">
               <h1 className="heading mr-2.5 w-full">내 워크스페이스</h1>
-              <button
-                className="p-2"
-                onClick={() => {
-                  console.log('open WorkspaceCreateModal');
-                }}
-              >
-                <Plus size={20} />
-              </button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="p-2">
+                    <Plus size={20} />
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader title="새 워크스페이스" />
+                  <WorkSpaceCreateForm
+                    onSubmit={(data) => {
+                      console.log(data);
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
             {workspaces.map((workspace) => (
               <NavLink

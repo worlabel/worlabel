@@ -3,6 +3,8 @@ import ProjectCard from '@/components/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { Workspace } from '@/types';
 import { Plus, Smile, Users } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
+import WorkSpaceCreateForm from '../WorkSpaceCreateModal/WorkSpaceCreateForm';
 
 export default function WorkspaceBrowseDetail() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -51,24 +53,28 @@ export default function WorkspaceBrowseDetail() {
       };
 
   return (
-    <>
-      {workspace ? (
-        <div className="flex w-full flex-col gap-8 px-6 py-4">
-          <div className="flex items-center justify-center">
-            <h1 className="small-title flex grow">{workspace.name}</h1>
-            <div className="flex flex-col">
-              <div className="flex gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    console.log('멤버 관리 모달');
-                  }}
-                >
-                  <div className="body flex items-center gap-2">
-                    <Users size={16} />
-                    <span>멤버 관리</span>
-                  </div>
-                </Button>
+    <div className="flex h-full w-full flex-col gap-8 px-6 py-4">
+      <div className="flex items-center justify-center">
+        <h1 className="small-title flex grow">{workspaceId ? workspace.name : ''}</h1>
+        <div className="flex flex-col">
+          <div className="flex gap-3">
+            {workspaceId ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  console.log('멤버 관리 모달');
+                }}
+              >
+                <div className="body flex items-center gap-2">
+                  <Users size={16} />
+                  <span>멤버 관리</span>
+                </div>
+              </Button>
+            ) : (
+              <></>
+            )}
+            <Dialog>
+              <DialogTrigger asChild>
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -80,24 +86,34 @@ export default function WorkspaceBrowseDetail() {
                     <span>새 프로젝트</span>
                   </div>
                 </Button>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-6">
-            {workspace.projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                title={project.name}
-                description={project.type}
-                onClick={() => {
-                  console.log('project id : ' + project.id);
-                }}
-              />
-            ))}
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader title="새 워크스페이스" />
+                <WorkSpaceCreateForm
+                  onSubmit={(data) => {
+                    console.log(data);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
+      </div>
+      {workspaceId ? (
+        <div className="flex flex-wrap gap-6">
+          {workspace.projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              title={project.name}
+              description={project.type}
+              onClick={() => {
+                console.log('project id : ' + project.id);
+              }}
+            />
+          ))}
+        </div>
       ) : (
-        <div className="flex h-full w-full items-center justify-center">
+        <div className="flex w-full grow items-center justify-center">
           <div className="flex flex-col items-center">
             <Smile
               size={48}
@@ -107,6 +123,6 @@ export default function WorkspaceBrowseDetail() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
