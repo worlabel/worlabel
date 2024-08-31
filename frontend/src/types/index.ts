@@ -13,16 +13,17 @@ export type DirectoryItem = {
   children: Array<DirectoryItem | FileItem>;
 };
 
-export type Workspace = {
-  id: number;
-  name: string;
-}
-
 export type Project = {
   id: number;
   name: string;
   type: 'Classification' | 'Detection' | 'Segmentation';
   children: Array<DirectoryItem | FileItem>;
+};
+
+export type Workspace = {
+  id: number;
+  name: string;
+  projects: Array<Project>;
 };
 
 export type Label = {

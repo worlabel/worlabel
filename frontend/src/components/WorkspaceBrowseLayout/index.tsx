@@ -10,22 +10,27 @@ export default function WorkspaceBrowseLayout() {
     {
       id: 1,
       name: 'workspace-1',
+      projects: [],
     },
     {
       id: 2,
       name: 'workspace-2',
+      projects: [],
     },
     {
       id: 3,
       name: 'workspace-3',
+      projects: [],
     },
     {
       id: 4,
       name: 'workspace-4',
+      projects: [],
     },
     {
       id: 5,
       name: 'workspace-5',
+      projects: [],
     },
   ];
 

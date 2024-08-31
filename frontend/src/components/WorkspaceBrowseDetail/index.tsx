@@ -1,70 +1,54 @@
 import { useParams } from 'react-router-dom';
 import ProjectCard from '@/components/ProjectCard';
 import { Button } from '@/components/ui/button';
-import { Project, Workspace } from '@/types';
+import { Workspace } from '@/types';
 import { Plus, Smile, Users } from 'lucide-react';
 
-export default function WorkspaceBrowseDetail(): JSX.Element {
+export default function WorkspaceBrowseDetail() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
-  const numericWorkspaceId: number | undefined = workspaceId ? Number(workspaceId) : undefined;
-
-  // workspace를 임시로 추가했다. WorkspaceBrowseLayout에서 현재 workspace 데이터를 어떻게 가져올지 생각해봐야 할 것 같다.
-  const workspace: Workspace = [
-    {
-      id: 1,
-      name: 'workspace-1',
-    },
-    {
-      id: 2,
-      name: 'workspace-2',
-    },
-    {
-      id: 3,
-      name: 'workspace-3',
-    },
-    {
-      id: 4,
-      name: 'workspace-4',
-    },
-    {
-      id: 5,
-      name: 'workspace-5',
-    },
-  ].filter((workspace) => workspace.id === numericWorkspaceId)[0];
-
-  // 추후에 백엔드에서 받아와야 할 정보이다.
-  const projects: Project[] = [
-    {
-      id: 1,
-      name: 'project1',
-      type: 'Detection',
-      children: [],
-    },
-    {
-      id: 2,
-      name: 'project2',
-      type: 'Detection',
-      children: [],
-    },
-    {
-      id: 3,
-      name: 'project3',
-      type: 'Detection',
-      children: [],
-    },
-    {
-      id: 4,
-      name: 'project4',
-      type: 'Detection',
-      children: [],
-    },
-    {
-      id: 5,
-      name: 'project5',
-      type: 'Detection',
-      children: [],
-    },
-  ];
+  const numericWorkspaceId: number = Number(workspaceId);
+  const workspace: Workspace = !workspaceId
+    ? {
+        id: 0,
+        name: '',
+        projects: [],
+      }
+    : {
+        id: numericWorkspaceId,
+        name: `workspace-${workspaceId}`,
+        projects: [
+          {
+            id: 1,
+            name: 'project1',
+            type: 'Detection',
+            children: [],
+          },
+          {
+            id: 2,
+            name: 'project2',
+            type: 'Detection',
+            children: [],
+          },
+          {
+            id: 3,
+            name: 'project3',
+            type: 'Detection',
+            children: [],
+          },
+          {
+            id: 4,
+            name: 'project4',
+            type: 'Detection',
+            children: [],
+          },
+          {
+            id: 5,
+            name: 'project5',
+            type: 'Detection',
+            children: [],
+          },
+        ],
+      };
 
   return (
     <>
@@ -100,7 +84,7 @@ export default function WorkspaceBrowseDetail(): JSX.Element {
             </div>
           </div>
           <div className="flex flex-wrap gap-6">
-            {projects.map((project) => (
+            {workspace.projects.map((project) => (
               <ProjectCard
                 key={project.id}
                 title={project.name}
