@@ -39,7 +39,7 @@ export default function WorkspaceBrowseLayout() {
       <Header className="fixed left-0 top-0 w-full" />
       <div className="flex min-h-screen flex-col justify-between">
         <div className="mt-16 flex flex-1">
-          <div className="flex w-[280px] flex-col gap-4 border-gray-300 bg-gray-100 px-6 py-4">
+          <div className="flex w-[280px] flex-col gap-4 border-r border-gray-200 bg-gray-100 px-6 py-4">
             <div className="flex items-center justify-center gap-5">
               <h1 className="heading mr-2.5 w-full">내 워크스페이스</h1>
               <button
