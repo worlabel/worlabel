@@ -61,7 +61,7 @@ export default function MemberManageForm({ members, onSubmit }: MemberManageForm
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-5"
       >
-        <div className="flex w-[530px] flex-col gap-[var(--size-space-200)]">
+        <div className="flex w-full flex-col gap-[var(--size-space-200)]">
           {sortedGroupedMembers.map(([role, groupMembers]) => {
             if (!groupMembers || groupMembers.length === 0) return null;
 

@@ -5,6 +5,14 @@ import { Workspace } from '@/types';
 import { Plus, Smile, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import WorkSpaceCreateForm from '../WorkSpaceCreateModal/WorkSpaceCreateForm';
+import MemberManageForm from '../MemberManageModal/MemberManageForm';
+
+type Role = 'admin' | 'editor' | 'viewer';
+
+interface Member {
+  email: string;
+  role: Role;
+}
 
 export default function WorkspaceBrowseDetail() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -52,6 +60,16 @@ export default function WorkspaceBrowseDetail() {
         ],
       };
 
+  const members: Array<Member> = [
+    { email: 'admin1@example.com', role: 'admin' },
+    { email: 'admin2@example.com', role: 'admin' },
+    { email: 'viewer3@example.com', role: 'viewer' },
+    { email: 'editor1@example.com', role: 'editor' },
+    { email: 'editor2@example.com', role: 'editor' },
+    { email: 'editor3@example.com', role: 'editor' },
+    { email: 'editor4@example.com', role: 'editor' },
+  ];
+
   return (
     <div className="flex h-full w-full flex-col gap-8 px-6 py-4">
       <div className="flex items-center justify-center">
@@ -59,17 +77,25 @@ export default function WorkspaceBrowseDetail() {
         <div className="flex flex-col">
           <div className="flex gap-3">
             {workspaceId ? (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  console.log('멤버 관리 모달');
-                }}
-              >
-                <div className="body flex items-center gap-2">
-                  <Users size={16} />
-                  <span>멤버 관리</span>
-                </div>
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <div className="body flex items-center gap-2">
+                      <Users size={16} />
+                      <span>멤버 관리</span>
+                    </div>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="lg:max-w-xl">
+                  <DialogHeader title="멤버 관리" />
+                  <MemberManageForm
+                    onSubmit={(data) => {
+                      console.log(data);
+                    }}
+                    members={members}
+                  />
+                </DialogContent>
+              </Dialog>
             ) : (
               <></>
             )}
