@@ -67,21 +67,13 @@ public class AuthController {
         }
     }
 
-    // TODO: Member 완성 후 구현
     @Operation(summary = "로그인 중인 사용자 정보를 반환", description = "현재 로그인중인 사용자의 정보를 반환합니다.")
     @SwaggerApiSuccess(description = "Return Member Info")
-<<<<<<< Updated upstream
-    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
-    @GetMapping("/me")
-    public SuccessResponse<Integer> getMemberInfo(@CurrentUser Integer currentMember){
-        return SuccessResponse.of(currentMember);
-=======
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
-    @GetMapping("/me")
+    @GetMapping("/profile")
     public SuccessResponse<MemberResponse> getMemberInfo(@CurrentUser Integer currentMember){
         MemberResponse memberResponse = memberService.getMemberId(currentMember);
         return SuccessResponse.of(memberResponse);
->>>>>>> Stashed changes
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {
