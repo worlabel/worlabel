@@ -1,0 +1,16 @@
+# FastAPI 웹 프레임워크
+fastapi
+
+# ASGI 서버를 위한 Uvicorn
+uvicorn
+
+# YOLOv8 모델을 위한 ultralytics
+ultralytics
+
+# 테스트 도구
+# pytest
+# pytest-asyncio  # 비동기 테스트 지원
+
+# 환경 변수 로드
+python-dotenv
+
