@@ -1,6 +1,7 @@
 package com.worlabel.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.util.IOUtils;
@@ -14,7 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -97,5 +101,24 @@ public class S3UploadService {
 
     private static String getS3FileName(Integer projectId, String extension) {
         return projectId + "/" + UUID.randomUUID().toString().substring(0, 13) + "." + extension;
+    }
+
+    public void deleteImageFromS3(String imageAddress){
+        String key = getKeyFromImageAddress(imageAddress);
+        try {
+            amazonS3.deleteObject(new DeleteObjectRequest(bucket, key));
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.FAIL_TO_DELETE_FILE);
+        }
+    }
+
+    private String getKeyFromImageAddress(String imageAddress) {
+        try {
+            URL url = new URL(imageAddress);
+            String decodingKey = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
+            return decodingKey.substring(1);
+        } catch (MalformedURLException e) {
+            throw new CustomException(ErrorCode.FAIL_TO_DELETE_FILE);
+        }
     }
 }

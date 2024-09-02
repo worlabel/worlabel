@@ -49,8 +49,7 @@ public class ImageService {
     @Transactional(readOnly = true)
     public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Integer imageId, final Integer memberId) {
         checkExistParticipant(memberId, projectId);
-        Image image = imageRepository.findByIdAndFolderId(imageId,folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+        Image image = getImage(folderId, imageId);
         return ImageResponse.from(image);
     }
 
@@ -58,21 +57,26 @@ public class ImageService {
      * 이미지 폴더 위치 변경
      */
     public void moveFolder(final Integer projectId,
+                           final Integer folderId,
                            final Integer moveFolderId,
                            final Integer imageId,
                            final Integer memberId) {
         checkEditorParticipant(memberId, projectId);
         Folder folder = null;
-        if(moveFolderId != null) folder = getFolder(moveFolderId);
-        Image image = imageRepository.findById(imageId).orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+        if (moveFolderId != null) folder = getFolder(moveFolderId);
+        Image image = getImage(folderId, imageId);
 
         image.moveFolder(folder);
     }
 
-    private void checkExistFolderInProject(final Integer folderId, final Integer projectId) {
-        if(!folderRepository.existsByIdAndProjectId(folderId, projectId)) {
-            throw new CustomException(ErrorCode.FOLDER_NOT_FOUND);
-        }
+    /**
+     * 이미지 삭제
+     */
+    public void deleteImage(final Integer projectId, final Integer folderId, final Integer imageId, final Integer memberId) {
+        checkEditorParticipant(memberId, projectId);
+        Image image = getImage(folderId, imageId);
+        imageRepository.delete(image);
+        s3UploadService.deleteImageFromS3(image.getImageUrl());
     }
 
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {
@@ -92,5 +96,8 @@ public class ImageService {
                 .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
     }
 
-
+    private Image getImage(Integer folderId, Integer imageId) {
+        return imageRepository.findByIdAndFolderId(imageId, folderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+    }
 }

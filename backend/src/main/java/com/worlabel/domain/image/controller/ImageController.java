@@ -67,7 +67,7 @@ public class ImageController {
     @PutMapping("/{image_id}")
     @SwaggerApiSuccess(description = "이미지 폴더 이동.")
     @Operation(summary = "이미지 폴더 이동", description = "이미지가 위치한 폴더를 변경합니다.")
-    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.FOLDER_NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND})
     public BaseResponse<Void> moveFolderImage(
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
@@ -76,7 +76,22 @@ public class ImageController {
             @RequestBody final ImageMoveRequest imageMoveRequest
     ) {
         log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}, 이동하는 폴더 {}", projectId, folderId, memberId, imageId, imageMoveRequest.getMoveFolderId());
-        imageService.moveFolder(projectId, imageMoveRequest.getMoveFolderId(), imageId, memberId);
+        imageService.moveFolder(projectId, folderId, imageMoveRequest.getMoveFolderId(), imageId, memberId);
+        return SuccessResponse.empty();
+    }
+
+    @DeleteMapping("/{image_id}")
+    @SwaggerApiSuccess(description = "이미지 삭제.")
+    @Operation(summary = "이미지 삭제", description = "폴더에서 해당 이미지를 제거합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.FOLDER_NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND})
+    public BaseResponse<Void> deleteImage(
+            @CurrentUser final Integer memberId,
+            @PathVariable("folder_id") final Integer folderId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("image_id") final Integer imageId
+    ) {
+        log.debug("project: {} , folder: {}, 삭제하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId, memberId);
+        imageService.deleteImage(projectId, folderId, imageId, memberId);
         return SuccessResponse.empty();
     }
 }

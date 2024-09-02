@@ -15,6 +15,7 @@ public enum ErrorCode {
     EMPTY_REQUEST_PARAMETER(HttpStatus.BAD_REQUEST, 1003, "필수 요청 파라미터가 입력되지 않았습니다."),
     INVALID_URL(HttpStatus.BAD_REQUEST, 1004, "제공하지 않는 주소입니다. 확인해주세요"),
     FAIL_TO_CREATE_FILE(HttpStatus.BAD_REQUEST, 1005, "파일 업로드에 실패하였습니다. 다시 한번 확인해주세요"),
+    FAIL_TO_DELETE_FILE(HttpStatus.BAD_REQUEST, 1006, "파일 삭제에 실패하였습니다. 다시 한번 확인해주세요"),
 
     // Auth & Member - 2000
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "해당 ID의 사용자를 찾을 수 없습니다."),
