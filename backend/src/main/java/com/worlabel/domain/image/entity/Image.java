@@ -75,4 +75,8 @@ public class Image extends BaseEntity {
     public static Image of(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {
         return new Image(imageTitle,imageUrl, order, folder);
     }
+
+    public void moveFolder(final Folder moveFolder) {
+        this.folder = moveFolder;
+    }
 }

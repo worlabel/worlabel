@@ -10,4 +10,6 @@ import java.util.List;
 public interface FolderRepository extends JpaRepository<Folder, Integer> {
 
     List<Folder> findAllByParentIsNull();
+
+    boolean existsByIdAndProjectId(Integer folderId, Integer projectId);
 }
