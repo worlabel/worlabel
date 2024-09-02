@@ -39,9 +39,13 @@ public enum ErrorCode {
     PARTICIPANT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 5000, "해당 프로젝트에 접근 권한이 없습니다."),
     PARTICIPANT_BAD_REQUEST(HttpStatus.UNAUTHORIZED, 5001, "자기 자신의 권한을 바꿀 수 없습니다."),
 
-    // Folder - 600,
+    // Folder - 6000,
     FOLDER_NOT_FOUND(HttpStatus.NOT_FOUND, 6000, "해당 폴더를 찾을 수 없습니다."),
     FOLDER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 6001, "해당 폴더에 접근 권한이 없습니다."),
+
+    // Image - 7000
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 7000,"해당 이미지를 찾을 수 없습니다."),
+
     ;
 
     private final HttpStatus status;

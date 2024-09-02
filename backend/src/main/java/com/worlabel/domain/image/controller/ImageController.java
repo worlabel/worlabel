@@ -60,7 +60,7 @@ public class ImageController {
             @PathVariable("image_id") final Integer imageId
     ) {
         log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, memberId, imageId);
-        ImageResponse imageResponse = imageService.getImageById(projectId, imageId, memberId);
+        ImageResponse imageResponse = imageService.getImageById(projectId, folderId, imageId, memberId);
         return SuccessResponse.of(imageResponse);
     }
 
@@ -76,7 +76,7 @@ public class ImageController {
             @RequestBody final ImageMoveRequest imageMoveRequest
     ) {
         log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}, 이동하는 폴더 {}", projectId, folderId, memberId, imageId, imageMoveRequest.getMoveFolderId());
-        imageService.moveFolder(projectId, folderId, imageMoveRequest.getMoveFolderId(),memberId);
+        imageService.moveFolder(projectId, imageMoveRequest.getMoveFolderId(), imageId, memberId);
         return SuccessResponse.empty();
     }
 }
