@@ -4,7 +4,10 @@ import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.Participant;
 import com.worlabel.domain.participant.entity.PrivilegeType;
+import com.worlabel.domain.participant.entity.WorkspaceParticipant;
+import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
+import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +32,7 @@ public class ProjectService {
     private final WorkspaceRepository workspaceRepository;
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
+    private final WorkspaceParticipantRepository workspaceParticipantRepository;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -70,6 +75,38 @@ public class ProjectService {
         projectRepository.deleteById(projectId);
     }
 
+    public void addProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
+        checkSelfParticipant(memberId, participantRequest.getMemberId());
+        checkAdminParticipant(memberId, projectId);
+        Project project = getProject(projectId);
+        Member member = getMember(participantRequest.getMemberId());
+        Participant participant = Participant.of(project, member, participantRequest.getPrivilegeType());
+
+        if (!workspaceParticipantRepository.existsByMemberAndWorkspace(member, project.getWorkspace())) {
+            workspaceParticipantRepository.save(WorkspaceParticipant.of(project.getWorkspace(), member));
+        }
+
+        participantRepository.save(participant);
+    }
+
+    public void changeProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
+        checkSelfParticipant(memberId, participantRequest.getMemberId());
+        checkAdminParticipant(memberId, projectId);
+        checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
+
+        Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId);
+        participant.updatePrivilege(participantRequest.getPrivilegeType());
+    }
+
+    public void removeProjectMember(final Integer memberId, final Integer projectId, final Integer removeMemberId) {
+        checkSelfParticipant(memberId, removeMemberId);
+        checkAdminParticipant(memberId, projectId);
+        checkNotAdminParticipant(removeMemberId, projectId);
+
+        Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId);
+        participantRepository.delete(participant);
+    }
+
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
@@ -94,6 +131,18 @@ public class ProjectService {
     private void checkAdminParticipant(final Integer memberId, final Integer projectId) {
         if (!participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+        }
+    }
+
+    private void checkNotAdminParticipant(final Integer memberId, final Integer projectId) {
+        if (participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
+            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+        }
+    }
+
+    private void checkSelfParticipant(final Integer memberId, final Integer addMemberId) {
+        if (Objects.equals(memberId, addMemberId)) {
+            throw new CustomException(ErrorCode.PARTICIPANT_BAD_REQUEST);
         }
     }
 }

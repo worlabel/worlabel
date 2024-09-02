@@ -1,5 +1,5 @@
 package com.worlabel.domain.image.entity;
 
 public enum LabelStatus {
-    Pending, NEED_REVIEW, COMPLETED
+    Pending, IN_PROGRESS, NEED_REVIEW, COMPLETED
 }

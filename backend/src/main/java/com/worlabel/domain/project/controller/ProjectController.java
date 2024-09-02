@@ -1,6 +1,6 @@
 package com.worlabel.domain.project.controller;
 
-import com.worlabel.domain.project.entity.Project;
+import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
 import com.worlabel.domain.project.entity.dto.ProjectResponses;
@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,6 +81,42 @@ public class ProjectController {
     public BaseResponse<Void> deleteProject(@CurrentUser final Integer memberId,
                                             @PathVariable("project_id") final Integer projectId) {
         projectService.deleteProject(memberId, projectId);
+        return SuccessResponse.empty();
+    }
+
+    @Operation(summary = "프로젝트 멤버 추가", description = "새로운 프로젝트 멤버를 추가합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 추가합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PostMapping("/projects/{project_id}/members")
+    public BaseResponse<Void> addProjectMember(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @Valid @RequestBody final ParticipantRequest participantRequest) {
+        projectService.addProjectMember(memberId, projectId, participantRequest);
+        return SuccessResponse.empty();
+    }
+
+    @Operation(summary = "프로젝트 멤버 권한 수정", description = "프로젝트 멤버 권한을 수정합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 멤버 권한을 성공적으로 수정합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PutMapping("/projects/{project_id}/members")
+    public BaseResponse<Void> changeProjectMember(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @Valid @RequestBody final ParticipantRequest participantRequest) {
+        projectService.changeProjectMember(memberId, projectId, participantRequest);
+        return SuccessResponse.empty();
+    }
+
+    @Operation(summary = "프로젝트 멤버 제거", description = "프로젝트 멤버를 제거합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 제거합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @DeleteMapping("/projects/{project_id}/members")
+    public BaseResponse<Void> removeProjectMember(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @Valid @RequestBody final Integer removeMemberId) {
+        projectService.removeProjectMember(memberId, projectId, removeMemberId);
         return SuccessResponse.empty();
     }
 }

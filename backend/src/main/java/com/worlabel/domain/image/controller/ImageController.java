@@ -46,8 +46,6 @@ public class ImageController {
         imageService.uploadImageList(imageList, folderId, projectId, memberId);
         return SuccessResponse.empty();
     }
-
-    
 }
 
 
