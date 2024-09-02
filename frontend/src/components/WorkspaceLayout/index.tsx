@@ -65,16 +65,22 @@ export default function WorkspaceLayout() {
       id: 1,
       name: 'Label 1',
       color: '#FFaa33',
+      coordinates: [],
+      type: 'rect',
     },
     {
       id: 2,
       name: 'Label 2',
       color: '#aaFF55',
+      coordinates: [],
+      type: 'rect',
     },
     {
       id: 3,
       name: 'Label 3',
       color: '#77aaFF',
+      coordinates: [],
+      type: 'rect',
     },
   ];
 
@@ -88,7 +94,7 @@ export default function WorkspaceLayout() {
             projects={workspace.projects}
           />
           <ResizablePanel className="flex w-full items-center">
-            <main className="grow">
+            <main className="h-full grow">
               <Outlet />
             </main>
             <WorkspaceLabelBar labels={labels} />
