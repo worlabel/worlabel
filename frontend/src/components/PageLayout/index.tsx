@@ -8,12 +8,14 @@ export default function PageLayout() {
     <>
       <Header className="fixed left-0 top-0 w-full" />
       <div className="flex min-h-screen flex-col justify-between">
-        <div className="mt-16">
+        <div className="mt-16 flex flex-1">
           <Suspense fallback={<div></div>}>
-            <Outlet />
+            <main className="grow">
+              <Outlet />
+            </main>
           </Suspense>
         </div>
-        <Footer className="mt-24" />
+        <Footer className="mt-0" />
       </div>
     </>
   );

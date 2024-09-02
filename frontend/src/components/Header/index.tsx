@@ -8,8 +8,7 @@ export default function Header({ className, ...props }: HeaderProps) {
   return (
     <header
       className={cn(
-        'flex h-16 w-full items-center justify-between border-b px-4 sm:px-6 md:px-8 lg:px-10',
-        'bg-color-background-default-default border-color-border-default-default',
+        'flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 md:px-8 lg:px-10',
         className
       )}
       {...props}

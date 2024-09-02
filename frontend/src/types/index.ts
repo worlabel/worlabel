@@ -20,6 +20,12 @@ export type Project = {
   children: Array<DirectoryItem | FileItem>;
 };
 
+export type Workspace = {
+  id: number;
+  name: string;
+  projects: Array<Project>;
+};
+
 export type Label = {
   id: number;
   name: string;
