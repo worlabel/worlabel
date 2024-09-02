@@ -4,6 +4,8 @@ import com.worlabel.domain.auth.entity.dto.JwtToken;
 import com.worlabel.domain.auth.entity.dto.AccessTokenResponse;
 import com.worlabel.domain.auth.service.AuthService;
 import com.worlabel.domain.auth.service.JwtTokenService;
+import com.worlabel.domain.member.entity.dto.MemberResponse;
+import com.worlabel.domain.member.service.MemberService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
@@ -37,6 +39,7 @@ public class AuthController {
     long refreshExpiry;
 
     private final AuthService authService;
+    private final MemberService memberService;
     private final JwtTokenService jwtTokenService;
 
     @Operation(summary = "JWT 토큰 재발급", description = "Refresh Token을 확인하여 JWT 토큰 재발급")
@@ -64,13 +67,13 @@ public class AuthController {
         }
     }
 
-    // TODO: Member 완성 후 구현
     @Operation(summary = "로그인 중인 사용자 정보를 반환", description = "현재 로그인중인 사용자의 정보를 반환합니다.")
     @SwaggerApiSuccess(description = "Return Member Info")
-    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
-    @GetMapping("/me")
-    public SuccessResponse<Integer> getMemberInfo(@CurrentUser Integer currentMember){
-        return SuccessResponse.of(currentMember);
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
+    @GetMapping("/profile")
+    public SuccessResponse<MemberResponse> getMemberInfo(@CurrentUser Integer currentMember){
+        MemberResponse memberResponse = memberService.getMemberId(currentMember);
+        return SuccessResponse.of(memberResponse);
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {

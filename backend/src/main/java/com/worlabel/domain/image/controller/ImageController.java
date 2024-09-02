@@ -26,13 +26,13 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/projects/{project_id}/folders/{folder_id}")
+@RequestMapping("/api/projects/{project_id}/folders/{folder_id}/images")
 @Tag(name = "이미지 관련 API")
 public class ImageController {
 
     private final ImageService imageService;
 
-    @PostMapping("/images")
+    @PostMapping("")
     @SwaggerApiSuccess(description = "이미지 목록을 성공적으로 업로드합니다.")
     @Operation(summary = "이미지 목록 업로드", description = "이미지 목록을 업로드합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})

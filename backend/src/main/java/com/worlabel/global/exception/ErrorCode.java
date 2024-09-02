@@ -16,7 +16,7 @@ public enum ErrorCode {
     INVALID_URL(HttpStatus.BAD_REQUEST, 1004, "제공하지 않는 주소입니다. 확인해주세요"),
     FAIL_TO_CREATE_FILE(HttpStatus.BAD_REQUEST, 1005, "파일 업로드에 실패하였습니다. 다시 한번 확인해주세요"),
 
-    // Auth & User - 2000
+    // Auth & Member - 2000
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "해당 ID의 사용자를 찾을 수 없습니다."),
     ACCESS_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2001, "만료된 액세스 토큰입니다."),
     REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, 2002, "리프레시 토큰이 누락되었습니다."),
