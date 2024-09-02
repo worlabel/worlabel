@@ -9,6 +9,7 @@ __pycache__/
 *.env
 
 # 패키지 디렉토리
+.venv/
 venv/
 env/
 
