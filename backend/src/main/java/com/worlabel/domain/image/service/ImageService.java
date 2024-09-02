@@ -35,10 +35,10 @@ public class ImageService {
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
         checkEditorParticipant(memberId, projectId);
         Folder folder = getFolder(folderId);
-        for (int i = 0; i < imageList.size(); i++) {
-            MultipartFile file = imageList.get(i);
+        for (int order = 0; order < imageList.size(); order++) {
+            MultipartFile file = imageList.get(order);
             String imageUrl = s3UploadService.upload(file, projectId);
-            Image image = Image.of(file.getOriginalFilename(), imageUrl, i, folder);
+            Image image = Image.of(file.getOriginalFilename(), imageUrl, order, folder);
             imageRepository.save(image);
         }
     }
@@ -47,7 +47,7 @@ public class ImageService {
      * 아이디 기반 이미지 조회
      */
     @Transactional(readOnly = true)
-    public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Integer imageId, final Integer memberId) {
+    public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         checkExistParticipant(memberId, projectId);
         Image image = getImage(folderId, imageId);
         return ImageResponse.from(image);
@@ -56,23 +56,27 @@ public class ImageService {
     /**
      * 이미지 폴더 위치 변경
      */
-    public void moveFolder(final Integer projectId,
-                           final Integer folderId,
-                           final Integer moveFolderId,
-                           final Integer imageId,
-                           final Integer memberId) {
+    public void moveFolder(
+            final Integer projectId,
+            final Integer folderId,
+            final Integer moveFolderId,
+            final Long imageId,
+            final Integer memberId
+    ) {
         checkEditorParticipant(memberId, projectId);
         Folder folder = null;
-        if (moveFolderId != null) folder = getFolder(moveFolderId);
-        Image image = getImage(folderId, imageId);
+        if (moveFolderId != null) {
+            folder = getFolder(moveFolderId);
+        }
 
+        Image image = getImage(folderId, imageId);
         image.moveFolder(folder);
     }
 
     /**
      * 이미지 삭제
      */
-    public void deleteImage(final Integer projectId, final Integer folderId, final Integer imageId, final Integer memberId) {
+    public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         checkEditorParticipant(memberId, projectId);
         Image image = getImage(folderId, imageId);
         imageRepository.delete(image);
@@ -96,7 +100,7 @@ public class ImageService {
                 .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
     }
 
-    private Image getImage(Integer folderId, Integer imageId) {
+    private Image getImage(Integer folderId, Long imageId) {
         return imageRepository.findByIdAndFolderId(imageId, folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
     }
