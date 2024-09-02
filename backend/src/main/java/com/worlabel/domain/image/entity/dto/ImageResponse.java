@@ -1,4 +1,4 @@
-package com.worlabel.domain.folder.entity.dto;
+package com.worlabel.domain.image.entity.dto;
 
 import com.worlabel.domain.image.entity.Image;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,12 +13,16 @@ public class ImageResponse {
     @Schema(description = "이미지 ID", example = "1")
     private Long id;
 
+    @Schema(description = "이미지 파일 제목", example = "image.jpg")
+    private String imageTitle;
+    
     @Schema(description = "이미지 URL", example = "https://example.com/image.jpg")
     private String imageUrl;
 
     public static ImageResponse from(final Image image) {
         return new ImageResponse(
                 image.getId(),
+                image.getTitle(),
                 image.getImageUrl()
         );
     }

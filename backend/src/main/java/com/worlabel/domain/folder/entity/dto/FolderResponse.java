@@ -1,6 +1,7 @@
 package com.worlabel.domain.folder.entity.dto;
 
 import com.worlabel.domain.folder.entity.Folder;
+import com.worlabel.domain.image.entity.dto.ImageResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

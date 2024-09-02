@@ -3,6 +3,8 @@ package com.worlabel.domain.image.controller;
 import com.worlabel.domain.folder.entity.dto.FolderRequest;
 import com.worlabel.domain.folder.entity.dto.FolderResponse;
 import com.worlabel.domain.folder.service.FolderService;
+import com.worlabel.domain.image.entity.dto.ImageMoveRequest;
+import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.service.ImageService;
 import com.worlabel.domain.project.service.ProjectService;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
@@ -44,6 +46,37 @@ public class ImageController {
     ) {
         log.debug("project: {} , folder: {}, imageList upload, 현재 로그인 중인 사용자 : {}, 이미지 개수 : {}", projectId, folderId, memberId, imageList.size());
         imageService.uploadImageList(imageList, folderId, projectId, memberId);
+        return SuccessResponse.empty();
+    }
+
+    @GetMapping("/{image_id}")
+    @SwaggerApiSuccess(description = "이미지를 조회합니다.")
+    @Operation(summary = "이미지 조회", description = "이미지 정보를 조회합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    public BaseResponse<ImageResponse> getImageById(
+            @CurrentUser final Integer memberId,
+            @PathVariable("folder_id") final Integer folderId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("image_id") final Integer imageId
+    ) {
+        log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, memberId, imageId);
+        ImageResponse imageResponse = imageService.getImageById(projectId, imageId, memberId);
+        return SuccessResponse.of(imageResponse);
+    }
+
+    @PutMapping("/{image_id}")
+    @SwaggerApiSuccess(description = "이미지 폴더 이동.")
+    @Operation(summary = "이미지 폴더 이동", description = "이미지가 위치한 폴더를 변경합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    public BaseResponse<Void> moveFolderImage(
+            @CurrentUser final Integer memberId,
+            @PathVariable("folder_id") final Integer folderId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("image_id") final Integer imageId,
+            @RequestBody final ImageMoveRequest imageMoveRequest
+    ) {
+        log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}, 이동하는 폴더 {}", projectId, folderId, memberId, imageId, imageMoveRequest.getMoveFolderId());
+        imageService.moveFolder(projectId, folderId, imageMoveRequest.getMoveFolderId(),memberId);
         return SuccessResponse.empty();
     }
 }
