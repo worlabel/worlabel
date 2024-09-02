@@ -37,7 +37,6 @@ const mockLabels: Label[] = [
     name: 'Label 3',
     color: '#aaff33',
     type: 'polygon',
-    // star shape
     coordinates: [
       [500, 375],
       [523, 232],
@@ -62,6 +61,11 @@ export default function ImageCanvas() {
   const labels = useCanvasStore((state) => state.labels) ?? [];
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [image, imageStatus] = useImage(imageUrl);
+  const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    if (e.target === e.target.getStage() || e.target.getClassName() === 'Image') {
+      setSelectedId(null);
+    }
+  };
   const handleZoom = (e: Konva.KonvaEventObject<WheelEvent>) => {
     const scaleBy = 1.05;
     const oldScale = scale.current;
@@ -114,12 +118,14 @@ export default function ImageCanvas() {
 
   return imageStatus === 'loaded' ? (
     <Stage
-      ref={stageRef}
+      className="overflow-hidden bg-gray-200"
       width={stageWidth}
       height={stageHeight}
-      className="overflow-hidden bg-gray-200"
       draggable
+      ref={stageRef}
       onWheel={handleWheel}
+      onMouseDown={handleClick}
+      onTouchStart={handleClick}
       scale={getScale()}
     >
       <Layer>
