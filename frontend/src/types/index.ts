@@ -30,4 +30,6 @@ export type Label = {
   id: number;
   name: string;
   color: string;
+  type: 'polygon' | 'rect';
+  coordinates: Array<[number, number]>;
 };
