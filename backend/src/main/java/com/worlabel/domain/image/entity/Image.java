@@ -27,6 +27,12 @@ public class Image extends BaseEntity {
     private Long id;
 
     /**
+     * 이미지 제목
+     */
+    @Column(name = "image_title", nullable = false, length = 255)
+    private String title;
+
+    /**
      * 이미지 URL
      */
     @Column(name = "image_url", nullable = false, length = 255)
@@ -59,13 +65,14 @@ public class Image extends BaseEntity {
     @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private Label label;
 
-    private Image(final String imageUrl, final Integer order, final Folder folder) {
+    private Image(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {
+        this.title = imageTitle;
         this.imageUrl = imageUrl;
         this.order = order;
         this.folder = folder;
     }
 
-    public static Image of(final String imageUrl, final Integer order, final Folder folder) {
-        return new Image(imageUrl, order, folder);
+    public static Image of(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {
+        return new Image(imageTitle,imageUrl, order, folder);
     }
 }

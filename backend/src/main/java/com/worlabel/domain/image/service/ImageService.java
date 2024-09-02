@@ -32,17 +32,18 @@ public class ImageService {
      * 이미지 리스트 업로드
      */
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
-//        checkEditorParticipant(memberId, projectId);
+        checkEditorParticipant(memberId, projectId);
         Folder folder = getFolder(folderId);
         for(int i = 0; i < imageList.size(); i++){
-            String imageUrl = s3UploadService.upload(imageList.get(i));
-            Image image = Image.of(imageUrl, i, folder);
+            MultipartFile file = imageList.get(i);
+            String imageUrl = s3UploadService.upload(file, projectId);
+            Image image = Image.of(file.getOriginalFilename(),imageUrl, i, folder);
             imageRepository.save(image);
         }
     }
 
     private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.EDITOR)) {
+        if (!participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(projectId, memberId)) {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }
