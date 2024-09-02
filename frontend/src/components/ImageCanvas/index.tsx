@@ -6,51 +6,34 @@ import useImage from 'use-image';
 import { Label } from '@/types';
 import LabelRect from './LabelRect';
 import { Vector2d } from 'konva/lib/types';
+import LabelPolygon from './LabelPolygon';
 
-const mockLabels: Label[] = [
-  {
-    id: 1,
-    name: 'Label 1',
-    color: '#FFaa33',
-    type: 'rect',
-    coordinates: [
-      [100, 100],
-      [200, 100],
-      [200, 200],
-      [100, 200],
-    ],
-  },
-  {
-    id: 2,
-    name: 'Label 3',
-    color: '#aa33ff',
-    type: 'rect',
-    coordinates: [
-      [1200, 200],
-      [1200, 400],
-      [1400, 400],
-      [1400, 200],
-    ],
-  },
-  {
-    id: 3,
-    name: 'Label 3',
-    color: '#aaff33',
-    type: 'polygon',
-    coordinates: [
-      [500, 375],
-      [523, 232],
-      [600, 232],
-      [535, 175],
-      [560, 100],
-      [500, 150],
-      [440, 100],
-      [465, 175],
-      [400, 232],
-      [477, 232],
-    ],
-  },
-];
+const mockLabels: Label[] = Array.from({ length: 10 }, (_, i) => {
+  const startX = Math.random() * 1200 + 300;
+  const startY = Math.random() * 2000 + 300;
+  const color = Math.floor(Math.random() * 65535)
+    .toString(16)
+    .padStart(4, '0');
+
+  return {
+    id: i,
+    name: `label-${i}`,
+    type: i % 2 === 0 ? 'polygon' : 'rect',
+    color: i % 2 === 0 ? `#ff${color}` : `#${color}ff`,
+    coordinates:
+      i % 2 === 0
+        ? [
+            [startX, startY],
+            [startX + 200, startY + 50],
+            [startX + 300, startY + 300],
+            [startX + 100, startY + 250],
+          ]
+        : [
+            [startX, startY],
+            [startX + 300, startY + 300],
+          ],
+  };
+});
 
 export default function ImageCanvas() {
   const stageWidth = window.innerWidth;
@@ -106,8 +89,6 @@ export default function ImageCanvas() {
     const heightRatio = stageHeight / image!.height;
     scale.current = Math.min(widthRatio, heightRatio);
 
-    console.log(scale);
-
     return { x: scale.current, y: scale.current };
   };
 
@@ -118,11 +99,11 @@ export default function ImageCanvas() {
 
   return imageStatus === 'loaded' ? (
     <Stage
-      className="overflow-hidden bg-gray-200"
+      ref={stageRef}
       width={stageWidth}
       height={stageHeight}
+      className="overflow-hidden bg-gray-200"
       draggable
-      ref={stageRef}
       onWheel={handleWheel}
       onMouseDown={handleClick}
       onTouchStart={handleClick}
@@ -131,19 +112,25 @@ export default function ImageCanvas() {
       <Layer>
         <Image image={image} />
       </Layer>
-      {labels.map((label) => (
-        <Layer key={label.id}>
-          {label.type === 'rect' ? (
+      <Layer>
+        {labels.map((label) =>
+          label.type === 'rect' ? (
             <LabelRect
+              key={label.id}
               isSelected={label.id === selectedId}
               onSelect={() => setSelectedId(label.id)}
               info={label}
             />
           ) : (
-            <></>
-          )}
-        </Layer>
-      ))}
+            <LabelPolygon
+              key={label.id}
+              isSelected={label.id === selectedId}
+              onSelect={() => setSelectedId(label.id)}
+              info={label}
+            />
+          )
+        )}
+      </Layer>
     </Stage>
   ) : (
     <div></div>

@@ -1,7 +1,7 @@
 import { Label } from '@/types';
 import Konva from 'konva';
 import { useEffect, useRef } from 'react';
-import { Line, Transformer } from 'react-konva';
+import { Group, Line, Transformer } from 'react-konva';
 
 export default function LabelRect({
   isSelected,
@@ -14,12 +14,16 @@ export default function LabelRect({
 }) {
   const rectRef = useRef<Konva.Line>(null);
   const trRef = useRef<Konva.Transformer>(null);
+  const coordinates = [
+    info.coordinates[0],
+    [info.coordinates[0][0], info.coordinates[1][1]],
+    info.coordinates[1],
+    [info.coordinates[1][0], info.coordinates[0][1]],
+  ].flat();
   const handleTransformEnd = () => {
     const points = rectRef.current?.points();
-    if (points) {
-      console.log(points);
-      console.log(trRef.current?.getAbsoluteScale());
-    }
+
+    console.log(points);
   };
 
   useEffect(() => {
@@ -30,9 +34,9 @@ export default function LabelRect({
   }, [isSelected]);
 
   return (
-    <>
+    <Group zIndex={isSelected ? 9999 : 1}>
       <Line
-        points={info.coordinates.flat()}
+        points={coordinates}
         stroke={info.color}
         strokeWidth={1}
         ref={rectRef}
@@ -57,6 +61,6 @@ export default function LabelRect({
           onTransformEnd={handleTransformEnd}
         />
       )}
-    </>
+    </Group>
   );
 }
