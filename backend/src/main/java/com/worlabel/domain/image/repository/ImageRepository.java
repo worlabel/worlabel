@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface ImageRepository extends JpaRepository<Image, Integer> {
+public interface ImageRepository extends JpaRepository<Image, Long> {
 
-    Optional<Image> findByIdAndFolderId(Integer imageId, Integer folderId);
+    Optional<Image> findByIdAndFolderId(Long imageId, Integer folderId);
 }

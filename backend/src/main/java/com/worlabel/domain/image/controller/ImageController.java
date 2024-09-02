@@ -57,7 +57,7 @@ public class ImageController {
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
-            @PathVariable("image_id") final Integer imageId
+            @PathVariable("image_id") final Long imageId
     ) {
         log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, memberId, imageId);
         ImageResponse imageResponse = imageService.getImageById(projectId, folderId, imageId, memberId);
@@ -72,7 +72,7 @@ public class ImageController {
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
-            @PathVariable("image_id") final Integer imageId,
+            @PathVariable("image_id") final Long imageId,
             @RequestBody final ImageMoveRequest imageMoveRequest
     ) {
         log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}, 이동하는 폴더 {}", projectId, folderId, memberId, imageId, imageMoveRequest.getMoveFolderId());
@@ -88,7 +88,7 @@ public class ImageController {
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
-            @PathVariable("image_id") final Integer imageId
+            @PathVariable("image_id") final Long imageId
     ) {
         log.debug("project: {} , folder: {}, 삭제하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId, memberId);
         imageService.deleteImage(projectId, folderId, imageId, memberId);
