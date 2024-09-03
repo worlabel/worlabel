@@ -21,7 +21,7 @@ public class ProjectResponse {
     private String title;
 
     @Schema(description = "워크스페이스 id", example = "1")
-    private Integer projectId;
+    private Integer workspaceId;
 
     @Schema(description = "프로젝트 타입", example = "classification")
     private ProjectType projectType;

@@ -90,7 +90,7 @@ public class ImageService {
     }
 
     private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(projectId, memberId)) {
+        if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)) {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }

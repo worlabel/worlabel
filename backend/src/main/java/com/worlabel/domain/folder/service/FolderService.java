@@ -51,7 +51,7 @@ public class FolderService {
 
         // 최상위 폴더
         if (folderId == 0) {
-            return FolderResponse.from(folderRepository.findAllByParentIsNull());
+            return FolderResponse.from(folderRepository.findAllByProjectIdAndParentIsNull(projectId));
         } else {
             return FolderResponse.from(getFolder(folderId));
         }
@@ -98,7 +98,7 @@ public class FolderService {
     }
 
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {
-        if (participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
+        if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
             throw new CustomException(ErrorCode.BAD_REQUEST);
         }
     }

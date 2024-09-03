@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, Integer> {
 
-    List<Folder> findAllByParentIsNull();
+    List<Folder> findAllByProjectIdAndParentIsNull(Integer projectId);
 
     boolean existsByIdAndProjectId(Integer folderId, Integer projectId);
 }

@@ -47,6 +47,9 @@ public enum ErrorCode {
     // Image - 7000
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 7000,"해당 이미지를 찾을 수 없습니다."),
 
+    // AI - 8000
+    AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 8000, "AI 서버 오류 입니다.")
+
     ;
 
     private final HttpStatus status;
