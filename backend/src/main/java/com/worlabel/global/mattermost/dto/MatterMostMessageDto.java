@@ -11,12 +11,10 @@ import java.util.List;
 public class MatterMostMessageDto {
 
     @Getter
+    @NoArgsConstructor
     public static class Attachments {
         private Props props;
         private List<Attachment> attachments = new ArrayList<>();
-
-        public Attachments() {
-        }
 
         public Attachments(List<Attachment> attachments) {
             this.attachments = attachments;
@@ -32,9 +30,9 @@ public class MatterMostMessageDto {
     }
 
     @Getter
-    @AllArgsConstructor
     @Builder
     @ToString
+    @AllArgsConstructor
     public static class Attachment {
         private String channel;
         private String pretext;

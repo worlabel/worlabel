@@ -16,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 @Primary
 public class MattermostProperties {
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
     private String channel;
     private String pretext;
     private String color = "#ff5d52";
@@ -23,6 +25,9 @@ public class MattermostProperties {
     private String authorIcon;
     private String title;
     private String text = "";
-    private String footer = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+    private String footer = LocalDateTime.now().format(FORMATTER);
 
+    public void updateFooter() {
+        this.footer = LocalDateTime.now().format(FORMATTER);
+    }
 }

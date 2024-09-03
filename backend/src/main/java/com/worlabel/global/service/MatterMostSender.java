@@ -29,10 +29,13 @@ public class MatterMostSender {
     private final MattermostProperties mmProperties;
 
     public void sendMessage(Exception excpetion, String uri, String params) {
-        if (!mmEnabled)
+        if (!mmEnabled){
             return;
+        }
 
         try {
+            mmProperties.updateFooter();
+
             RestTemplate restTemplate = restTemplateBuilder.build();
 
             Attachment attachment = Attachment.builder()

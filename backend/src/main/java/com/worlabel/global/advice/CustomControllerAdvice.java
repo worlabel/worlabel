@@ -67,7 +67,7 @@ public class CustomControllerAdvice {
 
     private void sendNotification(Exception e, HttpServletRequest request) {
         // TODO: 추후 주석 해제
-//        notificationManager.sendNotification(e, request.getRequestURI(),getParams(request));
+        notificationManager.sendNotification(e, request.getRequestURI(),getParams(request));
     }
 
     private String getParams(HttpServletRequest req) {
