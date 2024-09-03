@@ -20,8 +20,12 @@ export default function LabelRect({
     info.coordinates[1],
     [info.coordinates[1][0], info.coordinates[0][1]],
   ].flat();
-  const handleTransformEnd = () => {
-    const points = rectRef.current?.points();
+  const handleMoveEnd = () => {
+    const rectPoints = rectRef.current?.points();
+    const points = [
+      [rectPoints![0], rectPoints![1]],
+      [rectPoints![4], rectPoints![5]],
+    ];
 
     console.log(points);
   };
@@ -34,7 +38,7 @@ export default function LabelRect({
   }, [isSelected]);
 
   return (
-    <Group zIndex={isSelected ? 9999 : 1}>
+    <Group zIndex={isSelected ? 2 : 1}>
       <Line
         points={coordinates}
         stroke={info.color}
@@ -45,6 +49,7 @@ export default function LabelRect({
         strokeScaleEnabled={false}
         fillAfterStrokeEnabled={false}
         fill={`${info.color}33`}
+        onDragEnd={handleMoveEnd}
         closed
         draggable
       />
@@ -58,7 +63,7 @@ export default function LabelRect({
           rotateAnchorOffset={20}
           ignoreStroke={true}
           flipEnabled={false}
-          onTransformEnd={handleTransformEnd}
+          onTransformEnd={handleMoveEnd}
         />
       )}
     </Group>

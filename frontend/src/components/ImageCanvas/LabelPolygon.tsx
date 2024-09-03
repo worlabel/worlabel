@@ -8,16 +8,18 @@ export default function LabelPolygon({
   isSelected,
   onSelect,
   info,
+  stage,
 }: {
   isSelected: boolean;
   onSelect: () => void;
   info: Label;
+  stage: Konva.Stage;
 }) {
   const polyRef = useRef<Konva.Line>(null);
   const [coordinates, setCoordinates] = useState<Array<[number, number]>>(info.coordinates);
 
   return (
-    <Group zIndex={isSelected ? 9999 : 1}>
+    <Group zIndex={isSelected ? 2 : 1}>
       <Line
         points={coordinates.flat()}
         stroke={info.color}
@@ -34,6 +36,7 @@ export default function LabelPolygon({
         <PolygonTransformer
           coordinates={coordinates}
           setCoordinates={setCoordinates}
+          stage={stage}
         />
       )}
     </Group>
