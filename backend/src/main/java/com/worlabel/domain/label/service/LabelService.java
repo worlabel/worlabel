@@ -113,4 +113,7 @@ public class LabelService {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }
+
+    public void save(final Integer imageId) {
+    }
 }

@@ -19,17 +19,16 @@ public class ImageRequest {
     @Schema(description = "이미지 PK", example = "2")
     @NotEmpty(message = "이미지 PK를 입력하세요")
     private Long id;
-    
-    // TODO: Title 들어가야 함
-//    @Schema(description = "이미지 PK", example = "2")
-//    @NotEmpty(message = "이미지 PK를 입력하세요")
-//    private String title;
+
+    @Schema(description = "이미지 url", example = "image.png")
+    @NotEmpty(message = "이미지 url을 입력하세요")
+    private String imageUrl;
 
     @Schema(description = "프로젝트 유형", example = "classification")
     @NotNull(message = "카테고리를 입력하세요.")
     private ProjectType projectType;
 
     public static ImageRequest of(Image image, ProjectType projectType){
-        return new ImageRequest(image.getId(), projectType);
+        return new ImageRequest(image.getId(), image.getImageUrl(), projectType);
     }
 }
