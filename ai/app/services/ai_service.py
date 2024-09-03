@@ -1,9 +1,10 @@
 # ai_service.py
 
-from ultralytics import YOLO  # Ultralytics YOLO 모델을 가져오기
+from ultralytics import YOLO # Ultralytics YOLO 모델을 가져오기
+from typing import List
 import os
 
-def load_detection_model(model_path: str = "test/model/initial.pt", device:str ="cpu"): 
+def load_detection_model(model_path: str = "test-data/model/yolov8n.pt", device:str ="cpu"): 
     """
     지정된 경로에서 YOLO 모델을 로드합니다.
 
@@ -16,13 +17,15 @@ def load_detection_model(model_path: str = "test/model/initial.pt", device:str =
         YOLO: 로드된 YOLO 모델 인스턴스
     """
     
-    if not os.path.exists(model_path):
+    if not os.path.exists(model_path) and model_path != "test-data/model/yolov8n.pt":
         raise FileNotFoundError(f"Model file not found at path: {model_path}")
 
     try:
         model = YOLO(model_path)
         model.to(device)
+        # Detection 모델인지 검증
+        # 코드 추가 
         return model
     except Exception as e:
         raise RuntimeError(f"Failed to load the model from {model_path}. Error: {str(e)}")
-
+    

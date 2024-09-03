@@ -30,3 +30,6 @@ dist/
 
 # MacOS 관련 파일
 .DS_Store
+
+# 테스트 파일
+test-data/

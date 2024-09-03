@@ -7,9 +7,9 @@ class Shape(BaseModel):
     points: List[Tuple[float, float]]
     group_id: Optional[int] = None
     shape_type: str
-    flags: Dict[str, Optional[bool]] = {}  # key는 문자열, value는 boolean 또는 None
+    flags: Dict[str, Optional[bool]] = {}
 
-class PredictResponse(BaseModel):
+class LabelData(BaseModel):
     version: str
     task_type: str
     shapes: List[Shape]
@@ -17,3 +17,7 @@ class PredictResponse(BaseModel):
     imageHeight: int
     imageWidth: int
     imageDepth: int
+
+class PredictResponse(BaseModel):
+    image_id: int
+    data: LabelData
