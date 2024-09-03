@@ -9,6 +9,7 @@ __pycache__/
 *.env
 
 # 패키지 디렉토리
+.venv/
 venv/
 env/
 
@@ -29,3 +30,6 @@ dist/
 
 # MacOS 관련 파일
 .DS_Store
+
+# 테스트 파일
+test-data/
