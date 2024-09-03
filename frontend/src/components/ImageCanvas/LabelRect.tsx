@@ -58,7 +58,7 @@ export default function LabelRect({
           keepRatio={false}
           ref={trRef}
           rotateEnabled={false}
-          anchorSize={4}
+          anchorSize={8}
           rotateAnchorCursor="pointer"
           rotateAnchorOffset={20}
           ignoreStroke={true}
