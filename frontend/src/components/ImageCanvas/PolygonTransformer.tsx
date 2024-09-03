@@ -34,15 +34,14 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage 
   };
   const handleMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const circle = e.target as Konva.Circle;
-    circle.strokeWidth(2);
-    circle.radius(4);
+
+    circle.radius(7);
     stage.batchDraw();
   };
   const handleMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const circle = e.target as Konva.Circle;
-    const stage = circle.getStage();
-    circle.strokeWidth(1);
-    circle.radius(2);
+
+    circle.radius(5);
     stage?.batchDraw();
   };
 
@@ -77,6 +76,7 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage 
         strokeScaleEnabled={true}
         closed
         zIndex={1}
+        perfectDrawEnabled={false}
       />
       {coordinates.map((point, index) => {
         return (
@@ -84,7 +84,7 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage 
             key={index}
             x={point[0]}
             y={point[1]}
-            radius={2}
+            radius={5}
             stroke="#00a1ff"
             strokeWidth={1}
             fill="white"
@@ -93,6 +93,7 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage 
             onMouseOver={handleMouseOver}
             onMouseOut={handleMouseOut}
             scale={{ x: 1 / stage.getAbsoluteScale().x, y: 1 / stage.getAbsoluteScale().y }}
+            perfectDrawEnabled={false}
           />
         );
       })}
