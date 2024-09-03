@@ -127,6 +127,7 @@ export default function ImageCanvas() {
               isSelected={label.id === selectedId}
               onSelect={() => setSelectedId(label.id)}
               info={label}
+              stage={stageRef.current as Konva.Stage}
             />
           )
         )}
