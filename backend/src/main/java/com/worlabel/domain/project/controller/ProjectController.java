@@ -119,4 +119,5 @@ public class ProjectController {
         projectService.removeProjectMember(memberId, projectId, removeMemberId);
         return SuccessResponse.empty();
     }
+
 }

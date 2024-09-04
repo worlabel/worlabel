@@ -41,4 +41,12 @@ public class Label extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "label_category_id")
 //    private LabelCategory labelCategory;
+
+    public static Label of(String jsonUrl, Image image) {
+        Label label = new Label();
+        label.url = jsonUrl;
+        label.image = image;
+        return label;
+    }
+
 }

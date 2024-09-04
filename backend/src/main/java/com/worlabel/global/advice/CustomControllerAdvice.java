@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.lang.reflect.Executable;
 import java.util.Enumeration;
 
 @Slf4j
@@ -57,6 +59,13 @@ public class CustomControllerAdvice {
         return ErrorResponse.of(new CustomException(ErrorCode.EMPTY_REQUEST_PARAMETER));
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ErrorResponse handleRequestMethodNotSupportedException(Exception e, HttpServletRequest request) {
+        log.error("", e);
+        sendNotification(e, request);
+        return ErrorResponse.of(new CustomException(ErrorCode.BAD_REQUEST, "지원하지 않는 API입니다. 요청을 확인해주세요"));
+    }
+
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e, HttpServletRequest request) {
         log.error("", e);
@@ -65,9 +74,11 @@ public class CustomControllerAdvice {
                 .body(ErrorResponse.of(e));
     }
 
+
+
     private void sendNotification(Exception e, HttpServletRequest request) {
         // TODO: 추후 주석 해제
-        notificationManager.sendNotification(e, request.getRequestURI(),getParams(request));
+//        notificationManager.sendNotification(e, request.getRequestURI(),getParams(request));
     }
 
     private String getParams(HttpServletRequest req) {

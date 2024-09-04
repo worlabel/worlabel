@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -22,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
+// TODO: 추후 비동기로 변경해야합니다.
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,6 +46,32 @@ public class S3UploadService {
     @Value("${cloud.aws.url}")
     private String url;
 
+    public String uploadJson(final String json, final String imageUrl) {
+//        String targetUrl = projectId + "/" + title + ".json"; // S3에 업로드할 대상 URL
+        String targetUrl = removeExtension(getKeyFromImageAddress(imageUrl)) + ".json";
+
+        log.debug("주소 {}", targetUrl);
+
+        try {
+            byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType("application/json");
+            metadata.setContentLength(jsonBytes.length);
+
+            // JSON 데이터를 S3에 업로드
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(jsonBytes)) {
+                PutObjectRequest putRequest = new PutObjectRequest(bucket, targetUrl, inputStream, metadata);
+                amazonS3.putObject(putRequest); // S3에 파일 업로드
+            }
+
+            URL uploadedUrl = amazonS3.getUrl(bucket, targetUrl);
+            log.debug("Uploaded JSON URL: {}", uploadedUrl);
+            return uploadedUrl.toString(); // 업로드된 파일의 URL 반환
+        } catch (Exception e) {
+            log.error("JSON 업로드 중 오류 발생: ", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
 
     /**
      * 파일이 존재하는지 확인
@@ -60,7 +88,7 @@ public class S3UploadService {
      */
     private String uploadImage(final MultipartFile image, final Integer projectId) {
         try {
-            return uploadToS3(image, projectId);
+            return uploadImageToS3(image, projectId);
         } catch (IOException e) {
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
@@ -69,7 +97,7 @@ public class S3UploadService {
     /**
      * AWS S3 이미지 업로드
      */
-    private String uploadToS3(final MultipartFile image, final Integer projectId) throws IOException {
+    private String uploadImageToS3(final MultipartFile image, final Integer projectId) throws IOException {
         String originalFileName = image.getOriginalFilename(); // 원본 파일 이름
         String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1); // 파일 확장자
 
@@ -99,11 +127,11 @@ public class S3UploadService {
         return url.getPath();
     }
 
-    private static String getS3FileName(Integer projectId, String extension) {
+    private static String getS3FileName(final Integer projectId, final String extension) {
         return projectId + "/" + UUID.randomUUID().toString().substring(0, 13) + "." + extension;
     }
 
-    public void deleteImageFromS3(String imageAddress){
+    public void deleteImageFromS3(String imageAddress) {
         String key = getKeyFromImageAddress(imageAddress);
         try {
             amazonS3.deleteObject(new DeleteObjectRequest(bucket, key));
@@ -112,13 +140,24 @@ public class S3UploadService {
         }
     }
 
+    private String removeExtension(String url) {
+        if (!StringUtils.hasText(url) || !url.contains(".")) {
+            return url;
+        }
+        return url.substring(0, url.lastIndexOf("."));
+    }
+
     private String getKeyFromImageAddress(String imageAddress) {
+        if (!StringUtils.hasText(imageAddress)) {
+            throw new CustomException(ErrorCode.INVALID_FILE_PATH);
+        }
+
         try {
             URL url = new URL(imageAddress);
             String decodingKey = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
             return decodingKey.substring(1);
         } catch (MalformedURLException e) {
-            throw new CustomException(ErrorCode.FAIL_TO_DELETE_FILE);
+            throw new CustomException(ErrorCode.INVALID_FILE_PATH);
         }
     }
 }
