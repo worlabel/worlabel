@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { DialogClose } from '../ui/dialogCustom';
 
 const formSchema = z.object({
   workspaceName: z.string().max(50).min(1, {
@@ -66,15 +65,13 @@ export default function WorkSpaceCreateForm({ onSubmit }: { onSubmit: (data: Wor
             </FormItem>
           )}
         />
-        <DialogClose asChild>
-          <Button
-            type="submit"
-            variant="outlinePrimary"
-            disabled={!form.formState.isValid}
-          >
-            워크스페이스 만들기
-          </Button>
-        </DialogClose>
+        <Button
+          type="submit"
+          variant="outlinePrimary"
+          disabled={!form.formState.isValid}
+        >
+          워크스페이스 만들기
+        </Button>
       </form>
     </Form>
   );
