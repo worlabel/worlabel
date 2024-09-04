@@ -44,7 +44,6 @@ public class LabelService {
     private final RestTemplate restTemplate;
     private final Gson gson;
 
-
     /**
      * AI SERVER 주소
      */
@@ -74,7 +73,7 @@ public class LabelService {
     }
 
     private List<AutoLabelingResponse> sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
-        String url = createApiUrl("api/yolo/detection/predict");
+        String url = createApiUrl(apiEndpoint);
 
         // RestTemplate을 동적으로 생성하여 사용
         HttpHeaders headers = createJsonHeaders();
