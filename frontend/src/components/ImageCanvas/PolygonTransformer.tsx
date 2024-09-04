@@ -6,6 +6,7 @@ interface PolygonTransformerProps {
   coordinates: Array<[number, number]>;
   setCoordinates: (coordinates: Array<[number, number]>) => void;
   stage: Konva.Stage;
+  dragLayer: Konva.Layer;
 }
 
 const TRANSFORM_CHANGE_STR = [
@@ -21,8 +22,8 @@ const TRANSFORM_CHANGE_STR = [
   'strokeWidthChange',
 ];
 
-export default function PolygonTransformer({ coordinates, setCoordinates, stage }: PolygonTransformerProps) {
-  const trRef = useRef<Konva.Group>(null);
+export default function PolygonTransformer({ coordinates, setCoordinates, stage, dragLayer }: PolygonTransformerProps) {
+  const anchorsRef = useRef<Konva.Group>(null);
   const handleDragMove = (index: number) => (e: Konva.KonvaEventObject<DragEvent>) => {
     const circle = e.target as Konva.Circle;
     const pos = circle.position();
@@ -47,13 +48,13 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage 
 
   useEffect(() => {
     const transformEvents = TRANSFORM_CHANGE_STR.join(' ');
+    anchorsRef.current?.moveTo(dragLayer);
 
     stage.on(transformEvents, () => {
-      if (!trRef.current) return;
+      if (!anchorsRef.current) return;
 
-      const [line, ...anchors] = trRef.current!.children as Konva.Shape[];
+      const anchors = anchorsRef.current!.children as Konva.Shape[];
 
-      line.strokeWidth(1 / stage.getAbsoluteScale().x);
       anchors.forEach((anchor) => {
         anchor.scale({
           x: 1 / stage.getAbsoluteScale().x,
@@ -65,38 +66,44 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage 
     return () => {
       stage.off(transformEvents);
     };
-  }, [stage]);
+  }, [dragLayer, stage]);
 
   return (
-    <Group ref={trRef}>
+    <>
       <Line
         points={coordinates.flat()}
         stroke="#00a1ff"
-        strokeWidth={1 / stage.getAbsoluteScale().x}
-        strokeScaleEnabled={true}
+        // strokeWidth={1 / stage.getAbsoluteScale().x}
+        strokeWidth={1}
+        strokeScaleEnabled={false}
         closed
-        zIndex={1}
         perfectDrawEnabled={false}
+        shadowForStrokeEnabled={false}
+        listening={false}
       />
-      {coordinates.map((point, index) => {
-        return (
-          <Circle
-            key={index}
-            x={point[0]}
-            y={point[1]}
-            radius={5}
-            stroke="#00a1ff"
-            strokeWidth={1}
-            fill="white"
-            draggable
-            onDragMove={handleDragMove(index)}
-            onMouseOver={handleMouseOver}
-            onMouseOut={handleMouseOut}
-            scale={{ x: 1 / stage.getAbsoluteScale().x, y: 1 / stage.getAbsoluteScale().y }}
-            perfectDrawEnabled={false}
-          />
-        );
-      })}
-    </Group>
+      <Group ref={anchorsRef}>
+        {coordinates.map((point, index) => {
+          return (
+            <Circle
+              key={index}
+              x={point[0]}
+              y={point[1]}
+              radius={5}
+              stroke="#00a1ff"
+              strokeWidth={1}
+              fill="white"
+              draggable
+              strokeScaleEnabled={false}
+              onDragMove={handleDragMove(index)}
+              onMouseOver={handleMouseOver}
+              onMouseOut={handleMouseOut}
+              scale={{ x: 1 / stage.getAbsoluteScale().x, y: 1 / stage.getAbsoluteScale().y }}
+              perfectDrawEnabled={false}
+              shadowForStrokeEnabled={false}
+            />
+          );
+        })}
+      </Group>
+    </>
   );
 }

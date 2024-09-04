@@ -1,16 +1,18 @@
 import { Label } from '@/types';
 import Konva from 'konva';
 import { useEffect, useRef } from 'react';
-import { Group, Line, Transformer } from 'react-konva';
+import { Line, Transformer } from 'react-konva';
 
 export default function LabelRect({
   isSelected,
   onSelect,
   info,
+  dragLayer,
 }: {
   isSelected: boolean;
-  onSelect: () => void;
+  onSelect: (evt: Konva.KonvaEventObject<TouchEvent | MouseEvent>) => void;
   info: Label;
+  dragLayer: Konva.Layer;
 }) {
   const rectRef = useRef<Konva.Line>(null);
   const trRef = useRef<Konva.Transformer>(null);
@@ -20,6 +22,11 @@ export default function LabelRect({
     info.coordinates[1],
     [info.coordinates[1][0], info.coordinates[0][1]],
   ].flat();
+  const handleSelect = (evt: Konva.KonvaEventObject<TouchEvent | MouseEvent>): void => {
+    onSelect(evt);
+    rectRef.current?.moveToTop();
+    trRef.current?.moveToTop();
+  };
   const handleMoveEnd = () => {
     const rectPoints = rectRef.current?.points();
     const points = [
@@ -33,23 +40,25 @@ export default function LabelRect({
   useEffect(() => {
     if (isSelected) {
       trRef.current?.nodes([rectRef.current as Konva.Node]);
+      trRef.current?.moveTo(dragLayer);
       trRef.current?.getLayer()?.batchDraw();
     }
-  }, [isSelected]);
+  }, [dragLayer, isSelected]);
 
   return (
-    <Group zIndex={isSelected ? 2 : 1}>
+    <>
       <Line
         points={coordinates}
         stroke={info.color}
         strokeWidth={1}
         ref={rectRef}
-        onMouseDown={onSelect}
-        onTouchStart={onSelect}
+        onMouseDown={handleSelect}
+        onTouchStart={handleSelect}
         strokeScaleEnabled={false}
         fillAfterStrokeEnabled={false}
         fill={`${info.color}33`}
         onDragEnd={handleMoveEnd}
+        shadowForStrokeEnabled={false}
         closed
         draggable
       />
@@ -66,6 +75,6 @@ export default function LabelRect({
           onTransformEnd={handleMoveEnd}
         />
       )}
-    </Group>
+    </>
   );
 }
