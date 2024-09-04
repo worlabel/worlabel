@@ -5,8 +5,7 @@ from services.ai_service import load_detection_model
 from typing import List
 
 router = APIRouter()
-
-@router.post("/predict", response_model=List[PredictResponse])
+@router.post("/detection", response_model=List[PredictResponse])
 def predict(request: PredictRequest):
     version = "0.1.0"
 
@@ -20,12 +19,23 @@ def predict(request: PredictRequest):
     results = []
     try:
         for image in request.image_list:
+            # URL에서 이미지를 메모리로 로드 TODO: 추후 메모리에 할지 어떻게 해야할지 or 병렬 처리 고민
+            # response = requests.get(image.image_url)
+
+            # 이미지 데이터를 메모리로 로드
+            # img = Image.open(io.BytesIO(response.content))
+
             predict_results = model.predict(
-                source=image.image_url, 
+                source=image.image_url,
                 iou=request.iou_threshold, 
                 conf=request.conf_threshold,
-                classes=request.classes)
+                classes=request.classes
+            )
             results.append(predict_results[0])
+            
+            # 메모리에서 이미지 객체 해제
+            # img.close()
+            # del img
     except Exception as e:
         raise HTTPException(status_code=500, detail="model predict exception: "+str(e))
     
@@ -57,6 +67,7 @@ def predict(request: PredictRequest):
             }
             response.append({
                 "image_id":image.image_id,
+                "image_url":image.image_url,
                 "data":label_data
                 })
     except Exception as e:
