@@ -39,6 +39,7 @@ export default function ImageCanvas() {
   const stageWidth = window.innerWidth;
   const stageHeight = window.innerHeight;
   const stageRef = useRef<Konva.Stage>(null);
+  const dragLayerRef = useRef<Konva.Layer>(null);
   const scale = useRef<number>(0);
   const imageUrl = '/sample.jpg';
   const labels = useCanvasStore((state) => state.labels) ?? [];
@@ -120,6 +121,7 @@ export default function ImageCanvas() {
               isSelected={label.id === selectedId}
               onSelect={() => setSelectedId(label.id)}
               info={label}
+              dragLayer={dragLayerRef.current as Konva.Layer}
             />
           ) : (
             <LabelPolygon
@@ -128,10 +130,12 @@ export default function ImageCanvas() {
               onSelect={() => setSelectedId(label.id)}
               info={label}
               stage={stageRef.current as Konva.Stage}
+              dragLayer={dragLayerRef.current as Konva.Layer}
             />
           )
         )}
       </Layer>
+      <Layer ref={dragLayerRef} />
     </Stage>
   ) : (
     <div></div>
