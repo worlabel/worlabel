@@ -20,4 +20,5 @@ class LabelData(BaseModel):
 
 class PredictResponse(BaseModel):
     image_id: int
+    image_url: str
     data: LabelData
