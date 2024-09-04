@@ -1,10 +1,9 @@
 package com.worlabel.domain.label.entity.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.worlabel.domain.image.entity.Image;
-import com.worlabel.domain.project.entity.ProjectType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,17 +17,15 @@ public class ImageRequest {
 
     @Schema(description = "이미지 PK", example = "2")
     @NotEmpty(message = "이미지 PK를 입력하세요")
-    private Long id;
+    @JsonProperty("image_id")
+    private Long imageId;
 
     @Schema(description = "이미지 url", example = "image.png")
     @NotEmpty(message = "이미지 url을 입력하세요")
+    @JsonProperty("image_url")
     private String imageUrl;
 
-    @Schema(description = "프로젝트 유형", example = "classification")
-    @NotNull(message = "카테고리를 입력하세요.")
-    private ProjectType projectType;
-
-    public static ImageRequest of(Image image, ProjectType projectType){
-        return new ImageRequest(image.getId(), image.getImageUrl(), projectType);
+    public static ImageRequest of(Image image){
+        return new ImageRequest(image.getId(), image.getImageUrl());
     }
 }

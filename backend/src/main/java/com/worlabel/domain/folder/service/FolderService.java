@@ -33,7 +33,7 @@ public class FolderService {
 
         Folder parent = null;
         if (folderRequest.getParentId() != 0) {
-            parent = getFolder(folderRequest.getParentId());
+            parent = getFolder(folderRequest.getParentId(),projectId);
         }
 
         Folder folder = Folder.of(folderRequest.getTitle(), parent, project);
@@ -53,7 +53,7 @@ public class FolderService {
         if (folderId == 0) {
             return FolderResponse.from(folderRepository.findAllByProjectIdAndParentIsNull(projectId));
         } else {
-            return FolderResponse.from(getFolder(folderId));
+            return FolderResponse.from(getFolder(folderId,projectId));
         }
     }
 
@@ -62,7 +62,7 @@ public class FolderService {
      */
     public FolderResponse updateFolder(final Integer memberId, final Integer projectId, final Integer folderId, final FolderRequest updatedFolderRequest) {
         checkUnauthorized(memberId, projectId);
-        Folder folder = getFolder(folderId);
+        Folder folder = getFolder(folderId,projectId);
 
         Folder parentFolder = folderRepository.findById(updatedFolderRequest.getParentId())
                 .orElse(null);
@@ -77,7 +77,7 @@ public class FolderService {
      */
     public void deleteFolder(final Integer memberId, final Integer projectId, final Integer folderId) {
         checkUnauthorized(memberId, projectId);
-        Folder folder = getFolder(folderId);
+        Folder folder = getFolder(folderId,projectId);
         folderRepository.delete(folder);
     }
 
@@ -86,8 +86,8 @@ public class FolderService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
-    private Folder getFolder(final Integer folderId) {
-        return folderRepository.findById(folderId)
+    private Folder getFolder(final Integer folderId, final Integer projectId) {
+        return folderRepository.findAllByProjectIdAndId(projectId,folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
     }
 
