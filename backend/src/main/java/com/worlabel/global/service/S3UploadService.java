@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -45,8 +46,11 @@ public class S3UploadService {
     @Value("${cloud.aws.url}")
     private String url;
 
-    public String uploadJson(final String json, final String title, final Integer projectId) {
-        String targetUrl = projectId + "/" + title + ".json"; // S3에 업로드할 대상 URL
+    public String uploadJson(final String json, final String imageUrl) {
+//        String targetUrl = projectId + "/" + title + ".json"; // S3에 업로드할 대상 URL
+        String targetUrl = removeExtension(getKeyFromImageAddress(imageUrl)) + ".json";
+
+        log.debug("주소 {}", targetUrl);
 
         try {
             byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
@@ -123,11 +127,11 @@ public class S3UploadService {
         return url.getPath();
     }
 
-    private static String getS3FileName(final Integer projectId,final String extension) {
+    private static String getS3FileName(final Integer projectId, final String extension) {
         return projectId + "/" + UUID.randomUUID().toString().substring(0, 13) + "." + extension;
     }
 
-    public void deleteImageFromS3(String imageAddress){
+    public void deleteImageFromS3(String imageAddress) {
         String key = getKeyFromImageAddress(imageAddress);
         try {
             amazonS3.deleteObject(new DeleteObjectRequest(bucket, key));
@@ -136,13 +140,24 @@ public class S3UploadService {
         }
     }
 
+    private String removeExtension(String url) {
+        if (!StringUtils.hasText(url) || !url.contains(".")) {
+            return url;
+        }
+        return url.substring(0, url.lastIndexOf("."));
+    }
+
     private String getKeyFromImageAddress(String imageAddress) {
+        if (!StringUtils.hasText(imageAddress)) {
+            throw new CustomException(ErrorCode.INVALID_FILE_PATH);
+        }
+
         try {
             URL url = new URL(imageAddress);
             String decodingKey = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
             return decodingKey.substring(1);
         } catch (MalformedURLException e) {
-            throw new CustomException(ErrorCode.FAIL_TO_DELETE_FILE);
+            throw new CustomException(ErrorCode.INVALID_FILE_PATH);
         }
     }
 }

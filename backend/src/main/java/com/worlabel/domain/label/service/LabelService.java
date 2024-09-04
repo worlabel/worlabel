@@ -1,10 +1,13 @@
 package com.worlabel.domain.label.service;
 
 import com.google.gson.*;
+import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
+import com.worlabel.domain.label.entity.Label;
 import com.worlabel.domain.label.entity.dto.AutoLabelingRequest;
 import com.worlabel.domain.label.entity.dto.AutoLabelingResponse;
 import com.worlabel.domain.label.entity.dto.ImageRequest;
+import com.worlabel.domain.label.repository.LabelRepository;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.project.entity.ProjectType;
 import com.worlabel.domain.project.repository.ProjectRepository;
@@ -20,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -28,15 +32,16 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class LabelService {
 
     private final ParticipantRepository participantRepository;
-//    private final RestTemplateBuilder restTemplateBuilder;
-    private final RestTemplate restTemplate;
     private final ProjectRepository projectRepository;
+    private final LabelRepository labelRepository;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
+    private final RestTemplate restTemplate;
     private final Gson gson;
 
 
@@ -52,10 +57,20 @@ public class LabelService {
         ProjectType projectType = getType(projectId);
         log.debug("{}번 프로젝트 이미지 {} 진행 ", projectId, projectType);
 
-        List<ImageRequest> imageRequestList = getImageRequestList(projectId);
+        List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
+        List<ImageRequest> imageRequestList = imageList.stream().map(ImageRequest::of).toList();
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
 
         List<AutoLabelingResponse> autoLabelingResponseList = sendRequestToApi(autoLabelingRequest, projectType.getValue(), projectId);
+        for (int index = 0; index < autoLabelingResponseList.size(); index++) {
+            AutoLabelingResponse response = autoLabelingResponseList.get(index);
+            Image image = imageList.get(index);
+            String uploadedUrl = s3UploadService.uploadJson(response.getData(), response.getImageUrl());
+
+            Label label = labelRepository.findByImageId(response.getImageId())
+                    .orElseGet(() -> Label.of(uploadedUrl, image));
+            labelRepository.save(label);
+        }
     }
 
     private List<AutoLabelingResponse> sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
@@ -89,7 +104,6 @@ public class LabelService {
         }
     }
 
-
     private List<AutoLabelingResponse> parseAutoLabelingResponseList(String responseBody) {
         JsonElement jsonElement = JsonParser.parseString(responseBody);
         List<AutoLabelingResponse> autoLabelingResponseList = new ArrayList<>();
@@ -98,7 +112,6 @@ public class LabelService {
             autoLabelingResponseList.add(response);
         }
         return autoLabelingResponseList;
-
     }
 
     /**
@@ -109,7 +122,7 @@ public class LabelService {
         Long imageId = jsonObject.get("image_id").getAsLong();
         String imageUrl = jsonObject.get("image_url").getAsString();
         JsonObject data = jsonObject.get("data").getAsJsonObject();
-        return AutoLabelingResponse.of(imageId,imageUrl, gson.toJson(data));
+        return AutoLabelingResponse.of(imageId, imageUrl, gson.toJson(data));
     }
 
 
@@ -119,7 +132,7 @@ public class LabelService {
     private String createApiUrl(String endPoint) {
         return aiServer + "/" + endPoint;
     }
-    
+
     /**
      * 요청 헤더 설정
      */
@@ -127,12 +140,6 @@ public class LabelService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
         return headers;
-    }
-
-    // TODO: N + 1문제 발생 추후 리팩토링해야합니다.
-    private List<ImageRequest> getImageRequestList(Integer projectId) {
-        return imageRepository.findImagesByProjectId(projectId)
-                .stream().map(ImageRequest::of).toList();
     }
 
     /**
