@@ -1,3 +1,4 @@
+import '@/index.css';
 import { Meta } from '@storybook/react';
 import WorkspaceLabelBar from '.';
 import { Label } from '@/types';
@@ -17,16 +18,22 @@ const labels: Label[] = [
     id: 1,
     name: 'Label 1',
     color: '#FFaa33',
+    type: 'rect',
+    coordinates: [],
   },
   {
     id: 2,
     name: 'Label 2',
     color: '#aaFF55',
+    type: 'rect',
+    coordinates: [],
   },
   {
     id: 3,
     name: 'Label 3',
     color: '#77aaFF',
+    type: 'rect',
+    coordinates: [],
   },
 ];
 

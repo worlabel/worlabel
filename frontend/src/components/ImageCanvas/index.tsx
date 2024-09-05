@@ -1,12 +1,13 @@
 import useCanvasStore from '@/stores/useCanvasStore';
 import Konva from 'konva';
 import { useEffect, useRef, useState } from 'react';
-import { Image, Layer, Stage } from 'react-konva';
+import { Image, Layer, Rect, Stage } from 'react-konva';
 import useImage from 'use-image';
 import { Label } from '@/types';
 import LabelRect from './LabelRect';
 import { Vector2d } from 'konva/lib/types';
 import LabelPolygon from './LabelPolygon';
+import CanvasControlBar from '../CanvasControlBar';
 
 const mockLabels: Label[] = Array.from({ length: 10 }, (_, i) => {
   const startX = Math.random() * 1200 + 300;
@@ -45,9 +46,57 @@ export default function ImageCanvas() {
   const labels = useCanvasStore((state) => state.labels) ?? [];
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [image, imageStatus] = useImage(imageUrl);
+  const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
+  const drawState = useCanvasStore((state) => state.drawState);
+  const addLabel = useCanvasStore((state) => state.addLabel);
+  const startDrawRect = () => {
+    const { x, y } = stageRef.current!.getRelativePointerPosition()!;
+    setRectPoints([
+      [x, y],
+      [x, y],
+    ]);
+  };
+  const updateDrawingRect = () => {
+    if (rectPoints.length === 0) return;
+
+    const { x, y } = stageRef.current!.getRelativePointerPosition()!;
+    setRectPoints([rectPoints[0], [x, y]]);
+  };
+  const endDrawRect = () => {
+    if (drawState !== 'rect' || rectPoints.length === 0) return;
+    if (rectPoints[0][0] === rectPoints[1][0] && rectPoints[0][1] === rectPoints[1][1]) {
+      setRectPoints([]);
+      return;
+    }
+    setRectPoints([]);
+    const color = Math.floor(Math.random() * 65535)
+      .toString(16)
+      .padStart(4, '0');
+    addLabel({
+      id: labels.length,
+      name: 'label',
+      type: 'rect',
+      color: `#${color}ff`,
+      coordinates: rectPoints,
+    });
+  };
   const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    const isLeftMouseClicked = e.evt.type === 'mousedown' && (e.evt as MouseEvent).button === 0;
+
+    if (drawState !== 'pointer' && isLeftMouseClicked) {
+      stageRef.current?.stopDrag();
+      if (drawState === 'rect') {
+        startDrawRect();
+      }
+      return;
+    }
     if (e.target === e.target.getStage() || e.target.getClassName() === 'Image') {
       setSelectedId(null);
+    }
+  };
+  const handleMouseMove = () => {
+    if (drawState === 'rect' && rectPoints.length) {
+      updateDrawingRect();
     }
   };
   const handleZoom = (e: Konva.KonvaEventObject<WheelEvent>) => {
@@ -98,45 +147,77 @@ export default function ImageCanvas() {
     useCanvasStore.setState({ labels: mockLabels });
   }, []);
 
+  useEffect(() => {
+    if (!stageRef.current) return;
+    stageRef.current.container().style.cursor = drawState === 'pointer' ? 'default' : 'crosshair';
+
+    if (drawState !== 'pointer') {
+      setSelectedId(null);
+    }
+  }, [drawState]);
+
   return imageStatus === 'loaded' ? (
-    <Stage
-      ref={stageRef}
-      width={stageWidth}
-      height={stageHeight}
-      className="overflow-hidden bg-gray-200"
-      draggable
-      onWheel={handleWheel}
-      onMouseDown={handleClick}
-      onTouchStart={handleClick}
-      scale={getScale()}
-    >
-      <Layer>
-        <Image image={image} />
-      </Layer>
-      <Layer>
-        {labels.map((label) =>
-          label.type === 'rect' ? (
-            <LabelRect
-              key={label.id}
-              isSelected={label.id === selectedId}
-              onSelect={() => setSelectedId(label.id)}
-              info={label}
-              dragLayer={dragLayerRef.current as Konva.Layer}
+    <div>
+      <Stage
+        ref={stageRef}
+        width={stageWidth}
+        height={stageHeight}
+        className="overflow-hidden bg-gray-200"
+        draggable
+        onWheel={handleWheel}
+        onMouseDown={handleClick}
+        onTouchStart={handleClick}
+        onMouseMove={handleMouseMove}
+        onTouchMove={handleMouseMove}
+        onMouseUp={endDrawRect}
+        onTouchEnd={endDrawRect}
+        scale={getScale()}
+      >
+        <Layer>
+          <Image image={image} />
+        </Layer>
+        <Layer listening={drawState === 'pointer'}>
+          {labels.map((label) =>
+            label.type === 'rect' ? (
+              <LabelRect
+                key={label.id}
+                isSelected={label.id === selectedId}
+                onSelect={() => setSelectedId(label.id)}
+                info={label}
+                dragLayer={dragLayerRef.current as Konva.Layer}
+              />
+            ) : (
+              <LabelPolygon
+                key={label.id}
+                isSelected={label.id === selectedId}
+                onSelect={() => setSelectedId(label.id)}
+                info={label}
+                stage={stageRef.current as Konva.Stage}
+                dragLayer={dragLayerRef.current as Konva.Layer}
+              />
+            )
+          )}
+          {rectPoints.length ? (
+            <Rect
+              x={rectPoints[0][0]}
+              y={rectPoints[0][1]}
+              width={rectPoints[1][0] - rectPoints[0][0]}
+              height={rectPoints[1][1] - rectPoints[0][1]}
+              stroke={'#ff0000'}
+              strokeWidth={1}
+              strokeScaleEnabled={false}
+              fillAfterStrokeEnabled={false}
+              fill="#ff000033"
+              shadowForStrokeEnabled={false}
+              listening={false}
             />
-          ) : (
-            <LabelPolygon
-              key={label.id}
-              isSelected={label.id === selectedId}
-              onSelect={() => setSelectedId(label.id)}
-              info={label}
-              stage={stageRef.current as Konva.Stage}
-              dragLayer={dragLayerRef.current as Konva.Layer}
-            />
-          )
-        )}
-      </Layer>
-      <Layer ref={dragLayerRef} />
-    </Stage>
+          ) : null}
+        </Layer>
+
+        <Layer ref={dragLayerRef} />
+      </Stage>
+      <CanvasControlBar />
+    </div>
   ) : (
     <div></div>
   );

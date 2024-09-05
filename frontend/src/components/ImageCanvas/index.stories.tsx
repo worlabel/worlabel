@@ -1,3 +1,4 @@
+import '@/index.css';
 import { Meta } from '@storybook/react';
 import ImageCanvas from '.';
 
