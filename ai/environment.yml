@@ -1,0 +1,15 @@
+name: worlabel_ai_env
+channels:
+  - conda-forge
+  - nvidia
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.10.10
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - fastapi
+  - uvicorn
+  - ultralytics
