@@ -5,7 +5,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { DialogClose } from '../ui/dialogCustom';
 
 type Role = 'admin' | 'editor' | 'viewer';
 
@@ -127,15 +126,13 @@ export default function MemberManageForm({ members, onSubmit }: MemberManageForm
             );
           })}
         </div>
-        <DialogClose asChild>
-          <Button
-            type="submit"
-            variant="outlinePrimary"
-            disabled={!form.formState.isValid}
-          >
-            역할 설정
-          </Button>
-        </DialogClose>
+        <Button
+          type="submit"
+          variant="outlinePrimary"
+          disabled={!form.formState.isValid}
+        >
+          역할 설정
+        </Button>
       </form>
     </Form>
   );
