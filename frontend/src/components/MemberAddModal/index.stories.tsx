@@ -1,3 +1,4 @@
+import '@/index.css';
 import MemberAddModal from '.';
 
 export default {

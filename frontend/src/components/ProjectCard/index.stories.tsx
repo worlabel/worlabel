@@ -1,3 +1,4 @@
+import '@/index.css';
 import { Meta, StoryObj } from '@storybook/react';
 import ProjectCard from '.';
 
