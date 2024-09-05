@@ -6,10 +6,13 @@ channels:
   - defaults
 dependencies:
   - python=3.10.10
-  - pytorch
-  - torchvision
-  - torchaudio
+  - pytorch=2.3.1
+  - torchvision=0.16.1
+  - torchaudio=2.3.1
   - pytorch-cuda=12.1
   - fastapi
   - uvicorn
   - ultralytics
+  - dill
+  - boto3
+  - python-dotenv
