@@ -61,9 +61,9 @@ def predict(request: PredictRequest):
                     for summary in result.summary()
                 ],
                 "split": "none",
-                "imageHeight": result.orig_shape[0],
-                "imageWidth": result.orig_shape[1],
-                "imageDepth": 1
+                "imageHeight": result.orig_img.shape[0],
+                "imageWidth": result.orig_img.shape[1],
+                "imageDepth": result.orig_img.shape[2]
             }
             response.append({
                 "image_id":image.image_id,
