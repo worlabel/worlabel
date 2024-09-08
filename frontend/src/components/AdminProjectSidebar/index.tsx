@@ -18,13 +18,13 @@ export default function AdminProjectSidebar({ workspaceName, projects }: AdminPr
         minSize={15}
         maxSize={35}
         defaultSize={20}
-        className="flex h-full flex-col bg-gray-100"
+        className="flex h-full flex-col border-r border-gray-200 bg-gray-100"
       >
-        <header className="body flex w-full items-center gap-2 p-2">
-          <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold text-gray-900">
+        <header className="flex w-full items-center justify-between gap-2 border-b border-gray-200 p-4">
+          <h1 className="heading w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold text-gray-900">
             {workspaceName}
           </h1>
-          <button>
+          <button className="p-2">
             <SquarePen size={16} />
           </button>
           <Button
@@ -40,7 +40,7 @@ export default function AdminProjectSidebar({ workspaceName, projects }: AdminPr
           {projects.map((project) => (
             <button
               key={project.id}
-              className="rounded-md px-3 py-2 text-left hover:bg-gray-200"
+              className="body cursor-pointer rounded-md px-3 py-2 text-left hover:bg-gray-200"
               onClick={() => navigate(`/project/${project.id}`)}
             >
               {project.name}

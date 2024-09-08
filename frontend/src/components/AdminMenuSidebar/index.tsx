@@ -11,21 +11,25 @@ export default function AdminMenuSidebar() {
   ];
 
   return (
-    <div className="flex h-full w-[280px] flex-col border-l border-gray-300 bg-gray-100 p-4">
-      <h2 className="mb-4 text-lg font-semibold text-gray-800">메뉴</h2>
-      <div className="flex flex-col gap-2">
-        {menuItems.map((item) => (
-          <button
-            key={item.label}
-            className={cn(
-              'cursor-pointer rounded-md px-3 py-2 text-left text-gray-700 hover:bg-gray-200',
-              'transition-colors focus:bg-gray-300 focus:outline-none'
-            )}
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </button>
-        ))}
+    <div className="flex h-full w-[280px] flex-col justify-between border-l border-gray-300 bg-gray-100">
+      <div className="flex flex-col gap-2.5">
+        <header className="subheading flex w-full items-center gap-2 px-5 py-2.5">
+          <h2 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">메뉴</h2>
+        </header>
+        <div className="flex flex-col gap-1 px-2.5">
+          {menuItems.map((item) => (
+            <button
+              key={item.label}
+              className={cn(
+                'body cursor-pointer rounded-md px-3 py-2 text-left text-gray-800 hover:bg-gray-200',
+                'transition-colors focus:bg-gray-300 focus:outline-none'
+              )}
+              onClick={() => navigate(item.path)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
