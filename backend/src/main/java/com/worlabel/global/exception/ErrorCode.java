@@ -16,7 +16,7 @@ public enum ErrorCode {
     INVALID_URL(HttpStatus.BAD_REQUEST, 1004, "제공하지 않는 주소입니다. 확인해주세요"),
     FAIL_TO_CREATE_FILE(HttpStatus.BAD_REQUEST, 1005, "파일 업로드에 실패하였습니다. 다시 한번 확인해주세요"),
     FAIL_TO_DELETE_FILE(HttpStatus.BAD_REQUEST, 1006, "파일 삭제에 실패하였습니다. 다시 한번 확인해주세요"),
-    INVALID_FILE_PATH(HttpStatus.BAD_REQUEST,1007 , "파일 경로가 잘못되었습니다. 다시 한번 확인해주세요"),
+    INVALID_FILE_PATH(HttpStatus.BAD_REQUEST, 1007, "파일 경로가 잘못되었습니다. 다시 한번 확인해주세요"),
 
     // Auth & Member - 2000
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "해당 ID의 사용자를 찾을 수 없습니다."),
@@ -46,10 +46,13 @@ public enum ErrorCode {
     FOLDER_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 6001, "해당 폴더에 접근 권한이 없습니다."),
 
     // Image - 7000
-    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 7000,"해당 이미지를 찾을 수 없습니다."),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 7000, "해당 이미지를 찾을 수 없습니다."),
 
     // AI - 8000
     AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 8000, "AI 서버 오류 입니다."),
+
+    // Comment - 9000
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, 9000, "해당 댓글을 찾을 수 없습니다."),
 
     ;
     private final HttpStatus status;

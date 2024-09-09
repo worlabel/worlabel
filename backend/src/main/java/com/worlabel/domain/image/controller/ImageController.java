@@ -1,13 +1,8 @@
 package com.worlabel.domain.image.controller;
 
-import com.worlabel.domain.folder.entity.dto.FolderRequest;
-import com.worlabel.domain.folder.entity.dto.FolderResponse;
-import com.worlabel.domain.folder.service.FolderService;
 import com.worlabel.domain.image.entity.dto.ImageMoveRequest;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.service.ImageService;
-import com.worlabel.domain.project.service.ProjectService;
-import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
@@ -23,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
 
 @Slf4j
 @RestController
@@ -95,5 +89,3 @@ public class ImageController {
         return SuccessResponse.empty();
     }
 }
-
-
