@@ -18,6 +18,12 @@ public class CommentResponse {
     @Schema(description = "작성자 ID", example = "1")
     private Integer memberId;
 
+    @Schema(description = "작성자 닉네임", example = "javajoha")
+    private String memberNickname;
+
+    @Schema(description = "작성자 프로필", example = "profile.jpg")
+    private String memberProfileImage;
+
     @Schema(description = "y좌표", example = "3.16324")
     private double positionY;
 
@@ -27,12 +33,14 @@ public class CommentResponse {
     @Schema(description = "댓글 내용", example = "이 부분 더 자세하게 표현해주세요")
     private String content;
 
-    @Schema(description = "작성 일자", example = "2024.09.09 / 15:00")
+    @Schema(description = "작성 일자", example = "2024-09-09T14:47:45")
     private LocalDateTime createTime;
 
     public static CommentResponse from(final Comment comment) {
         return new CommentResponse(comment.getId(),
                 comment.getMember().getId(),
+                comment.getMember().getNickname(),
+                comment.getMember().getProfileImage(),
                 comment.getPositionY(),
                 comment.getPositionX(),
                 comment.getContent(),
