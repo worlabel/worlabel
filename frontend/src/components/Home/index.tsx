@@ -10,6 +10,7 @@ interface HomeProps {
 export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedWorkspace, setSelectedWorkspace] = useState('');
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn);
 
   const workspaces = [
     { id: 1, name: 'Workspace 1' },
@@ -19,6 +20,7 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
 
   const handleGoogleSignIn = () => {
     console.log('구글로 계속하기');
+    setLoggedIn(true); // 임시 코드
     if (setIsLoggedIn) {
       setIsLoggedIn(true);
     }
@@ -45,7 +47,7 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
         </p>
       </div>
 
-      {!isLoggedIn ? (
+      {!loggedIn ? (
         <button
           onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
