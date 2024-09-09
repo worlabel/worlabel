@@ -5,8 +5,8 @@ from PIL import Image
 from schemas.train_request import TrainDataInfo
 
 def get_dataset_root_path(project_id):
-    """프로젝트 ID를 기반으로 데이터셋 루트 경로 반환"""
-    return os.path.join('test-data', 'projects', str(project_id), 'train_model')
+    """데이터셋 루트 절대 경로 반환"""
+    return os.path.join(os.getcwd(), 'datasets', 'train')
 
 def make_dir(path:str, init: bool):
     """
@@ -19,8 +19,8 @@ def make_dir(path:str, init: bool):
 
 def make_yml(path:str):
     data = {
-        "train": "train",
-        "val": "val",
+        "train": f"{path}/train",
+        "val": f"{path}/val",
         "nc": 80,
         "names": 
         {
@@ -106,7 +106,7 @@ def make_yml(path:str):
             79: "toothbrush"
         }
     }
-    with open(path, 'w') as f:
+    with open(os.path.join(path, "dataset.yaml"), 'w') as f:
         yaml.dump(data, f)
 
 def process_directories(dataset_root_path:str):
@@ -114,7 +114,9 @@ def process_directories(dataset_root_path:str):
     make_dir(dataset_root_path, init=False)
     make_dir(os.path.join(dataset_root_path, "train"), init=True)
     make_dir(os.path.join(dataset_root_path, "val"), init=True)
-    make_yml(os.path.join(dataset_root_path, "dataset.yaml"))
+    if os.path.exists(os.path.join(dataset_root_path, "result")):
+        shutil.rmtree(os.path.join(dataset_root_path, "result"))
+    make_yml(dataset_root_path)
 
 def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_path:str):
     
@@ -138,8 +140,12 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
             x2 = shape.points[1][0]
             y2 = shape.points[1][1]
             train_label.append(str(shape.group_id)) # label Id
-            train_label.append(str((x1 + x2) / 2))  # 중심 x 좌표
-            train_label.append(str((y1 + y2) / 2))  # 중심 y 좌표
-            train_label.append(str(x2 - x1))        # 너비
-            train_label.append(str(y2 - y1))        # 높이
+            train_label.append(str((x1 + x2) / 2 / label.imageWidth))   # 중심 x 좌표
+            train_label.append(str((y1 + y2) / 2 / label.imageHeight))  # 중심 y 좌표
+            train_label.append(str((x2 - x1) / label.imageWidth))       # 너비
+            train_label.append(str((y2 - y1) / label.imageHeight ))     # 높이
             train_label_txt.write(" ".join(train_label)+"\n")
+
+def join_path(path, *paths):
+    """os.path.join()과 같은 기능, os import 하기 싫어서 만듦"""
+    return os.path.join(path, *paths)

@@ -6,7 +6,7 @@ from ultralytics.nn.tasks import DetectionModel, SegmentationModel
 import os
 import torch
 
-def load_detection_model(model_path: str = "test-data/model/yolov8n.pt", device:str ="auto"): 
+def load_detection_model(model_path: str = os.path.join("test-data","model","initial.pt"), device:str ="auto"): 
     """
     지정된 경로에서 YOLO 모델을 로드합니다.
 
