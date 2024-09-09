@@ -1,7 +1,9 @@
 import PageLayout from '@/components/PageLayout';
+import Home from '@/components/Home';
 import WorkspaceBrowseDetail from '@/components/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+
 import { createBrowserRouter } from 'react-router-dom';
 
 export const webPath = {
@@ -17,7 +19,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <div>home</div>,
+        element: <Home />,
       },
     ],
   },
