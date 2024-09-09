@@ -33,3 +33,8 @@ dist/
 
 # 테스트 파일
 test-data/
+
+# 리소스
+resources/
+datasets/
+*.pt

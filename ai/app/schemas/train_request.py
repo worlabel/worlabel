@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union
 from schemas.predict_response import LabelData
 
 class TrainDataInfo(BaseModel):
@@ -11,4 +11,6 @@ class TrainRequest(BaseModel):
     project_id: int
     data: List[TrainDataInfo]
     seed: Optional[int] = None # 랜덤 변수 시드
-    ratio: Optional[float] = 0.8 # 훈련/검증 분할 비율
+    ratio: float = 0.8 # 훈련/검증 분할 비율
+    epochs: int = 50 # 훈련 반복 횟수
+    batch: Union[float, int] = -1 # 훈련 batch 수[int] or GPU의 사용률 자동[float] default(-1): gpu의 60% 사용 유지

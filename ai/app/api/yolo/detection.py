@@ -4,9 +4,9 @@ from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
 from services.ai_service import load_detection_model
 from utils.dataset_utils import split_data
-from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label
+from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from typing import List
-from PIL import Image
+from fastapi.responses import FileResponse
 
 router = APIRouter()
 @router.post("/detection", response_model=List[PredictResponse])
@@ -97,3 +97,14 @@ def train(request: TrainRequest):
     # 검증 데이터 처리
     for data in val_data:
         process_image_and_label(data, dataset_root_path, "val")
+
+    model = load_detection_model("test-data/model/best.pt")
+
+    model.train(
+        data=join_path(dataset_root_path,"dataset.yaml"),
+        name=join_path(dataset_root_path,"result"), 
+        epochs= request.epochs, 
+        batch=request.batch, 
+        )
+    
+    return FileResponse(path=join_path(dataset_root_path, "result", "weights", "best.pt"), filename="best.pt", media_type="application/octet-stream")
