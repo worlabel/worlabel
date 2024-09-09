@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import Header from '../Header';
-import Footer from '../Footer';
 import { Workspace } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Plus } from 'lucide-react';
@@ -60,15 +59,19 @@ export default function WorkspaceBrowseLayout() {
                 </DialogContent>
               </Dialog>
             </div>
-            {workspaces.map((workspace) => (
-              <NavLink
-                to={`/browse/${workspace.id}`}
-                key={workspace.id}
-                className={({ isActive }) => (isActive ? 'body-strong' : 'body') + ' cursor-pointer'}
-              >
-                {workspace.name}
-              </NavLink>
-            ))}
+            {workspaces.length > 0 ? (
+              workspaces.map((workspace) => (
+                <NavLink
+                  to={`/browse/${workspace.id}`}
+                  key={workspace.id}
+                  className={({ isActive }) => (isActive ? 'body-strong' : 'body') + ' cursor-pointer'}
+                >
+                  {workspace.name}
+                </NavLink>
+              ))
+            ) : (
+              <p className="text-gray-500">워크스페이스가 없습니다.</p>
+            )}
           </div>
           <div className="flex w-[calc(100%-280px)] flex-col gap-24">
             <Suspense fallback={<div></div>}>
@@ -76,7 +79,6 @@ export default function WorkspaceBrowseLayout() {
                 <Outlet />
               </main>
             </Suspense>
-            <Footer className="mt-0" />
           </div>
         </div>
       </div>
