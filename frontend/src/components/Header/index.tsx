@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Bell, User } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -19,23 +19,34 @@ export default function Header({ className, ...props }: HeaderProps) {
       {...props}
     >
       <div className="flex items-center gap-4 md:gap-10">
-        <div
+        <Link
+          to="/"
           className={cn('text-[20px] font-normal tracking-[-1.60px] text-black sm:text-[24px] md:text-[32px]')}
           style={{ fontFamily: "'Offside-Regular', Helvetica" }}
         >
           WorLabel
-        </div>
+        </Link>
 
         {!isHomePage && (
           <nav className="hidden items-center gap-5 md:flex">
-            <div
+            <Link
+              to="/browse"
               className={cn('text-color-text-default-default', 'font-body-strong', 'text-sm sm:text-base md:text-lg')}
             >
               workspace
-            </div>
-            <div className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}>
+            </Link>
+            <Link
+              to="/workspace"
+              className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
+            >
               labeling
-            </div>
+            </Link>
+            <Link
+              to="/admin/1"
+              className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
+            >
+              admin
+            </Link>
           </nav>
         )}
       </div>
