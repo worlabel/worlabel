@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectGroup } from '../ui/select';
 import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 
@@ -8,9 +9,9 @@ interface HomeProps {
 }
 
 export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedWorkspace, setSelectedWorkspace] = useState('');
+  const [, setSelectedWorkspace] = useState('');
   const [loggedIn, setLoggedIn] = useState(isLoggedIn);
+  const navigate = useNavigate();
 
   const workspaces = [
     { id: 1, name: 'Workspace 1' },
@@ -20,10 +21,18 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
 
   const handleGoogleSignIn = () => {
     console.log('구글로 계속하기');
-    setLoggedIn(true); // 임시 코드
+    setLoggedIn(true);
     if (setIsLoggedIn) {
       setIsLoggedIn(true);
     }
+  };
+
+  const handleWorkspaceSelect = (value: string) => {
+    const selected = workspaces.find((workspace) => workspace.name === value);
+    if (selected) {
+      navigate(`/browse/${selected.id}`);
+    }
+    setSelectedWorkspace(value);
   };
 
   return (
@@ -59,7 +68,7 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
           />
         </button>
       ) : (
-        <Select onValueChange={(value) => setSelectedWorkspace(value)}>
+        <Select onValueChange={handleWorkspaceSelect}>
           <SelectTrigger className="mb-4 w-72">
             <SelectValue placeholder="워크스페이스를 선택하세요" />
           </SelectTrigger>
