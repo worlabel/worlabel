@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
+from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
 from services.ai_service import load_detection_model
+from utils.dataset_utils import split_data
+from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label
 from typing import List
+from PIL import Image
 
 router = APIRouter()
 @router.post("/detection", response_model=List[PredictResponse])
@@ -73,3 +77,23 @@ def predict(request: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail="label parsing exception: "+str(e))
     return response
+
+
+@router.post("/detection/train")
+def train(request: TrainRequest):
+    # 데이터셋 루트 경로 얻기
+    dataset_root_path = get_dataset_root_path(request.project_id)
+    
+    # 디렉토리 생성 및 초기화
+    process_directories(dataset_root_path)
+    
+    # 학습 데이터 분류
+    train_data, val_data = split_data(request.data, request.ratio, request.seed)
+    
+    # 학습 데이터 처리
+    for data in train_data:
+        process_image_and_label(data, dataset_root_path, "train")
+
+    # 검증 데이터 처리
+    for data in val_data:
+        process_image_and_label(data, dataset_root_path, "val")
