@@ -16,18 +16,24 @@ interface Project {
 
 export default function AdminMemberManage({
   title = '멤버 관리',
-  projects,
-  onProjectChange,
-  onSubmit,
-  members,
-  onMemberInvite,
+  projects = [
+    { id: 'project-1', name: '프로젝트 A' },
+    { id: 'project-2', name: '프로젝트 B' },
+  ],
+  onProjectChange = (projectId: string) => console.log('Selected Project:', projectId),
+  onSubmit = (data: MemberManageFormValues) => console.log('Submitted:', data),
+  members = [
+    { email: 'admin1@example.com', role: 'admin' },
+    { email: 'viewer2@example.com', role: 'viewer' },
+  ],
+  onMemberInvite = () => console.log('Invite member'),
 }: {
   title?: string;
-  projects: Project[];
-  onProjectChange: (projectId: string) => void;
-  onSubmit: (data: MemberManageFormValues) => void;
-  members: Member[];
-  onMemberInvite: () => void;
+  projects?: Project[];
+  onProjectChange?: (projectId: string) => void;
+  onSubmit?: (data: MemberManageFormValues) => void;
+  members?: Member[];
+  onMemberInvite?: () => void;
 }) {
   return (
     <div className="flex w-full flex-col gap-6 border-b-[0.67px] border-[#dcdcde] bg-[#fbfafd] p-6">
