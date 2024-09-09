@@ -1,7 +1,6 @@
 import '@/index.css';
 import { Meta, StoryObj } from '@storybook/react';
 import AdminLayout from './index';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { Workspace } from '@/types';
 
 const meta: Meta<typeof AdminLayout> = {
@@ -36,9 +35,5 @@ const workspace: Workspace = {
 };
 
 export const Default: Story = {
-  render: () => (
-    <Router>
-      <AdminLayout workspace={workspace} />
-    </Router>
-  ),
+  render: () => <AdminLayout workspace={workspace} />,
 };
