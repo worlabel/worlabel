@@ -1,13 +1,13 @@
 name: worlabel_ai_env
 channels:
   - conda-forge
-  - nvidia
   - pytorch
+  - nvidia
   - defaults
 dependencies:
   - python=3.10.10
   - pytorch=2.3.1
-  - torchvision=0.16.1
+  - torchvision=0.18.1
   - torchaudio=2.3.1
   - pytorch-cuda=12.1
   - fastapi
@@ -16,3 +16,4 @@ dependencies:
   - dill
   - boto3
   - python-dotenv
+  - locust
