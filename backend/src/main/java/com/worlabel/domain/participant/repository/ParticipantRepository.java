@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ParticipantRepository extends JpaRepository<Participant, Integer> {
 
@@ -23,7 +25,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Intege
             @Param("memberId") Integer memberId,
             @Param("projectId") Integer projectId);
 
-    Participant findByMemberIdAndProjectId(Integer memberId, Integer projectId);
+    Optional<Participant> findByMemberIdAndProjectId(Integer memberId, Integer projectId);
 }
 
 

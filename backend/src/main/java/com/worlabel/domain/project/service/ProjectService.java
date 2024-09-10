@@ -98,7 +98,8 @@ public class ProjectService {
         checkAdminParticipant(memberId, projectId);
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
-        Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId);
+        Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
         participant.updatePrivilege(participantRequest.getPrivilegeType());
     }
 
@@ -107,10 +108,11 @@ public class ProjectService {
         checkAdminParticipant(memberId, projectId);
         checkNotAdminParticipant(removeMemberId, projectId);
 
-        Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId);
+        Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
+
         participantRepository.delete(participant);
     }
-
 
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)

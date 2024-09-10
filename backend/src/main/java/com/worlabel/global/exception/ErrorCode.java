@@ -36,6 +36,7 @@ public enum ErrorCode {
 
     // Project - 4000
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, 4000, "프로젝트를 찾을 수 없습니다"),
+    PROJECT_IMAGE_MISMATCH(HttpStatus.BAD_REQUEST, 4001, "해당 프로젝트에는 존재하지 않는 이미지입니다."),
 
     // Participant - 5000,
     PARTICIPANT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 5000, "해당 프로젝트에 접근 권한이 없습니다."),
@@ -51,10 +52,9 @@ public enum ErrorCode {
     // AI - 8000
     AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 8000, "AI 서버 오류 입니다."),
 
-    // Comment - 9000
-    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, 9000, "해당 댓글을 찾을 수 없습니다."),
+    // Comment - 9000,
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, 9000, "해당 댓글을 찾을 수 없습니다.");
 
-    ;
     private final HttpStatus status;
     private final int code;
     private final String message;

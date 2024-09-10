@@ -2,6 +2,7 @@ package com.worlabel.domain.image.controller;
 
 import com.worlabel.domain.image.entity.dto.ImageMoveRequest;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
+import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.service.ImageService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -88,4 +89,23 @@ public class ImageController {
         imageService.deleteImage(projectId, folderId, imageId, memberId);
         return SuccessResponse.empty();
     }
+
+    @PutMapping("/{image_id}/status")
+    @SwaggerApiSuccess(description = "이미지 상태 변경.")
+    @Operation(summary = "이미지 상태 변경", description = "특정 이미지의 상태를 변경합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.FOLDER_NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND})
+    public BaseResponse<ImageResponse> changeImageStatus(
+            @CurrentUser final Integer memberId,
+            @PathVariable("folder_id") final Integer folderId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("image_id") final Long imageId,
+            @RequestBody final ImageStatusRequest imageStatusRequest
+            ) {
+        log.debug("project: {} , folder: {}, 수정하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId, memberId);
+        ImageResponse imageResponse = imageService.changeImageStatus(projectId, folderId, imageId, memberId, imageStatusRequest);
+        return SuccessResponse.of(imageResponse);
+    }
+
+
+
 }

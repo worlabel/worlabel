@@ -1,6 +1,7 @@
 package com.worlabel.domain.image.entity.dto;
 
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,15 +16,19 @@ public class ImageResponse {
 
     @Schema(description = "이미지 파일 제목", example = "image.jpg")
     private String imageTitle;
-    
+
     @Schema(description = "이미지 URL", example = "https://example.com/image.jpg")
     private String imageUrl;
+
+    @Schema(description = "이미지 상태", example = "PENDING")
+    private LabelStatus status;
 
     public static ImageResponse from(final Image image) {
         return new ImageResponse(
                 image.getId(),
                 image.getTitle(),
-                image.getImageUrl()
+                image.getImageUrl(),
+                image.getStatus()
         );
     }
 }

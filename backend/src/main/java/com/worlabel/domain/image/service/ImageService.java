@@ -4,7 +4,9 @@ import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
+import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
+import com.worlabel.domain.participant.entity.Participant;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.global.exception.CustomException;
@@ -33,6 +35,7 @@ public class ImageService {
      * 이미지 리스트 업로드
      */
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
+        // 권한이 편집자 이상인지 확인
         checkEditorParticipant(memberId, projectId);
         Folder folder = getFolder(folderId);
         for (int order = 0; order < imageList.size(); order++) {
@@ -48,8 +51,11 @@ public class ImageService {
      */
     @Transactional(readOnly = true)
     public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
+        // 참가에 존재하는지 확인
         checkExistParticipant(memberId, projectId);
-        Image image = getImage(folderId, imageId);
+
+        // 이미지가 해당 프로젝트에 속하는지 확인
+        Image image = getImageAndValidateProject(folderId, imageId, projectId);
         return ImageResponse.from(image);
     }
 
@@ -63,13 +69,15 @@ public class ImageService {
             final Long imageId,
             final Integer memberId
     ) {
+        // 권한이 편집자 이상인지 확인
         checkEditorParticipant(memberId, projectId);
         Folder folder = null;
         if (moveFolderId != null) {
             folder = getFolder(moveFolderId);
         }
 
-        Image image = getImage(folderId, imageId);
+        // 이미지가 해당 프로젝트에 속하는지 확인
+        Image image = getImageAndValidateProject(folderId, imageId, projectId);
         image.moveFolder(folder);
     }
 
@@ -77,31 +85,65 @@ public class ImageService {
      * 이미지 삭제
      */
     public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
+        // 권한이 편집자 이상인지 확인
         checkEditorParticipant(memberId, projectId);
-        Image image = getImage(folderId, imageId);
+
+        // 이미지가 해당 프로젝트에 속하는지 확인
+        Image image = getImageAndValidateProject(folderId, imageId, projectId);
+
         imageRepository.delete(image);
         s3UploadService.deleteImageFromS3(image.getImageUrl());
     }
 
+    /**
+     * 이미지 상태 변경
+     */
+    public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId, final ImageStatusRequest imageStatusRequest) {
+        // 참가에 존재하는지 확인
+        checkExistParticipant(memberId, projectId);
+
+        // 이미지가 해당 프로젝트에 속하는지 확인
+        Image image = getImageAndValidateProject(folderId, imageId, projectId);
+
+        // 이미지 상태 변경 로직 추가 (생략)
+        image.updateStatus(imageStatusRequest.getLabelStatus());
+
+        return ImageResponse.from(image);
+    }
+
+    // 참가에 존재하는지 확인
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {
         if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
             throw new CustomException(ErrorCode.BAD_REQUEST);
         }
     }
 
+    // 편집자 이상의 권한을 확인하는 메서드
     private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
-        if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)) {
+        Participant participant = participantRepository.findByMemberIdAndProjectId(memberId, projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
+
+        if (!participant.getPrivilege().isEditeAuth()) {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }
 
+    // 폴더 가져오기
     private Folder getFolder(final Integer folderId) {
         return folderRepository.findById(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
     }
 
-    private Image getImage(Integer folderId, Long imageId) {
-        return imageRepository.findByIdAndFolderId(imageId, folderId)
+    // 이미지 가져오면서 프로젝트 소속 여부를 확인
+    private Image getImageAndValidateProject(final Integer folderId, final Long imageId, final Integer projectId) {
+        Image image = imageRepository.findByIdAndFolderId(imageId, folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+
+        // 이미지가 해당 프로젝트에 속하는지 확인
+        if (!image.getFolder().getProject().getId().equals(projectId)) {
+            throw new CustomException(ErrorCode.PROJECT_IMAGE_MISMATCH);
+        }
+
+        return image;
     }
 }
