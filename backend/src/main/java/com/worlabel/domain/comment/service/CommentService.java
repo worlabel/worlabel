@@ -4,6 +4,8 @@ import com.worlabel.domain.comment.entity.Comment;
 import com.worlabel.domain.comment.entity.dto.CommentRequest;
 import com.worlabel.domain.comment.entity.dto.CommentResponse;
 import com.worlabel.domain.comment.repository.CommentRepository;
+import com.worlabel.domain.folder.entity.Folder;
+import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.member.entity.Member;
@@ -26,10 +28,11 @@ public class CommentService {
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
+    private final FolderRepository folderRepository;
 
     @Transactional(readOnly = true)
     public List<CommentResponse> getAllComments(final Integer memberId, final Integer projectId, final Long imageId) {
-        checkAuthorized(memberId, projectId);
+        checkAuthorizedAndImageProjectRelation(memberId, projectId, imageId);
 
         return commentRepository.findByImageId(imageId).stream()
                 .map(CommentResponse::from)
@@ -38,14 +41,14 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public CommentResponse getCommentById(final Integer memberId, final Integer projectId, final Integer commentId) {
-        checkAuthorized(memberId, projectId);
+        checkAuthorizedAndCommentProjectRelation(memberId, projectId, commentId);
         Comment comment = getComment(commentId);
 
         return CommentResponse.from(comment);
     }
 
     public CommentResponse createComment(final CommentRequest commentRequest, Integer memberId, final Integer projectId, final Long imageId) {
-        checkAuthorized(memberId, projectId);
+        checkAuthorizedAndImageProjectRelation(memberId, projectId, imageId);
         Member member = getMember(memberId);
         Image image = getImage(imageId);
 
@@ -67,6 +70,36 @@ public class CommentService {
         commentRepository.delete(comment);
     }
 
+    /**
+     * 프로젝트에 속한 멤버인지 검증하고, 이미지가 해당 프로젝트에 속하는지 검증
+     */
+    private void checkAuthorizedAndImageProjectRelation(final Integer memberId, final Integer projectId, final Long imageId) {
+        checkAuthorized(memberId, projectId);
+        Image image = getImage(imageId);
+        Folder folder = image.getFolder(); // 이미지가 속한 폴더를 가져옴
+
+        if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
+            throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 프로젝트에 속한 멤버인지 검증하고, 코멘트가 속한 이미지가 해당 프로젝트에 속하는지 검증
+     */
+    private void checkAuthorizedAndCommentProjectRelation(final Integer memberId, final Integer projectId, final Integer commentId) {
+        checkAuthorized(memberId, projectId);
+        Comment comment = getComment(commentId);
+        Image image = comment.getImage();
+        Folder folder = image.getFolder(); // 코멘트가 속한 이미지의 폴더를 가져옴
+
+        if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+        }
+    }
+
+    /**
+     * 멤버가 해당 프로젝트에 참여하고 있는지, 권한이 있는지 검증
+     */
     private void checkAuthorized(final Integer memberId, final Integer projectId) {
         if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);

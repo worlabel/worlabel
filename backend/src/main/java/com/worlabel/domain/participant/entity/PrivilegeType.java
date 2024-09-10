@@ -1,8 +1,23 @@
 package com.worlabel.domain.participant.entity;
 
-/**
- * 프로젝트 참여 권한
- */
+import lombok.Getter;
+
+@Getter
 public enum PrivilegeType {
-    ADMIN, MANAGER, EDITOR, VIEWER
+    ADMIN(4),
+    MANAGER(3),
+    EDITOR(2),
+    VIEWER(1);
+
+    private final int score;
+
+    // 점수를 부여하는 생성자
+    PrivilegeType(final int score) {
+        this.score = score;
+    }
+
+    // 편집자 이상의 권한이 있는지 확인하는 메서드
+    public boolean isEditeAuth() {
+        return this.score >= EDITOR.getScore();
+    }
 }

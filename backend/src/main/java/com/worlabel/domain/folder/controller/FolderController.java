@@ -47,6 +47,18 @@ public class FolderController {
         return SuccessResponse.of(folderResponse);
     }
 
+    @Operation(summary = "폴더 하위 리뷰해야할 목록만 조회", description = "폴더하위 리뷰해야할 목록을 조회합니다.")
+    @SwaggerApiSuccess(description = "폴더 하위 리뷰해야할 목록을 성공적으로 조회합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @GetMapping("/{folder_id}/review")
+    public BaseResponse<FolderResponse> getFolderByIdWithNeedReview(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("folder_id") final Integer folderId) {
+        FolderResponse folderResponse = folderService.getFolderByIdWithNeedReview(memberId, projectId, folderId);
+        return SuccessResponse.of(folderResponse);
+    }
+
     @Operation(summary = "폴더 수정", description = "폴더 정보를 수정합니다.")
     @SwaggerApiSuccess(description = "폴더를 성공적으로 수정합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})

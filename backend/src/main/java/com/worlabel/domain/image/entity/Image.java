@@ -47,9 +47,9 @@ public class Image extends BaseEntity {
     /**
      * 이미지 레이블링 상태
      */
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private LabelStatus status = LabelStatus.Pending;
+    @Enumerated(EnumType.STRING)
+    private LabelStatus status = LabelStatus.PENDING;
 
     /**
      * 속한 폴더
@@ -73,10 +73,14 @@ public class Image extends BaseEntity {
     }
 
     public static Image of(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {
-        return new Image(imageTitle,imageUrl, order, folder);
+        return new Image(imageTitle, imageUrl, order, folder);
     }
 
     public void moveFolder(final Folder moveFolder) {
         this.folder = moveFolder;
+    }
+
+    public void updateStatus(final LabelStatus labelStatus) {
+        this.status = labelStatus;
     }
 }

@@ -1,6 +1,7 @@
 package com.worlabel.domain.folder.entity.dto;
 
 import com.worlabel.domain.folder.entity.Folder;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,24 @@ public class FolderResponse {
 
     public static FolderResponse from(final Folder folder) {
         List<ImageResponse> images = folder.getImageList().stream()
+                .map(ImageResponse::from)
+                .toList();
+
+        List<FolderIdResponse> children = folder.getChildren().stream()
+                .map(FolderIdResponse::from)
+                .toList();
+
+        return new FolderResponse(
+                folder.getId(),
+                folder.getTitle(),
+                images,
+                children
+        );
+    }
+
+    public static FolderResponse fromWithNeedReview(final Folder folder) {
+        List<ImageResponse> images = folder.getImageList().stream()
+                .filter(image -> image.getStatus() == LabelStatus.NEED_REVIEW)
                 .map(ImageResponse::from)
                 .toList();
 
