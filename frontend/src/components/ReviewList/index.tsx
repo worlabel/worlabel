@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import ReviewRequestItem from './ReviewRequestItem';
+import ReviewItem from './ReviewItem';
 import ReviewSearchInput from './ReviewSearchInput';
 
-interface ReviewRequestProps {
+interface ReviewListProps {
   acceptedCount: number;
   rejectedCount: number;
   pendingCount: number;
@@ -14,9 +14,6 @@ interface ReviewRequestProps {
     project: string;
     type: 'Classification' | 'Detection' | 'Polygon' | 'Polyline';
     status: string;
-    commentsCount: number;
-    updatesCount: number;
-    lastUpdated: string;
   }[];
 }
 
@@ -27,13 +24,13 @@ const typeColors: Record<'Classification' | 'Detection' | 'Polygon' | 'Polyline'
   Polyline: '#c5f9d4',
 };
 
-export default function ReviewRequest({
+export default function ReviewList({
   acceptedCount,
   rejectedCount,
   pendingCount,
   totalCount,
   items,
-}: ReviewRequestProps): JSX.Element {
+}: ReviewListProps): JSX.Element {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
@@ -42,7 +39,8 @@ export default function ReviewRequest({
     .filter((item) => {
       if (activeTab === 'pending') return item.status.toLowerCase() === 'needs_review';
       if (activeTab === 'accepted') return item.status.toLowerCase() === 'completed';
-      if (activeTab === 'rejected') return ['in_progress', 'pending'].includes(item.status.toLowerCase());
+      if (activeTab === 'rejected')
+        return item.status.toLowerCase() === 'in_progress' || item.status.toLowerCase() === 'pending';
       if (activeTab === 'all') return true;
       return false;
     })
@@ -51,10 +49,6 @@ export default function ReviewRequest({
       switch (sortValue) {
         case 'oldest':
           return new Date(a.createdTime).getTime() - new Date(b.createdTime).getTime();
-        case 'comments':
-          return b.commentsCount - a.commentsCount;
-        case 'updates':
-          return b.updatesCount - a.updatesCount;
         default:
           return new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime();
       }
@@ -132,16 +126,13 @@ export default function ReviewRequest({
 
       <div className="relative w-full overflow-y-auto px-4">
         {filteredItems.map((item, index) => (
-          <ReviewRequestItem
+          <ReviewItem
             key={index}
             title={item.title}
             createdTime={item.createdTime}
             creatorName={item.creatorName}
             project={item.project}
             status={item.status}
-            commentsCount={item.commentsCount}
-            updatesCount={item.updatesCount}
-            lastUpdated={item.lastUpdated}
             type={{ text: item.type, color: typeColors[item.type] }}
           />
         ))}

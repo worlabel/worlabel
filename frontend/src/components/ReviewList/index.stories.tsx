@@ -1,15 +1,15 @@
 import '@/index.css';
 import type { Meta, StoryObj } from '@storybook/react';
-import ReviewRequest from '.';
+import ReviewList from '.';
 
-const meta: Meta<typeof ReviewRequest> = {
-  title: 'Components/ReviewRequest',
-  component: ReviewRequest,
+const meta: Meta<typeof ReviewList> = {
+  title: 'Components/ReviewList',
+  component: ReviewList,
 };
 
 export default meta;
 
-type Story = StoryObj<typeof ReviewRequest>;
+type Story = StoryObj<typeof ReviewList>;
 
 export const Default: Story = {
   args: {
@@ -25,9 +25,6 @@ export const Default: Story = {
         project: 'Project A',
         type: 'Classification',
         status: 'needs_review',
-        commentsCount: 4,
-        updatesCount: 1,
-        lastUpdated: '1 hour ago',
       },
       {
         title: '갤럭시 흠집 객체 탐지',
@@ -36,9 +33,6 @@ export const Default: Story = {
         project: 'Project B',
         type: 'Detection',
         status: 'completed',
-        commentsCount: 2,
-        updatesCount: 3,
-        lastUpdated: '30 minutes ago',
       },
       {
         title: '갤럭시 흠집 경계 폴리곤',
@@ -47,9 +41,6 @@ export const Default: Story = {
         project: 'Project C',
         type: 'Polygon',
         status: 'in_progress',
-        commentsCount: 3,
-        updatesCount: 2,
-        lastUpdated: '2 hours ago',
       },
       {
         title: '갤럭시 흠집 폴리라인',
@@ -58,9 +49,6 @@ export const Default: Story = {
         project: 'Project D',
         type: 'Polyline',
         status: 'completed',
-        commentsCount: 5,
-        updatesCount: 0,
-        lastUpdated: '20 minutes ago',
       },
       {
         title: '갤럭시 흠집 디텍션 허가 요청',
@@ -69,9 +57,6 @@ export const Default: Story = {
         project: 'Project E',
         type: 'Detection',
         status: 'pending',
-        commentsCount: 1,
-        updatesCount: 4,
-        lastUpdated: '3 hours ago',
       },
     ],
   },
