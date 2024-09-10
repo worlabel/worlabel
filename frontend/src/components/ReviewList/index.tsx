@@ -3,11 +3,11 @@ import ReviewItem from './ReviewItem';
 import ReviewSearchInput from './ReviewSearchInput';
 
 interface ReviewListProps {
-  acceptedCount: number;
-  rejectedCount: number;
-  pendingCount: number;
-  totalCount: number;
-  items: {
+  acceptedCount?: number;
+  rejectedCount?: number;
+  pendingCount?: number;
+  totalCount?: number;
+  items?: {
     title: string;
     createdTime: string;
     creatorName: string;
@@ -24,18 +24,53 @@ const typeColors: Record<'Classification' | 'Detection' | 'Polygon' | 'Polyline'
   Polyline: '#c5f9d4',
 };
 
+const defaultItems: ReviewListProps['items'] = [
+  {
+    title: '리뷰 항목 1',
+    createdTime: '2024-09-09T10:00:00Z',
+    creatorName: '사용자 1',
+    project: '프로젝트 A',
+    type: 'Classification',
+    status: 'needs_review',
+  },
+  {
+    title: '리뷰 항목 2',
+    createdTime: '2024-09-08T14:30:00Z',
+    creatorName: '사용자 2',
+    project: '프로젝트 B',
+    type: 'Detection',
+    status: 'completed',
+  },
+  {
+    title: '리뷰 항목 3',
+    createdTime: '2024-09-07T08:45:00Z',
+    creatorName: '사용자 3',
+    project: '프로젝트 C',
+    type: 'Polygon',
+    status: 'in_progress',
+  },
+  {
+    title: '리뷰 항목 4',
+    createdTime: '2024-09-06T10:20:00Z',
+    creatorName: '사용자 4',
+    project: '프로젝트 D',
+    type: 'Polyline',
+    status: 'pending',
+  },
+];
+
 export default function ReviewList({
-  acceptedCount,
-  rejectedCount,
-  pendingCount,
-  totalCount,
-  items,
+  acceptedCount = 1,
+  rejectedCount = 1,
+  pendingCount = 1,
+  totalCount = 3,
+  items = defaultItems,
 }: ReviewListProps): JSX.Element {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
-  const filteredItems = items
+  const filteredItems = (items ?? [])
     .filter((item) => {
       if (activeTab === 'pending') return item.status.toLowerCase() === 'needs_review';
       if (activeTab === 'accepted') return item.status.toLowerCase() === 'completed';

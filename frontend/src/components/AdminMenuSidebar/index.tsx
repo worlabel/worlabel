@@ -1,13 +1,13 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export default function AdminMenuSidebar() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
   const menuItems = [
-    { label: '작업', path: '/admin/tasks' },
-    { label: '리뷰', path: '/admin/reviews' },
-    { label: '멤버 관리', path: '/admin/members' },
+    { label: '리뷰', path: `/admin/${id}/review` },
+    { label: '멤버 관리', path: `/admin/${id}/members` },
   ];
 
   return (
