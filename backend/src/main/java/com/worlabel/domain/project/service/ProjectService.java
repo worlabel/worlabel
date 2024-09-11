@@ -114,6 +114,14 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
+    public void train(final Integer memberId,final Integer projectId) {
+        // 멤버 권한 체크 
+        
+        // 레디스 train 테이블에 존재하는지 확인
+
+        // AI서버와 웹 소켓 연결
+    }
+
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
@@ -152,5 +160,6 @@ public class ProjectService {
             throw new CustomException(ErrorCode.PARTICIPANT_BAD_REQUEST);
         }
     }
+
 }
 

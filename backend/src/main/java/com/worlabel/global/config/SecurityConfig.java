@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .formLogin((auth) -> auth.disable());
 
         // 세션 설정 비활성화
-        http.sessionManagement((session)->session
+        http.sessionManagement((session) -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         // CORS 설정
@@ -57,16 +57,16 @@ public class SecurityConfig {
 
         http
                 .exceptionHandling(configurer -> configurer
-                                .authenticationEntryPoint(authenticationEntryPoint)
-                                .accessDeniedHandler(authenticationDeniedHandler)
-                        );
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(authenticationDeniedHandler)
+                );
 
         // 경로별 인가 작업
         http
-                .authorizeHttpRequests(auth->auth
+                .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/auth/reissue").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/auth/reissue").permitAll()
+                                .anyRequest().authenticated()
 //                        .anyRequest().permitAll()
                 );
 
@@ -74,14 +74,11 @@ public class SecurityConfig {
         http
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization.baseUri("/api/login/oauth2/authorization"))
-                        .redirectionEndpoint(redirection  -> redirection.baseUri("/api/login/oauth2/code/*"))
+                        .redirectionEndpoint(redirection -> redirection.baseUri("/api/login/oauth2/code/*"))
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                 );
 
-
-
-    
 
         // JWT 필터 추가
         http
@@ -93,8 +90,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of(frontend));  // 프론트엔드 URL 사용
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        configuration.setAllowedOrigins(List.of(frontend, "http://localhost:5173"));  // 프론트엔드 URL 사용
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setMaxAge(3600L);
 
