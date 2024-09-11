@@ -54,7 +54,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         cookie.setMaxAge((int) (refreshExpiry / 1000));
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        // cookie.setSecure(true); // 배포 시 HTTPS에서 사용
+        cookie.setSecure(true); // 배포 시 HTTPS에서 사용
         return cookie;
     }
 
