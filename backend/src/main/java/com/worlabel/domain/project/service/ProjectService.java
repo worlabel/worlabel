@@ -8,6 +8,8 @@ import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
+import com.worlabel.domain.project.dto.RequestDto;
+import com.worlabel.domain.project.dto.RequestDto.TrainRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
@@ -16,14 +18,26 @@ import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
+import com.worlabel.global.service.AIWebSocketClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -36,7 +50,7 @@ public class ProjectService {
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
-
+    private final RestTemplate restTemplate;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -114,15 +128,29 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
-    public void train(final Integer memberId,final Integer projectId) {
+    @Async
+    public CompletableFuture<Void> train(final Integer memberId, final Integer projectId) {
         // 멤버 권한 체크 
-        
+
         // 레디스 train 테이블에 존재하는지 확인
 
-        // AI서버와 웹 소켓 연결
+        // FastAPI 서버로 학습 요청을 전송
+        String url = "http://localhost:8000/api/detection/train";
 
-        // 웹 소켓 연결 후 AI에서 받은 메시지를 다른 곳에 전달
+        TrainRequest trainRequest = new TrainRequest();
+        trainRequest.setProjectId(projectId);
+        trainRequest.setData(List.of());
 
+        // FastAPI 서버로 POST 요청 전송
+        try {
+            ResponseEntity<String> result = restTemplate.postForEntity(url, trainRequest, String.class);
+            log.debug("응답 결과 {} ",result);
+            System.out.println("FastAPI 서버에 학습 요청을 성공적으로 전송했습니다. Project ID: " + projectId);
+        } catch (Exception e) {
+            System.err.println("FastAPI 서버에 학습 요청을 전송하는 중 오류가 발생했습니다: " + e.getMessage());
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {

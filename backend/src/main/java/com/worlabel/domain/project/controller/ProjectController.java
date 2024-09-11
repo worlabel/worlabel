@@ -16,10 +16,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name = "프로젝트 관련 API")
 @RestController
 @RequestMapping("/api")
@@ -77,10 +79,12 @@ public class ProjectController {
     @Operation(summary = "프로젝트 모델 학습", description = "프로젝트 모델을 학습시킵니다..")
     @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 학습됩니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
-    @DeleteMapping("/projects/{project_id}/train")
+    @PostMapping("/projects/{project_id}/train")
     public BaseResponse<Void> trainModel(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId) {
+        log.debug("훈련 요청 ");
+
         projectService.train(memberId, projectId);
         return SuccessResponse.empty();
     }

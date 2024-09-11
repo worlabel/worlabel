@@ -26,6 +26,7 @@ public class LabelController {
 
     private final LabelService labelService;
 
+
     @Operation(summary = "프로젝트 단위 오토레이블링", description = "해당 프로젝트 이미지를 오토레이블링합니다.")
     @SwaggerApiSuccess(description = "해당 프로젝트가 오토 레이블링 됩니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
