@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
-import { fetchProfileApi } from '@/api/authApi';
+import { fetchProfileApi, reissueTokenApi } from '@/api/authApi';
 
 const DOMAIN = 'https://j11s002.p.ssafy.io';
 
@@ -42,6 +42,19 @@ export default function Home() {
     navigate('/browse');
   };
 
+  const handleReissueToken = async () => {
+    try {
+      const response = await reissueTokenApi();
+      console.log('토큰 재발급 성공:', response);
+      alert('토큰 재발급 성공! 새로운 액세스 토큰을 콘솔에서 확인하세요.');
+    } catch (error) {
+      console.error('토큰 재발급 실패:', error);
+      alert('토큰 재발급에 실패했습니다. 다시 시도해 주세요.');
+    }
+  };
+
+  const isHidden = true;
+
   return (
     <div className="flex h-full flex-col items-center justify-center bg-gray-50 p-8">
       <div className="mb-6 max-w-xl rounded-lg bg-white p-6 shadow-lg">
@@ -75,13 +88,24 @@ export default function Home() {
           />
         </button>
       ) : (
-        <Button
-          variant="outlinePrimary"
-          size="lg"
-          onClick={handleStart}
-        >
-          시작하기
-        </Button>
+        <>
+          <Button
+            variant="outlinePrimary"
+            size="lg"
+            onClick={handleStart}
+          >
+            시작하기
+          </Button>
+          <Button
+            variant="outlinePrimary"
+            size="lg"
+            onClick={handleReissueToken}
+            className="mt-4"
+            style={{ display: isHidden ? 'none' : 'block' }}
+          >
+            리프레시 토큰 재발급 테스트
+          </Button>
+        </>
       )}
     </div>
   );

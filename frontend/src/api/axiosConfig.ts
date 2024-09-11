@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import useAuthStore from '@/stores/useAuthStore';
 
 const baseURL = 'https://j11s002.p.ssafy.io';
@@ -8,56 +8,83 @@ const api = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
+let isTokenRefreshing = false;
+
+type FailedRequest = {
+  resolve: (value?: string | undefined) => void;
+  reject: (reason?: unknown) => void;
+};
+
+let failedQueue: FailedRequest[] = [];
+
+const processQueue = (error: Error | null, token: string | undefined = undefined): void => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('accessToken');
-  if (token) {
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && originalRequest._retry) {
-      console.error('토큰 재발급 중 401 오류가 발생했습니다. 로그아웃 처리합니다.');
-      alert('세션이 만료되었습니다. 다시 로그인해 주세요.');
-      useAuthStore.getState().clearAuth();
-      window.location.href = '/';
-      return Promise.reject(error);
-    }
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isTokenRefreshing) {
+        return new Promise<string | undefined>((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (token && originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return api(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isTokenRefreshing = true;
 
-      try {
-        const response = await api.post('/api/auth/reissue', null, {
-          withCredentials: true,
-        });
+      return api
+        .post('/api/auth/reissue', null, { withCredentials: true })
+        .then((response) => {
+          const newAccessToken = response.data?.data?.accessToken;
+          if (!newAccessToken) {
+            throw new Error('Invalid token reissue response');
+          }
 
-        if (!response.data?.data?.accessToken) {
-          alert('잘못된 토큰 재발급 응답입니다. 다시 로그인해 주세요.');
+          useAuthStore.getState().setLoggedIn(true, newAccessToken);
+          localStorage.setItem('accessToken', newAccessToken);
+          processQueue(null, newAccessToken);
+
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          }
+          return api(originalRequest);
+        })
+        .catch((reissueError: Error) => {
+          processQueue(reissueError, undefined);
+          console.error('토큰 재발급 실패:', reissueError);
           useAuthStore.getState().clearAuth();
           window.location.href = '/';
-          return Promise.reject(new Error('Invalid token reissue response'));
-        }
-
-        const newAccessToken = response.data.data.accessToken;
-
-        useAuthStore.getState().setLoggedIn(true, newAccessToken);
-        localStorage.setItem('accessToken', newAccessToken);
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return api(originalRequest);
-      } catch (reissueError) {
-        console.error('토큰 재발급 실패:', reissueError);
-        alert('토큰 재발급에 실패했습니다. 다시 로그인해 주세요.');
-        useAuthStore.getState().clearAuth();
-        window.location.href = '/';
-        return Promise.reject(reissueError);
-      }
+          return Promise.reject(reissueError);
+        })
+        .finally(() => {
+          isTokenRefreshing = false;
+        });
     }
 
     if (error.response?.status === 400) {
