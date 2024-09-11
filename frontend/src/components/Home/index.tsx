@@ -1,38 +1,45 @@
-import { useState } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectGroup } from '../ui/select';
 import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
+import useAuthStore from '@/stores/useAuthStore';
+import { Button } from '@/components/ui/button';
+import { fetchProfileApi } from '@/api/authApi';
 
-interface HomeProps {
-  isLoggedIn?: boolean;
-  setIsLoggedIn?: (loggedIn: boolean) => void;
-}
+const DOMAIN = 'https://j11s002.p.ssafy.io';
 
-export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
-  const [, setSelectedWorkspace] = useState('');
-  const [loggedIn, setLoggedIn] = useState(isLoggedIn);
+export default function Home() {
   const navigate = useNavigate();
+  const { isLoggedIn, setLoggedIn, profile, setProfile } = useAuthStore();
+  const hasFetchedProfile = useRef(false);
 
-  const workspaces = [
-    { id: 1, name: 'Workspace 1' },
-    { id: 2, name: 'Workspace 2' },
-    { id: 3, name: 'Workspace 3' },
-  ];
+  if (!isLoggedIn && !profile.id && !hasFetchedProfile.current) {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      setLoggedIn(true, accessToken);
+      fetchProfileApi()
+        .then((data) => {
+          if (data?.isSuccess && data.data) {
+            setProfile({
+              id: data.data.id,
+              nickname: data.data.nickname,
+              profileImage: data.data.profileImage,
+            });
+            hasFetchedProfile.current = true;
+          }
+        })
+        .catch((error) => {
+          alert('프로필을 가져오는 중 오류가 발생했습니다. 다시 시도해주세요.');
+          console.error('프로필 가져오기 실패:', error);
+        });
+    }
+  }
 
   const handleGoogleSignIn = () => {
-    console.log('구글로 계속하기');
-    setLoggedIn(true);
-    if (setIsLoggedIn) {
-      setIsLoggedIn(true);
-    }
+    window.location.href = `${DOMAIN}/api/login/oauth2/authorization/google`;
   };
 
-  const handleWorkspaceSelect = (value: string) => {
-    const selected = workspaces.find((workspace) => workspace.name === value);
-    if (selected) {
-      navigate(`/browse/${selected.id}`);
-    }
-    setSelectedWorkspace(value);
+  const handleStart = () => {
+    navigate('/browse');
   };
 
   return (
@@ -41,7 +48,7 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
         <h2 className="mb-4 text-2xl font-bold text-gray-900">서비스 설명</h2>
         <p className="mb-4 text-base text-gray-700">
           본 서비스는 인공 지능(AI) 모델의 학습을 지원하기 위해 웹 기반의 자동 라벨링 도구를 개발하는 것을 목표로
-          합니다. 이 도구는 이미지나 텍스트와 같은 비정형 데이터에 레이블을 자동으로 부여하는 기능을 제공합니다.
+          합니다.
         </p>
         <p className="mb-4 text-base text-gray-700">
           기존의 수동적인 방법으로는 대량의 학습 데이터를 처리하는데 시간과 비용이 많이 소모되었습니다. 그러나 본
@@ -56,7 +63,7 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
         </p>
       </div>
 
-      {!loggedIn ? (
+      {!isLoggedIn ? (
         <button
           onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
@@ -68,23 +75,13 @@ export default function Home({ isLoggedIn = false, setIsLoggedIn }: HomeProps) {
           />
         </button>
       ) : (
-        <Select onValueChange={handleWorkspaceSelect}>
-          <SelectTrigger className="mb-4 w-72">
-            <SelectValue placeholder="워크스페이스를 선택하세요" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {workspaces.map((workspace) => (
-                <SelectItem
-                  key={workspace.id}
-                  value={workspace.name}
-                >
-                  {workspace.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <Button
+          variant="outlinePrimary"
+          size="lg"
+          onClick={handleStart}
+        >
+          시작하기
+        </Button>
       )}
     </div>
   );
