@@ -7,7 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), svgr()],
-  base: './',
+  base: '/', // base 경로를 절대 경로로 수정
   test: {
     globals: true,
   },
