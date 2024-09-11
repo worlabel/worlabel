@@ -120,6 +120,9 @@ public class ProjectService {
         // 레디스 train 테이블에 존재하는지 확인
 
         // AI서버와 웹 소켓 연결
+
+        // 웹 소켓 연결 후 AI에서 받은 메시지를 다른 곳에 전달
+
     }
 
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
