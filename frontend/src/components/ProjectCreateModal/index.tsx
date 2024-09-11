@@ -1,25 +1,47 @@
+import * as React from 'react';
 import ProjectCreateForm, { ProjectCreateFormValues } from './ProjectCreateForm';
-import XIcon from '@/assets/icons/x.svg?react';
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export default function ProjectCreateModal({
-  onClose,
   onSubmit,
 }: {
-  onClose: () => void;
-  onSubmit: (data: ProjectCreateFormValues) => void;
+  onSubmit: (data: { title: string; labelType: 'Classification' | 'Detection' | 'Segmentation' }) => void;
 }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   return (
-    <div className="flex w-[610px] flex-col gap-10 rounded-3xl border px-10 py-5 shadow-lg">
-      <header className="flex gap-5">
-        <h1 className="small-title w-full">새 프로젝트</h1>
-        <button
-          className="flex h-8 w-8 items-center justify-center"
-          onClick={onClose}
+    <Dialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <DialogTrigger asChild>
+        <Button
+          variant="outlinePrimary"
+          className="mt-4 flex items-center gap-2"
+          onClick={handleOpen}
         >
-          <XIcon className="stroke-gray-900" />
-        </button>
-      </header>
-      <ProjectCreateForm onSubmit={onSubmit} />
-    </div>
+          <Plus size={16} />
+          <span>프로젝트 추가</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader title="새 프로젝트" />
+        <ProjectCreateForm
+          onSubmit={(data: ProjectCreateFormValues) => {
+            const formattedData = {
+              title: data.projectName,
+              labelType: data.labelType,
+            };
+            onSubmit(formattedData);
+            handleClose();
+          }}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

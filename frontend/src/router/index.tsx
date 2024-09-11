@@ -6,6 +6,7 @@ import WorkspaceLayout from '@/components/WorkspaceLayout';
 import AdminLayout from '@/components/AdminLayout';
 import ReviewList from '@/components/ReviewList';
 import AdminMemberManage from '@/components/AdminMemberManage';
+import OAuthCallback from '@/components/OAuthCallback';
 import { createBrowserRouter } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 
@@ -14,6 +15,7 @@ export const webPath = {
   browse: () => '/browse',
   workspace: () => '/workspace',
   admin: (id: string) => `/admin/${id}`,
+  oauthCallback: () => '/redirect/oauth2',
 };
 
 const router = createBrowserRouter([
@@ -68,6 +70,10 @@ const router = createBrowserRouter([
         element: <AdminMemberManage />,
       },
     ],
+  },
+  {
+    path: webPath.oauthCallback(),
+    element: <OAuthCallback />,
   },
 ]);
 
