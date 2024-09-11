@@ -8,9 +8,6 @@ export default {
 
 export const Default = () => (
   <WorkSpaceCreateModal
-    onClose={() => {
-      console.log('close');
-    }}
     onSubmit={(data) => {
       console.log(data);
     }}

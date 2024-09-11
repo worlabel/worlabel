@@ -1,25 +1,44 @@
+import * as React from 'react';
 import WorkSpaceCreateForm, { WorkSpaceCreateFormValues } from './WorkSpaceCreateForm';
-import XIcon from '@/assets/icons/x.svg?react';
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
+import { Plus } from 'lucide-react';
 
 export default function WorkSpaceCreateModal({
-  onClose,
   onSubmit,
 }: {
-  onClose: () => void;
-  onSubmit: (data: WorkSpaceCreateFormValues) => void;
+  onSubmit: (data: { title: string; content: string }) => void;
 }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   return (
-    <div className="flex w-[610px] flex-col gap-10 rounded-3xl border px-10 py-5 shadow-lg">
-      <header className="flex gap-5">
-        <h1 className="small-title w-full">새 워크스페이스</h1>
+    <Dialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <DialogTrigger asChild>
         <button
-          className="flex h-8 w-8 items-center justify-center"
-          onClick={onClose}
+          className="flex items-center justify-center p-2"
+          onClick={handleOpen}
         >
-          <XIcon className="stroke-gray-900" />
+          <Plus size={20} />
         </button>
-      </header>
-      <WorkSpaceCreateForm onSubmit={onSubmit} />
-    </div>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader title="새 워크스페이스" />
+        <WorkSpaceCreateForm
+          onSubmit={(data: WorkSpaceCreateFormValues) => {
+            const formattedData = {
+              title: data.workspaceName,
+              content: data.workspaceDescription || '',
+            };
+            onSubmit(formattedData);
+            handleClose();
+          }}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
