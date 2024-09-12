@@ -6,7 +6,7 @@ from ultralytics.nn.tasks import DetectionModel, SegmentationModel
 import os
 import torch
 
-def load_detection_model(model_path: str = os.path.join("test-data","model","initial.pt"), device:str ="auto"): 
+def load_detection_model(model_path: str = os.path.join("test-data","model","yolov8n.pt"), device:str ="auto"):
     """
     지정된 경로에서 YOLO 모델을 로드합니다.
 
@@ -18,7 +18,7 @@ def load_detection_model(model_path: str = os.path.join("test-data","model","ini
     Returns:
         YOLO: 로드된 YOLO 모델 인스턴스
     """
-    
+
     if not os.path.exists(model_path) and model_path != "test-data/model/yolov8n.pt":
         raise FileNotFoundError(f"Model file not found at path: {model_path}")
 
@@ -26,7 +26,7 @@ def load_detection_model(model_path: str = os.path.join("test-data","model","ini
     # Detection 모델인지 검증
     if not (isinstance(model, YOLO_Model) and isinstance(model.model, DetectionModel)):
         raise TypeError(f"Invalid model type: {type(model)} (contained model type: {type(model.model)}). Expected a DetectionModel.")
-    
+
     # gpu 이용
     if (device == "auto" and torch.cuda.is_available()):
         model.to("cuda")

@@ -1,6 +1,4 @@
-import asyncio
 import websockets
-import logging
 
 class WebSocketClient:
     def __init__(self, url: str):
@@ -33,3 +31,6 @@ class WebSocketClient:
                 print("WebSocket connection closed.")
         except Exception as e:
             print(f"Failed to close WebSocket connection: {str(e)}")
+
+    def is_connected(self):
+        return self.websocket is not None and self.websocket.open
