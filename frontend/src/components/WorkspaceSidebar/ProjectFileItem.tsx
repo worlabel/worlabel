@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { FileItem } from '@/types';
 import { Check, Image, Minus } from 'lucide-react';
+import useCanvasStore from '@/stores/useCanvasStore';
 
 export default function ProjectFileItem({
   className = '',
@@ -12,6 +13,19 @@ export default function ProjectFileItem({
   depth?: number;
 }) {
   const paddingLeft = depth * 12;
+  const changeImage = useCanvasStore((state) => state.changeImage);
+
+  const handleClick = () => {
+    changeImage(item.url, [
+      {
+        id: item.id,
+        name: item.name,
+        type: 'rect',
+        color: '#FF0000',
+        coordinates: [],
+      },
+    ]);
+  };
 
   return (
     <button
@@ -19,6 +33,7 @@ export default function ProjectFileItem({
       style={{
         paddingLeft,
       }}
+      onClick={handleClick}
     >
       <div className="flex items-center">
         <Image
