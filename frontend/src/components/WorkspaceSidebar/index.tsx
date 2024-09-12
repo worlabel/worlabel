@@ -3,8 +3,11 @@ import { ResizableHandle, ResizablePanel } from '../ui/resizable';
 import ProjectStructure from './ProjectStructure';
 import { Button } from '../ui/button';
 import { Project } from '@/types';
+import useCanvasStore from '@/stores/useCanvasStore';
 
 export default function WorkspaceSidebar({ workspaceName, projects }: { workspaceName: string; projects: Project[] }) {
+  const setSidebarSize = useCanvasStore((state) => state.setSidebarSize);
+
   return (
     <>
       <ResizablePanel
@@ -12,9 +15,7 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
         maxSize={35}
         defaultSize={20}
         className="flex h-full flex-col bg-gray-100"
-        onResize={(size) => {
-          console.log(size);
-        }}
+        onResize={(size) => setSidebarSize(size)}
       >
         <header className="body flex w-full items-center gap-2 p-2">
           <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>

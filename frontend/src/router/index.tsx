@@ -9,6 +9,7 @@ import AdminMemberManage from '@/components/AdminMemberManage';
 import OAuthCallback from '@/components/OAuthCallback';
 import { createBrowserRouter } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
+import ImageCanvas from '@/components/ImageCanvas';
 
 export const webPath = {
   home: () => '/',
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <div>workspace</div>,
+        element: <ImageCanvas />,
       },
     ],
   },

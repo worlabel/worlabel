@@ -4,8 +4,48 @@ import { Label, Project } from '@/types';
 import { ResizablePanelGroup, ResizablePanel } from '../ui/resizable';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import WorkspaceLabelBar from '../WorkspaceLabelBar';
+import { useEffect } from 'react';
+import useCanvasStore from '@/stores/useCanvasStore';
+
+const mockLabels: Label[] = [
+  {
+    id: 1,
+    name: 'Label 1',
+    color: '#FFaa33',
+    coordinates: [
+      [700, 100],
+      [1200, 800],
+    ],
+    type: 'rect',
+  },
+  {
+    id: 2,
+    name: 'Label 2',
+    color: '#aaFF55',
+    coordinates: [
+      [200, 200],
+      [400, 200],
+      [500, 500],
+      [400, 800],
+      [200, 800],
+      [100, 500],
+    ],
+    type: 'polygon',
+  },
+  {
+    id: 3,
+    name: 'Label 3',
+    color: '#77aaFF',
+    coordinates: [
+      [1000, 1000],
+      [1800, 1800],
+    ],
+    type: 'rect',
+  },
+];
 
 export default function WorkspaceLayout() {
+  const setLabels = useCanvasStore((state) => state.setLabels);
   const workspace: { name: string; projects: Project[] } = {
     name: 'Workspace-name-1',
     projects: [
@@ -60,29 +100,10 @@ export default function WorkspaceLayout() {
       },
     ],
   };
-  const labels: Label[] = [
-    {
-      id: 1,
-      name: 'Label 1',
-      color: '#FFaa33',
-      coordinates: [],
-      type: 'rect',
-    },
-    {
-      id: 2,
-      name: 'Label 2',
-      color: '#aaFF55',
-      coordinates: [],
-      type: 'rect',
-    },
-    {
-      id: 3,
-      name: 'Label 3',
-      color: '#77aaFF',
-      coordinates: [],
-      type: 'rect',
-    },
-  ];
+
+  useEffect(() => {
+    setLabels(mockLabels);
+  }, [setLabels]);
 
   return (
     <>
@@ -97,7 +118,7 @@ export default function WorkspaceLayout() {
             <main className="h-full grow">
               <Outlet />
             </main>
-            <WorkspaceLabelBar labels={labels} />
+            <WorkspaceLabelBar labels={mockLabels} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
