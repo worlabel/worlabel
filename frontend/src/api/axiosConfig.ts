@@ -30,7 +30,7 @@ const processQueue = (error: Error | null, token: string | undefined = undefined
 };
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken');
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -72,7 +72,7 @@ api.interceptors.response.use(
         }
 
         useAuthStore.getState().setLoggedIn(true, newAccessToken);
-        localStorage.setItem('accessToken', newAccessToken);
+        sessionStorage.setItem('accessToken', newAccessToken);
         processQueue(null, newAccessToken);
 
         if (originalRequest.headers) {
