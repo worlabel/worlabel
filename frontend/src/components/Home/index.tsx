@@ -4,6 +4,8 @@ import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { fetchProfileApi, reissueTokenApi } from '@/api/authApi';
+import { SuccessResponse, MemberResponseDTO, CustomError } from '@/types';
+import { AxiosError } from 'axios';
 
 const DOMAIN = 'https://j11s002.p.ssafy.io';
 
@@ -12,24 +14,20 @@ export default function Home() {
   const { isLoggedIn, setLoggedIn, profile, setProfile } = useAuthStore();
   const hasFetchedProfile = useRef(false);
 
-  if (!isLoggedIn && !profile.id && !hasFetchedProfile.current) {
-    const accessToken = localStorage.getItem('accessToken');
+  if (!isLoggedIn && !profile && !hasFetchedProfile.current) {
+    const accessToken = sessionStorage.getItem('accessToken');
     if (accessToken) {
       setLoggedIn(true, accessToken);
       fetchProfileApi()
-        .then((data) => {
+        .then((data: SuccessResponse<MemberResponseDTO>) => {
           if (data?.isSuccess && data.data) {
-            setProfile({
-              id: data.data.id,
-              nickname: data.data.nickname,
-              profileImage: data.data.profileImage,
-            });
+            setProfile(data.data);
             hasFetchedProfile.current = true;
           }
         })
-        .catch((error) => {
+        .catch((error: AxiosError<CustomError>) => {
           alert('프로필을 가져오는 중 오류가 발생했습니다. 다시 시도해주세요.');
-          console.error('프로필 가져오기 실패:', error);
+          console.error('프로필 가져오기 실패:', error?.response?.data?.message || '알 수 없는 오류');
         });
     }
   }

@@ -4,23 +4,31 @@ import { Smile } from 'lucide-react';
 import ProjectCreateModal from '../ProjectCreateModal';
 import { useGetAllProjects, useCreateProject } from '@/hooks/useProjectHooks';
 import useAuthStore from '@/stores/useAuthStore';
-import { Key } from 'react';
+import { ProjectResponseDTO } from '@/types';
 
 export default function WorkspaceBrowseDetail() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const numericWorkspaceId = Number(workspaceId);
   const { profile } = useAuthStore();
-  const memberId = profile.id ?? 0;
+  const memberId = profile?.id ?? 0;
 
-  const { data: projectsResponse, isLoading, isError, refetch } = useGetAllProjects(numericWorkspaceId || 0, memberId);
+  const {
+    data: projectsResponse,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetAllProjects(numericWorkspaceId, memberId, {
+    enabled: !isNaN(numericWorkspaceId),
+  });
+
   const createProject = useCreateProject();
 
-  const handleCreateProject = (data: { title: string; labelType: 'Classification' | 'Detection' | 'Segmentation' }) => {
+  const handleCreateProject = (data: { title: string; labelType: 'classification' | 'detection' | 'segmentation' }) => {
     createProject.mutate(
       {
         workspaceId: numericWorkspaceId,
         memberId,
-        data: { title: data.title, projectType: data.labelType.toLowerCase() },
+        data: { title: data.title, projectType: data.labelType },
       },
       {
         onSuccess: () => {
@@ -29,8 +37,6 @@ export default function WorkspaceBrowseDetail() {
         },
         onError: (error) => {
           console.error('프로젝트 생성 실패:', error);
-          console.log('Error details:', JSON.stringify(error, null, 2));
-
           const errorMessage = error?.response?.data?.message || error.message || '알 수 없는 오류';
           console.error('프로젝트 생성 실패:', errorMessage);
         },
@@ -38,9 +44,21 @@ export default function WorkspaceBrowseDetail() {
     );
   };
 
-  const projects = Array.isArray(projectsResponse?.data?.workspaceResponses)
-    ? projectsResponse.data.workspaceResponses
-    : [];
+  const projects: ProjectResponseDTO[] = projectsResponse?.data?.workspaceResponses ?? [];
+
+  if (isNaN(numericWorkspaceId)) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Smile
+            size={48}
+            className="mb-2 text-gray-300"
+          />
+          <div className="body text-gray-400">작업할 워크스페이스를 선택하세요</div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <p>Loading projects...</p>;
@@ -74,7 +92,7 @@ export default function WorkspaceBrowseDetail() {
       </div>
       {projects.length > 0 ? (
         <div className="flex flex-wrap gap-6">
-          {projects.map((project: { id: Key | null | undefined; title: string; projectType: string }) => (
+          {projects.map((project: ProjectResponseDTO) => (
             <ProjectCard
               key={project.id}
               title={project.title}
