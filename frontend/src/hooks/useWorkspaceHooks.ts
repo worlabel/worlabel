@@ -9,90 +9,42 @@ import {
   addWorkspaceMemberApi,
   removeWorkspaceMemberApi,
 } from '@/api/workspaceApi';
-
-interface WorkspaceResponse {
-  status: number;
-  code: number;
-  message: string;
-  data: {
-    id: number;
-    memberId: string;
-    title: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  errors: Array<{
-    field: string;
-    code: string;
-    message: string;
-    objectName: string;
-  }>;
-  isSuccess: boolean;
-}
-interface Workspace {
-  id: number;
-  memberId: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface GetAllWorkspacesResponse {
-  status: number;
-  code: number;
-  message: string;
-  data: {
-    workspaceResponses: Workspace[];
-  };
-  errors: Array<{
-    field: string;
-    code: string;
-    message: string;
-    objectName: string;
-  }>;
-  isSuccess: boolean;
-}
-
-interface ErrorResponse {
-  message: string;
-}
+import { BaseResponse, WorkspaceResponseDTO, WorkspaceListResponseDTO, CustomError } from '@/types';
 
 export const useGetWorkspace = (
   workspaceId: number,
   memberId: number
-): UseQueryResult<WorkspaceResponse, AxiosError<ErrorResponse>> => {
-  return useQuery<WorkspaceResponse, AxiosError<ErrorResponse>>({
+): UseQueryResult<BaseResponse<WorkspaceResponseDTO>, AxiosError<CustomError>> => {
+  return useQuery<BaseResponse<WorkspaceResponseDTO>, AxiosError<CustomError>>({
     queryKey: ['workspace', workspaceId],
     queryFn: () => getWorkspaceApi(workspaceId, memberId),
   });
 };
 
 export const useUpdateWorkspace = (): UseMutationResult<
-  WorkspaceResponse,
-  AxiosError<ErrorResponse>,
+  BaseResponse<WorkspaceResponseDTO>,
+  AxiosError<CustomError>,
   { workspaceId: number; memberId: number; data: { title: string; content: string } }
 > => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ workspaceId, memberId, data }) => updateWorkspaceApi(workspaceId, memberId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
     },
   });
 };
 
 export const useDeleteWorkspace = (): UseMutationResult<
-  WorkspaceResponse,
-  AxiosError<ErrorResponse>,
+  BaseResponse<null>,
+  AxiosError<CustomError>,
   { workspaceId: number; memberId: number }
 > => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ workspaceId, memberId }) => deleteWorkspaceApi(workspaceId, memberId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
     },
   });
 };
@@ -101,52 +53,52 @@ export const useGetAllWorkspaces = (
   memberId: number,
   lastWorkspaceId?: number,
   limit?: number
-): UseQueryResult<GetAllWorkspacesResponse, AxiosError<ErrorResponse>> => {
-  return useQuery<GetAllWorkspacesResponse, AxiosError<ErrorResponse>>({
+): UseQueryResult<BaseResponse<WorkspaceListResponseDTO>, AxiosError<CustomError>> => {
+  return useQuery<BaseResponse<WorkspaceListResponseDTO>, AxiosError<CustomError>>({
     queryKey: ['workspaces'],
     queryFn: () => getAllWorkspacesApi(memberId, lastWorkspaceId, limit),
   });
 };
 
 export const useCreateWorkspace = (): UseMutationResult<
-  WorkspaceResponse,
-  AxiosError<ErrorResponse>,
+  BaseResponse<WorkspaceResponseDTO>,
+  AxiosError<CustomError>,
   { memberId: number; data: { title: string; content: string } }
 > => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ memberId, data }) => createWorkspaceApi(memberId, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace'] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
     },
   });
 };
 
 export const useAddWorkspaceMember = (): UseMutationResult<
-  WorkspaceResponse,
-  AxiosError<ErrorResponse>,
+  BaseResponse<null>,
+  AxiosError<CustomError>,
   { workspaceId: number; memberId: number; newMemberId: number }
 > => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ workspaceId, memberId, newMemberId }) => addWorkspaceMemberApi(workspaceId, memberId, newMemberId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
     },
   });
 };
 
 export const useRemoveWorkspaceMember = (): UseMutationResult<
-  WorkspaceResponse,
-  AxiosError<ErrorResponse>,
+  BaseResponse<null>,
+  AxiosError<CustomError>,
   { workspaceId: number; memberId: number; targetMemberId: number }
 > => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ workspaceId, memberId, targetMemberId }) =>
       removeWorkspaceMemberApi(workspaceId, memberId, targetMemberId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspace'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
     },
   });
 };
