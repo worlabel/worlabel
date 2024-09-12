@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
-from services.ai_service import load_detection_model
+from app.services.load_model import load_detection_model
 from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from typing import List

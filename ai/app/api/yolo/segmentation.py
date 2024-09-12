@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.predict_response import PredictResponse, LabelData
-from services.ai_service import load_segmentation_model
+from app.services.load_model import load_segmentation_model
 from typing import List
 
 router = APIRouter()
