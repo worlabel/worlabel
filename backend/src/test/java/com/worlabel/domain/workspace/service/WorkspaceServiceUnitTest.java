@@ -2,6 +2,7 @@ package com.worlabel.domain.workspace.service;
 
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
+import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
@@ -38,6 +39,9 @@ class WorkspaceServiceUnitTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private WorkspaceParticipantRepository workspaceParticipantRepository;
 
     private Member member;
     private Workspace workspace;
@@ -79,7 +83,8 @@ class WorkspaceServiceUnitTest {
     void throws_exception_when_find_workspace_with_invalid_workspace_id() {
         //given
         Integer workspaceId = 1;
-        given(workspaceRepository.findByMemberIdAndId(anyInt(), eq(workspaceId))).willReturn(Optional.empty());
+        given(workspaceRepository.findById(eq(workspaceId))).willReturn(Optional.empty());
+        given(workspaceParticipantRepository.existsByMemberIdAndWorkspaceId(1, workspaceId)).willReturn(true);
 
         //when & then
         assertThatThrownBy(() -> workspaceService.getWorkspaceById(1, workspaceId))
@@ -123,7 +128,7 @@ class WorkspaceServiceUnitTest {
         //when & then
         assertThatThrownBy(() -> workspaceService.deleteWorkspace(1, workspaceId))
                 .isInstanceOf(CustomException.class)
-                .hasMessageContaining(ErrorCode.WORKSPACE_NOT_FOUND.getMessage());
+                .hasMessageContaining(ErrorCode.NOT_AUTHOR.getMessage());
     }
 
     @DisplayName("특정 워크스페이스 조회에 성공하면 정상적으로 반환된다.")
@@ -131,7 +136,8 @@ class WorkspaceServiceUnitTest {
     void success_when_find_workspace_by_id() {
         //given
         Integer workspaceId = 1;
-        given(workspaceRepository.findByMemberIdAndId(anyInt(), eq(workspaceId))).willReturn(Optional.of(workspace));
+        given(workspaceParticipantRepository.existsByMemberIdAndWorkspaceId(1, workspaceId)).willReturn(true);
+        given(workspaceRepository.findById(eq(workspaceId))).willReturn(Optional.of(workspace));
 
         //when
         WorkspaceResponse response = workspaceService.getWorkspaceById(1, workspaceId);
@@ -151,7 +157,7 @@ class WorkspaceServiceUnitTest {
         Workspace workspace1 = Workspace.of(member, "Title 1", "Content 1");
         Workspace workspace2 = Workspace.of(member, "Title 2", "Content 2");
 
-        given(workspaceRepository.findWorkspacesByMemberIdAndLastWorkspaceId(member.getId(), lastWorkspaceId, pageSize))
+        given(workspaceRepository.findWorkspacesByMemberIdWithPagination(member.getId(), lastWorkspaceId, pageSize))
                 .willReturn(List.of(workspace1, workspace2));
 
         //when
