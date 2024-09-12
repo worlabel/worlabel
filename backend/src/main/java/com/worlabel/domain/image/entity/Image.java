@@ -46,7 +46,7 @@ public class Image extends BaseEntity {
      */
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private LabelStatus status = LabelStatus.Pending;
+    private LabelStatus status = LabelStatus.PENDING;
 
     /**
      * 속한 폴더
@@ -59,7 +59,7 @@ public class Image extends BaseEntity {
     /**
      * 이미지에 연결된 레이블
      */
-    @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private Label label;
 
     private Image(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {

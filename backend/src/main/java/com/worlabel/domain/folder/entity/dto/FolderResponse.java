@@ -45,7 +45,7 @@ public class FolderResponse {
 
     public static FolderResponse fromWithNeedReview(final Folder folder) {
         List<ImageResponse> images = folder.getImageList().stream()
-                .filter(image -> image.getStatus() == LabelStatus.NEED_REVIEW)
+                .filter(image -> image.getStatus() == LabelStatus.REVIEW_REQUEST)
                 .map(ImageResponse::from)
                 .toList();
 

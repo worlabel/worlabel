@@ -40,8 +40,4 @@ public class Label extends BaseEntity {
         label.image = image;
         return label;
     }
-
-    public void changeUrl(String newUrl){
-
-    }
 }

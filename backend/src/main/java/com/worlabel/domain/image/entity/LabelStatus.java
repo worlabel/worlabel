@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LabelStatus {
-    Pending,
+    PENDING,
     IN_PROGRESS,
-    NEED_REVIEW,
+    SAVE,
+    REVIEW_REQUEST,
     COMPLETED;
 
     // 입력 값을 enum 값과 일치시키기 위해 대소문자 구분 없이 변환
