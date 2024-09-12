@@ -4,15 +4,28 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
-export default function ProjectCreateModal({
-  onSubmit,
-}: {
-  onSubmit: (data: { title: string; labelType: 'Classification' | 'Detection' | 'Segmentation' }) => void;
-}) {
+interface ProjectCreateModalProps {
+  onSubmit: (data: { title: string; labelType: 'classification' | 'detection' | 'segmentation' }) => void;
+}
+
+export default function ProjectCreateModal({ onSubmit }: ProjectCreateModalProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
+
+  const formatLabelType = (
+    labelType: 'Classification' | 'Detection' | 'Segmentation'
+  ): 'classification' | 'detection' | 'segmentation' => {
+    switch (labelType) {
+      case 'Classification':
+        return 'classification';
+      case 'Detection':
+        return 'detection';
+      case 'Segmentation':
+        return 'segmentation';
+    }
+  };
 
   return (
     <Dialog
@@ -35,7 +48,7 @@ export default function ProjectCreateModal({
           onSubmit={(data: ProjectCreateFormValues) => {
             const formattedData = {
               title: data.projectName,
-              labelType: data.labelType,
+              labelType: formatLabelType(data.labelType),
             };
             onSubmit(formattedData);
             handleClose();

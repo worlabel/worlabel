@@ -6,10 +6,11 @@ import useAuthStore from '@/stores/useAuthStore';
 import WorkSpaceCreateModal from '../WorkSpaceCreateModal';
 import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { WorkspaceRequestDTO, WorkspaceResponseDTO, CustomError } from '@/types';
 
 export default function WorkspaceBrowseLayout() {
   const { profile, isLoggedIn } = useAuthStore();
-  const memberId = profile.id;
+  const memberId = profile?.id ?? 0;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -26,7 +27,7 @@ export default function WorkspaceBrowseLayout() {
 
   const createWorkspace = useCreateWorkspace();
 
-  const handleCreateWorkspace = (data: { title: string; content: string }) => {
+  const handleCreateWorkspace = (data: WorkspaceRequestDTO) => {
     if (!memberId) return;
     createWorkspace.mutate(
       { memberId, data },
@@ -35,7 +36,7 @@ export default function WorkspaceBrowseLayout() {
           console.log('워크스페이스가 성공적으로 생성되었습니다.');
           queryClient.invalidateQueries({ queryKey: ['workspaces'] });
         },
-        onError: (error: AxiosError) => {
+        onError: (error: AxiosError<CustomError>) => {
           console.error('워크스페이스 생성 실패:', error.message);
         },
       }
@@ -61,7 +62,7 @@ export default function WorkspaceBrowseLayout() {
               <WorkSpaceCreateModal onSubmit={handleCreateWorkspace} />
             </div>
             {workspaces.length > 0 ? (
-              workspaces.map((workspace) => (
+              workspaces.map((workspace: WorkspaceResponseDTO) => (
                 <NavLink
                   to={`/browse/${workspace.id}`}
                   key={workspace.id}

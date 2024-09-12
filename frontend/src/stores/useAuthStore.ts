@@ -1,18 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface ProfileData {
-  id: number | null;
-  nickname: string;
-  profileImage: string;
-}
+import { MemberResponseDTO } from '@/types';
 
 interface AuthState {
   isLoggedIn: boolean;
   accessToken: string;
-  profile: ProfileData;
+  profile: MemberResponseDTO | null;
   setLoggedIn: (status: boolean, token: string) => void;
-  setProfile: (profile: ProfileData) => void;
+  setProfile: (profile: MemberResponseDTO) => void;
   clearAuth: () => void;
 }
 
@@ -21,15 +16,14 @@ const useAuthStore = create<AuthState>()(
     (set) => ({
       isLoggedIn: false,
       accessToken: '',
-      profile: { id: null, nickname: '', profileImage: '' },
+      profile: null,
       setLoggedIn: (status, token) => set({ isLoggedIn: status, accessToken: token }),
       setProfile: (profile) => set({ profile }),
-      clearAuth: () =>
-        set({ isLoggedIn: false, accessToken: '', profile: { id: null, nickname: '', profileImage: '' } }),
+      clearAuth: () => set({ isLoggedIn: false, accessToken: '', profile: null }),
     }),
     {
       name: 'auth-storage',
-      getStorage: () => localStorage,
+      getStorage: () => sessionStorage,
     }
   )
 );

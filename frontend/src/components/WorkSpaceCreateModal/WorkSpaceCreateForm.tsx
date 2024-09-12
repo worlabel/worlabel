@@ -19,7 +19,11 @@ const defaultValues: Partial<WorkSpaceCreateFormValues> = {
   workspaceDescription: '',
 };
 
-export default function WorkSpaceCreateForm({ onSubmit }: { onSubmit: (data: WorkSpaceCreateFormValues) => void }) {
+interface WorkSpaceCreateFormProps {
+  onSubmit: (data: WorkSpaceCreateFormValues) => void;
+}
+
+export default function WorkSpaceCreateForm({ onSubmit }: WorkSpaceCreateFormProps) {
   const form = useForm<WorkSpaceCreateFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,

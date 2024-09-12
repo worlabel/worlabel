@@ -13,7 +13,7 @@ export default function OAuthCallback() {
 
     if (accessToken) {
       setLoggedIn(true, accessToken);
-      localStorage.setItem('accessToken', accessToken);
+      sessionStorage.setItem('accessToken', accessToken);
 
       fetchProfileApi()
         .then((data) => {

@@ -1,34 +1,18 @@
 import api from '@/api/axiosConfig';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
+import { BaseResponse, WorkspaceRequestDTO, WorkspaceResponseDTO, WorkspaceListResponseDTO } from '@/types';
 
-interface Workspace {
-  id: number;
-  memberId: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
-interface GetAllWorkspacesResponse {
-  status: number;
-  code: number;
-  message: string;
-  data: {
-    workspaceResponses: Workspace[];
-  };
-  errors: Array<{
-    field: string;
-    code: string;
-    message: string;
-    objectName: string;
-  }>;
-  isSuccess: boolean;
-}
-export const getWorkspaceApi = async (workspaceId: number, memberId: number) => {
+export const getWorkspaceApi = async (
+  workspaceId: number,
+  memberId: number
+): Promise<BaseResponse<WorkspaceResponseDTO>> => {
   try {
-    const response = await api.get(`/api/workspaces/${workspaceId}`, {
-      params: { memberId },
-    });
+    const response: AxiosResponse<BaseResponse<WorkspaceResponseDTO>> = await api.get(
+      `/api/workspaces/${workspaceId}`,
+      {
+        params: { memberId },
+      }
+    );
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -43,12 +27,16 @@ export const getWorkspaceApi = async (workspaceId: number, memberId: number) => 
 export const updateWorkspaceApi = async (
   workspaceId: number,
   memberId: number,
-  data: { title: string; content: string }
-) => {
+  data: WorkspaceRequestDTO
+): Promise<BaseResponse<WorkspaceResponseDTO>> => {
   try {
-    const response = await api.put(`/api/workspaces/${workspaceId}`, data, {
-      params: { memberId },
-    });
+    const response: AxiosResponse<BaseResponse<WorkspaceResponseDTO>> = await api.put(
+      `/api/workspaces/${workspaceId}`,
+      data,
+      {
+        params: { memberId },
+      }
+    );
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -60,9 +48,9 @@ export const updateWorkspaceApi = async (
   }
 };
 
-export const deleteWorkspaceApi = async (workspaceId: number, memberId: number) => {
+export const deleteWorkspaceApi = async (workspaceId: number, memberId: number): Promise<BaseResponse<null>> => {
   try {
-    const response = await api.delete(`/api/workspaces/${workspaceId}`, {
+    const response: AxiosResponse<BaseResponse<null>> = await api.delete(`/api/workspaces/${workspaceId}`, {
       params: { memberId },
     });
     return response.data;
@@ -80,9 +68,9 @@ export const getAllWorkspacesApi = async (
   memberId: number,
   lastWorkspaceId?: number,
   limit?: number
-): Promise<GetAllWorkspacesResponse> => {
+): Promise<BaseResponse<WorkspaceListResponseDTO>> => {
   try {
-    const response = await api.get('/api/workspaces', {
+    const response: AxiosResponse<BaseResponse<WorkspaceListResponseDTO>> = await api.get('/api/workspaces', {
       params: { memberId, lastWorkspaceId, limit },
     });
     return response.data;
@@ -96,9 +84,12 @@ export const getAllWorkspacesApi = async (
   }
 };
 
-export const createWorkspaceApi = async (memberId: number, data: { title: string; content: string }) => {
+export const createWorkspaceApi = async (
+  memberId: number,
+  data: WorkspaceRequestDTO
+): Promise<BaseResponse<WorkspaceResponseDTO>> => {
   try {
-    const response = await api.post('/api/workspaces', data, {
+    const response: AxiosResponse<BaseResponse<WorkspaceResponseDTO>> = await api.post('/api/workspaces', data, {
       params: { memberId },
     });
     return response.data;
@@ -112,11 +103,19 @@ export const createWorkspaceApi = async (memberId: number, data: { title: string
   }
 };
 
-export const addWorkspaceMemberApi = async (workspaceId: number, memberId: number, newMemberId: number) => {
+export const addWorkspaceMemberApi = async (
+  workspaceId: number,
+  memberId: number,
+  newMemberId: number
+): Promise<BaseResponse<null>> => {
   try {
-    const response = await api.post(`/api/workspaces/${workspaceId}/members/${newMemberId}`, null, {
-      params: { memberId },
-    });
+    const response: AxiosResponse<BaseResponse<null>> = await api.post(
+      `/api/workspaces/${workspaceId}/members/${newMemberId}`,
+      null,
+      {
+        params: { memberId },
+      }
+    );
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {
@@ -128,11 +127,18 @@ export const addWorkspaceMemberApi = async (workspaceId: number, memberId: numbe
   }
 };
 
-export const removeWorkspaceMemberApi = async (workspaceId: number, memberId: number, targetMemberId: number) => {
+export const removeWorkspaceMemberApi = async (
+  workspaceId: number,
+  memberId: number,
+  targetMemberId: number
+): Promise<BaseResponse<null>> => {
   try {
-    const response = await api.delete(`/api/workspaces/${workspaceId}/members/${targetMemberId}`, {
-      params: { memberId },
-    });
+    const response: AxiosResponse<BaseResponse<null>> = await api.delete(
+      `/api/workspaces/${workspaceId}/members/${targetMemberId}`,
+      {
+        params: { memberId },
+      }
+    );
     return response.data;
   } catch (error) {
     if (error instanceof AxiosError) {

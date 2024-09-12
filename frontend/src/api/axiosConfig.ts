@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import useAuthStore from '@/stores/useAuthStore';
+import { BaseResponse, CustomError, SuccessResponse, RefreshTokenResponseDTO } from '@/types';
 
 const baseURL = 'https://j11s002.p.ssafy.io';
 
@@ -29,7 +30,7 @@ const processQueue = (error: Error | null, token: string | undefined = undefined
 };
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('accessToken');
+  const token = sessionStorage.getItem('accessToken');
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -38,7 +39,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
+  async (error: AxiosError<BaseResponse<CustomError>>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -58,45 +59,55 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isTokenRefreshing = true;
 
-      return api
-        .post('/api/auth/reissue', null, { withCredentials: true })
-        .then((response) => {
-          const newAccessToken = response.data?.data?.accessToken;
-          if (!newAccessToken) {
-            throw new Error('Invalid token reissue response');
-          }
+      try {
+        const response: AxiosResponse<SuccessResponse<RefreshTokenResponseDTO>> = await api.post(
+          '/api/auth/reissue',
+          null,
+          { withCredentials: true }
+        );
 
-          useAuthStore.getState().setLoggedIn(true, newAccessToken);
-          localStorage.setItem('accessToken', newAccessToken);
-          processQueue(null, newAccessToken);
+        const newAccessToken = response.data.data?.accessToken;
+        if (!newAccessToken) {
+          throw new Error('Invalid token reissue response');
+        }
 
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          }
-          return api(originalRequest);
-        })
-        .catch((reissueError: Error) => {
-          processQueue(reissueError, undefined);
-          console.error('토큰 재발급 실패:', reissueError);
-          useAuthStore.getState().clearAuth();
-          window.location.href = '/';
-          return Promise.reject(reissueError);
-        })
-        .finally(() => {
-          isTokenRefreshing = false;
-        });
+        useAuthStore.getState().setLoggedIn(true, newAccessToken);
+        sessionStorage.setItem('accessToken', newAccessToken);
+        processQueue(null, newAccessToken);
+
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        }
+        return api(originalRequest);
+      } catch (reissueError: unknown) {
+        processQueue(reissueError as Error, undefined);
+        console.error('토큰 재발급 실패:', reissueError);
+        useAuthStore.getState().clearAuth();
+        window.location.href = '/';
+        return Promise.reject(reissueError);
+      } finally {
+        isTokenRefreshing = false;
+      }
     }
 
-    if (error.response?.status === 400) {
-      alert('잘못된 요청입니다. 다시 시도해 주세요.');
-    } else if (error.response?.status === 403) {
-      alert('권한이 없습니다. 다시 로그인해 주세요.');
-      useAuthStore.getState().clearAuth();
-      window.location.href = '/';
-    }
+    handleCommonErrors(error);
 
     return Promise.reject(error);
   }
 );
+
+const handleCommonErrors = (error: AxiosError<BaseResponse<CustomError>>) => {
+  if (error.response?.status === 400) {
+    alert('잘못된 요청입니다. 다시 시도해 주세요.');
+  } else if (error.response?.status === 403) {
+    alert('권한이 없습니다. 다시 로그인해 주세요.');
+    useAuthStore.getState().clearAuth();
+    window.location.href = '/';
+  } else {
+    console.error('오류 발생:', error.response?.data?.message || '알 수 없는 오류');
+    useAuthStore.getState().clearAuth();
+    window.location.href = '/';
+  }
+};
 
 export default api;
