@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LabelStatus {
-    PENDING,
+    Pending,
     IN_PROGRESS,
     NEED_REVIEW,
     COMPLETED;

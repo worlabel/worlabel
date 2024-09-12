@@ -8,7 +8,6 @@ import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
-import com.worlabel.domain.project.dto.RequestDto;
 import com.worlabel.domain.project.dto.RequestDto.TrainRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
@@ -18,26 +17,16 @@ import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.service.AIWebSocketClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHttpHeaders;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -51,6 +40,12 @@ public class ProjectService {
     private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final RestTemplate restTemplate;
+
+    /**
+     * AI SERVER 주소
+     */
+    @Value("${ai.server}")
+    private String aiServer;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -128,14 +123,17 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
-    @Async
-    public CompletableFuture<Void> train(final Integer memberId, final Integer projectId) {
-        // 멤버 권한 체크 
+    public void train(final Integer memberId, final Integer projectId) {
+        // 멤버 권한 체크
+        checkEditorParticipant(memberId, projectId);
 
-        // 레디스 train 테이블에 존재하는지 확인
+        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다.
+        /*
+            없으면 redis 상태 테이블을 만든다. progressTable
+         */
 
         // FastAPI 서버로 학습 요청을 전송
-        String url = "http://localhost:8000/api/detection/train";
+        String url = aiServer + "/detection/train";
 
         TrainRequest trainRequest = new TrainRequest();
         trainRequest.setProjectId(projectId);
@@ -145,12 +143,11 @@ public class ProjectService {
         try {
             ResponseEntity<String> result = restTemplate.postForEntity(url, trainRequest, String.class);
             log.debug("응답 결과 {} ",result);
-            System.out.println("FastAPI 서버에 학습 요청을 성공적으로 전송했습니다. Project ID: " + projectId);
+            log.debug("FastAPI 서버에 학습 요청을 성공적으로 전송했습니다. Project ID: {}", projectId);
         } catch (Exception e) {
-            System.err.println("FastAPI 서버에 학습 요청을 전송하는 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("FastAPI 서버에 학습 요청을 전송하는 중 오류가 발생했습니다 {}",e.getMessage());
+            throw new CustomException(ErrorCode.AI_SERVER_ERROR);
         }
-
-        return CompletableFuture.completedFuture(null);
     }
 
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
@@ -166,6 +163,12 @@ public class ProjectService {
     private Project getProject(final Integer projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+    }
+
+    private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
+        if(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)){
+            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+        }
     }
 
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {

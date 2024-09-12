@@ -83,8 +83,6 @@ public class ProjectController {
     public BaseResponse<Void> trainModel(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId) {
-        log.debug("훈련 요청 ");
-
         projectService.train(memberId, projectId);
         return SuccessResponse.empty();
     }
