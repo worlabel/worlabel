@@ -1,4 +1,5 @@
 import PageLayout from '@/components/PageLayout';
+import ImageCanvas from '@/components/ImageCanvas';
 import Home from '@/components/Home';
 import WorkspaceBrowseDetail from '@/components/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
@@ -54,7 +55,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'project/:projectId',
-        element: <div>workspace project</div>,
+        element: <ImageCanvas />,
       },
     ],
   },
