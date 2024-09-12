@@ -10,7 +10,6 @@ export const fetchFolderApi = async (
   try {
     const response = await api.get(`/api/projects/${projectId}/folders/${folderId}`, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -32,7 +31,6 @@ export const updateFolderApi = async (
   try {
     const response = await api.put(`/api/projects/${projectId}/folders/${folderId}`, folderData, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -53,7 +51,6 @@ export const deleteFolderApi = async (
   try {
     const response = await api.delete(`/api/projects/${projectId}/folders/${folderId}`, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -74,7 +71,6 @@ export const createFolderApi = async (
   try {
     const response = await api.post(`/api/projects/${projectId}/folders`, folderData, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -95,7 +91,6 @@ export const fetchFolderReviewListApi = async (
   try {
     const response = await api.get(`/api/projects/${projectId}/folders/${folderId}/review`, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {

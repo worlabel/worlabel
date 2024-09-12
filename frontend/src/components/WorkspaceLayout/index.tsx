@@ -1,65 +1,114 @@
-import { Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, Outlet } from 'react-router-dom';
 import Header from '../Header';
-import { Label, Project } from '@/types';
+import { Label, Project, DirectoryItem, FileItem } from '@/types';
 import { ResizablePanelGroup, ResizablePanel } from '../ui/resizable';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import WorkspaceLabelBar from '../WorkspaceLabelBar';
+import { fetchFolderApi } from '@/api/folderApi';
+import { getWorkspaceApi } from '@/api/workspaceApi';
+import { getAllProjectsApi } from '@/api/projectApi';
+import useAuthStore from '@/stores/useAuthStore';
 
 export default function WorkspaceLayout() {
-  const workspace: { name: string; projects: Project[] } = {
-    name: 'Workspace-name-1',
-    projects: [
-      {
-        id: 1,
-        name: 'project-111',
-        type: 'Segmentation',
-        children: [
-          {
-            id: 12,
-            type: 'directory',
-            name: 'directory-1',
-            children: [
-              {
-                id: 123,
-                type: 'directory',
-                name: 'directory-2',
-                children: [
-                  { id: 1, url: '', type: 'image', name: 'image-1.jpg', status: 'done' },
-                  { id: 1, url: '', type: 'image', name: 'image-2.jpg', status: 'idle' },
-                ],
-              },
-              { id: 1, url: '', type: 'image', name: 'image-1.jpg', status: 'idle' },
-              { id: 1, url: '', type: 'image', name: 'image-2.jpg', status: 'done' },
-            ],
-          },
-          { id: 1, url: '', type: 'image', name: 'image-1.jpg', status: 'done' },
-        ],
-      },
-      {
-        id: 2,
-        name: 'very-extremely-long-long-project-name-222',
-        type: 'Classification',
-        children: [
-          {
-            id: 23,
-            type: 'directory',
-            name: 'this-is-my-very-very-long-directory-name-that-will-be-overflow',
-            children: [
-              { id: 1, url: '', type: 'image', name: 'image-1.jpg', status: 'done' },
-              { id: 1, url: '', type: 'image', name: 'image-2.jpg', status: 'done' },
-            ],
-          },
-          {
-            id: 1,
-            url: '',
+  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
+  const [workspace, setWorkspace] = useState<{ name: string; projects: Project[] }>({
+    name: '',
+    projects: [],
+  });
+  const profile = useAuthStore((state) => state.profile);
+  const memberId = profile?.id || 0;
+
+  useEffect(() => {
+    const fetchWorkspaceData = async (workspaceId: number, memberId: number) => {
+      try {
+        const workspaceResponse = await getWorkspaceApi(workspaceId, memberId);
+        if (workspaceResponse.isSuccess) {
+          const workspaceTitle = workspaceResponse.data.title;
+          setWorkspace((prev) => ({
+            ...prev,
+            name: workspaceTitle,
+          }));
+          fetchProjects(workspaceId, memberId);
+        }
+      } catch (error) {
+        console.error('워크스페이스 조회 실패:', error);
+      }
+    };
+
+    const fetchProjects = async (workspaceId: number, memberId: number) => {
+      try {
+        const projectResponse = await getAllProjectsApi(workspaceId, memberId);
+        if (projectResponse.isSuccess) {
+          const projects = await Promise.all(
+            projectResponse.data.workspaceResponses.map(async (project) => {
+              const children = await fetchFolderWithImages(project.id, memberId);
+              return {
+                id: project.id,
+                name: project.title,
+                type: capitalizeType(project.projectType),
+                children,
+              };
+            })
+          );
+          setWorkspace((prev) => ({
+            ...prev,
+            projects: projects as Project[],
+          }));
+        }
+      } catch (error) {
+        console.error('프로젝트 목록 조회 실패:', error);
+      }
+    };
+
+    const fetchFolderWithImages = async (projectId: number, memberId: number): Promise<DirectoryItem[]> => {
+      try {
+        const folderResponse = await fetchFolderApi(projectId, 0, memberId);
+        if (folderResponse.isSuccess) {
+          const files: FileItem[] = folderResponse.data.images.map((image) => ({
+            id: image.id,
+            name: image.imageTitle,
+            url: image.imageUrl,
             type: 'image',
-            name: 'wow-this-is-my-very-very-long-image-name-so-this-will-be-overflow-too.jpg',
-            status: 'idle',
-          },
-        ],
-      },
-    ],
-  };
+            status: image.status === 'COMPLETED' ? 'done' : 'idle',
+          }));
+
+          return [
+            {
+              id: folderResponse.data.id,
+              name: folderResponse.data.title,
+              type: 'directory',
+              children: files,
+            },
+          ];
+        }
+        return [];
+      } catch (error) {
+        console.error('폴더 및 이미지 조회 실패:', error);
+        return [];
+      }
+    };
+
+    const capitalizeType = (
+      type: 'classification' | 'detection' | 'segmentation'
+    ): 'Classification' | 'Detection' | 'Segmentation' => {
+      switch (type) {
+        case 'classification':
+          return 'Classification';
+        case 'detection':
+          return 'Detection';
+        case 'segmentation':
+          return 'Segmentation';
+        default:
+          throw new Error(`Unknown project type: ${type}`);
+      }
+    };
+
+    if (workspaceId && memberId) {
+      fetchWorkspaceData(Number(workspaceId), memberId);
+    }
+  }, [workspaceId, projectId, memberId]);
+
   const labels: Label[] = [
     {
       id: 1,

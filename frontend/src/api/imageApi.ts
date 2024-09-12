@@ -11,7 +11,6 @@ export const fetchImageApi = async (
   try {
     const response = await api.get(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -34,7 +33,6 @@ export const moveImageApi = async (
   try {
     const response = await api.put(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`, moveRequest, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -56,7 +54,6 @@ export const deleteImageApi = async (
   try {
     const response = await api.delete(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
       params: { memberId },
-      withCredentials: true,
     });
     return response.data;
   } catch (error) {
@@ -82,7 +79,6 @@ export const changeImageStatusApi = async (
       statusChangeRequest,
       {
         params: { memberId },
-        withCredentials: true,
       }
     );
     return response.data;
@@ -108,7 +104,6 @@ export const uploadImageListApi = async (
       { imageList },
       {
         params: { memberId },
-        withCredentials: true,
       }
     );
     return response.data;
