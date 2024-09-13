@@ -7,13 +7,10 @@ import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.BaseResponse;
-import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,10 +27,7 @@ public class LabelCategoryController {
     @SwaggerApiSuccess(description = "카테고리 성공적으로 생성합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping
-    public LabelCategoryResponse createFolder(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @RequestBody final LabelCategoryRequest categoryRequest) {
+    public LabelCategoryResponse createFolder(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId, @RequestBody final LabelCategoryRequest categoryRequest) {
         return categoryService.createCategory(memberId, projectId, categoryRequest);
     }
 
@@ -41,11 +35,7 @@ public class LabelCategoryController {
     @SwaggerApiSuccess(description = "카테고리 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/{category_id}")
-    public LabelCategoryResponse getCategoryById(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @PathVariable("category_id") final Integer categoryId
-    ) {
+    public LabelCategoryResponse getCategoryById(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId, @PathVariable("category_id") final Integer categoryId) {
         return categoryService.getCategoryById(memberId, projectId, categoryId);
     }
 
@@ -53,11 +43,7 @@ public class LabelCategoryController {
     @SwaggerApiSuccess(description = "카테고리 존재 여부를 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/exist")
-    public boolean existByCategoryName(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @Param("categoryName") final String categoryName
-    ) {
+    public boolean existByCategoryName(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId, @Param("categoryName") final String categoryName) {
         return categoryService.existByCategoryName(memberId, projectId, categoryName);
     }
 
@@ -65,25 +51,16 @@ public class LabelCategoryController {
     @SwaggerApiSuccess(description = "카테고리 리스트를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping
-    public List<LabelCategoryResponse> getCategoryList(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId
-    ) {
+    public List<LabelCategoryResponse> getCategoryList(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId) {
         return categoryService.getCategoryList(memberId, projectId);
     }
 
-    
 
     @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @SwaggerApiSuccess(description = "카테고리를 성공적으로 삭제합니다.")
     @DeleteMapping("/{category_id}")
-    public void deleteCategoryById(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @PathVariable("category_id") final Integer categoryId) {
+    public void deleteCategoryById(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId, @PathVariable("category_id") final Integer categoryId) {
         categoryService.deleteCategory(memberId, projectId, categoryId);
     }
-
-
 }
