@@ -1,12 +1,16 @@
 package com.worlabel.domain.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.worlabel.domain.labelcategory.entity.LabelCategory;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -42,6 +46,12 @@ public class Project extends BaseEntity {
     @Column(name = "project_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private ProjectType projectType;
+
+    /**
+     * 프로젝트에 속한 카테고리
+     */
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LabelCategory> category = new ArrayList<>();
 
     private Project(final String title, final Workspace workspace, final ProjectType projectType) {
         this.title = title;
