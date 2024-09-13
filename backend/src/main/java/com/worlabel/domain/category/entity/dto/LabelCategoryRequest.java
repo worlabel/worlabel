@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryRequest {
+public class LabelCategoryRequest {
 
     @Schema(description = "카테고리 이름", example = "Car")
     private String categoryName;
