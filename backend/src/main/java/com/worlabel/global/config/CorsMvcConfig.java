@@ -15,7 +15,7 @@ public class CorsMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .exposedHeaders("Set-Cookie")
-                .allowedOrigins(frontend)  // application.yml에서 가져온 값 사용
+                .allowedOrigins(frontend,"http://localhost:5173")  // application.yml에서 가져온 값 사용
                 .allowCredentials(true);
     }
 }

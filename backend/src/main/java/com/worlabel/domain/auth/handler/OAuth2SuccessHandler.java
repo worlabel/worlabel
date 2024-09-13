@@ -38,10 +38,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         JwtToken jwtToken = jwtTokenService.generateTokenByOAuth2User(customOAuth2User);
 
         // 쿼리 파라미터로 액세스 토큰 전달
-        String redirectUrl = UriComponentsBuilder.fromUriString(frontEnd + "/redirect/oauth2")
+//        String redirectUrl = UriComponentsBuilder.fromUriString(frontEnd + "/redirect/oauth2")
+        String redirectUrl = UriComponentsBuilder.fromUriString("https://j11s002.p.ssafy.io" + "/redirect/oauth2")
                 .queryParam("accessToken", jwtToken.getAccessToken())
                 .toUriString();
-
         // 쿠키에 리프레시 토큰 추가
         response.addCookie(createCookie(jwtToken.getRefreshToken()));
         authCacheRepository.save(customOAuth2User.getId(), jwtToken.getRefreshToken(), refreshExpiry);

@@ -102,8 +102,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
-/*
-eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5czAxMDcxODUxNjUxQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJhdXRob3JpdGllcyI6W3siYXV0aG9yaXR5IjoiVVNFUiJ9XSwiZXhwIjoxNzI0ODU1NzQ2fQ.tIo9e40nY1KjhBwYcw0BG18Q9qeTYAoXefezYM9YQiY
-
- */
