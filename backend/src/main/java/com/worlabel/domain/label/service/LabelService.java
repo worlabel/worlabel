@@ -2,11 +2,13 @@ package com.worlabel.domain.label.service;
 
 import com.google.gson.*;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.label.entity.Label;
 import com.worlabel.domain.label.entity.dto.AutoLabelingRequest;
 import com.worlabel.domain.label.entity.dto.AutoLabelingResponse;
-import com.worlabel.domain.label.entity.dto.ImageRequest;
+import com.worlabel.domain.label.entity.dto.AutoLabelingImageRequest;
+import com.worlabel.domain.label.entity.dto.LabelRequest;
 import com.worlabel.domain.label.repository.LabelRepository;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.project.entity.ProjectType;
@@ -17,7 +19,6 @@ import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -50,27 +51,47 @@ public class LabelService {
     @Value("${ai.server}")
     private String aiServer;
 
-    public void autoLabeling(final Integer projectId, final Integer memberId) {
+    public void autoLabeling(final int projectId, final int memberId) {
         checkEditorExistParticipant(memberId, projectId);
 
         ProjectType projectType = getType(projectId);
         log.debug("{}번 프로젝트 이미지 {} 진행 ", projectId, projectType);
 
         List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
-        List<ImageRequest> imageRequestList = imageList.stream().map(ImageRequest::of).toList();
+        List<AutoLabelingImageRequest> imageRequestList = imageList.stream().map(AutoLabelingImageRequest::of).toList();
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
         sendRequestToApi(autoLabelingRequest, projectType.getValue(), projectId);
     }
 
-    public void saveLabel(final AutoLabelingResponse autoLabelingResponse) {
-        String uploadUrl = s3UploadService.uploadJson(autoLabelingResponse.getData(), autoLabelingResponse.getImageUrl());
-        Image image = imageRepository.findById(autoLabelingResponse.getImageId())
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+    public void saveAutoLabel(final AutoLabelingResponse autoLabelingResponse) {
+        save(autoLabelingResponse.getImageId(), autoLabelingResponse.getData(), LabelStatus.IN_PROGRESS);
+    }
 
-        if (!labelRepository.existsByImageId(autoLabelingResponse.getImageId())) {
-            Label label = Label.of(uploadUrl, image);
+    public void saveUserLabel(final int memberId, final int projectId, final long imageId, final LabelRequest labelRequest){
+        checkEditorExistParticipant(memberId, projectId);
+        save(imageId, labelRequest.getData(), labelRequest.getStatus());
+    }
+
+
+    private void save(final long imageId, final String data, final LabelStatus status) {
+        Image image = getImage(imageId);
+        String dataPath = s3UploadService.uploadJson(data, image.getImageUrl());
+
+        // PENDING 상태면 Label 존재 X
+        if(image.getStatus() == LabelStatus.PENDING){
+            Label label = Label.of(dataPath, image);
             labelRepository.save(label);
+
         }
+        if(image.getStatus() != status){
+            image.updateStatus(status);
+            imageRepository.save(image);
+        }
+    }
+
+    private Image getImage(long imageId) {
+        return imageRepository.findById(imageId)
+                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     private void sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
@@ -151,12 +172,9 @@ public class LabelService {
      * 참여자(EDITOR, ADMIN) 검증 메서드
      */
     private void checkEditorExistParticipant(final Integer memberId, final Integer projectId) {
+        log.debug("권한체크");
         if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId, projectId)) {
             throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
-    }
-
-    // TODO : 구현
-    public void save(final Integer imageId) {
     }
 }

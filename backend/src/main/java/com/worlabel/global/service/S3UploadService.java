@@ -47,7 +47,6 @@ public class S3UploadService {
     private String url;
 
     public String uploadJson(final String json, final String imageUrl) {
-//        String targetUrl = projectId + "/" + title + ".json"; // S3에 업로드할 대상 URL
         String targetUrl = removeExtension(getKeyFromImageAddress(imageUrl)) + ".json";
 
 //        log.debug("주소 {}", targetUrl);
