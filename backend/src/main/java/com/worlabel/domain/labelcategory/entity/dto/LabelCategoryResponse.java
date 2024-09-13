@@ -1,6 +1,6 @@
-package com.worlabel.domain.category.entity.dto;
+package com.worlabel.domain.labelcategory.entity.dto;
 
-import com.worlabel.domain.category.entity.LabelCategory;
+import com.worlabel.domain.labelcategory.entity.LabelCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

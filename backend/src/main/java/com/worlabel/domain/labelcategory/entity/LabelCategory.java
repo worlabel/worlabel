@@ -1,4 +1,4 @@
-package com.worlabel.domain.category.entity;
+package com.worlabel.domain.labelcategory.entity;
 
 
 import com.worlabel.domain.project.entity.Project;

@@ -1,7 +1,7 @@
 package com.worlabel.domain.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.worlabel.domain.category.entity.LabelCategory;
+import com.worlabel.domain.labelcategory.entity.LabelCategory;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
