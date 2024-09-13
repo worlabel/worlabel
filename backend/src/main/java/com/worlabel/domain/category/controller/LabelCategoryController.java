@@ -28,13 +28,24 @@ public class LabelCategoryController {
     @SwaggerApiSuccess(description = "카테고리 성공적으로 생성합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping
-    public BaseResponse<CategoryResponse> createFolder(
+    public CategoryResponse createFolder(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @RequestBody final CategoryRequest categoryRequest) {
-        CategoryResponse response = categoryService.createCategory(memberId, projectId, categoryRequest);
-        return SuccessResponse.of(response);
+        return categoryService.createCategory(memberId, projectId, categoryRequest);
     }
+
+//    @Operation(summary = "레이블 카테고리 단일 조회", description = "레이블 카테고리를 조회합니다..")
+//    @SwaggerApiSuccess(description = "카테고리 성공적으로 조회합니다.")
+//    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+//    @GetMapping("/{category_id}")
+//    public CategoryResponse getCategory(
+//            @CurrentUser final Integer memberId,
+//            @PathVariable("project_id") final Integer projectId,
+//            @RequestBody final CategoryRequest categoryRequest) {
+//        return categoryService.get(memberId, projectId, categoryRequest);
+//    }
+    
 
     @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제합니다.")
     @SwaggerApiSuccess(description = "카테고리를 성공적으로 삭제합니다.")
