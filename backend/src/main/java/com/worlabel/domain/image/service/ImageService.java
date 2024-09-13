@@ -7,7 +7,6 @@ import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.Participant;
-import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -121,10 +120,10 @@ public class ImageService {
     // 편집자 이상의 권한을 확인하는 메서드
     private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
         Participant participant = participantRepository.findByMemberIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
 
         if (!participant.getPrivilege().isEditeAuth()) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 

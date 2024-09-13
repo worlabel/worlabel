@@ -174,7 +174,7 @@ public class LabelService {
     private void checkEditorExistParticipant(final Integer memberId, final Integer projectId) {
         log.debug("권한체크");
         if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 }

@@ -44,7 +44,7 @@ public class ProjectController {
 
     @Operation(summary = "프로젝트 조회", description = "프로젝트를 조회합니다.")
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 조회합니다.")
-    @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @GetMapping("/projects/{project_id}")
     public BaseResponse<ProjectResponse> getProject(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId) {
         ProjectResponse project = projectService.getProjectById(memberId, projectId);
@@ -66,7 +66,7 @@ public class ProjectController {
 
     @Operation(summary = "프로젝트 수정", description = "프로젝트를 수정합니다.")
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 수정합니다.")
-    @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}")
     public BaseResponse<ProjectResponse> updateProject(
             @CurrentUser final Integer memberId,
@@ -89,7 +89,7 @@ public class ProjectController {
 
     @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제합니다.")
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 삭제합니다.")
-    @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @DeleteMapping("/projects/{project_id}")
     public BaseResponse<Void> deleteProject(@CurrentUser final Integer memberId,
                                             @PathVariable("project_id") final Integer projectId) {

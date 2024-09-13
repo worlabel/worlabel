@@ -108,7 +108,7 @@ public class ProjectService {
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
         participant.updatePrivilege(participantRequest.getPrivilegeType());
     }
 
@@ -118,7 +118,7 @@ public class ProjectService {
         checkNotAdminParticipant(removeMemberId, projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
 
         participantRepository.delete(participant);
     }
@@ -150,6 +150,11 @@ public class ProjectService {
         }
     }
 
+    public Project getProject(final Integer projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+    }
+
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
@@ -160,32 +165,27 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private Project getProject(final Integer projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
-    }
-
     private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
         if(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)){
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {
         if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 
     private void checkAdminParticipant(final Integer memberId, final Integer projectId) {
         if (!participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 
     private void checkNotAdminParticipant(final Integer memberId, final Integer projectId) {
         if (participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 

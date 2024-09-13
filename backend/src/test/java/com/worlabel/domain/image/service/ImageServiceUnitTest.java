@@ -85,7 +85,7 @@ class ImageServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> imageService.uploadImageList(List.of(mock(MultipartFile.class)), 1, 1, 1))
                 .isInstanceOf(CustomException.class)
-                .hasMessageContaining(ErrorCode.PARTICIPANT_UNAUTHORIZED.getMessage());
+                .hasMessageContaining(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED.getMessage());
     }
 
     @DisplayName("이미지 업로드 성공")
