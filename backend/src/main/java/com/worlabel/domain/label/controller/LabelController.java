@@ -30,24 +30,20 @@ public class LabelController {
     @SwaggerApiSuccess(description = "해당 프로젝트가 오토 레이블링 됩니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/auto")
-    public BaseResponse<Void> projectAutoLabeling(
+    public void projectAutoLabeling(
             @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId
-    ) {
+            @PathVariable("project_id") final Integer projectId) {
         labelService.autoLabeling(projectId, memberId);
-        return SuccessResponse.empty();
     }
 
     @Operation(summary = "이미지 단위 레이블링", description = "진행한 레이블링을 저장합니다.")
     @SwaggerApiSuccess(description = "해당 이미지에 대한 레이블링을 저장합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/image/{image_id}")
-    public BaseResponse<Void> imageLabeling(
+    public void imageLabeling(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
-            @PathVariable("image_id") final Integer imageId
-    ) {
+            @PathVariable("image_id") final Integer imageId) {
         labelService.save(imageId);
-        return SuccessResponse.empty();
     }
 }

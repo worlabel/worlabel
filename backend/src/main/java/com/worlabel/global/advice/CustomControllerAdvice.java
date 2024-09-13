@@ -67,14 +67,12 @@ public class CustomControllerAdvice {
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e, HttpServletRequest request) {
+    public ResponseEntity<Void> handleCustomException(CustomException e, HttpServletRequest request) {
         log.error("", e);
         sendNotification(e, request);
         return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e));
+                .body(null);
     }
-
-
 
     private void sendNotification(Exception e, HttpServletRequest request) {
         // TODO: 필요시 주석 처리
