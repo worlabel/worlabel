@@ -3,8 +3,6 @@ package com.worlabel.domain.category.controller;
 import com.worlabel.domain.category.entity.dto.CategoryRequest;
 import com.worlabel.domain.category.entity.dto.CategoryResponse;
 import com.worlabel.domain.category.service.CategoryService;
-import com.worlabel.domain.folder.entity.dto.FolderRequest;
-import com.worlabel.domain.folder.entity.dto.FolderResponse;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
@@ -35,21 +33,22 @@ public class LabelCategoryController {
         return categoryService.createCategory(memberId, projectId, categoryRequest);
     }
 
-//    @Operation(summary = "레이블 카테고리 단일 조회", description = "레이블 카테고리를 조회합니다..")
-//    @SwaggerApiSuccess(description = "카테고리 성공적으로 조회합니다.")
-//    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
-//    @GetMapping("/{category_id}")
-//    public CategoryResponse getCategory(
-//            @CurrentUser final Integer memberId,
-//            @PathVariable("project_id") final Integer projectId,
-//            @RequestBody final CategoryRequest categoryRequest) {
-//        return categoryService.get(memberId, projectId, categoryRequest);
-//    }
+    @Operation(summary = "레이블 카테고리 단일 조회", description = "레이블 카테고리를 조회합니다..")
+    @SwaggerApiSuccess(description = "카테고리 성공적으로 조회합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @GetMapping("/{category_id}")
+    public CategoryResponse getCategory(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("category_id") final Integer categoryId
+    ) {
+        return categoryService.getCategoryById(memberId, projectId, categoryId);
+    }
     
 
     @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제합니다.")
-    @SwaggerApiSuccess(description = "카테고리를 성공적으로 삭제합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @SwaggerApiSuccess(description = "카테고리를 성공적으로 삭제합니다.")
     @DeleteMapping("/{category_id}")
     public BaseResponse<Void> deleteFolder(
             @CurrentUser final Integer memberId,

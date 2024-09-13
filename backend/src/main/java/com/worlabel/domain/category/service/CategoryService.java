@@ -40,13 +40,18 @@ public class CategoryService {
         return CategoryResponse.from(labelCategory);
     }
 
-    public void deleteCategory(Integer memberId, Integer projectId, Integer categoryId) {
+    public void deleteCategory(final int memberId, final int  projectId, final int categoryId) {
         participantService.checkEditorUnauthorized(memberId, projectId);
         LabelCategory category = getCategory(categoryId);
         categoryRepository.delete(category);
     }
 
-    private LabelCategory getCategory(Integer categoryId) {
+    public CategoryResponse getCategoryById(final int memberId, final int projectId, final int categoryId){
+        participantService.checkViewerUnauthorized(memberId,projectId);
+        return CategoryResponse.from(getCategory(categoryId));
+    }
+
+    private LabelCategory getCategory(final Integer categoryId) {
         return categoryRepository.findById(categoryId).orElseThrow(() ->new CustomException(ErrorCode.PROJECT_CATEGORY_NOT_FOUND));
     }
 
