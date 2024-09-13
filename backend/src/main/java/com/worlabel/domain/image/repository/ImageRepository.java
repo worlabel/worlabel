@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
-    Optional<Image> findByIdAndFolderId(Long imageId, Integer folderId);
-
     @Query("select i from Image i " +
             "join fetch i.label l " +
             "where i.folder.project.id = :projectId")
     List<Image> findImagesByProjectId(@Param("projectId") Integer projectId);
+
+    Optional<Image> findByIdAndFolderIdAndFolderProjectId(Long imageId, Integer folderId, Integer projectId);
 }

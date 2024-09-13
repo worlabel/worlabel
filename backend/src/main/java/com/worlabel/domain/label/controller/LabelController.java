@@ -28,10 +28,7 @@ public class LabelController {
     @SwaggerApiSuccess(description = "해당 프로젝트가 오토 레이블링 됩니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/auto")
-    public void projectAutoLabeling(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId
-    ) {
+    public void projectAutoLabeling(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId) {
         labelService.autoLabeling(projectId, memberId);
     }
 
@@ -44,7 +41,6 @@ public class LabelController {
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId,
             @RequestBody final LabelRequest labelRequest
-
     ) {
         labelService.saveUserLabel(memberId, projectId, imageId, labelRequest);
     }

@@ -67,7 +67,7 @@ public class LabelService {
         save(autoLabelingResponse.getImageId(), autoLabelingResponse.getData(), LabelStatus.IN_PROGRESS);
     }
 
-    public void saveUserLabel(final int memberId, final int projectId, final long imageId, final LabelRequest labelRequest){
+    public void saveUserLabel(final int memberId, final int projectId, final long imageId, final LabelRequest labelRequest) {
         checkEditorExistParticipant(memberId, projectId);
         save(imageId, labelRequest.getData(), labelRequest.getStatus());
     }
@@ -78,20 +78,19 @@ public class LabelService {
         String dataPath = s3UploadService.uploadJson(data, image.getImageUrl());
 
         // PENDING 상태면 Label 존재 X
-        if(image.getStatus() == LabelStatus.PENDING){
+        if (image.getStatus() == LabelStatus.PENDING) {
             Label label = Label.of(dataPath, image);
             labelRepository.save(label);
-
         }
-        if(image.getStatus() != status){
+
+        if (image.getStatus() != status) {
             image.updateStatus(status);
             imageRepository.save(image);
         }
     }
 
     private Image getImage(long imageId) {
-        return imageRepository.findById(imageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+        return imageRepository.findById(imageId).orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     private void sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
@@ -106,16 +105,13 @@ public class LabelService {
         try {
             log.debug("요청 서버 : {}", url);
             // AI 서버로 POST 요청
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url, // 요청을 보낼 URL
+            ResponseEntity<String> response = restTemplate.exchange(url, // 요청을 보낼 URL
                     HttpMethod.POST, // HTTP 메서드 (POST)
                     request, // HTTP 요청 본문과 헤더가 포함된 객체
                     String.class // 응답을 String 타입으로
             );
 
-            String responseBody = Optional.ofNullable(response.getBody())
-                    .orElseThrow(() -> new CustomException(ErrorCode.AI_SERVER_ERROR));
-
+            String responseBody = Optional.ofNullable(response.getBody()).orElseThrow(() -> new CustomException(ErrorCode.AI_SERVER_ERROR));
 //            return parseAutoLabelingResponseList(responseBody);
         } catch (Exception e) {
             log.error("AI 서버 요청 중 오류 발생: ", e);
@@ -164,15 +160,13 @@ public class LabelService {
      * 프로젝트 타입 조회
      */
     private ProjectType getType(final Integer projectId) {
-        return projectRepository.findProjectTypeById(projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+        return projectRepository.findProjectTypeById(projectId).orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     /**
      * 참여자(EDITOR, ADMIN) 검증 메서드
      */
     private void checkEditorExistParticipant(final Integer memberId, final Integer projectId) {
-        log.debug("권한체크");
         if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId, projectId)) {
             throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
