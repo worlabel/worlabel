@@ -6,12 +6,13 @@ import ProjectStructure from './ProjectStructure';
 import { Project } from '@/types';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
 import ProjectCreateModal from '../ProjectCreateModal';
+import useCanvasStore from '@/stores/useCanvasStore';
 
 export default function WorkspaceSidebar({ workspaceName, projects }: { workspaceName: string; projects: Project[] }) {
+  const setSidebarSize = useCanvasStore((state) => state.setSidebarSize);
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>();
-
   const handleSelectProject = (projectId: string) => {
     setSelectedProjectId(projectId);
     navigate(`/workspace/${workspaceId}/project/${projectId}`);
@@ -24,9 +25,7 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
         maxSize={35}
         defaultSize={20}
         className="flex h-full flex-col bg-gray-100"
-        onResize={(size) => {
-          console.log(size);
-        }}
+        onResize={(size) => setSidebarSize(size)}
       >
         <header className="body flex w-full items-center gap-2 p-2">
           <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>

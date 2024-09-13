@@ -14,8 +14,9 @@ import { Navigate } from 'react-router-dom';
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
-  workspace: (workspaceId: string, projectId?: string) =>
-    projectId ? `/workspace/${workspaceId}/project/${projectId}` : `/workspace/${workspaceId}`,
+  workspace: () => '/workspace',
+  // workspace: (workspaceId: string, projectId?: string) =>
+  //   projectId ? `/workspace/${workspaceId}/project/${projectId}` : `/workspace/${workspaceId}`,
   admin: (workspaceId: string) => `/admin/${workspaceId}`,
   oauthCallback: () => '/redirect/oauth2',
 };
@@ -46,12 +47,12 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/workspace/:workspaceId',
+    path: `${webPath.workspace()}/:workspaceId`,
     element: <WorkspaceLayout />,
     children: [
       {
-        path: '',
-        element: <div>workspace</div>,
+        index: true,
+        element: <ImageCanvas />,
       },
       {
         path: 'project/:projectId',

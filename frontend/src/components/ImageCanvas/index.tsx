@@ -3,42 +3,15 @@ import Konva from 'konva';
 import { useEffect, useRef, useState } from 'react';
 import { Circle, Image, Layer, Line, Rect, Stage } from 'react-konva';
 import useImage from 'use-image';
-import { Label } from '@/types';
 import LabelRect from './LabelRect';
 import { Vector2d } from 'konva/lib/types';
 import LabelPolygon from './LabelPolygon';
 import CanvasControlBar from '../CanvasControlBar';
 
-const mockLabels: Label[] = Array.from({ length: 10 }, (_, i) => {
-  const startX = Math.random() * 1200 + 300;
-  const startY = Math.random() * 2000 + 300;
-  const color = Math.floor(Math.random() * 65535)
-    .toString(16)
-    .padStart(4, '0');
-
-  return {
-    id: i,
-    name: `label-${i}`,
-    type: i % 2 === 0 ? 'polygon' : 'rect',
-    color: i % 2 === 0 ? `#ff${color}` : `#${color}ff`,
-    coordinates:
-      i % 2 === 0
-        ? [
-            [startX, startY],
-            [startX + 200, startY + 50],
-            [startX + 300, startY + 300],
-            [startX + 100, startY + 250],
-          ]
-        : [
-            [startX, startY],
-            [startX + 300, startY + 300],
-          ],
-  };
-});
-
 export default function ImageCanvas() {
-  const stageWidth = window.innerWidth;
-  const stageHeight = window.innerHeight;
+  const sidebarSize = useCanvasStore((state) => state.sidebarSize);
+  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 280;
+  const stageHeight = window.innerHeight - 64;
   const stageRef = useRef<Konva.Stage>(null);
   const dragLayerRef = useRef<Konva.Layer>(null);
   const scale = useRef<number>(0);
@@ -100,7 +73,7 @@ export default function ImageCanvas() {
     const color = Math.floor(Math.random() * 65535)
       .toString(16)
       .padStart(6, '0');
-    const id = labels.length;
+    const id = labels.length + 1;
     addLabel({
       id: id,
       name: 'label',
@@ -127,7 +100,7 @@ export default function ImageCanvas() {
     const color = Math.floor(Math.random() * 65535)
       .toString(16)
       .padStart(6, '0');
-    const id = labels.length;
+    const id = labels.length + 1;
     addLabel({
       id: id,
       name: 'label',
@@ -208,11 +181,6 @@ export default function ImageCanvas() {
 
     return { x: scale.current, y: scale.current };
   };
-
-  // TODO: remove mock data
-  useEffect(() => {
-    useCanvasStore.setState({ labels: mockLabels });
-  }, []);
 
   useEffect(() => {
     if (!stageRef.current) return;
