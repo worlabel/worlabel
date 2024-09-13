@@ -1,151 +1,44 @@
 import api from '@/api/axiosConfig';
-import { AxiosError, AxiosResponse } from 'axios';
-import { BaseResponse, WorkspaceRequestDTO, WorkspaceResponseDTO, WorkspaceListResponseDTO } from '@/types';
+import { WorkspaceRequestDTO } from '@/types';
 
-export const getWorkspaceApi = async (
-  workspaceId: number,
-  memberId: number
-): Promise<BaseResponse<WorkspaceResponseDTO>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<WorkspaceResponseDTO>> = await api.get(
-      `/api/workspaces/${workspaceId}`,
-      {
-        params: { memberId },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function fetchWorkspaceList(memberId: number, lastWorkspaceId?: number, limit?: number) {
+  return api.get('/workspaces', {
+    params: { memberId, lastWorkspaceId, limit },
+  });
+}
 
-export const updateWorkspaceApi = async (
-  workspaceId: number,
-  memberId: number,
-  data: WorkspaceRequestDTO
-): Promise<BaseResponse<WorkspaceResponseDTO>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<WorkspaceResponseDTO>> = await api.put(
-      `/api/workspaces/${workspaceId}`,
-      data,
-      {
-        params: { memberId },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function fetchWorkspace(workspaceId: number, memberId: number) {
+  return api.get(`/workspaces/${workspaceId}`, {
+    params: { memberId },
+  });
+}
 
-export const deleteWorkspaceApi = async (workspaceId: number, memberId: number): Promise<BaseResponse<null>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<null>> = await api.delete(`/api/workspaces/${workspaceId}`, {
-      params: { memberId },
-    });
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function updateWorkspace(workspaceId: number, memberId: number, data: WorkspaceRequestDTO) {
+  return api.put(`/workspaces/${workspaceId}`, data, {
+    params: { memberId },
+  });
+}
 
-export const getAllWorkspacesApi = async (
-  memberId: number,
-  lastWorkspaceId?: number,
-  limit?: number
-): Promise<BaseResponse<WorkspaceListResponseDTO>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<WorkspaceListResponseDTO>> = await api.get('/api/workspaces', {
-      params: { memberId, lastWorkspaceId, limit },
-    });
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function deleteWorkspace(workspaceId: number, memberId: number) {
+  return api.delete(`/workspaces/${workspaceId}`, {
+    params: { memberId },
+  });
+}
 
-export const createWorkspaceApi = async (
-  memberId: number,
-  data: WorkspaceRequestDTO
-): Promise<BaseResponse<WorkspaceResponseDTO>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<WorkspaceResponseDTO>> = await api.post('/api/workspaces', data, {
-      params: { memberId },
-    });
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function createWorkspace(memberId: number, data: WorkspaceRequestDTO) {
+  return api.post('/workspaces', data, {
+    params: { memberId },
+  });
+}
 
-export const addWorkspaceMemberApi = async (
-  workspaceId: number,
-  memberId: number,
-  newMemberId: number
-): Promise<BaseResponse<null>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<null>> = await api.post(
-      `/api/workspaces/${workspaceId}/members/${newMemberId}`,
-      null,
-      {
-        params: { memberId },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function addWorkspaceMember(workspaceId: number, memberId: number, newMemberId: number) {
+  return api.post(`/workspaces/${workspaceId}/members/${newMemberId}`, null, {
+    params: { memberId },
+  });
+}
 
-export const removeWorkspaceMemberApi = async (
-  workspaceId: number,
-  memberId: number,
-  targetMemberId: number
-): Promise<BaseResponse<null>> => {
-  try {
-    const response: AxiosResponse<BaseResponse<null>> = await api.delete(
-      `/api/workspaces/${workspaceId}/members/${targetMemberId}`,
-      {
-        params: { memberId },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('API 요청 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function removeWorkspaceMember(workspaceId: number, memberId: number, targetMemberId: number) {
+  return api.delete(`/workspaces/${workspaceId}/members/${targetMemberId}`, {
+    params: { memberId },
+  });
+}

@@ -1,118 +1,48 @@
 import api from '@/api/axiosConfig';
-import { AxiosError } from 'axios';
-import { ImageResponseDTO, ImageMoveRequestDTO, ImageStatusChangeRequestDTO, BaseResponse } from '@/types';
+import { ImageMoveRequestDTO, ImageStatusChangeRequestDTO } from '@/types';
 
-export const fetchImageApi = async (
-  projectId: number,
-  folderId: number,
-  imageId: number,
-  memberId: number
-): Promise<BaseResponse<ImageResponseDTO>> => {
-  try {
-    const response = await api.get(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
-      params: { memberId },
-    });
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('이미지 조회 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function fetchImage(projectId: number, folderId: number, imageId: number, memberId: number) {
+  return api.get(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
+    params: { memberId },
+  });
+}
 
-export const moveImageApi = async (
+export async function moveImage(
   projectId: number,
   folderId: number,
   imageId: number,
   memberId: number,
   moveRequest: ImageMoveRequestDTO
-): Promise<BaseResponse<null>> => {
-  try {
-    const response = await api.put(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`, moveRequest, {
-      params: { memberId },
-    });
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('이미지 폴더 이동 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+) {
+  return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, moveRequest, {
+    params: { memberId },
+  });
+}
 
-export const deleteImageApi = async (
-  projectId: number,
-  folderId: number,
-  imageId: number,
-  memberId: number
-): Promise<BaseResponse<null>> => {
-  try {
-    const response = await api.delete(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
-      params: { memberId },
-    });
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('이미지 삭제 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+export async function deleteImage(projectId: number, folderId: number, imageId: number, memberId: number) {
+  return api.delete(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
+    params: { memberId },
+  });
+}
 
-export const changeImageStatusApi = async (
+export async function changeImageStatus(
   projectId: number,
   folderId: number,
   imageId: number,
   memberId: number,
   statusChangeRequest: ImageStatusChangeRequestDTO
-): Promise<BaseResponse<ImageResponseDTO>> => {
-  try {
-    const response = await api.put(
-      `/api/projects/${projectId}/folders/${folderId}/images/${imageId}/status`,
-      statusChangeRequest,
-      {
-        params: { memberId },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('이미지 상태 변경 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
-    }
-    throw error;
-  }
-};
+) {
+  return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}/status`, statusChangeRequest, {
+    params: { memberId },
+  });
+}
 
-export const uploadImageListApi = async (
-  projectId: number,
-  folderId: number,
-  memberId: number,
-  imageList: string[]
-): Promise<BaseResponse<null>> => {
-  try {
-    const response = await api.post(
-      `/api/projects/${projectId}/folders/${folderId}/images`,
-      { imageList },
-      {
-        params: { memberId },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      console.error('이미지 목록 업로드 실패:', error.response?.data?.message || '알 수 없는 오류');
-    } else {
-      console.error('알 수 없는 오류가 발생했습니다.');
+export async function uploadImageList(projectId: number, folderId: number, memberId: number, imageList: string[]) {
+  return api.post(
+    `/projects/${projectId}/folders/${folderId}/images`,
+    { imageList },
+    {
+      params: { memberId },
     }
-    throw error;
-  }
-};
+  );
+}
