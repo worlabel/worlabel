@@ -2,7 +2,6 @@ package com.worlabel.domain.project.service;
 
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
-import com.worlabel.domain.participant.entity.Participant;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.project.entity.Project;
@@ -142,7 +141,7 @@ class ProjectServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> projectService.updateProject(1, 1, request))
                 .isInstanceOf(CustomException.class)
-                .hasMessageContaining(ErrorCode.PARTICIPANT_UNAUTHORIZED.getMessage());
+                .hasMessageContaining(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED.getMessage());
     }
 
     @DisplayName("프로젝트 수정에 성공하면 수정된 프로젝트가 반환된다.")
@@ -172,7 +171,7 @@ class ProjectServiceUnitTest {
         // when & then
         assertThatThrownBy(() -> projectService.deleteProject(1, 1))
                 .isInstanceOf(CustomException.class)
-                .hasMessageContaining(ErrorCode.PARTICIPANT_UNAUTHORIZED.getMessage());
+                .hasMessageContaining(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED.getMessage());
     }
 
     @DisplayName("프로젝트 삭제에 성공하면 예외 없이 수행된다.")
