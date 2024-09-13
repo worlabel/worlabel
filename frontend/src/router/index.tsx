@@ -17,7 +17,7 @@ export const webPath = {
   workspace: () => '/workspace',
   // workspace: (workspaceId: string, projectId?: string) =>
   //   projectId ? `/workspace/${workspaceId}/project/${projectId}` : `/workspace/${workspaceId}`,
-  admin: (workspaceId: string) => `/admin/${workspaceId}`,
+  admin: () => `/admin`,
   oauthCallback: () => '/redirect/oauth2',
 };
 
@@ -61,7 +61,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: webPath.admin(':workspaceId'),
+    path: `${webPath.admin()}/:workspaceId`,
     element: <AdminLayout />,
     children: [
       {

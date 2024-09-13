@@ -11,25 +11,22 @@ const DOMAIN = 'https://j11s002.p.ssafy.io';
 
 export default function Home() {
   const navigate = useNavigate();
-  const { isLoggedIn, setLoggedIn, profile, setProfile } = useAuthStore();
+  const { isLoggedIn, accessToken, setLoggedIn, profile, setProfile } = useAuthStore();
   const hasFetchedProfile = useRef(false);
 
-  if (!isLoggedIn && !profile && !hasFetchedProfile.current) {
-    const accessToken = sessionStorage.getItem('accessToken');
-    if (accessToken) {
-      setLoggedIn(true, accessToken);
-      fetchProfileApi()
-        .then((data: SuccessResponse<MemberResponseDTO>) => {
-          if (data?.isSuccess && data.data) {
-            setProfile(data.data);
-            hasFetchedProfile.current = true;
-          }
-        })
-        .catch((error: AxiosError<CustomError>) => {
-          alert('프로필을 가져오는 중 오류가 발생했습니다. 다시 시도해주세요.');
-          console.error('프로필 가져오기 실패:', error?.response?.data?.message || '알 수 없는 오류');
-        });
-    }
+  if (!isLoggedIn && !profile && !hasFetchedProfile.current && accessToken) {
+    setLoggedIn(true, accessToken);
+    fetchProfileApi()
+      .then((data: SuccessResponse<MemberResponseDTO>) => {
+        if (data?.isSuccess && data.data) {
+          setProfile(data.data);
+          hasFetchedProfile.current = true;
+        }
+      })
+      .catch((error: AxiosError<CustomError>) => {
+        alert('프로필을 가져오는 중 오류가 발생했습니다. 다시 시도해주세요.');
+        console.error('프로필 가져오기 실패:', error?.response?.data?.message || '알 수 없는 오류');
+      });
   }
 
   const handleGoogleSignIn = () => {
