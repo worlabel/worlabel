@@ -32,14 +32,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         // OAuth2User
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        log.debug("로그인 성공 : {}", customOAuth2User);
+
+        StringBuffer requestURL = request.getRequestURL();
+        String originalUri = request.getRequestURI();
+        String baseUrl = requestURL.substring(0, requestURL.length() - originalUri.length());
 
         // JWT 토큰 생성
         JwtToken jwtToken = jwtTokenService.generateTokenByOAuth2User(customOAuth2User);
 
         // 쿼리 파라미터로 액세스 토큰 전달
-//        String redirectUrl = UriComponentsBuilder.fromUriString(frontEnd + "/redirect/oauth2")
-        String redirectUrl = UriComponentsBuilder.fromUriString("https://j11s002.p.ssafy.io" + "/redirect/oauth2")
+        String redirectUrl = UriComponentsBuilder.fromUriString(baseUrl + "/redirect/oauth2")
                 .queryParam("accessToken", jwtToken.getAccessToken())
                 .toUriString();
         // 쿠키에 리프레시 토큰 추가
