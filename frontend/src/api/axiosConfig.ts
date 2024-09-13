@@ -30,9 +30,9 @@ const processQueue = (error: Error | null, token: string | undefined = undefined
 };
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = sessionStorage.getItem('accessToken');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const accessToken = useAuthStore.getState().accessToken;
+  if (accessToken && config.headers) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
@@ -72,13 +72,12 @@ api.interceptors.response.use(
         }
 
         useAuthStore.getState().setLoggedIn(true, newAccessToken);
-        sessionStorage.setItem('accessToken', newAccessToken);
         processQueue(null, newAccessToken);
 
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        }
-        return api(originalRequest);
+        const redirectUri = `/redirect/oauth2?accessToken=${newAccessToken}`;
+        window.location.href = redirectUri;
+
+        return Promise.reject(new Error('Redirecting to retrieve cookies'));
       } catch (reissueError: unknown) {
         processQueue(reissueError as Error, undefined);
         console.error('토큰 재발급 실패:', reissueError);

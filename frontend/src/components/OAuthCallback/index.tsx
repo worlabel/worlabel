@@ -6,6 +6,7 @@ import { fetchProfileApi } from '@/api/authApi';
 export default function OAuthCallback() {
   const navigate = useNavigate();
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);
+  const setProfile = useAuthStore((state) => state.setProfile);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -13,7 +14,6 @@ export default function OAuthCallback() {
 
     if (accessToken) {
       setLoggedIn(true, accessToken);
-      sessionStorage.setItem('accessToken', accessToken);
 
       fetchProfileApi()
         .then((data) => {
@@ -23,7 +23,7 @@ export default function OAuthCallback() {
               nickname: data.data.nickname,
               profileImage: data.data.profileImage,
             };
-            useAuthStore.getState().setProfile(profileData);
+            setProfile(profileData);
             navigate('/browse');
           } else {
             throw new Error('프로필 데이터를 가져올 수 없습니다.');
@@ -37,7 +37,7 @@ export default function OAuthCallback() {
     } else {
       navigate('/');
     }
-  }, [navigate, setLoggedIn]);
+  }, [navigate, setLoggedIn, setProfile]);
 
   return <p>처리 중입니다...</p>;
 }
