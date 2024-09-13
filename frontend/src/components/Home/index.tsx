@@ -7,7 +7,7 @@ import { fetchProfileApi, reissueTokenApi } from '@/api/authApi';
 import { SuccessResponse, MemberResponseDTO, CustomError } from '@/types';
 import { AxiosError } from 'axios';
 
-const DOMAIN = 'https://j11s002.p.ssafy.io';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function Home() {
   }
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${DOMAIN}/api/login/oauth2/authorization/google`;
+    window.location.href = `${BASE_URL}/login/oauth2/authorization/google`;
   };
 
   const handleStart = () => {
