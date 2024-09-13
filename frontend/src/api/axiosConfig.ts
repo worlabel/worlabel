@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
 import useAuthStore from '@/stores/useAuthStore';
 import { BaseResponse, CustomError, SuccessResponse, RefreshTokenResponseDTO } from '@/types';
 
-const baseURL = 'https://j11s002.p.ssafy.io';
+const baseURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL,
@@ -105,8 +105,6 @@ const handleCommonErrors = (error: AxiosError<BaseResponse<CustomError>>) => {
     window.location.href = '/';
   } else {
     console.error('오류 발생:', error.response?.data?.message || '알 수 없는 오류');
-    useAuthStore.getState().clearAuth();
-    window.location.href = '/';
   }
 };
 

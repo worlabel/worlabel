@@ -6,9 +6,10 @@ import { Plus } from 'lucide-react';
 
 interface ProjectCreateModalProps {
   onSubmit: (data: { title: string; labelType: 'classification' | 'detection' | 'segmentation' }) => void;
+  buttonClass?: string;
 }
 
-export default function ProjectCreateModal({ onSubmit }: ProjectCreateModalProps) {
+export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: ProjectCreateModalProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -35,7 +36,7 @@ export default function ProjectCreateModal({ onSubmit }: ProjectCreateModalProps
       <DialogTrigger asChild>
         <Button
           variant="outlinePrimary"
-          className="mt-4 flex items-center gap-2"
+          className={`${buttonClass}`}
           onClick={handleOpen}
         >
           <Plus size={16} />

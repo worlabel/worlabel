@@ -143,3 +143,37 @@ export interface BaseResponse<T> {
 export interface RefreshTokenResponseDTO {
   accessToken: string;
 }
+
+export interface CommentRequestDTO {
+  content: string;
+  positionX: number;
+  positionY: number;
+}
+
+export interface CommentResponseDTO {
+  id: number;
+  memberId: number;
+  memberNickname: string;
+  memberProfileImage: string;
+  positionX: number;
+  positionY: number;
+  content: string;
+  createTime: string; // 작성 일자 (ISO 8601 형식)
+}
+
+export interface ProjectMemberRequestDTO {
+  memberId: number;
+  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
+}
+
+export interface LabelingRequestDTO {
+  memberId: number;
+  projectId: number;
+  imageId: number;
+}
+
+export interface AutoLabelingResponseDTO {
+  imageId: number;
+  imageUrl: string;
+  data: string;
+}

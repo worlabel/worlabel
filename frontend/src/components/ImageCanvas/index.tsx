@@ -73,7 +73,7 @@ export default function ImageCanvas() {
     const color = Math.floor(Math.random() * 65535)
       .toString(16)
       .padStart(6, '0');
-    const id = labels.length;
+    const id = labels.length + 1;
     addLabel({
       id: id,
       name: 'label',
@@ -100,7 +100,7 @@ export default function ImageCanvas() {
     const color = Math.floor(Math.random() * 65535)
       .toString(16)
       .padStart(6, '0');
-    const id = labels.length;
+    const id = labels.length + 1;
     addLabel({
       id: id,
       name: 'label',

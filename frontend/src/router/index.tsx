@@ -1,4 +1,5 @@
 import PageLayout from '@/components/PageLayout';
+import ImageCanvas from '@/components/ImageCanvas';
 import Home from '@/components/Home';
 import WorkspaceBrowseDetail from '@/components/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
@@ -9,13 +10,14 @@ import AdminMemberManage from '@/components/AdminMemberManage';
 import OAuthCallback from '@/components/OAuthCallback';
 import { createBrowserRouter } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
-import ImageCanvas from '@/components/ImageCanvas';
 
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
   workspace: () => '/workspace',
-  admin: (id: string) => `/admin/${id}`,
+  // workspace: (workspaceId: string, projectId?: string) =>
+  //   projectId ? `/workspace/${workspaceId}/project/${projectId}` : `/workspace/${workspaceId}`,
+  admin: (workspaceId: string) => `/admin/${workspaceId}`,
   oauthCallback: () => '/redirect/oauth2',
 };
 
@@ -45,17 +47,21 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: webPath.workspace(),
+    path: `${webPath.workspace()}/:workspaceId`,
     element: <WorkspaceLayout />,
     children: [
       {
         index: true,
         element: <ImageCanvas />,
       },
+      {
+        path: 'project/:projectId',
+        element: <ImageCanvas />,
+      },
     ],
   },
   {
-    path: webPath.admin(':id'),
+    path: webPath.admin(':workspaceId'),
     element: <AdminLayout />,
     children: [
       {

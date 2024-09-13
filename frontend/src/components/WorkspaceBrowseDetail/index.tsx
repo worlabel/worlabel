@@ -86,7 +86,10 @@ export default function WorkspaceBrowseDetail() {
         <h1 className="small-title flex grow">{`Workspace-${workspaceId}`}</h1>
         <div className="flex flex-col">
           <div className="flex gap-3">
-            <ProjectCreateModal onSubmit={handleCreateProject} />
+            <ProjectCreateModal
+              buttonClass="mt-4 flex items-center gap-2"
+              onSubmit={handleCreateProject}
+            />
           </div>
         </div>
       </div>
