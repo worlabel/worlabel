@@ -50,7 +50,4 @@ public class LabelController {
         labelService.save(imageId);
         return SuccessResponse.empty();
     }
-    
-    
-
 }

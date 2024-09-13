@@ -26,6 +26,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, Intege
             @Param("projectId") Integer projectId);
 
     Optional<Participant> findByMemberIdAndProjectId(Integer memberId, Integer projectId);
+
+
 }
 
 

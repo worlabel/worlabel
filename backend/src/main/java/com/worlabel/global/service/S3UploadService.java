@@ -50,8 +50,7 @@ public class S3UploadService {
 //        String targetUrl = projectId + "/" + title + ".json"; // S3에 업로드할 대상 URL
         String targetUrl = removeExtension(getKeyFromImageAddress(imageUrl)) + ".json";
 
-        log.debug("주소 {}", targetUrl);
-
+//        log.debug("주소 {}", targetUrl);
         try {
             byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
             ObjectMetadata metadata = new ObjectMetadata();
@@ -65,7 +64,7 @@ public class S3UploadService {
             }
 
             URL uploadedUrl = amazonS3.getUrl(bucket, targetUrl);
-            log.debug("Uploaded JSON URL: {}", uploadedUrl);
+//            log.debug("Uploaded JSON URL: {}", uploadedUrl);
             return uploadedUrl.toString(); // 업로드된 파일의 URL 반환
         } catch (Exception e) {
             log.error("JSON 업로드 중 오류 발생: ", e);

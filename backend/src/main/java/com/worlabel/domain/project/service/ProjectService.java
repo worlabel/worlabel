@@ -8,6 +8,7 @@ import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
+import com.worlabel.domain.project.dto.RequestDto.TrainRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
@@ -19,8 +20,10 @@ import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +39,13 @@ public class ProjectService {
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
+    private final RestTemplate restTemplate;
 
+    /**
+     * AI SERVER 주소
+     */
+    @Value("${ai.server}")
+    private String aiServer;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -114,6 +123,33 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
+    public void train(final Integer memberId, final Integer projectId) {
+        // 멤버 권한 체크
+        checkEditorParticipant(memberId, projectId);
+
+        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다.
+        /*
+            없으면 redis 상태 테이블을 만든다. progressTable
+         */
+
+        // FastAPI 서버로 학습 요청을 전송
+        String url = aiServer + "/detection/train";
+
+        TrainRequest trainRequest = new TrainRequest();
+        trainRequest.setProjectId(projectId);
+        trainRequest.setData(List.of());
+
+        // FastAPI 서버로 POST 요청 전송
+        try {
+            ResponseEntity<String> result = restTemplate.postForEntity(url, trainRequest, String.class);
+            log.debug("응답 결과 {} ",result);
+            log.debug("FastAPI 서버에 학습 요청을 성공적으로 전송했습니다. Project ID: {}", projectId);
+        } catch (Exception e) {
+            log.error("FastAPI 서버에 학습 요청을 전송하는 중 오류가 발생했습니다 {}",e.getMessage());
+            throw new CustomException(ErrorCode.AI_SERVER_ERROR);
+        }
+    }
+
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
@@ -127,6 +163,12 @@ public class ProjectService {
     private Project getProject(final Integer projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+    }
+
+    private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
+        if(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)){
+            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+        }
     }
 
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {
@@ -152,5 +194,6 @@ public class ProjectService {
             throw new CustomException(ErrorCode.PARTICIPANT_BAD_REQUEST);
         }
     }
+
 }
 

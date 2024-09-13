@@ -34,19 +34,10 @@ public class Label extends BaseEntity {
     @JoinColumn(name = "image_id")
     private Image image;
 
-    /**
-     * 속한 카테고리
-     * TODO: 한 레이블 카테고리에 속한걸 찾는데에 Json파일에 담기 때문에 카테고리는 Label Entity에 없어도 될 것 같음
-     */
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "label_category_id")
-//    private LabelCategory labelCategory;
-
     public static Label of(String jsonUrl, Image image) {
         Label label = new Label();
         label.url = jsonUrl;
         label.image = image;
         return label;
     }
-
 }

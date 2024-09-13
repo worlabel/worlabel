@@ -59,20 +59,21 @@ public class LabelService {
         List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
         List<ImageRequest> imageRequestList = imageList.stream().map(ImageRequest::of).toList();
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
+        sendRequestToApi(autoLabelingRequest, projectType.getValue(), projectId);
+    }
 
-        List<AutoLabelingResponse> autoLabelingResponseList = sendRequestToApi(autoLabelingRequest, projectType.getValue(), projectId);
-        for (int index = 0; index < autoLabelingResponseList.size(); index++) {
-            AutoLabelingResponse response = autoLabelingResponseList.get(index);
-            Image image = imageList.get(index);
-            String uploadedUrl = s3UploadService.uploadJson(response.getData(), response.getImageUrl());
+    public void saveLabel(final AutoLabelingResponse autoLabelingResponse) {
+        String uploadUrl = s3UploadService.uploadJson(autoLabelingResponse.getData(), autoLabelingResponse.getImageUrl());
+        Image image = imageRepository.findById(autoLabelingResponse.getImageId())
+                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
 
-            Label label = labelRepository.findByImageId(response.getImageId())
-                    .orElseGet(() -> Label.of(uploadedUrl, image));
+        if (!labelRepository.existsByImageId(autoLabelingResponse.getImageId())) {
+            Label label = Label.of(uploadUrl, image);
             labelRepository.save(label);
         }
     }
 
-    private List<AutoLabelingResponse> sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
+    private void sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
         String url = createApiUrl(apiEndpoint);
 
         // RestTemplate을 동적으로 생성하여 사용
@@ -94,9 +95,7 @@ public class LabelService {
             String responseBody = Optional.ofNullable(response.getBody())
                     .orElseThrow(() -> new CustomException(ErrorCode.AI_SERVER_ERROR));
 
-            log.info("AI 서버 응답 -> {}", response.getBody());
-
-            return parseAutoLabelingResponseList(responseBody);
+//            return parseAutoLabelingResponseList(responseBody);
         } catch (Exception e) {
             log.error("AI 서버 요청 중 오류 발생: ", e);
             throw new CustomException(ErrorCode.AI_SERVER_ERROR);
@@ -107,17 +106,16 @@ public class LabelService {
         JsonElement jsonElement = JsonParser.parseString(responseBody);
         List<AutoLabelingResponse> autoLabelingResponseList = new ArrayList<>();
         for (JsonElement element : jsonElement.getAsJsonArray()) {
-            AutoLabelingResponse response = parseAutoLabelingResponse(element);
+            AutoLabelingResponse response = parseAutoLabelingResponse(element.getAsJsonObject());
             autoLabelingResponseList.add(response);
         }
         return autoLabelingResponseList;
     }
 
     /**
-     * jsonElement -> AutoLabelingResponse
+     * jsonObject -> AutoLabelingResponse
      */
-    private AutoLabelingResponse parseAutoLabelingResponse(JsonElement element) {
-        JsonObject jsonObject = element.getAsJsonObject();
+    public AutoLabelingResponse parseAutoLabelingResponse(JsonObject jsonObject) {
         Long imageId = jsonObject.get("image_id").getAsLong();
         String imageUrl = jsonObject.get("image_url").getAsString();
         JsonObject data = jsonObject.get("data").getAsJsonObject();

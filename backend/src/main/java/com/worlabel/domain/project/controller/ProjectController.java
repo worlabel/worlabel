@@ -16,10 +16,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name = "프로젝트 관련 API")
 @RestController
 @RequestMapping("/api")
@@ -74,6 +76,17 @@ public class ProjectController {
         return SuccessResponse.of(project);
     }
 
+    @Operation(summary = "프로젝트 모델 학습", description = "프로젝트 모델을 학습시킵니다..")
+    @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 학습됩니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PostMapping("/projects/{project_id}/train")
+    public BaseResponse<Void> trainModel(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId) {
+        projectService.train(memberId, projectId);
+        return SuccessResponse.empty();
+    }
+
     @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제합니다.")
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 삭제합니다.")
     @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
@@ -120,4 +133,6 @@ public class ProjectController {
         return SuccessResponse.empty();
     }
 
+
+    
 }
