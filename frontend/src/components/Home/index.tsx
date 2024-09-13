@@ -30,7 +30,7 @@ export default function Home() {
   }
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${BASE_URL}/login/oauth2/authorization/google`;
+    window.location.href = `${BASE_URL}/api/login/oauth2/authorization/google`;
   };
 
   const handleStart = () => {
