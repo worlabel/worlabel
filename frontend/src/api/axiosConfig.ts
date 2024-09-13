@@ -101,9 +101,7 @@ const handleCommonErrors = (error: AxiosError<BaseResponse<CustomError>>) => {
   if (error.response?.status === 400) {
     alert('잘못된 요청입니다. 다시 시도해 주세요.');
   } else if (error.response?.status === 403) {
-    alert('권한이 없습니다. 다시 로그인해 주세요.');
-    useAuthStore.getState().clearAuth();
-    window.location.href = '/';
+    alert(error.response?.data?.message);
   } else {
     console.error('오류 발생:', error.response?.data?.message || '알 수 없는 오류');
   }
