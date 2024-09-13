@@ -9,8 +9,47 @@ import { fetchFolderApi } from '@/api/folderApi';
 import { getWorkspaceApi } from '@/api/workspaceApi';
 import { getAllProjectsApi } from '@/api/projectApi';
 import useAuthStore from '@/stores/useAuthStore';
+import useCanvasStore from '@/stores/useCanvasStore';
+
+const mockLabels: Label[] = [
+  {
+    id: 1,
+    name: 'Label 1',
+    color: '#FFaa33',
+    coordinates: [
+      [700, 100],
+      [1200, 800],
+    ],
+    type: 'rect',
+  },
+  {
+    id: 2,
+    name: 'Label 2',
+    color: '#aaFF55',
+    coordinates: [
+      [200, 200],
+      [400, 200],
+      [500, 500],
+      [400, 800],
+      [200, 800],
+      [100, 500],
+    ],
+    type: 'polygon',
+  },
+  {
+    id: 3,
+    name: 'Label 3',
+    color: '#77aaFF',
+    coordinates: [
+      [1000, 1000],
+      [1800, 1800],
+    ],
+    type: 'rect',
+  },
+];
 
 export default function WorkspaceLayout() {
+  const setLabels = useCanvasStore((state) => state.setLabels);
   const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
   const [workspace, setWorkspace] = useState<{ name: string; projects: Project[] }>({
     name: '',
@@ -109,29 +148,9 @@ export default function WorkspaceLayout() {
     }
   }, [workspaceId, projectId, memberId]);
 
-  const labels: Label[] = [
-    {
-      id: 1,
-      name: 'Label 1',
-      color: '#FFaa33',
-      coordinates: [],
-      type: 'rect',
-    },
-    {
-      id: 2,
-      name: 'Label 2',
-      color: '#aaFF55',
-      coordinates: [],
-      type: 'rect',
-    },
-    {
-      id: 3,
-      name: 'Label 3',
-      color: '#77aaFF',
-      coordinates: [],
-      type: 'rect',
-    },
-  ];
+  useEffect(() => {
+    setLabels(mockLabels);
+  }, [setLabels]);
 
   return (
     <>
@@ -146,7 +165,7 @@ export default function WorkspaceLayout() {
             <main className="h-full grow">
               <Outlet />
             </main>
-            <WorkspaceLabelBar labels={labels} />
+            <WorkspaceLabelBar labels={mockLabels} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

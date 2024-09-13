@@ -2,8 +2,7 @@ import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'ax
 import useAuthStore from '@/stores/useAuthStore';
 import { BaseResponse, CustomError, SuccessResponse, RefreshTokenResponseDTO } from '@/types';
 
-const baseURL = 'https://j11s002.p.ssafy.io';
-// const baseURL = 'http://localhost:5173'; 모킹 테스트
+const baseURL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL,
