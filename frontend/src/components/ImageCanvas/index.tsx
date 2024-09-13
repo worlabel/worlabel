@@ -255,8 +255,6 @@ export default function ImageCanvas() {
                 stroke={'#00a1ff'}
                 strokeWidth={1}
                 strokeScaleEnabled={false}
-                fill="#00a1ff33"
-                closed
                 listening={false}
               />
               {polygonPoints.map((point, index) => (
