@@ -58,6 +58,8 @@ public enum ErrorCode {
     // Comment - 9000,
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, 9000, "해당 댓글을 찾을 수 없습니다."),
 
+    // Comment - 10000,
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 10000, "해당 리뷰를 찾을 수 없습니다."),
     ;
     private final HttpStatus status;
     private final int code;

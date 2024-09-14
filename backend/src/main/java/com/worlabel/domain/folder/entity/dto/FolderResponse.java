@@ -28,43 +28,43 @@ public class FolderResponse {
 
     public static FolderResponse from(final Folder folder) {
         List<ImageResponse> images = folder.getImageList().stream()
-                .map(ImageResponse::from)
-                .toList();
+            .map(ImageResponse::from)
+            .toList();
 
         List<FolderIdResponse> children = folder.getChildren().stream()
-                .map(FolderIdResponse::from)
-                .toList();
+            .map(FolderIdResponse::from)
+            .toList();
 
         return new FolderResponse(
-                folder.getId(),
-                folder.getTitle(),
-                images,
-                children
+            folder.getId(),
+            folder.getTitle(),
+            images,
+            children
         );
     }
 
     public static FolderResponse fromWithNeedReview(final Folder folder) {
         List<ImageResponse> images = folder.getImageList().stream()
-                .filter(image -> image.getStatus() == LabelStatus.REVIEW_REQUEST)
-                .map(ImageResponse::from)
-                .toList();
+            .filter(image -> image.getStatus() == LabelStatus.SAVE)
+            .map(ImageResponse::from)
+            .toList();
 
         List<FolderIdResponse> children = folder.getChildren().stream()
-                .map(FolderIdResponse::from)
-                .toList();
+            .map(FolderIdResponse::from)
+            .toList();
 
         return new FolderResponse(
-                folder.getId(),
-                folder.getTitle(),
-                images,
-                children
+            folder.getId(),
+            folder.getTitle(),
+            images,
+            children
         );
     }
 
     public static FolderResponse from(final List<Folder> topFolders) {
         List<FolderIdResponse> list = topFolders.stream()
-                .map(FolderIdResponse::from)
-                .toList();
+            .map(FolderIdResponse::from)
+            .toList();
 
         return new FolderResponse(0, "root", List.of(), list);
     }
