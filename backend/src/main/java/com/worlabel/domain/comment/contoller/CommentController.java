@@ -29,61 +29,57 @@ public class CommentController {
     @SwaggerApiSuccess(description = "댓글 목록을 성공적으로 조회합니다.")
     @Operation(summary = "댓글 목록 조회", description = "댓글 목록을 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public BaseResponse<CommentResponses> getAllComments(
+    public CommentResponses getAllComments(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
         List<CommentResponse> comments = commentService.getAllComments(memberId, projectId, imageId);
-        return new SuccessResponse<>(CommentResponses.from(comments));
+        return CommentResponses.from(comments);
     }
 
     @GetMapping("/{comment_id}")
     @SwaggerApiSuccess(description = "댓글을 성공적으로 조회합니다.")
     @Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
     @SwaggerApiError({ErrorCode.COMMENT_NOT_FOUND, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public BaseResponse<CommentResponse> getCommentById(
+    public CommentResponse getCommentById(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("comment_id") final Integer commentId) {
-        CommentResponse comment = commentService.getCommentById(memberId, projectId, commentId);
-        return new SuccessResponse<>(comment);
+        return commentService.getCommentById(memberId, projectId, commentId);
     }
 
     @PostMapping("/images/{image_id}")
     @SwaggerApiSuccess(description = "댓글을 성공적으로 생성합니다.")
     @Operation(summary = "댓글 생성", description = "댓글을 생성합니다.")
     @SwaggerApiError({ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public BaseResponse<CommentResponse> createComment(
+    public CommentResponse createComment(
             @RequestBody final CommentRequest commentRequest,
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
-        CommentResponse comment = commentService.createComment(commentRequest, memberId, projectId, imageId);
-        return new SuccessResponse<>(comment);
+        return commentService.createComment(commentRequest, memberId, projectId, imageId);
     }
 
     @PutMapping("/{comment_id}")
     @SwaggerApiSuccess(description = "댓글을 성공적으로 수정합니다.")
     @Operation(summary = "댓글 수정", description = "댓글을 수정합니다.")
     @SwaggerApiError({ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public BaseResponse<CommentResponse> updateComment(
+    public CommentResponse updateComment(
             @RequestBody final CommentRequest commentRequest,
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("comment_id") final Integer commentId) {
-        CommentResponse comment = commentService.updateComment(commentRequest, memberId, projectId, commentId);
-        return new SuccessResponse<>(comment);
+        return commentService.updateComment(commentRequest, memberId, projectId, commentId);
     }
 
     @DeleteMapping("/{comment_id}")
     @SwaggerApiSuccess(description = "댓글을 성공적으로 생성합니다.")
     @Operation(summary = "댓글 생성", description = "댓글을 생성합니다.")
     @SwaggerApiError({ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public BaseResponse<Void> deleteComment(
+    public void deleteComment(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("comment_id") final Integer commentId) {
         commentService.deleteComment(memberId, projectId, commentId);
-        return new SuccessResponse<>();
     }
 }

@@ -46,10 +46,7 @@ public class AuthController {
     @SwaggerApiSuccess(description = "Return Access Token")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
     @PostMapping("/reissue")
-    public SuccessResponse<AccessTokenResponse> reissue(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+    public AccessTokenResponse reissue(HttpServletRequest request, HttpServletResponse response) {
         log.debug("reissue request");
         String refresh = parseRefreshCookie(request);
         try {
@@ -59,7 +56,7 @@ public class AuthController {
             response.addCookie(createCookie(newToken.getRefreshToken()));
             authService.saveRefreshToken(id, newToken.getRefreshToken(),refreshExpiry);
 
-            return SuccessResponse.of(AccessTokenResponse.from(newToken.getAccessToken()));
+            return AccessTokenResponse.from(newToken.getAccessToken());
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
@@ -71,9 +68,8 @@ public class AuthController {
     @SwaggerApiSuccess(description = "Return Member Info")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @GetMapping("/profile")
-    public SuccessResponse<MemberResponse> getMemberInfo(@CurrentUser Integer currentMember){
-        MemberResponse memberResponse = memberService.getMemberId(currentMember);
-        return SuccessResponse.of(memberResponse);
+    public MemberResponse getMemberInfo(@CurrentUser Integer currentMember){
+        return memberService.getMemberId(currentMember);
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {
@@ -93,7 +89,7 @@ public class AuthController {
         cookie.setMaxAge((int) (refreshExpiry / 1000));
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        // cookie.setSecure(true); // 배포 시 HTTPS에서 사용
+        cookie.setSecure(true); // 배포 시 HTTPS에서 사용
         return cookie;
     }
 }
