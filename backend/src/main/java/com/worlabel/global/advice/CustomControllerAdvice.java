@@ -1,5 +1,6 @@
 package com.worlabel.global.advice;
 
+import com.amazonaws.Response;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.response.ErrorResponse;
@@ -30,55 +31,31 @@ public class CustomControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleException(Exception e, HttpServletRequest request) {
-        log.error("", e);
+    public void handleException(Exception e, HttpServletRequest request) {
         sendNotification(e, request);
-        return ErrorResponse.of(new CustomException(ErrorCode.SERVER_ERROR));
     }
 
-
-    @ExceptionHandler({HttpMessageNotReadableException.class})
-    public ErrorResponse handleReadableException(Exception e,HttpServletRequest request) {
-        log.error("",e);
-        sendNotification(e, request);
-        return ErrorResponse.of(new CustomException(ErrorCode.BAD_REQUEST));
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNoHandlerFoundException(NoResourceFoundException e, HttpServletRequest request) {
-        log.error("", e);
+    @ExceptionHandler({NoResourceFoundException.class})
+    public void handleNotFountException(NoResourceFoundException e, HttpServletRequest request) {
         sendNotification(e, request);
-        return ErrorResponse.of(new CustomException(ErrorCode.INVALID_URL));
     }
 
-    @ExceptionHandler({MissingServletRequestParameterException.class})
-    public ErrorResponse handleRequestParameterException(Exception e, HttpServletRequest request) {
-        log.error("",e);
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler({HttpRequestMethodNotSupportedException.class, MissingServletRequestParameterException.class, HttpMessageNotReadableException.class})
+    public void handleBadRequestException(Exception e, HttpServletRequest request) {
         sendNotification(e, request);
-        return ErrorResponse.of(new CustomException(ErrorCode.EMPTY_REQUEST_PARAMETER));
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ErrorResponse handleRequestMethodNotSupportedException(Exception e, HttpServletRequest request) {
-        log.error("", e);
-        sendNotification(e, request);
-        return ErrorResponse.of(new CustomException(ErrorCode.BAD_REQUEST, "지원하지 않는 API입니다. 요청을 확인해주세요"));
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e, HttpServletRequest request) {
-        log.error("", e);
+    public ResponseEntity<Void> handleCustomException(CustomException e, HttpServletRequest request) {
         sendNotification(e, request);
-        return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e));
+        return ResponseEntity.status(e.getErrorCode().getStatus()).build();
     }
 
-
-
     private void sendNotification(Exception e, HttpServletRequest request) {
-        // TODO: 필요시 주석 처리
-        notificationManager.sendNotification(e, request.getRequestURI(),getParams(request));
+        log.error("", e);
+        notificationManager.sendNotification(e, request.getRequestURI(), getParams(request));
     }
 
     private String getParams(HttpServletRequest req) {

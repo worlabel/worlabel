@@ -7,7 +7,6 @@ import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.Participant;
-import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -62,13 +61,7 @@ public class ImageService {
     /**
      * 이미지 폴더 위치 변경
      */
-    public void moveFolder(
-            final Integer projectId,
-            final Integer folderId,
-            final Integer moveFolderId,
-            final Long imageId,
-            final Integer memberId
-    ) {
+    public void moveFolder(final Integer projectId, final Integer folderId, final Integer moveFolderId, final Long imageId, final Integer memberId) {
         // 권한이 편집자 이상인지 확인
         checkEditorParticipant(memberId, projectId);
         Folder folder = null;
@@ -120,11 +113,8 @@ public class ImageService {
 
     // 편집자 이상의 권한을 확인하는 메서드
     private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
-        Participant participant = participantRepository.findByMemberIdAndProjectId(memberId, projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
-
-        if (!participant.getPrivilege().isEditeAuth()) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
+        if(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)){
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
     }
 
@@ -136,14 +126,7 @@ public class ImageService {
 
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
     private Image getImageAndValidateProject(final Integer folderId, final Long imageId, final Integer projectId) {
-        Image image = imageRepository.findByIdAndFolderId(imageId, folderId)
+        return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
-
-        // 이미지가 해당 프로젝트에 속하는지 확인
-        if (!image.getFolder().getProject().getId().equals(projectId)) {
-            throw new CustomException(ErrorCode.PROJECT_IMAGE_MISMATCH);
-        }
-
-        return image;
     }
 }

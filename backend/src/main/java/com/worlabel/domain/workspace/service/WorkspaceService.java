@@ -127,6 +127,6 @@ public class WorkspaceService {
 
     private WorkspaceParticipant getWorkspaceParticipant(final Integer newMemberId, final Workspace workspace) {
         return workspaceParticipantRepository.findByMemberIdAndWorkspace(newMemberId, workspace)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED));
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
     }
 }
