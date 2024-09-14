@@ -14,6 +14,7 @@ export async function uploadFilesToProject(
     formData.append('files', file);
   });
 
+  // TODO: api.post()를 return하고 사이드 이펙트는 외부에서 처리하도록 수정
   return api
     .post('/projects/{project_id}', formData, {
       onUploadProgress: (progressEvent: AxiosProgressEvent) => {

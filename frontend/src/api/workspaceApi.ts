@@ -1,5 +1,5 @@
 import api from '@/api/axiosConfig';
-import { WorkspaceRequestDTO } from '@/types';
+import { WorkspaceRequest } from '@/types';
 
 export async function fetchWorkspaceList(memberId: number, lastWorkspaceId?: number, limit?: number) {
   return api.get('/workspaces', {
@@ -13,7 +13,7 @@ export async function fetchWorkspace(workspaceId: number, memberId: number) {
   });
 }
 
-export async function updateWorkspace(workspaceId: number, memberId: number, data: WorkspaceRequestDTO) {
+export async function updateWorkspace(workspaceId: number, memberId: number, data: WorkspaceRequest) {
   return api.put(`/workspaces/${workspaceId}`, data, {
     params: { memberId },
   });
@@ -25,7 +25,7 @@ export async function deleteWorkspace(workspaceId: number, memberId: number) {
   });
 }
 
-export async function createWorkspace(memberId: number, data: WorkspaceRequestDTO) {
+export async function createWorkspace(memberId: number, data: WorkspaceRequest) {
   return api.post('/workspaces', data, {
     params: { memberId },
   });

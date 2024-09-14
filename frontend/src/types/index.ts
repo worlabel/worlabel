@@ -34,50 +34,50 @@ export type Label = {
   coordinates: Array<[number, number]>;
 };
 
-export interface FolderRequestDTO {
+export interface FolderRequest {
   title: string;
   parentId: number;
 }
 
-export interface ChildFolderDTO {
+export interface ChildFolder {
   id: number;
   title: string;
 }
 
-export interface FolderResponseDTO {
+export interface FolderResponse {
   id: number;
   title: string;
-  images: ImageResponseDTO[];
-  children: ChildFolderDTO[];
+  images: ImageResponse[];
+  children: ChildFolder[];
 }
 
-export interface ImageResponseDTO {
+export interface ImageResponse {
   id: number;
   imageTitle: string;
   imageUrl: string;
   status: 'PENDING' | 'IN_PROGRESS' | 'NEED_REVIEW' | 'COMPLETED';
 }
 
-export interface ImageMoveRequestDTO {
+export interface ImageMoveRequest {
   moveFolderId: number;
 }
 
-export interface ImageStatusChangeRequestDTO {
+export interface ImageStatusChangeRequest {
   labelStatus: 'PENDING' | 'IN_PROGRESS' | 'NEED_REVIEW' | 'COMPLETED';
 }
 
-export interface MemberResponseDTO {
+export interface MemberResponse {
   id: number;
   nickname: string;
   profileImage: string;
 }
 
-export interface WorkspaceRequestDTO {
+export interface WorkspaceRequest {
   title: string;
   content: string;
 }
 
-export interface WorkspaceResponseDTO {
+export interface WorkspaceResponse {
   id: number;
   memberId: string;
   title: string;
@@ -86,8 +86,8 @@ export interface WorkspaceResponseDTO {
   updatedAt: string;
 }
 
-export interface WorkspaceListResponseDTO {
-  workspaceResponses: WorkspaceResponseDTO[];
+export interface WorkspaceListResponse {
+  workspaceResponses: WorkspaceResponse[];
 }
 
 export interface SuccessResponse<T> {
@@ -98,11 +98,13 @@ export interface SuccessResponse<T> {
   errors: CustomError[];
   isSuccess: boolean;
 }
-export interface ProjectRequestDTO {
+
+export interface ProjectRequest {
   title: string;
   projectType: 'classification' | 'detection' | 'segmentation';
 }
-export interface ProjectResponseDTO {
+
+export interface ProjectResponse {
   id: number;
   title: string;
   workspaceId: number;
@@ -111,8 +113,8 @@ export interface ProjectResponseDTO {
   updatedAt: string;
 }
 
-export interface ProjectListResponseDTO {
-  workspaceResponses: ProjectResponseDTO[];
+export interface ProjectListResponse {
+  workspaceResponses: ProjectResponse[];
 }
 
 export interface CustomError {
@@ -140,17 +142,17 @@ export interface BaseResponse<T> {
   isSuccess: boolean;
 }
 
-export interface RefreshTokenResponseDTO {
+export interface RefreshTokenResponse {
   accessToken: string;
 }
 
-export interface CommentRequestDTO {
+export interface CommentRequest {
   content: string;
   positionX: number;
   positionY: number;
 }
 
-export interface CommentResponseDTO {
+export interface CommentResponse {
   id: number;
   memberId: number;
   memberNickname: string;
@@ -161,18 +163,18 @@ export interface CommentResponseDTO {
   createTime: string; // 작성 일자 (ISO 8601 형식)
 }
 
-export interface ProjectMemberRequestDTO {
+export interface ProjectMemberRequest {
   memberId: number;
   privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 }
 
-export interface LabelingRequestDTO {
+export interface LabelingRequest {
   memberId: number;
   projectId: number;
   imageId: number;
 }
 
-export interface AutoLabelingResponseDTO {
+export interface AutoLabelingResponse {
   imageId: number;
   imageUrl: string;
   data: string;

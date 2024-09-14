@@ -1,7 +1,7 @@
 import api from '@/api/axiosConfig';
-import { ImageMoveRequestDTO, ImageStatusChangeRequestDTO } from '@/types';
+import { ImageMoveRequest, ImageStatusChangeRequest } from '@/types';
 
-export async function fetchImage(projectId: number, folderId: number, imageId: number, memberId: number) {
+export async function getImage(projectId: number, folderId: number, imageId: number, memberId: number) {
   return api.get(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, {
     params: { memberId },
   });
@@ -12,7 +12,7 @@ export async function moveImage(
   folderId: number,
   imageId: number,
   memberId: number,
-  moveRequest: ImageMoveRequestDTO
+  moveRequest: ImageMoveRequest
 ) {
   return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, moveRequest, {
     params: { memberId },
@@ -30,7 +30,7 @@ export async function changeImageStatus(
   folderId: number,
   imageId: number,
   memberId: number,
-  statusChangeRequest: ImageStatusChangeRequestDTO
+  statusChangeRequest: ImageStatusChangeRequest
 ) {
   return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}/status`, statusChangeRequest, {
     params: { memberId },

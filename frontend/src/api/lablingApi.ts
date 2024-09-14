@@ -1,7 +1,7 @@
 import api from '@/api/axiosConfig';
-import { LabelingRequestDTO } from '@/types';
+import { LabelingRequest } from '@/types';
 
-export async function saveImageLabels(projectId: number, imageId: number, memberId: number, data: LabelingRequestDTO) {
+export async function saveImageLabels(projectId: number, imageId: number, memberId: number, data: LabelingRequest) {
   return api.post(`/projects/${projectId}/label/image/${imageId}`, data, {
     params: { memberId },
   });
