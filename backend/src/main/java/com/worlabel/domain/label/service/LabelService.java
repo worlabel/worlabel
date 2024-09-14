@@ -58,7 +58,9 @@ public class LabelService {
         log.debug("{}번 프로젝트 이미지 {} 진행 ", projectId, projectType);
 
         List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
-        List<AutoLabelingImageRequest> imageRequestList = imageList.stream().map(AutoLabelingImageRequest::of).toList();
+        List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
+                .map(AutoLabelingImageRequest::of)
+                .toList();
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
         sendRequestToApi(autoLabelingRequest, projectType.getValue(), projectId);
     }
