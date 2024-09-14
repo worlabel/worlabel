@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter
-public class ImageRequest {
+public class AutoLabelingImageRequest {
 
     @Schema(description = "이미지 PK", example = "2")
     @NotEmpty(message = "이미지 PK를 입력하세요")
@@ -25,7 +25,7 @@ public class ImageRequest {
     @JsonProperty("image_url")
     private String imageUrl;
 
-    public static ImageRequest of(Image image){
-        return new ImageRequest(image.getId(), image.getImageUrl());
+    public static AutoLabelingImageRequest of(Image image){
+        return new AutoLabelingImageRequest(image.getId(), image.getImageUrl());
     }
 }

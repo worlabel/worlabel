@@ -35,7 +35,7 @@ public class ProgressController {
 
         int progress = jsonObject.get("progress").getAsInt();
         AutoLabelingResponse autoLabelingResponse = labelService.parseAutoLabelingResponse(jsonObject.getAsJsonObject("result"));
-        labelService.saveLabel(autoLabelingResponse);
+        labelService.saveAutoLabel(autoLabelingResponse);
         log.debug("오토 레이블링 진행률 : {}%",progress);
         return String.valueOf(progress);
     }

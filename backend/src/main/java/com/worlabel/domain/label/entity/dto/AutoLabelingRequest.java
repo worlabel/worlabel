@@ -14,13 +14,13 @@ public class AutoLabelingRequest {
     private Integer projectId;
 
     @JsonProperty("image_list")
-    private List<ImageRequest> imageList;
+    private List<AutoLabelingImageRequest> imageList;
 
     // private Double confThreshold
     // private Double iouThreshold;
     // List<?> classes
 
-    public static AutoLabelingRequest of(final Integer projectId, final List<ImageRequest> imageList) {
+    public static AutoLabelingRequest of(final Integer projectId, final List<AutoLabelingImageRequest> imageList) {
         return new AutoLabelingRequest(projectId, imageList);
     }
 }
