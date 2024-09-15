@@ -77,8 +77,8 @@ public class S3UploadService {
             log.debug("object Content: {}", data);
 
             return data;
-        }catch (IOException e){
-            throw new CustomException(ErrorCode.EMPTY_FILE);
+        } catch (Exception e) {
+            return null;
         }
     }
 

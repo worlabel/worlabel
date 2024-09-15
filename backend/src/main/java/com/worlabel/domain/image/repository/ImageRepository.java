@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
     @Query("select i from Image i " +
-            "join fetch i.label l " +
             "where i.folder.project.id = :projectId")
     List<Image> findImagesByProjectId(@Param("projectId") Integer projectId);
 

@@ -1,4 +1,4 @@
-package com.worlabel.domain.label.entity.dto;
+package com.worlabel.domain.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.worlabel.domain.image.entity.Image;
@@ -11,10 +11,9 @@ import lombok.NoArgsConstructor;
 
 @Schema(name = "오토 레이블링 요청 dto", description = "오토 레이블링 요청 DTO")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public class AutoLabelingImageRequest {
-
     @Schema(description = "이미지 PK", example = "2")
     @NotEmpty(message = "이미지 PK를 입력하세요")
     @JsonProperty("image_id")
@@ -26,6 +25,6 @@ public class AutoLabelingImageRequest {
     private String imageUrl;
 
     public static AutoLabelingImageRequest of(Image image){
-        return new AutoLabelingImageRequest(image.getId(), image.getImageKey());
+        return new AutoLabelingImageRequest(image.getId(), image.getImagePath());
     }
 }

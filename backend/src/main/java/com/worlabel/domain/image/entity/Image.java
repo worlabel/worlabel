@@ -2,7 +2,6 @@ package com.worlabel.domain.image.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.worlabel.domain.folder.entity.Folder;
-import com.worlabel.domain.label.entity.Label;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -61,12 +60,6 @@ public class Image extends BaseEntity {
     @JoinColumn(name = "folder_id", nullable = false)
     @JsonIgnore
     private Folder folder;
-
-    /**
-     * 이미지에 연결된 레이블
-     */
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Label label;
 
     private Image(final String imageTitle, final String imageKey, final String extension, final Integer order, final Folder folder) {
         this.title = imageTitle;

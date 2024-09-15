@@ -9,7 +9,6 @@ import com.worlabel.domain.image.entity.dto.ImageLabelRequest;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
-import com.worlabel.domain.label.entity.dto.LabelRequest;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
@@ -55,12 +54,7 @@ public class ImageService {
     @Transactional(readOnly = true)
     public DetailImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
-        String data = null;
-        if(image.getStatus() != LabelStatus.PENDING){
-            data = s3UploadService.getData(image.getDataPath());
-        }
-
-        log.debug("datA: {}",data);
+        String data = s3UploadService.getData(image.getDataPath());
         return DetailImageResponse.from(image,data);
     }
 
