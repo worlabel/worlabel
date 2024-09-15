@@ -71,11 +71,9 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public ProjectResponse getProjectById(final Integer memberId, final Integer projectId) {
-
-        checkExistParticipant(memberId, projectId);
         Project project = getProject(projectId);
-
         return ProjectResponse.from(project);
     }
 
@@ -86,22 +84,23 @@ public class ProjectService {
                 .toList();
     }
 
+    @CheckPrivilege(PrivilegeType.ADMIN)
     public ProjectResponse updateProject(final Integer memberId, final Integer projectId, final ProjectRequest projectRequest) {
-        checkAdminParticipant(memberId, projectId);
         Project project = getProject(projectId);
         project.updateProject(projectRequest.getTitle(), projectRequest.getProjectType());
 
         return ProjectResponse.from(project);
     }
 
+    @CheckPrivilege(PrivilegeType.ADMIN)
     public void deleteProject(final Integer memberId, final Integer projectId) {
-        checkAdminParticipant(memberId, projectId);
         projectRepository.deleteById(projectId);
     }
 
+    @CheckPrivilege(PrivilegeType.ADMIN)
     public void addProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
         checkSelfParticipant(memberId, participantRequest.getMemberId());
-        checkAdminParticipant(memberId, projectId);
+
         Project project = getProject(projectId);
         Member member = getMember(participantRequest.getMemberId());
         Participant participant = Participant.of(project, member, participantRequest.getPrivilegeType());
@@ -113,9 +112,8 @@ public class ProjectService {
         participantRepository.save(participant);
     }
 
+    @CheckPrivilege(PrivilegeType.ADMIN)
     public void changeProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
-        checkSelfParticipant(memberId, participantRequest.getMemberId());
-        checkAdminParticipant(memberId, projectId);
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId)
@@ -123,9 +121,8 @@ public class ProjectService {
         participant.updatePrivilege(participantRequest.getPrivilegeType());
     }
 
+    @CheckPrivilege(PrivilegeType.ADMIN)
     public void removeProjectMember(final Integer memberId, final Integer projectId, final Integer removeMemberId) {
-        checkSelfParticipant(memberId, removeMemberId);
-        checkAdminParticipant(memberId, projectId);
         checkNotAdminParticipant(removeMemberId, projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId)
@@ -134,10 +131,8 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
+    @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer memberId, final Integer projectId) {
-        // 멤버 권한 체크
-//        checkEditorParticipant(memberId, projectId);
-
         // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다.
         /*
             없으면 redis 상태 테이블을 만든다. progressTable
@@ -176,19 +171,8 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private void checkExistParticipant(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
-        }
-    }
-
-    private void checkAdminParticipant(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
-        }
-    }
-
     private void checkNotAdminParticipant(final Integer memberId, final Integer projectId) {
+        checkSelfParticipant(memberId, projectId);
         if (participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
             throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
