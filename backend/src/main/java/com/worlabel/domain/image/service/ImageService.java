@@ -3,13 +3,11 @@ package com.worlabel.domain.image.service;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.dto.DetailImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
-import com.worlabel.domain.participant.entity.Participant;
 import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.participant.repository.ParticipantRepository;
-import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -40,8 +38,9 @@ public class ImageService {
         Folder folder = getFolder(folderId);
         for (int order = 0; order < imageList.size(); order++) {
             MultipartFile file = imageList.get(order);
-            String imageUrl = s3UploadService.upload(file, projectId);
-            Image image = Image.of(file.getOriginalFilename(), imageUrl, order, folder);
+            String extension = getExtension(file);
+            String imageKey = s3UploadService.upload(file,extension, projectId);
+            Image image = Image.of(file.getOriginalFilename(), imageKey, extension, order, folder);
             imageRepository.save(image);
         }
     }
@@ -51,9 +50,9 @@ public class ImageService {
      */
     @CheckPrivilege(PrivilegeType.VIEWER)
     @Transactional(readOnly = true)
-    public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
-        Image image = getImageAndValidateProject(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
-        return ImageResponse.from(image);
+    public DetailImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
+        Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
+        return DetailImageResponse.from(image);
     }
 
     /**
@@ -66,8 +65,7 @@ public class ImageService {
             folder = getFolder(moveFolderId);
         }
 
-        // 이미지가 해당 프로젝트에 속하는지 확인
-        Image image = getImageAndValidateProject(folderId, imageId, projectId);
+        Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
         image.moveFolder(folder);
     }
 
@@ -77,10 +75,10 @@ public class ImageService {
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         // 이미지가 해당 프로젝트에 속하는지 확인
-        Image image = getImageAndValidateProject(folderId, imageId, projectId);
+        Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
 
         imageRepository.delete(image);
-        s3UploadService.deleteImageFromS3(image.getImageUrl());
+        s3UploadService.deleteImageFromS3(image.getImageKey());
     }
 
     /**
@@ -89,12 +87,17 @@ public class ImageService {
     @CheckPrivilege(PrivilegeType.VIEWER)
     public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId, final ImageStatusRequest imageStatusRequest) {
         // 이미지가 해당 프로젝트에 속하는지 확인
-        Image image = getImageAndValidateProject(folderId, imageId, projectId);
+        Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
 
         // 이미지 상태 변경 로직 추가 (생략)
         image.updateStatus(imageStatusRequest.getLabelStatus());
 
         return ImageResponse.from(image);
+    }
+
+    private String getExtension(final MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        return fileName.substring(fileName.lastIndexOf(".") + 1); // 파일 확장자
     }
 
     // 폴더 가져오기
@@ -104,7 +107,7 @@ public class ImageService {
     }
 
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
-    private Image getImageAndValidateProject(final Integer folderId, final Long imageId, final Integer projectId) {
+    private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
     }

@@ -28,12 +28,12 @@ public class DetailImageResponse {
     @Schema(description = "이미지 상태", example = "PENDING")
     private LabelStatus status;
 
-    public static DetailImageResponse from(final Image image, final String data) {
+    public static DetailImageResponse from(final Image image) {
         return new DetailImageResponse(
                 image.getId(),
                 image.getTitle(),
-                image.getImageUrl(),
-                data,
+                image.getImagePath(),
+                image.getDataPath(),
                 image.getStatus()
         );
     }

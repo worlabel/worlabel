@@ -133,7 +133,6 @@ public class JwtTokenService {
     private boolean isTokenType(String token, String expectedType) {
         try {
             Claims claims = parseClaims(token);
-            log.debug("claims : {}", claims);
             String tokenType = claims.get("type", String.class);
             return expectedType.equals(tokenType);
         } catch (Exception e) {

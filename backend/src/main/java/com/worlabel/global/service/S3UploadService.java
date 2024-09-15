@@ -49,7 +49,6 @@ public class S3UploadService {
     public String uploadJson(final String json, final String imageUrl) {
         String targetUrl = removeExtension(getKeyFromImageAddress(imageUrl)) + ".json";
 
-//        log.debug("주소 {}", targetUrl);
         try {
             byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
             ObjectMetadata metadata = new ObjectMetadata();
@@ -74,19 +73,19 @@ public class S3UploadService {
     /**
      * 파일이 존재하는지 확인
      */
-    public String upload(final MultipartFile image, final Integer projectId) {
+    public String upload(final MultipartFile image, final String extension, final Integer projectId) {
         if (image.isEmpty() || Objects.isNull(image.getOriginalFilename())) {
             throw new CustomException(ErrorCode.EMPTY_FILE);
         }
-        return url + uploadImage(image, projectId);
+        return url + uploadImage(image, extension, projectId);
     }
 
     /**
      * 파일 업로드
      */
-    private String uploadImage(final MultipartFile image, final Integer projectId) {
+    private String uploadImage(final MultipartFile image, final String extension, final Integer projectId) {
         try {
-            return uploadImageToS3(image, projectId);
+            return uploadImageToS3(image, extension, projectId);
         } catch (IOException e) {
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
@@ -95,12 +94,10 @@ public class S3UploadService {
     /**
      * AWS S3 이미지 업로드
      */
-    private String uploadImageToS3(final MultipartFile image, final Integer projectId) throws IOException {
-        String originalFileName = image.getOriginalFilename(); // 원본 파일 이름
-        String extension = originalFileName.substring(originalFileName.lastIndexOf(".") + 1); // 파일 확장자
-
+    private String uploadImageToS3(final MultipartFile image, final String extension, final Integer projectId) throws IOException {
         // UUID를 사용하여 고유한 파일 이름 생성
-        String s3FileName = getS3FileName(projectId, extension);
+        String s3Key = getS3FileName(projectId);
+        String s3FileName = getS3FileName(projectId) + "." + extension;
         log.debug("{}", s3FileName);
 
         // MultipartFile의 InputStream을 가져온 뒤, 바이트 배열로 변환
@@ -120,13 +117,7 @@ public class S3UploadService {
             log.error("", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
-        URL url = amazonS3.getUrl(bucket, s3FileName);
-        log.debug("url :{}", url);
-        return url.getPath();
-    }
-
-    private static String getS3FileName(final Integer projectId, final String extension) {
-        return projectId + "/" + UUID.randomUUID().toString().substring(0, 13) + "." + extension;
+        return s3Key;
     }
 
     public void deleteImageFromS3(String imageAddress) {
@@ -136,6 +127,10 @@ public class S3UploadService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.FAIL_TO_DELETE_FILE);
         }
+    }
+
+    private static String getS3FileName(final Integer projectId) {
+        return projectId + "/" + UUID.randomUUID().toString().substring(0, 13);
     }
 
     private String removeExtension(String url) {

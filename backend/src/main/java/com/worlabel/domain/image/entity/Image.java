@@ -30,10 +30,16 @@ public class Image extends BaseEntity {
     private String title;
 
     /**
-     * 이미지 URL
+     * 이미지 주소 key
      */
-    @Column(name = "image_url", nullable = false, length = 255)
-    private String imageUrl;
+    @Column(name = "image_key", nullable = false, length = 255)
+    private String imageKey;
+
+    /**
+     * 이미지 확장자
+     */
+    @Column(name = "image_extenstion", nullable = false, length = 10)
+    private String extension;
 
     /**
      * 이미지 순서
@@ -62,15 +68,16 @@ public class Image extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private Label label;
 
-    private Image(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {
+    private Image(final String imageTitle, final String imageKey, final String extension, final Integer order, final Folder folder) {
         this.title = imageTitle;
-        this.imageUrl = imageUrl;
+        this.imageKey = imageKey;
+        this.extension = extension;
         this.order = order;
         this.folder = folder;
     }
 
-    public static Image of(final String imageTitle, final String imageUrl, final Integer order, final Folder folder) {
-        return new Image(imageTitle, imageUrl, order, folder);
+    public static Image of(final String imageTitle, final String imageKey,final String extension, final Integer order, final Folder folder) {
+        return new Image(imageTitle, imageKey, extension, order, folder);
     }
 
     public void moveFolder(final Folder moveFolder) {
@@ -79,5 +86,13 @@ public class Image extends BaseEntity {
 
     public void updateStatus(final LabelStatus labelStatus) {
         this.status = labelStatus;
+    }
+
+    public String getImagePath(){
+        return this.imageKey + "." + this.extension;
+    }
+
+    public String getDataPath(){
+        return this.imageKey + ".json";
     }
 }

@@ -26,6 +26,6 @@ public class AutoLabelingImageRequest {
     private String imageUrl;
 
     public static AutoLabelingImageRequest of(Image image){
-        return new AutoLabelingImageRequest(image.getId(), image.getImageUrl());
+        return new AutoLabelingImageRequest(image.getId(), image.getImageKey());
     }
 }

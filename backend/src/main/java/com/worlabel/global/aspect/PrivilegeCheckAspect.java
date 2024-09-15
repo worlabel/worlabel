@@ -43,8 +43,6 @@ public class PrivilegeCheckAspect {
             }
         }
 
-        PrivilegeType value = checkPrivilege.value();
-        log.debug("projectId {}, memberId {} value : {}", projectId, memberId,value);
         participantService.checkPrivilegeUnauthorized(memberId, projectId, checkPrivilege.value());
     }
 }

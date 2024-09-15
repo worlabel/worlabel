@@ -1,5 +1,6 @@
 package com.worlabel.domain.image.controller;
 
+import com.worlabel.domain.image.entity.dto.DetailImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageMoveRequest;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
@@ -43,10 +44,10 @@ public class ImageController {
     }
 
     @GetMapping("/{image_id}")
-    @SwaggerApiSuccess(description = "이미지를 조회합니다.")
-    @Operation(summary = "이미지 조회", description = "이미지 정보를 조회합니다.")
+    @SwaggerApiSuccess(description = "이미지를 단일 조회합니다.")
+    @Operation(summary = "이미지 단일 조회", description = "이미지 정보를 단일 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public ImageResponse getImageById(
+    public DetailImageResponse getImageById(
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,

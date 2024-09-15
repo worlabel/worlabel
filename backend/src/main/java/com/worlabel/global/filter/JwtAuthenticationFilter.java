@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.debug(request.getRequestURI());
         String token = resolveToken(request);
-        log.debug("token {}", token);
+
         try {
             if (StringUtils.hasText(token) && !jwtTokenService.isTokenExpired(token) && jwtTokenService.isAccessToken(token)) {
                 String name = jwtTokenService.parseUsername(token);
