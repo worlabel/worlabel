@@ -31,7 +31,6 @@ public class ImageService {
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
     private final FolderRepository folderRepository;
-    private final ParticipantService participantService;
 
     /**
      * 이미지 리스트 업로드
@@ -50,23 +49,18 @@ public class ImageService {
     /**
      * 아이디 기반 이미지 조회
      */
+    @CheckPrivilege(PrivilegeType.VIEWER)
     @Transactional(readOnly = true)
     public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
-        // 참가에 존재하는지 확인
-        participantService.checkViewerUnauthorized(memberId, projectId);
-
-        // 이미지가 해당 프로젝트에 속하는지 확인
-        Image image = getImageAndValidateProject(folderId, imageId, projectId);
+        Image image = getImageAndValidateProject(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
         return ImageResponse.from(image);
     }
 
     /**
      * 이미지 폴더 위치 변경
      */
+    @CheckPrivilege(PrivilegeType.EDITOR)
     public void moveFolder(final Integer projectId, final Integer folderId, final Integer moveFolderId, final Long imageId, final Integer memberId) {
-        // 권한이 편집자 이상인지 확인
-        participantService.checkEditorUnauthorized(memberId, projectId);
-
         Folder folder = null;
         if (moveFolderId != null) {
             folder = getFolder(moveFolderId);
@@ -80,10 +74,8 @@ public class ImageService {
     /**
      * 이미지 삭제
      */
+    @CheckPrivilege(PrivilegeType.EDITOR)
     public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
-        // 권한이 편집자 이상인지 확인
-        participantService.checkEditorUnauthorized(memberId, projectId);
-
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageAndValidateProject(folderId, imageId, projectId);
 
@@ -94,10 +86,8 @@ public class ImageService {
     /**
      * 이미지 상태 변경
      */
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId, final ImageStatusRequest imageStatusRequest) {
-        // 참가에 존재하는지 확인
-        participantService.checkViewerUnauthorized(memberId, projectId);
-
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageAndValidateProject(folderId, imageId, projectId);
 
