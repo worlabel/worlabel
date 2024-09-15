@@ -7,7 +7,10 @@ import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.Participant;
+import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
+import com.worlabel.domain.participant.service.ParticipantService;
+import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.S3UploadService;
@@ -28,14 +31,13 @@ public class ImageService {
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
     private final FolderRepository folderRepository;
-    private final ParticipantRepository participantRepository;
+    private final ParticipantService participantService;
 
     /**
      * 이미지 리스트 업로드
      */
+    @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
-        // 권한이 편집자 이상인지 확인
-        checkEditorParticipant(memberId, projectId);
         Folder folder = getFolder(folderId);
         for (int order = 0; order < imageList.size(); order++) {
             MultipartFile file = imageList.get(order);
@@ -51,7 +53,7 @@ public class ImageService {
     @Transactional(readOnly = true)
     public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         // 참가에 존재하는지 확인
-        checkExistParticipant(memberId, projectId);
+        participantService.checkViewerUnauthorized(memberId, projectId);
 
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageAndValidateProject(folderId, imageId, projectId);
@@ -63,7 +65,8 @@ public class ImageService {
      */
     public void moveFolder(final Integer projectId, final Integer folderId, final Integer moveFolderId, final Long imageId, final Integer memberId) {
         // 권한이 편집자 이상인지 확인
-        checkEditorParticipant(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
+
         Folder folder = null;
         if (moveFolderId != null) {
             folder = getFolder(moveFolderId);
@@ -79,7 +82,7 @@ public class ImageService {
      */
     public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         // 권한이 편집자 이상인지 확인
-        checkEditorParticipant(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
 
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageAndValidateProject(folderId, imageId, projectId);
@@ -93,7 +96,7 @@ public class ImageService {
      */
     public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId, final ImageStatusRequest imageStatusRequest) {
         // 참가에 존재하는지 확인
-        checkExistParticipant(memberId, projectId);
+        participantService.checkViewerUnauthorized(memberId, projectId);
 
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageAndValidateProject(folderId, imageId, projectId);
@@ -102,20 +105,6 @@ public class ImageService {
         image.updateStatus(imageStatusRequest.getLabelStatus());
 
         return ImageResponse.from(image);
-    }
-
-    // 참가에 존재하는지 확인
-    private void checkExistParticipant(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.BAD_REQUEST);
-        }
-    }
-
-    // 편집자 이상의 권한을 확인하는 메서드
-    private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
-        if(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)){
-            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
-        }
     }
 
     // 폴더 가져오기

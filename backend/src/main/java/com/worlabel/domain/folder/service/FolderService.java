@@ -6,6 +6,7 @@ import com.worlabel.domain.folder.entity.dto.FolderRequest;
 import com.worlabel.domain.folder.entity.dto.FolderResponse;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
+import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.exception.CustomException;
@@ -21,13 +22,13 @@ public class FolderService {
 
     private final FolderRepository folderRepository;
     private final ProjectRepository projectRepository;
-    private final ParticipantRepository participantRepository;
+    private final ParticipantService participantService;
 
     /**
      * 폴더 생성
      */
     public FolderResponse createFolder(final Integer memberId, final Integer projectId, final FolderRequest folderRequest) {
-        checkUnauthorized(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
 
         Project project = getProject(projectId);
 
@@ -47,7 +48,7 @@ public class FolderService {
      */
     @Transactional(readOnly = true)
     public FolderResponse getFolderById(final Integer memberId, final Integer projectId, final Integer folderId) {
-        checkExistParticipant(memberId, projectId);
+        participantService.checkViewerUnauthorized(memberId, projectId);
 
         // 최상위 폴더
         if (folderId == 0) {
@@ -61,7 +62,8 @@ public class FolderService {
      * 폴더 수정
      */
     public FolderResponse updateFolder(final Integer memberId, final Integer projectId, final Integer folderId, final FolderRequest updatedFolderRequest) {
-        checkUnauthorized(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
+
         Folder folder = getFolder(folderId, projectId);
 
         Folder parentFolder = folderRepository.findById(updatedFolderRequest.getParentId())
@@ -76,7 +78,7 @@ public class FolderService {
      * 폴더 삭제
      */
     public void deleteFolder(final Integer memberId, final Integer projectId, final Integer folderId) {
-        checkUnauthorized(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
         Folder folder = getFolder(folderId, projectId);
         folderRepository.delete(folder);
     }
@@ -85,7 +87,7 @@ public class FolderService {
      *  리뷰 목록만 조회
      */
     public FolderResponse getFolderByIdWithNeedReview(final Integer memberId, final Integer projectId, final Integer folderId) {
-        checkExistParticipant(memberId, projectId);
+        participantService.checkViewerUnauthorized(memberId, projectId);
 
         // 최상위 폴더
         if (folderId == 0) {
@@ -103,17 +105,5 @@ public class FolderService {
     private Folder getFolder(final Integer folderId, final Integer projectId) {
         return folderRepository.findAllByProjectIdAndId(projectId, folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
-    }
-
-    private void checkUnauthorized(final Integer memberId, final Integer projectId) {
-        if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.FOLDER_UNAUTHORIZED);
-        }
-    }
-
-    private void checkExistParticipant(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.BAD_REQUEST);
-        }
     }
 }

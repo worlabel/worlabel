@@ -11,6 +11,7 @@ import com.worlabel.domain.label.entity.dto.AutoLabelingImageRequest;
 import com.worlabel.domain.label.entity.dto.LabelRequest;
 import com.worlabel.domain.label.repository.LabelRepository;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
+import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.domain.project.entity.ProjectType;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.exception.CustomException;
@@ -37,7 +38,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LabelService {
 
-    private final ParticipantRepository participantRepository;
+    private final ParticipantService participantService;
     private final ProjectRepository projectRepository;
     private final LabelRepository labelRepository;
     private final S3UploadService s3UploadService;
@@ -52,7 +53,7 @@ public class LabelService {
     private String aiServer;
 
     public void autoLabeling(final int projectId, final int memberId) {
-        checkEditorExistParticipant(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
 
         ProjectType projectType = getType(projectId);
         log.debug("{}번 프로젝트 이미지 {} 진행 ", projectId, projectType);
@@ -70,7 +71,7 @@ public class LabelService {
     }
 
     public void saveUserLabel(final int memberId, final int projectId, final long imageId, final LabelRequest labelRequest) {
-        checkEditorExistParticipant(memberId, projectId);
+        participantService.checkEditorUnauthorized(memberId, projectId);
         save(imageId, labelRequest.getData(), labelRequest.getStatus());
     }
 
@@ -98,7 +99,7 @@ public class LabelService {
     private void sendRequestToApi(AutoLabelingRequest autoLabelingRequest, String apiEndpoint, int projectId) {
         String url = createApiUrl(apiEndpoint);
 
-        // RestTemplate을 동적으로 생성하여 사용
+        // RestTemplate 동적으로 생성하여 사용
         HttpHeaders headers = createJsonHeaders();
 
         // 요청 본문 설정
@@ -164,13 +165,5 @@ public class LabelService {
     private ProjectType getType(final Integer projectId) {
         return projectRepository.findProjectTypeById(projectId).orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
     }
-
-    /**
-     * 참여자(EDITOR, ADMIN) 검증 메서드
-     */
-    private void checkEditorExistParticipant(final Integer memberId, final Integer projectId) {
-        if (participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
-        }
-    }
 }
+

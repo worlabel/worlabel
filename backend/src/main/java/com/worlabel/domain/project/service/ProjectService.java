@@ -62,6 +62,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectResponse getProjectById(final Integer memberId, final Integer projectId) {
+
         checkExistParticipant(memberId, projectId);
         Project project = getProject(projectId);
 
@@ -125,7 +126,7 @@ public class ProjectService {
 
     public void train(final Integer memberId, final Integer projectId) {
         // 멤버 권한 체크
-        checkEditorParticipant(memberId, projectId);
+//        checkEditorParticipant(memberId, projectId);
 
         // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다.
         /*
@@ -163,12 +164,6 @@ public class ProjectService {
     private Member getMember(final Integer memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    private void checkEditorParticipant(final Integer memberId, final Integer projectId) {
-        if(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(memberId,projectId)){
-            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
-        }
     }
 
     private void checkExistParticipant(final Integer memberId, final Integer projectId) {
