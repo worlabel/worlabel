@@ -78,7 +78,8 @@ public class LabelService {
 
     private void save(final long imageId, final String data, final LabelStatus status) {
         Image image = getImage(imageId);
-        String dataPath = s3UploadService.uploadJson(data, image.getImageKey());
+        s3UploadService.uploadJson(data, image.getImageKey());
+        String dataPath = null;
 
         // PENDING 상태면 Label 존재 X
         if (image.getStatus() == LabelStatus.PENDING) {

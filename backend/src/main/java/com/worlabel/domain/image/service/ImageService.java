@@ -3,10 +3,13 @@ package com.worlabel.domain.image.service;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.DetailImageResponse;
+import com.worlabel.domain.image.entity.dto.ImageLabelRequest;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
 import com.worlabel.domain.image.repository.ImageRepository;
+import com.worlabel.domain.label.entity.dto.LabelRequest;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
@@ -52,7 +55,13 @@ public class ImageService {
     @Transactional(readOnly = true)
     public DetailImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
-        return DetailImageResponse.from(image);
+        String data = null;
+        if(image.getStatus() != LabelStatus.PENDING){
+            data = s3UploadService.getData(image.getDataPath());
+        }
+
+        log.debug("datA: {}",data);
+        return DetailImageResponse.from(image,data);
     }
 
     /**
@@ -93,6 +102,22 @@ public class ImageService {
         image.updateStatus(imageStatusRequest.getLabelStatus());
 
         return ImageResponse.from(image);
+    }
+
+    /**
+     * 사용자가 수정한 레이블링 설정
+     */
+    @CheckPrivilege(PrivilegeType.EDITOR)
+    public void saveUserLabel(final Integer memberId, final Integer projectId, final Long imageId, final ImageLabelRequest labelRequest) {
+        save(imageId, labelRequest.getData());
+    }
+
+    private void save(final long imageId, final String data) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+
+        String dataPath = image.getDataPath();
+        s3UploadService.uploadJson(data, dataPath);
     }
 
     private String getExtension(final MultipartFile file) {

@@ -1,9 +1,7 @@
 package com.worlabel.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -14,14 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 // TODO: 추후 비동기로 변경해야합니다.
 @Slf4j
@@ -46,8 +44,8 @@ public class S3UploadService {
     @Value("${cloud.aws.url}")
     private String url;
 
-    public String uploadJson(final String json, final String imageUrl) {
-        String targetUrl = removeExtension(getKeyFromImageAddress(imageUrl)) + ".json";
+    public void uploadJson(final String json, final String dataUrl) {
+        String key = getKeyFromImageAddress(dataUrl);
 
         try {
             byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
@@ -57,16 +55,36 @@ public class S3UploadService {
 
             // JSON 데이터를 S3에 업로드
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(jsonBytes)) {
-                PutObjectRequest putRequest = new PutObjectRequest(bucket, targetUrl, inputStream, metadata);
+                PutObjectRequest putRequest = new PutObjectRequest(bucket, key, inputStream, metadata);
                 amazonS3.putObject(putRequest); // S3에 파일 업로드
             }
-
-            URL uploadedUrl = amazonS3.getUrl(bucket, targetUrl);
-//            log.debug("Uploaded JSON URL: {}", uploadedUrl);
-            return uploadedUrl.toString(); // 업로드된 파일의 URL 반환
         } catch (Exception e) {
             log.error("JSON 업로드 중 오류 발생: ", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
+
+    public String getData(final String dataUrl) {
+        try {
+            // S3 URL에서 Key 추출
+            String key = getKeyFromImageAddress(dataUrl);
+
+            // S3에서 객체 가져오기
+            S3Object object = amazonS3.getObject(bucket, key);
+
+            // S3 객체의 내용을 스트림으로 읽어오기
+            String data = readS3ObjectContent(object.getObjectContent());
+            log.debug("object Content: {}", data);
+
+            return data;
+        }catch (IOException e){
+            throw new CustomException(ErrorCode.EMPTY_FILE);
+        }
+    }
+
+    private String readS3ObjectContent(InputStream inputStream) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            return reader.lines().collect(Collectors.joining("\n"));
         }
     }
 
@@ -77,7 +95,7 @@ public class S3UploadService {
         if (image.isEmpty() || Objects.isNull(image.getOriginalFilename())) {
             throw new CustomException(ErrorCode.EMPTY_FILE);
         }
-        return url + uploadImage(image, extension, projectId);
+        return url + "/" + uploadImage(image, extension, projectId);
     }
 
     /**
@@ -97,7 +115,7 @@ public class S3UploadService {
     private String uploadImageToS3(final MultipartFile image, final String extension, final Integer projectId) throws IOException {
         // UUID를 사용하여 고유한 파일 이름 생성
         String s3Key = getS3FileName(projectId);
-        String s3FileName = getS3FileName(projectId) + "." + extension;
+        String s3FileName = s3Key + "." + extension;
         log.debug("{}", s3FileName);
 
         // MultipartFile의 InputStream을 가져온 뒤, 바이트 배열로 변환
