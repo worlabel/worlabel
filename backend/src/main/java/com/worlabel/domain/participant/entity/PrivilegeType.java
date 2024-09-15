@@ -20,4 +20,9 @@ public enum PrivilegeType {
     public boolean isEditeAuth() {
         return this.score >= EDITOR.getScore();
     }
+
+    // 매니저 이상의 권한이 있는지 확인하는 메서드
+    public boolean isManagerAuth() {
+        return this.score >= MANAGER.getScore();
+    }
 }
