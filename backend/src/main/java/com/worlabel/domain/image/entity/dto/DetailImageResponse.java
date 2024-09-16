@@ -2,7 +2,6 @@ package com.worlabel.domain.image.entity.dto;
 
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.entity.LabelStatus;
-import com.worlabel.domain.label.entity.Label;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -32,7 +31,7 @@ public class DetailImageResponse {
         return new DetailImageResponse(
                 image.getId(),
                 image.getTitle(),
-                image.getImageUrl(),
+                image.getImagePath(),
                 data,
                 image.getStatus()
         );

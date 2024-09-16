@@ -25,4 +25,9 @@ public enum PrivilegeType {
     public boolean isManagerAuth() {
         return this.score >= MANAGER.getScore();
     }
+
+    // 주어진 권한보다 같거나 큰 권한이 있는지 확인하는 메서드
+    public boolean isAuth(PrivilegeType type) {
+        return this.score >= type.getScore();
+    }
 }

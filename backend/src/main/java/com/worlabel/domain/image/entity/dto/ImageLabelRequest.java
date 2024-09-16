@@ -1,6 +1,5 @@
-package com.worlabel.domain.label.entity.dto;
+package com.worlabel.domain.image.entity.dto;
 
-import com.worlabel.domain.image.entity.LabelStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,11 +11,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class LabelRequest {
-    
+public class ImageLabelRequest {
     @Schema(description = "레이블 데이터", example = "레이블 데이터 양식 json 파일 형태")
     private String data;
-
-    @Schema(description = "업데이트 할 상태", example = "IN_PROGRESS")
-    private LabelStatus status;
 }

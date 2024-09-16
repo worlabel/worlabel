@@ -14,14 +14,12 @@ public interface FolderRepository extends JpaRepository<Folder, Integer> {
 
     @Query("SELECT f FROM Folder f " +
             "LEFT JOIN FETCH f.imageList i " +
-            "LEFT JOIN FETCH i.label " +
             "WHERE f.project.id = :projectId " +
             "AND f.parent IS NULL ")
     List<Folder> findAllByProjectIdAndParentIsNull(@Param("projectId") Integer projectId);
 
     @Query("SELECT f FROM Folder f " +
             "LEFT JOIN FETCH f.imageList i " +
-            "LEFT JOIN FETCH i.label " +
             "WHERE f.project.id = :projectId " +
             "AND f.id = :folderId")
     Optional<Folder> findAllByProjectIdAndId(@Param("projectId") Integer projectId, @Param("folderId") Integer folderId);

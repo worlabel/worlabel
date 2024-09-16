@@ -1,15 +1,11 @@
 package com.worlabel.domain.image.controller;
 
-import com.worlabel.domain.image.entity.dto.ImageMoveRequest;
-import com.worlabel.domain.image.entity.dto.ImageResponse;
-import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
+import com.worlabel.domain.image.entity.dto.*;
 import com.worlabel.domain.image.service.ImageService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.BaseResponse;
-import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,10 +39,10 @@ public class ImageController {
     }
 
     @GetMapping("/{image_id}")
-    @SwaggerApiSuccess(description = "이미지를 조회합니다.")
-    @Operation(summary = "이미지 조회", description = "이미지 정보를 조회합니다.")
+    @SwaggerApiSuccess(description = "이미지를 단일 조회합니다.")
+    @Operation(summary = "이미지 단일 조회", description = "이미지 정보를 단일 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public ImageResponse getImageById(
+    public DetailImageResponse getImageById(
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
@@ -94,5 +90,18 @@ public class ImageController {
             @RequestBody final ImageStatusRequest imageStatusRequest) {
         log.debug("project: {} , folder: {}, 수정하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId, memberId);
         return imageService.changeImageStatus(projectId, folderId, imageId, memberId, imageStatusRequest);
+    }
+
+    @Operation(summary = "이미지 단위 레이블링", description = "진행한 레이블링을 저장합니다.")
+    @SwaggerApiSuccess(description = "해당 이미지에 대한 레이블링을 저장합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PostMapping("/{image_id}/label")
+    public void imageLabeling(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("image_id") final Long imageId,
+            @RequestBody final ImageLabelRequest labelRequest
+    ) {
+        imageService.saveUserLabel(memberId, projectId, imageId, labelRequest);
     }
 }

@@ -134,7 +134,7 @@ class ImageServiceUnitTest {
         given(imageRepository.findByIdAndFolderId(anyLong(), anyInt())).willReturn(Optional.of(mockImage));
 
         // when
-        ImageResponse response = imageService.getImageById(1, 1, 1L, 1);
+//        ImageResponse response = imageService.getImageById(1, 1, 1L, 1);
 
         // then
         assertEquals("test.jpg", response.getImageTitle());

@@ -1,4 +1,4 @@
-package com.worlabel.domain.comment.contoller;
+package com.worlabel.domain.comment.controller;
 
 import com.worlabel.domain.comment.entity.dto.CommentRequest;
 import com.worlabel.domain.comment.entity.dto.CommentResponse;
@@ -8,8 +8,6 @@ import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.BaseResponse;
-import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
