@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
-from app.services.load_model import load_detection_model
+from services.load_model import load_detection_model
 from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from typing import List
@@ -14,9 +14,8 @@ import asyncio
 
 router = APIRouter()
 
-
-@router.post("/detection", response_model=List[PredictResponse])
-async def predict(request: PredictRequest):
+@router.post("/predict", response_model=List[PredictResponse])
+async def detection_predict(request: PredictRequest):
     version = "0.1.0"
     print("여기")
 
@@ -141,8 +140,8 @@ async def predict(request: PredictRequest):
             await ws_client.close()
 
 
-@router.post("/detection/train")
-async def train(request: TrainRequest):
+@router.post("/train")
+async def detection_train(request: TrainRequest):
     # 데이터셋 루트 경로 얻기
     dataset_root_path = get_dataset_root_path(request.project_id)
 
@@ -204,7 +203,3 @@ async def train(request: TrainRequest):
     finally:
         if ws_client.is_connected():
             await ws_client.close()
-    
-
-
-    
