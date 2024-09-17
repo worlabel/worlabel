@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Pretendard Variable';
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: fallback;
+  src: url('./assets/fonts/PretendardVariable.woff2') format('woff2-variations');
+}
+
+.large-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.small-title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subheading {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.body-strong {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.body-small {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.body-small-strong {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.caption {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
