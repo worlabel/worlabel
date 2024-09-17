@@ -32,17 +32,21 @@ export async function changeImageStatus(
   memberId: number,
   statusChangeRequest: ImageStatusChangeRequest
 ) {
-  return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}/status`, statusChangeRequest, {
-    params: { memberId },
-  });
+  return api
+    .put(`/projects/${projectId}/folders/${folderId}/images/${imageId}/status`, statusChangeRequest, {
+      params: { memberId },
+    })
+    .then(({ data }) => data);
 }
 
 export async function uploadImageList(projectId: number, folderId: number, memberId: number, imageList: string[]) {
-  return api.post(
-    `/projects/${projectId}/folders/${folderId}/images`,
-    { imageList },
-    {
-      params: { memberId },
-    }
-  );
+  return api
+    .post(
+      `/projects/${projectId}/folders/${folderId}/images`,
+      { imageList },
+      {
+        params: { memberId },
+      }
+    )
+    .then(({ data }) => data);
 }

@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { FolderResponseDTO } from '@/types';
+import { FolderResponse } from '@/types';
 
 interface FolderState {
-  folder: FolderResponseDTO | null;
+  folder: FolderResponse | null;
   loading: boolean;
   error: string | null;
-  setFolder: (folder: FolderResponseDTO | null) => void;
+  setFolder: (folder: FolderResponse | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }

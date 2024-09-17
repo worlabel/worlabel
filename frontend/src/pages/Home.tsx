@@ -1,45 +1,27 @@
 import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
-import { fetchProfileApi, reissueTokenApi } from '@/api/authApi';
-import { SuccessResponse, MemberResponseDTO, CustomError } from '@/types';
-import { AxiosError } from 'axios';
+import { getProfile, reissueToken } from '@/api/authApi';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
-  const navigate = useNavigate();
   const { isLoggedIn, accessToken, setLoggedIn, profile, setProfile } = useAuthStore();
   const hasFetchedProfile = useRef(false);
 
   if (!isLoggedIn && !profile && !hasFetchedProfile.current && accessToken) {
     setLoggedIn(true, accessToken);
-    fetchProfileApi()
-      .then((data: SuccessResponse<MemberResponseDTO>) => {
-        if (data?.isSuccess && data.data) {
-          setProfile(data.data);
-          hasFetchedProfile.current = true;
-        }
-      })
-      .catch((error: AxiosError<CustomError>) => {
-        alert('프로필을 가져오는 중 오류가 발생했습니다. 다시 시도해주세요.');
-        console.error('프로필 가져오기 실패:', error?.response?.data?.message || '알 수 없는 오류');
-      });
+    getProfile().then((data) => {
+      setProfile(data);
+      hasFetchedProfile.current = true;
+    });
   }
-
-  const handleGoogleSignIn = () => {
-    window.location.href = `${BASE_URL}/api/login/oauth2/authorization/google`;
-  };
-
-  const handleStart = () => {
-    navigate('/browse');
-  };
 
   const handleReissueToken = async () => {
     try {
-      const response = await reissueTokenApi();
+      const response = await reissueToken();
       console.log('토큰 재발급 성공:', response);
       alert('토큰 재발급 성공! 새로운 액세스 토큰을 콘솔에서 확인하세요.');
     } catch (error) {
@@ -72,8 +54,9 @@ export default function Home() {
       </div>
 
       {!isLoggedIn ? (
-        <button
-          onClick={handleGoogleSignIn}
+        <Link
+          to={`${BASE_URL}/login/oauth2/authorization/google`}
+          // onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
         >
           <img
@@ -81,15 +64,15 @@ export default function Home() {
             alt="Sign in with Google"
             className="h-auto w-full"
           />
-        </button>
+        </Link>
       ) : (
         <>
           <Button
+            asChild
             variant="outlinePrimary"
             size="lg"
-            onClick={handleStart}
           >
-            시작하기
+            <Link to="/browse">시작하기</Link>
           </Button>
           <Button
             variant="outlinePrimary"

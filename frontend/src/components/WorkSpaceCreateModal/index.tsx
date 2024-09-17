@@ -2,10 +2,10 @@ import * as React from 'react';
 import WorkSpaceCreateForm, { WorkSpaceCreateFormValues } from './WorkSpaceCreateForm';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Plus } from 'lucide-react';
-import { WorkspaceRequestDTO } from '@/types';
+import { WorkspaceRequest } from '@/types';
 
 interface WorkSpaceCreateModalProps {
-  onSubmit: (data: WorkspaceRequestDTO) => void;
+  onSubmit: (data: WorkspaceRequest) => void;
 }
 
 export default function WorkSpaceCreateModal({ onSubmit }: WorkSpaceCreateModalProps) {
@@ -15,7 +15,7 @@ export default function WorkSpaceCreateModal({ onSubmit }: WorkSpaceCreateModalP
   const handleClose = () => setIsOpen(false);
 
   const handleFormSubmit = (data: WorkSpaceCreateFormValues) => {
-    const formattedData: WorkspaceRequestDTO = {
+    const formattedData: WorkspaceRequest = {
       title: data.workspaceName,
       content: data.workspaceDescription || '',
     };

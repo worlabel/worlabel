@@ -1,7 +1,7 @@
 import PageLayout from '@/components/PageLayout';
 import ImageCanvas from '@/components/ImageCanvas';
-import Home from '@/components/Home';
-import WorkspaceBrowseDetail from '@/components/WorkspaceBrowseDetail';
+import Home from '@/pages/Home';
+import WorkspaceBrowseDetail from '@/pages/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
 import AdminLayout from '@/components/AdminLayout';
@@ -10,6 +10,8 @@ import AdminMemberManage from '@/components/AdminMemberManage';
 import OAuthCallback from '@/components/OAuthCallback';
 import { createBrowserRouter } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
+import { Suspense } from 'react';
+import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
 
 export const webPath = {
   home: () => '/',
@@ -33,12 +35,17 @@ const router = createBrowserRouter([
     ],
   },
   {
+    // FIXME: index에서 오류나지 않게 수정
     path: webPath.browse(),
-    element: <WorkspaceBrowseLayout />,
+    element: (
+      <Suspense fallback={<div></div>}>
+        <WorkspaceBrowseLayout />
+      </Suspense>
+    ),
     children: [
       {
         index: true,
-        element: <WorkspaceBrowseDetail />,
+        element: <WorkspaceBrowseIndex />,
       },
       {
         path: ':workspaceId',
@@ -47,8 +54,13 @@ const router = createBrowserRouter([
     ],
   },
   {
+    // FIXME: index에서 오류나지 않게 수정
     path: `${webPath.workspace()}/:workspaceId`,
-    element: <WorkspaceLayout />,
+    element: (
+      <Suspense fallback={<div></div>}>
+        <WorkspaceLayout />
+      </Suspense>
+    ),
     children: [
       {
         index: true,

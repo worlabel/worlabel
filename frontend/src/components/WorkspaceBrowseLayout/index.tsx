@@ -1,18 +1,15 @@
 import { Suspense, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Header from '../Header';
-import { useGetAllWorkspaces, useCreateWorkspace } from '@/hooks/useWorkspaceHooks';
 import useAuthStore from '@/stores/useAuthStore';
 import WorkSpaceCreateModal from '../WorkSpaceCreateModal';
-import { useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import { WorkspaceRequestDTO, WorkspaceResponseDTO, CustomError } from '@/types';
+import { WorkspaceRequest, WorkspaceResponse } from '@/types';
+import useWorkspaceListQuery from '@/queries/useWorkspaceListQuery';
 
 export default function WorkspaceBrowseLayout() {
   const { profile, isLoggedIn } = useAuthStore();
   const memberId = profile?.id ?? 0;
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoggedIn || !memberId) {
@@ -21,26 +18,27 @@ export default function WorkspaceBrowseLayout() {
     }
   }, [isLoggedIn, memberId, navigate]);
 
-  const { data: workspacesResponse, isLoading, isError } = useGetAllWorkspaces(memberId || 0);
+  const { data: workspacesResponse, isLoading, isError } = useWorkspaceListQuery(memberId ?? 0);
 
-  const workspaces = workspacesResponse?.data?.workspaceResponses || [];
+  const workspaces = workspacesResponse?.workspaceResponses ?? [];
 
-  const createWorkspace = useCreateWorkspace();
+  // const createWorkspace = useCreateWorkspace();
 
-  const handleCreateWorkspace = (data: WorkspaceRequestDTO) => {
+  const handleCreateWorkspace = (data: WorkspaceRequest) => {
     if (!memberId) return;
-    createWorkspace.mutate(
-      { memberId, data },
-      {
-        onSuccess: () => {
-          console.log('워크스페이스가 성공적으로 생성되었습니다.');
-          queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-        },
-        onError: (error: AxiosError<CustomError>) => {
-          console.error('워크스페이스 생성 실패:', error.message);
-        },
-      }
-    );
+    console.log(data);
+    // createWorkspace.mutate(
+    //   { memberId, data },
+    //   {
+    //     onSuccess: () => {
+    //       console.log('워크스페이스가 성공적으로 생성되었습니다.');
+    //       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+    //     },
+    //     onError: (error: AxiosError<CustomError>) => {
+    //       console.error('워크스페이스 생성 실패:', error.message);
+    //     },
+    //   }
+    // );
   };
 
   if (isLoading) {
@@ -62,7 +60,7 @@ export default function WorkspaceBrowseLayout() {
               <WorkSpaceCreateModal onSubmit={handleCreateWorkspace} />
             </div>
             {workspaces.length > 0 ? (
-              workspaces.map((workspace: WorkspaceResponseDTO) => (
+              workspaces.map((workspace: WorkspaceResponse) => (
                 <NavLink
                   to={`/browse/${workspace.id}`}
                   key={workspace.id}
@@ -76,11 +74,11 @@ export default function WorkspaceBrowseLayout() {
             )}
           </div>
           <div className="flex w-[calc(100%-280px)] flex-col gap-24">
-            <Suspense fallback={<div></div>}>
-              <main className="grow">
+            <main className="grow">
+              <Suspense fallback={<div></div>}>
                 <Outlet />
-              </main>
-            </Suspense>
+              </Suspense>
+            </main>
           </div>
         </div>
       </div>

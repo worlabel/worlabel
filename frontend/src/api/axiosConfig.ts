@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import useAuthStore from '@/stores/useAuthStore';
-import { BaseResponse, CustomError, SuccessResponse, RefreshTokenResponseDTO } from '@/types';
+import { BaseResponse, CustomError, SuccessResponse, RefreshTokenResponse } from '@/types';
 
 const baseURL = import.meta.env.VITE_API_URL;
 
@@ -60,11 +60,9 @@ api.interceptors.response.use(
       isTokenRefreshing = true;
 
       try {
-        const response: AxiosResponse<SuccessResponse<RefreshTokenResponseDTO>> = await api.post(
-          '/api/auth/reissue',
-          null,
-          { withCredentials: true }
-        );
+        const response: AxiosResponse<SuccessResponse<RefreshTokenResponse>> = await api.post('/auth/reissue', null, {
+          withCredentials: true,
+        });
 
         const newAccessToken = response.data.data?.accessToken;
         if (!newAccessToken) {

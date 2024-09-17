@@ -1,8 +1,26 @@
 import api from '@/api/axiosConfig';
+import { ProjectListResponse, ProjectResponse } from '@/types';
+
+export async function getProjectList(
+  workspaceId: number,
+  memberId: number,
+  lastProjectId?: number,
+  limit: number = 10
+) {
+  return api
+    .get<ProjectListResponse>(`/workspaces/${workspaceId}/projects`, {
+      params: {
+        memberId,
+        lastProjectId,
+        limit,
+      },
+    })
+    .then(({ data }) => data);
+}
 
 export async function getProject(projectId: number, memberId: number) {
   return api
-    .get(`/projects/${projectId}`, {
+    .get<ProjectResponse>(`/projects/${projectId}`, {
       params: { memberId },
     })
     .then(({ data }) => data);
@@ -50,23 +68,6 @@ export async function removeProjectMember(projectId: number, memberId: number, t
     .delete(`/projects/${projectId}/members`, {
       params: { memberId },
       data: { memberId: targetMemberId },
-    })
-    .then(({ data }) => data);
-}
-
-export async function getAllProjects(
-  workspaceId: number,
-  memberId: number,
-  lastProjectId?: number,
-  limit: number = 10
-) {
-  return api
-    .get(`/workspaces/${workspaceId}/projects`, {
-      params: {
-        memberId,
-        lastProjectId,
-        limit,
-      },
     })
     .then(({ data }) => data);
 }
