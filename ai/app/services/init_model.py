@@ -10,7 +10,7 @@ def create_pretrained_model(project_id: id, type:str):
     model = YOLO(os.path.join("resources", "models" ,f"yolov8n{suffix}.pt"))
 
     # 모델을 저장할 폴더 경로
-    base_path = os.path.join("resources","projects",str(project_id))
+    base_path = os.path.join("resources","projects",str(project_id),"models")
     os.makedirs(base_path, exist_ok=True)
 
     # 고유값 id 생성

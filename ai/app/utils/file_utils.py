@@ -149,3 +149,8 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
 def join_path(path, *paths):
     """os.path.join()과 같은 기능, os import 하기 싫어서 만듦"""
     return os.path.join(path, *paths)
+
+def get_model_paths(project_id:int):
+    path = os.path.join("resources","projects",str(project_id), "models")
+    files = os.listdir(path)
+    return [os.path.join(path, file) for file in files if file.endswith(".pt")]
