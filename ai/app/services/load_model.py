@@ -55,3 +55,18 @@ def load_segmentation_model(model_path: str = "test-data/model/yolov8n-seg.pt", 
     else:
         model.to(device)
     return model
+
+def load_model(model_path: str):
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found at path: {model_path}")
+    
+    try:
+        model = YOLO(model_path)
+        if (torch.cuda.is_available()):
+            model.to("cuda")
+            print("gpu 사용")
+        else:
+            model.to("cpu")
+        return model
+    except:
+        raise Exception("YOLO model conversion failed: Unsupported architecture or invalid configuration.")
