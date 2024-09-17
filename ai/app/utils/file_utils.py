@@ -152,5 +152,10 @@ def join_path(path, *paths):
 
 def get_model_paths(project_id:int):
     path = os.path.join("resources","projects",str(project_id), "models")
+    if not os.path.exists(path):
+        raise FileNotFoundError()
     files = os.listdir(path)
     return [os.path.join(path, file) for file in files if file.endswith(".pt")]
+
+def delete_file(path):
+    os.remove(path)

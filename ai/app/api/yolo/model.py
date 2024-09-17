@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from schemas.model_create_request import ModelCreateRequest
 from services.init_model import create_pretrained_model, create_default_model
 from services.load_model import load_model
-from utils.file_utils import get_model_paths
+from utils.file_utils import get_model_paths, delete_file
+import re
 
 router = APIRouter()
 
@@ -42,8 +43,16 @@ def model_create(request: ModelCreateRequest):
     return {"model_path": model_path}
 
 @router.delete("/delete", status_code=204)
-def model_delete():
-    pass
+def model_delete(model_path:str):
+    pattern = r'^resources[/\\]projects[/\\](\d+)[/\\]models[/\\]([a-f0-9\-]+)\.pt$'
+    if not re.match(pattern, model_path):
+        raise HTTPException(status_code=400,
+                            detail= "Invalid path format")
+    try:
+        delete_file(model_path)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404,
+                        detail= "모델을 찾을 수 없습니다.")
 
 @router.post("/upload")
 def model_upload():
