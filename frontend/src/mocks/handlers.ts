@@ -1,21 +1,21 @@
 import { http, HttpResponse } from 'msw';
 import {
   BaseResponse,
-  ProjectResponseDTO,
-  FolderResponseDTO,
-  ImageResponseDTO,
-  WorkspaceResponseDTO,
-  MemberResponseDTO,
-  RefreshTokenResponseDTO,
-  AutoLabelingResponseDTO,
-  ProjectListResponseDTO,
+  ProjectResponse,
+  FolderResponse,
+  ImageResponse,
+  WorkspaceResponse,
+  MemberResponse,
+  RefreshTokenResponse,
+  AutoLabelingResponse,
+  ProjectListResponse,
 } from '@/types';
 
 export const handlers = [
   // Auth Handlers
   http.post('/api/auth/reissue', () => {
     // 토큰 재발급 핸들러
-    const response: BaseResponse<RefreshTokenResponseDTO> = {
+    const response: BaseResponse<RefreshTokenResponse> = {
       status: 200,
       code: 0,
       message: '토큰 재발급 성공',
@@ -28,7 +28,7 @@ export const handlers = [
 
   http.get('/api/auth/profile', () => {
     // 사용자 프로필 핸들러
-    const response: BaseResponse<MemberResponseDTO> = {
+    const response: BaseResponse<MemberResponse> = {
       status: 200,
       code: 0,
       message: '사용자 정보 가져오기 성공',
@@ -47,7 +47,7 @@ export const handlers = [
   http.get('/api/workspaces/:workspaceId', ({ params }) => {
     // 워크스페이스 조회 핸들러
     const { workspaceId } = params;
-    const response: BaseResponse<WorkspaceResponseDTO> = {
+    const response: BaseResponse<WorkspaceResponse> = {
       status: 200,
       code: 0,
       message: '워크스페이스 조회 성공',
@@ -68,7 +68,7 @@ export const handlers = [
   http.put('/api/workspaces/:workspaceId', ({ params }) => {
     // 워크스페이스 수정 핸들러
     const { workspaceId } = params;
-    const response: BaseResponse<WorkspaceResponseDTO> = {
+    const response: BaseResponse<WorkspaceResponse> = {
       status: 200,
       code: 0,
       message: '워크스페이스 수정 성공',
@@ -102,7 +102,7 @@ export const handlers = [
 
   http.get('/api/workspaces', () => {
     // 워크스페이스 목록 조회 핸들러
-    const response: BaseResponse<{ workspaceResponses: WorkspaceResponseDTO[] }> = {
+    const response: BaseResponse<{ workspaceResponses: WorkspaceResponse[] }> = {
       status: 200,
       code: 0,
       message: '워크스페이스 목록 조회 성공',
@@ -128,7 +128,7 @@ export const handlers = [
   http.get('/api/projects/:projectId', ({ params }) => {
     // 프로젝트 조회 핸들러
     const { projectId } = params;
-    const response: BaseResponse<ProjectResponseDTO> = {
+    const response: BaseResponse<ProjectResponse> = {
       status: 200,
       code: 0,
       message: '프로젝트 조회 성공',
@@ -148,7 +148,7 @@ export const handlers = [
 
   http.post('/api/workspaces/:workspaceId/projects', () => {
     // 프로젝트 생성 핸들러
-    const response: BaseResponse<ProjectResponseDTO> = {
+    const response: BaseResponse<ProjectResponse> = {
       status: 200,
       code: 0,
       message: '프로젝트 생성 성공',
@@ -169,7 +169,7 @@ export const handlers = [
   http.put('/api/projects/:projectId', ({ params }) => {
     // 프로젝트 수정 핸들러
     const { projectId } = params;
-    const response: BaseResponse<ProjectResponseDTO> = {
+    const response: BaseResponse<ProjectResponse> = {
       status: 200,
       code: 0,
       message: '프로젝트 수정 성공',
@@ -204,7 +204,7 @@ export const handlers = [
 
   http.get('/api/projects/:projectId/folders/:folderId', ({ params }) => {
     const { folderId } = params;
-    const response: BaseResponse<FolderResponseDTO> = {
+    const response: BaseResponse<FolderResponse> = {
       status: 200,
       code: 0,
       message: '폴더 조회 성공',
@@ -241,7 +241,7 @@ export const handlers = [
           field: 'id',
           code: '1001',
           message: 'ID format issue',
-          objectName: 'FolderResponseDTO',
+          objectName: 'FolderResponse',
         },
       ],
       isSuccess: true,
@@ -261,7 +261,7 @@ export const handlers = [
     const limit = parseInt(url.searchParams.get('limit') || '10', 10);
 
     // 프로젝트 데이터 예시 생성
-    const projects: ProjectResponseDTO[] = Array.from({ length: limit }, (_, index) => ({
+    const projects: ProjectResponse[] = Array.from({ length: limit }, (_, index) => ({
       id: lastProjectId + index + 1,
       title: `프로젝트 ${lastProjectId + index + 1}`,
       workspaceId,
@@ -274,7 +274,7 @@ export const handlers = [
     }));
 
     // 응답 생성
-    const response: BaseResponse<ProjectListResponseDTO> = {
+    const response: BaseResponse<ProjectListResponse> = {
       status: 200,
       code: 0,
       message: '프로젝트 목록 조회 성공',
@@ -290,7 +290,7 @@ export const handlers = [
 
   http.post('/api/projects/:projectId/folders', () => {
     // 폴더 생성 핸들러
-    const response: BaseResponse<FolderResponseDTO> = {
+    const response: BaseResponse<FolderResponse> = {
       status: 200,
       code: 0,
       message: '폴더 생성 성공',
@@ -310,7 +310,7 @@ export const handlers = [
   http.get('/api/projects/:projectId/folders/:folderId/images/:imageId', ({ params }) => {
     // 이미지 조회 핸들러
     const { imageId } = params;
-    const response: BaseResponse<ImageResponseDTO> = {
+    const response: BaseResponse<ImageResponse> = {
       status: 200,
       code: 0,
       message: '이미지 조회 성공',
@@ -434,8 +434,8 @@ export const handlers = [
     //     "imageDepth": 4
     //   }`;
 
-    // AutoLabelingResponseDTO 예시
-    const response: BaseResponse<AutoLabelingResponseDTO> = {
+    // AutoLabelingResponse 예시
+    const response: BaseResponse<AutoLabelingResponse> = {
       status: 200,
       code: 0,
       message: '프로젝트 오토 레이블링 성공',

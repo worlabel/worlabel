@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Outlet } from 'react-router-dom';
 import Header from '../Header';
-import { Label, Project, DirectoryItem, FileItem } from '@/types';
+import { Label, Project } from '@/types';
 import { ResizablePanelGroup, ResizablePanel } from '../ui/resizable';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import WorkspaceLabelBar from '../WorkspaceLabelBar';
-import { fetchFolderApi } from '@/api/folderApi';
-import { getWorkspaceApi } from '@/api/workspaceApi';
-import { getAllProjectsApi } from '@/api/projectApi';
 import useAuthStore from '@/stores/useAuthStore';
 import useCanvasStore from '@/stores/useCanvasStore';
+import useFolderQuery from '@/queries/useFolderQuery';
+import useWorkspaceQuery from '@/queries/useWorkspaceQuery';
+import useProjectListQuery from '@/queries/useProjectListQuery';
 
 const mockLabels: Label[] = [
   {
@@ -50,103 +50,136 @@ const mockLabels: Label[] = [
 
 export default function WorkspaceLayout() {
   const setLabels = useCanvasStore((state) => state.setLabels);
-  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
+  const params = useParams<{ workspaceId: string; projectId: string }>();
+  const workspaceId = Number(params.workspaceId);
+  const projectId = Number(params.projectId);
   const [workspace, setWorkspace] = useState<{ name: string; projects: Project[] }>({
     name: '',
     projects: [],
   });
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
+  const { data: workspaceData } = useWorkspaceQuery(workspaceId, memberId);
+  const { data: projectListData } = useProjectListQuery(workspaceId, memberId);
+  const { data: folderData } = useFolderQuery(projectId, 0, memberId);
 
   useEffect(() => {
-    const fetchWorkspaceData = async (workspaceId: number, memberId: number) => {
-      try {
-        const workspaceResponse = await getWorkspaceApi(workspaceId, memberId);
-        if (workspaceResponse.isSuccess) {
-          const workspaceTitle = workspaceResponse.data.title;
-          setWorkspace((prev) => ({
-            ...prev,
-            name: workspaceTitle,
-          }));
-          fetchProjects(workspaceId, memberId);
-        }
-      } catch (error) {
-        console.error('워크스페이스 조회 실패:', error);
-      }
-    };
+    if (!workspaceData) return;
+    setWorkspace((prev) => ({
+      ...prev,
+      name: workspaceData.title,
+    }));
+  }, [workspaceData]);
 
-    const fetchProjects = async (workspaceId: number, memberId: number) => {
-      try {
-        const projectResponse = await getAllProjectsApi(workspaceId, memberId);
-        if (projectResponse.isSuccess) {
-          const projects = await Promise.all(
-            projectResponse.data.workspaceResponses.map(async (project) => {
-              const children = await fetchFolderWithImages(project.id, memberId);
-              return {
-                id: project.id,
-                name: project.title,
-                type: capitalizeType(project.projectType),
-                children,
-              };
-            })
-          );
-          setWorkspace((prev) => ({
-            ...prev,
-            projects: projects as Project[],
-          }));
-        }
-      } catch (error) {
-        console.error('프로젝트 목록 조회 실패:', error);
-      }
-    };
+  useEffect(() => {
+    if (!projectListData) return;
+    console.log(folderData);
+    const projects = projectListData.workspaceResponses.map(
+      (project): Project => ({
+        id: project.id,
+        name: project.title,
+        type: (project.projectType.charAt(0).toUpperCase() + project.projectType.slice(1)) as
+          | 'Classification'
+          | 'Detection'
+          | 'Segmentation',
+        children: [],
+      })
+    );
+    setWorkspace((prev) => ({
+      ...prev,
+      projects,
+    }));
+  }, [projectListData]);
 
-    const fetchFolderWithImages = async (projectId: number, memberId: number): Promise<DirectoryItem[]> => {
-      try {
-        const folderResponse = await fetchFolderApi(projectId, 0, memberId);
-        if (folderResponse.isSuccess) {
-          const files: FileItem[] = folderResponse.data.images.map((image) => ({
-            id: image.id,
-            name: image.imageTitle,
-            url: image.imageUrl,
-            type: 'image',
-            status: image.status === 'COMPLETED' ? 'done' : 'idle',
-          }));
+  // useEffect(() => {
+  //   const fetchWorkspaceData = async (workspaceId: number, memberId: number) => {
+  //     try {
+  //       const workspaceResponse = await getWorkspaceApi(workspaceId, memberId);
+  //       if (workspaceResponse.isSuccess) {
+  //         const workspaceTitle = workspaceResponse.data.title;
+  //         setWorkspace((prev) => ({
+  //           ...prev,
+  //           name: workspaceTitle,
+  //         }));
+  //         fetchProjects(workspaceId, memberId);
+  //       }
+  //     } catch (error) {
+  //       console.error('워크스페이스 조회 실패:', error);
+  //     }
+  //   };
 
-          return [
-            {
-              id: folderResponse.data.id,
-              name: folderResponse.data.title,
-              type: 'directory',
-              children: files,
-            },
-          ];
-        }
-        return [];
-      } catch (error) {
-        console.error('폴더 및 이미지 조회 실패:', error);
-        return [];
-      }
-    };
+  //   const fetchProjects = async (workspaceId: number, memberId: number) => {
+  //     try {
+  //       const projectResponse = await getAllProjectsApi(workspaceId, memberId);
+  //       if (projectResponse.isSuccess) {
+  //         const projects = await Promise.all(
+  //           projectResponse.data.workspaceResponses.map(async (project) => {
+  //             const children = await fetchFolderWithImages(project.id, memberId);
+  //             return {
+  //               id: project.id,
+  //               name: project.title,
+  //               type: capitalizeType(project.projectType),
+  //               children,
+  //             };
+  //           })
+  //         );
+  //         setWorkspace((prev) => ({
+  //           ...prev,
+  //           projects: projects as Project[],
+  //         }));
+  //       }
+  //     } catch (error) {
+  //       console.error('프로젝트 목록 조회 실패:', error);
+  //     }
+  //   };
 
-    const capitalizeType = (
-      type: 'classification' | 'detection' | 'segmentation'
-    ): 'Classification' | 'Detection' | 'Segmentation' => {
-      switch (type) {
-        case 'classification':
-          return 'Classification';
-        case 'detection':
-          return 'Detection';
-        case 'segmentation':
-          return 'Segmentation';
-        default:
-          throw new Error(`Unknown project type: ${type}`);
-      }
-    };
+  //   const fetchFolderWithImages = async (projectId: number, memberId: number): Promise<DirectoryItem[]> => {
+  //     try {
+  //       const folderResponse = await fetchFolderApi(projectId, 0, memberId);
+  //       if (folderResponse.isSuccess) {
+  //         const files: FileItem[] = folderResponse.data.images.map((image) => ({
+  //           id: image.id,
+  //           name: image.imageTitle,
+  //           url: image.imageUrl,
+  //           type: 'image',
+  //           status: image.status === 'COMPLETED' ? 'done' : 'idle',
+  //         }));
 
-    if (workspaceId && memberId) {
-      fetchWorkspaceData(Number(workspaceId), memberId);
-    }
-  }, [workspaceId, projectId, memberId]);
+  //         return [
+  //           {
+  //             id: folderResponse.data.id,
+  //             name: folderResponse.data.title,
+  //             type: 'directory',
+  //             children: files,
+  //           },
+  //         ];
+  //       }
+  //       return [];
+  //     } catch (error) {
+  //       console.error('폴더 및 이미지 조회 실패:', error);
+  //       return [];
+  //     }
+  //   };
+
+  //   const capitalizeType = (
+  //     type: 'classification' | 'detection' | 'segmentation'
+  //   ): 'Classification' | 'Detection' | 'Segmentation' => {
+  //     switch (type) {
+  //       case 'classification':
+  //         return 'Classification';
+  //       case 'detection':
+  //         return 'Detection';
+  //       case 'segmentation':
+  //         return 'Segmentation';
+  //       default:
+  //         throw new Error(`Unknown project type: ${type}`);
+  //     }
+  //   };
+
+  //   if (workspaceId && memberId) {
+  //     fetchWorkspaceData(Number(workspaceId), memberId);
+  //   }
+  // }, [workspaceId, projectId, memberId]);
 
   useEffect(() => {
     setLabels(mockLabels);

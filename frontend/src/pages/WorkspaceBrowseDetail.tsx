@@ -1,52 +1,48 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ProjectCard from '@/components/ProjectCard';
 import { Smile } from 'lucide-react';
-import ProjectCreateModal from '../ProjectCreateModal';
-import { useGetAllProjects, useCreateProject } from '@/hooks/useProjectHooks';
+import ProjectCreateModal from '../components/ProjectCreateModal';
 import useAuthStore from '@/stores/useAuthStore';
-import { ProjectResponseDTO } from '@/types';
+import { ProjectResponse } from '@/types';
+import useProjectListQuery from '@/queries/useProjectListQuery';
+import { webPath } from '@/router';
 
 export default function WorkspaceBrowseDetail() {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
-  const numericWorkspaceId = Number(workspaceId);
+  const params = useParams<{ workspaceId: string }>();
+  const workspaceId = Number(params.workspaceId);
   const { profile } = useAuthStore();
   const memberId = profile?.id ?? 0;
+  const navigate = useNavigate();
+  // const createProject = useCreateProject();
 
-  const {
-    data: projectsResponse,
-    isLoading,
-    isError,
-    refetch,
-  } = useGetAllProjects(numericWorkspaceId, memberId, {
-    enabled: !isNaN(numericWorkspaceId),
-  });
-
-  const createProject = useCreateProject();
+  const { data: projectsResponse, isError } = useProjectListQuery(workspaceId, memberId);
 
   const handleCreateProject = (data: { title: string; labelType: 'classification' | 'detection' | 'segmentation' }) => {
-    createProject.mutate(
-      {
-        workspaceId: numericWorkspaceId,
-        memberId,
-        data: { title: data.title, projectType: data.labelType },
-      },
-      {
-        onSuccess: () => {
-          console.log('프로젝트가 성공적으로 생성되었습니다.');
-          refetch();
-        },
-        onError: (error) => {
-          console.error('프로젝트 생성 실패:', error);
-          const errorMessage = error?.response?.data?.message || error.message || '알 수 없는 오류';
-          console.error('프로젝트 생성 실패:', errorMessage);
-        },
-      }
-    );
+    console.log(data);
+    // createProject.mutate(
+    //   {
+    //     workspaceId: workspaceId,
+    //     memberId,
+    //     data: { title: data.title, projectType: data.labelType },
+    //   },
+    //   {
+    //     onSuccess: () => {
+    //       console.log('프로젝트가 성공적으로 생성되었습니다.');
+    //       refetch();
+    //     },
+    //     onError: (error) => {
+    //       console.error('프로젝트 생성 실패:', error);
+    //       const errorMessage = error?.response?.data?.message || error.message || '알 수 없는 오류';
+    //       console.error('프로젝트 생성 실패:', errorMessage);
+    //     },
+    //   }
+    // );
   };
 
-  const projects: ProjectResponseDTO[] = projectsResponse?.data?.workspaceResponses ?? [];
+  // TODO: 반환 형식 반영 projectsResponse?.workspaceResponses => projectResponse
+  const projects: ProjectResponse[] = projectsResponse?.workspaceResponses ?? [];
 
-  if (isNaN(numericWorkspaceId)) {
+  if (isNaN(workspaceId)) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center">
         <div className="flex flex-col items-center">
@@ -58,10 +54,6 @@ export default function WorkspaceBrowseDetail() {
         </div>
       </div>
     );
-  }
-
-  if (isLoading) {
-    return <p>Loading projects...</p>;
   }
 
   if (isError || !workspaceId) {
@@ -95,13 +87,13 @@ export default function WorkspaceBrowseDetail() {
       </div>
       {projects.length > 0 ? (
         <div className="flex flex-wrap gap-6">
-          {projects.map((project: ProjectResponseDTO) => (
+          {projects.map((project: ProjectResponse) => (
             <ProjectCard
               key={project.id}
               title={project.title}
               description={project.projectType}
               onClick={() => {
-                console.log('project id : ' + project.id);
+                navigate(`${webPath.workspace()}/${workspaceId}/project/${project.id}`);
               }}
             />
           ))}
