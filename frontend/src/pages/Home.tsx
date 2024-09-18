@@ -17,7 +17,9 @@ export default function Home() {
       hasFetchedProfile.current = true;
     });
   }
-
+  const handleGoogleSignIn = () => {
+    window.location.href = `${BASE_URL}/api/login/oauth2/authorization/google`;
+  };
   const handleReissueToken = async () => {
     try {
       const response = await reissueToken();
@@ -53,9 +55,19 @@ export default function Home() {
       </div>
 
       {!isLoggedIn ? (
-        <Link
-          to={`${BASE_URL}/api/login/oauth2/authorization/google`}
-          // onClick={handleGoogleSignIn}
+        // <Link
+        //   to={`${BASE_URL}/api/login/oauth2/authorization/google`}
+        //   // onClick={handleGoogleSignIn}
+        //   className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
+        // >
+        //   <img
+        //     src={GoogleLogo}
+        //     alt="Sign in with Google"
+        //     className="h-auto w-full"
+        //   />
+        // </Link>
+        <button
+          onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
         >
           <img
@@ -63,7 +75,7 @@ export default function Home() {
             alt="Sign in with Google"
             className="h-auto w-full"
           />
-        </Link>
+        </button> // 404 에러 방지
       ) : (
         <>
           <Button
