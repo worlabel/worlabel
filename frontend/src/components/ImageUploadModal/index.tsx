@@ -2,7 +2,7 @@ import { useState } from 'react';
 import CloseButton from './CloseButton';
 import ProgressButton from './ProgressButton';
 import FileList from './FileList';
-import { uploadFiles } from '@/api/upload';
+import { uploadFilesToProject } from '@/api/upload';
 
 interface ImageUploadModalProps {
   title: string;
@@ -39,7 +39,7 @@ export default function ImageUploadModal({ title, buttonText, onClose }: ImageUp
   const handleUpload = async () => {
     setIsUploading(true);
 
-    await uploadFiles(
+    await uploadFilesToProject(
       files,
       setUploadProgress,
       () => {
