@@ -1,10 +1,11 @@
-import { Suspense, useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Header from '../Header';
 import useAuthStore from '@/stores/useAuthStore';
 import WorkSpaceCreateModal from '../WorkSpaceCreateModal';
 import { WorkspaceRequest, WorkspaceResponse } from '@/types';
 import useWorkspaceListQuery from '@/queries/useWorkspaceListQuery';
+import { useCreateWorkspace } from '@/hooks/useWorkspaceHooks';
 
 export default function WorkspaceBrowseLayout() {
   const { profile, isLoggedIn } = useAuthStore();
@@ -12,42 +13,22 @@ export default function WorkspaceBrowseLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoggedIn || !memberId) {
-      console.error('로그인되지 않았거나 유효한 멤버 ID가 없습니다.');
+    if (!isLoggedIn || memberId == 0) {
       navigate('/');
     }
   }, [isLoggedIn, memberId, navigate]);
 
-  const { data: workspacesResponse, isLoading, isError } = useWorkspaceListQuery(memberId ?? 0);
-
-  const workspaces = workspacesResponse?.workspaceResponses ?? [];
-
-  // const createWorkspace = useCreateWorkspace();
+  const { data: workspacesResponse } = useWorkspaceListQuery(memberId ?? 0);
+  const createWorkspace = useCreateWorkspace();
 
   const handleCreateWorkspace = (data: WorkspaceRequest) => {
-    if (!memberId) return;
-    console.log(data);
-    // createWorkspace.mutate(
-    //   { memberId, data },
-    //   {
-    //     onSuccess: () => {
-    //       console.log('워크스페이스가 성공적으로 생성되었습니다.');
-    //       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
-    //     },
-    //     onError: (error: AxiosError<CustomError>) => {
-    //       console.error('워크스페이스 생성 실패:', error.message);
-    //     },
-    //   }
-    // );
+    createWorkspace.mutate({
+      memberId,
+      data,
+    });
   };
 
-  if (isLoading) {
-    return <p>Loading workspaces...</p>;
-  }
-
-  if (isError) {
-    return <p>Error loading workspaces. Please try again later.</p>;
-  }
+  const workspaces = workspacesResponse?.workspaceResponses ?? [];
 
   return (
     <>

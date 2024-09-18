@@ -4,7 +4,6 @@ import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { getProfile, reissueToken } from '@/api/authApi';
-
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
@@ -55,7 +54,7 @@ export default function Home() {
 
       {!isLoggedIn ? (
         <Link
-          to={`${BASE_URL}/login/oauth2/authorization/google`}
+          to={`${BASE_URL}/api/login/oauth2/authorization/google`}
           // onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
         >
