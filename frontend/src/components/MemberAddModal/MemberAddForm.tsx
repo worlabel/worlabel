@@ -6,14 +6,15 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-type Role = 'admin' | 'editor' | 'viewer';
+type PrivilegeType = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 
-const roles: Role[] = ['admin', 'editor', 'viewer'];
+const privilegeTypes: readonly ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER'] = ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER'];
 
-const roleToStr: { [key in Role]: string } = {
-  admin: '관리자',
-  editor: '에디터',
-  viewer: '뷰어',
+const privilegeTypeToStr: { [key in PrivilegeType]: string } = {
+  ADMIN: '관리자',
+  MANAGER: '매니저',
+  EDITOR: '에디터',
+  VIEWER: '뷰어',
 };
 
 const formSchema = z.object({
@@ -26,7 +27,7 @@ const formSchema = z.object({
     .min(1, {
       message: '초대할 멤버의 이메일 주소를 입력해주세요.',
     }),
-  role: z.enum(['admin', 'editor', 'viewer']),
+  role: z.enum(privilegeTypes),
 });
 
 export type MemberAddFormValues = z.infer<typeof formSchema>;
@@ -80,12 +81,12 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
                     <SelectValue placeholder="초대할 멤버의 역할을 선택해주세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
+                    {privilegeTypes.map((role) => (
                       <SelectItem
                         key={role}
                         value={role}
                       >
-                        {roleToStr[role]}
+                        {privilegeTypeToStr[role]}
                       </SelectItem>
                     ))}
                   </SelectContent>

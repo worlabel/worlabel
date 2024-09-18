@@ -1,27 +1,44 @@
+import React from 'react';
 import MemberAddForm, { MemberAddFormValues } from './MemberAddForm';
-import XIcon from '@/assets/icons/x.svg?react';
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
-export default function MemberAddModal({
-  title = '새 멤버 초대',
-  onClose,
-  onSubmit,
-}: {
-  title?: string;
-  onClose: () => void;
+interface MemberAddModalProps {
   onSubmit: (data: MemberAddFormValues) => void;
-}) {
+  buttonClass?: string;
+}
+
+export default function MemberAddModal({ onSubmit, buttonClass = '' }: MemberAddModalProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
   return (
-    <div className="flex w-[610px] flex-col gap-10 rounded-3xl border px-10 py-5 shadow-lg">
-      <header className="flex gap-5">
-        <h1 className="small-title w-full">{title}</h1>
-        <button
-          className="flex h-8 w-8 items-center justify-center"
-          onClick={onClose}
+    <Dialog
+      open={isOpen}
+      onOpenChange={setIsOpen}
+    >
+      <DialogTrigger asChild>
+        <Button
+          variant="outlinePrimary"
+          className={`${buttonClass}`}
+          onClick={handleOpen}
         >
-          <XIcon className="stroke-gray-900" />
-        </button>
-      </header>
-      <MemberAddForm onSubmit={onSubmit} />
-    </div>
+          <Plus size={16} />
+          <span>멤버 초대하기</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader title="새 멤버 초대" />
+        <MemberAddForm
+          onSubmit={(data: MemberAddFormValues) => {
+            onSubmit(data);
+            handleClose();
+          }}
+        />
+      </DialogContent>
+    </Dialog>
   );
 }

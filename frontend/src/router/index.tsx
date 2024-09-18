@@ -71,7 +71,11 @@ const router = createBrowserRouter([
   },
   {
     path: `${webPath.admin()}/:workspaceId/project/:projectId?`,
-    element: <AdminLayout />,
+    element: (
+      <Suspense fallback={<div></div>}>
+        <AdminLayout />
+      </Suspense>
+    ),
     children: [
       {
         index: true,

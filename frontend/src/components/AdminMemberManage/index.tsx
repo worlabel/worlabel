@@ -1,70 +1,45 @@
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import AdminMemberManageForm, { MemberManageFormValues } from './AdminMemberManageForm';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import AdminMemberManageForm from './AdminMemberManageForm';
+import { useParams } from 'react-router-dom';
+import useProjectMembersQuery from '@/queries/useProjectMembersQuery';
+import useAuthStore from '@/stores/useAuthStore';
+import { useAddProjectMember } from '@/hooks/useProjectHooks';
+import MemberAddModal from '../MemberAddModal';
+import { MemberAddFormValues } from '../MemberAddModal/MemberAddForm';
 
-type Role = 'admin' | 'editor' | 'viewer';
+export default function AdminMemberManage() {
+  const { projectId } = useParams<{ workspaceId: string; projectId: string }>();
+  const profile = useAuthStore((state) => state.profile);
+  const memberId = profile?.id || 0;
 
-interface Member {
-  email: string;
-  role: Role;
-}
+  const { data: members = [] } = useProjectMembersQuery(Number(projectId), memberId);
+  const addProjectMember = useAddProjectMember();
 
-interface Project {
-  id: string;
-  name: string;
-}
+  const [, setInviteModalOpen] = useState(false);
 
-export default function AdminMemberManage({
-  title = '멤버 관리',
-  projects = [
-    { id: 'project-1', name: '프로젝트 A' },
-    { id: 'project-2', name: '프로젝트 B' },
-  ],
-  onProjectChange = (projectId: string) => console.log('Selected Project:', projectId),
-  onSubmit = (data: MemberManageFormValues) => console.log('Submitted:', data),
-  members = [
-    { email: 'admin1@example.com', role: 'admin' },
-    { email: 'viewer2@example.com', role: 'viewer' },
-  ],
-  onMemberInvite = () => console.log('Invite member'),
-}: {
-  title?: string;
-  projects?: Project[];
-  onProjectChange?: (projectId: string) => void;
-  onSubmit?: (data: MemberManageFormValues) => void;
-  members?: Member[];
-  onMemberInvite?: () => void;
-}) {
+  const handleMemberInvite = (data: MemberAddFormValues) => {
+    addProjectMember.mutate({
+      projectId: Number(projectId),
+      memberId: memberId,
+      newMember: {
+        // Todo : 멤버 id로 수정하는 로직 수정해야한다.
+        // memberId: data.email,
+        memberId: 0,
+        privilegeType: data.role,
+      },
+    });
+    console.log('Invited:', data);
+    setInviteModalOpen(false);
+  };
+
   return (
     <div className="flex w-full flex-col gap-6 border-b-[0.67px] border-[#dcdcde] bg-[#fbfafd] p-6">
       <header className="flex w-full items-center gap-4">
-        <h1 className="flex-1 text-lg font-semibold text-[#333238]">{title}</h1>
-        <Button
-          variant="outlinePrimary"
-          onClick={onMemberInvite}
-        >
-          멤버 초대하기
-        </Button>
-        <Select onValueChange={onProjectChange}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="프로젝트 선택" />
-          </SelectTrigger>
-          <SelectContent>
-            {projects.map((project) => (
-              <SelectItem
-                key={project.id}
-                value={project.id}
-              >
-                {project.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <h1 className="flex-1 text-lg font-semibold text-[#333238]">멤버 관리</h1>
+        <MemberAddModal onSubmit={handleMemberInvite} />
       </header>
-      <AdminMemberManageForm
-        onSubmit={onSubmit}
-        members={members}
-      />
+
+      <AdminMemberManageForm members={members} />
     </div>
   );
 }
