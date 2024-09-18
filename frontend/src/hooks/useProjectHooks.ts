@@ -112,3 +112,62 @@
 //     },
 //   });
 // };
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createProject, updateProject, deleteProject, addProjectMember, removeProjectMember } from '@/api/projectApi';
+import { ProjectResponse, ProjectRequest, ProjectMemberRequest } from '@/types';
+
+export const useCreateProject = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ProjectResponse, Error, { workspaceId: number; memberId: number; data: ProjectRequest }>({
+    mutationFn: ({ workspaceId, memberId, data }) => createProject(workspaceId, memberId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', variables.workspaceId] });
+    },
+  });
+};
+
+export const useUpdateProject = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ProjectResponse, Error, { projectId: number; memberId: number; data: ProjectRequest }>({
+    mutationFn: ({ projectId, memberId, data }) => updateProject(projectId, memberId, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['project', data.id] });
+    },
+  });
+};
+
+export const useDeleteProject = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { projectId: number; memberId: number }>({
+    mutationFn: ({ projectId, memberId }) => deleteProject(projectId, memberId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['projects', variables.projectId] });
+    },
+  });
+};
+
+export const useAddProjectMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { projectId: number; memberId: number; data: ProjectMemberRequest }>({
+    mutationFn: ({ projectId, memberId, data }) =>
+      addProjectMember(projectId, memberId, data.memberId, data.privilegeType),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['project', variables.projectId] });
+    },
+  });
+};
+
+export const useRemoveProjectMember = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { projectId: number; memberId: number; targetMemberId: number }>({
+    mutationFn: ({ projectId, memberId, targetMemberId }) => removeProjectMember(projectId, memberId, targetMemberId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['project', variables.projectId] });
+    },
+  });
+};
