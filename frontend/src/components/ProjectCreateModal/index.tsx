@@ -3,9 +3,10 @@ import ProjectCreateForm, { ProjectCreateFormValues } from './ProjectCreateForm'
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { ProjectRequest } from '@/types';
 
 interface ProjectCreateModalProps {
-  onSubmit: (data: { title: string; labelType: 'classification' | 'detection' | 'segmentation' }) => void;
+  onSubmit: (data: ProjectRequest) => void;
   buttonClass?: string;
 }
 
@@ -17,7 +18,7 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
 
   const formatLabelType = (
     labelType: 'Classification' | 'Detection' | 'Segmentation'
-  ): 'classification' | 'detection' | 'segmentation' => {
+  ): ProjectRequest['projectType'] => {
     switch (labelType) {
       case 'Classification':
         return 'classification';
@@ -47,9 +48,9 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
         <DialogHeader title="새 프로젝트" />
         <ProjectCreateForm
           onSubmit={(data: ProjectCreateFormValues) => {
-            const formattedData = {
+            const formattedData: ProjectRequest = {
               title: data.projectName,
-              labelType: formatLabelType(data.labelType),
+              projectType: formatLabelType(data.labelType),
             };
             onSubmit(formattedData);
             handleClose();
