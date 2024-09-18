@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 from schemas.model_create_request import ModelCreateRequest
-from services.init_model import create_pretrained_model, create_default_model
+from services.init_model import create_pretrained_model, create_default_model, upload_tmp_model
 from services.load_model import load_model
-from utils.file_utils import get_model_paths, delete_file
+from utils.file_utils import get_model_paths, delete_file, join_path, save_file
 import re
 
 router = APIRouter()
@@ -55,8 +55,29 @@ def model_delete(model_path:str):
                         detail= "모델을 찾을 수 없습니다.")
 
 @router.post("/upload")
-def model_upload():
-    pass
+def upload_model(project_id:int, file: UploadFile = File(...)):
+    # 확장자 확인
+    if not file.filename.endswith(".pt"):
+        raise HTTPException(status_code=400, detail="Only .pt files are allowed.")
+
+    tmp_path = join_path("resources", "models", "tmp-"+file.filename)
+
+    # 임시로 파일 저장
+    try:
+        save_file(tmp_path, file)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="file save exception: "+str(e))
+    
+    # YOLO 모델 변환 및 저장
+    try:
+        model_path = upload_tmp_model(project_id, tmp_path)
+        return {"model_path": model_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="file save exception: "+str(e))
+    finally:
+        # 임시파일 삭제
+        delete_file(tmp_path)
+
 
 @router.get("/download")
 def model_download():

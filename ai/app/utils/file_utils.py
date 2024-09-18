@@ -158,4 +158,14 @@ def get_model_paths(project_id:int):
     return [os.path.join(path, file) for file in files if file.endswith(".pt")]
 
 def delete_file(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError()
     os.remove(path)
+
+def save_file(path, file):
+    # 경로에서 디렉토리 부분만 추출 (파일명을 제외한 경로)
+    dir_path = os.path.dirname(path)
+    os.makedirs(dir_path, exist_ok=True)
+
+    with open(path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
