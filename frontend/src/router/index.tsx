@@ -92,7 +92,11 @@ const router = createBrowserRouter([
   },
   {
     path: webPath.oauthCallback(),
-    element: <OAuthCallback />,
+    element: (
+      <Suspense fallback={<div></div>}>
+        <OAuthCallback />
+      </Suspense>
+    ),
   },
 ]);
 
