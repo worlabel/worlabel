@@ -139,7 +139,7 @@ public class ProjectController {
     @Operation(summary = "프로젝트 멤버 조회", description = "프로젝트 멤버를 조회합니다.")
     @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
-    @DeleteMapping("/projects/{project_id}/members")
+    @GetMapping("/projects/{project_id}/members")
     public List<ProjectMemberResponse> getProjectMember(
         @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId) {
