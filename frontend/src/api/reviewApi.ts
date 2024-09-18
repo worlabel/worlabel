@@ -50,11 +50,21 @@ export async function updateReviewStatus(projectId: number, reviewId: number, me
     .then(({ data }) => data);
 }
 
-// 리뷰 상태별 조회
-export async function getReviewByStatus(projectId: number, memberId: number, reviewStatus: string) {
+export async function getReviewByStatus(
+  projectId: number,
+  memberId: number,
+  reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
+  lastReviewId?: number,
+  limitPage: number = 10
+) {
   return api
     .get<ReviewResponse[]>(`/projects/${projectId}/reviews`, {
-      params: { memberId, reviewStatus },
+      params: {
+        memberId,
+        limitPage,
+        ...(reviewStatus ? { reviewStatus } : {}),
+        ...(lastReviewId ? { lastReviewId } : {}),
+      },
     })
     .then(({ data }) => data);
 }

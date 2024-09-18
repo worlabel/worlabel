@@ -149,23 +149,52 @@ export interface AutoLabelingResponse {
   data: string;
 }
 
+// 리뷰 요청 DTO
 export interface ReviewRequest {
   title: string;
   content: string;
   imageIds: number[];
 }
 
+// 리뷰 응답 DTO
 export interface ReviewResponse {
   reviewId: number;
   title: string;
   content: string;
   status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  nickname: string;
+  email: string;
+  createAt: string;
+  updateAt: string;
 }
 
+// 리뷰 상태 요청 DTO
 export interface ReviewStatusRequest {
   reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
 }
 
+// 리뷰 이미지 응답 DTO
+export interface ReviewImageResponse {
+  id: number; // 이미지 ID
+  imageTitle: string; // 이미지 파일 제목
+  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+}
+
+// 리뷰 디테일 응답 DTO
+export interface ReviewDetailResponse {
+  reviewId: number;
+  title: string;
+  content: string;
+  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  images: ReviewImageResponse[];
+}
+// 프로젝트 멤버 응답 DTO
+export interface ProjectMemberResponse {
+  memberId: number;
+  nickname: string;
+  profileImage: string;
+  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
+}
 export interface FolderIdResponse {
   id: number;
   title: string;
@@ -175,7 +204,7 @@ export interface ImageDetailResponse {
   id: number;
   imageTitle: string;
   imageUrl: string;
-  data: string | null; // PENDING 상태라면 null
+  data: string | null;
   status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
@@ -192,12 +221,16 @@ export interface LabelSaveRequest {
   data: string;
 }
 
-export interface ReviewDetailResponse {
-  reviewId: number;
-  title: string;
-  content: string;
-  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
-  images: ImageResponse[];
+export interface ProjectMemberResponse {
+  memberId: number;
+  nickname: string;
+  profileImage: string;
+  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
+}
+
+export interface ProjectMemberRequest {
+  memberId: number;
+  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 }
 
 export interface ErrorResponse {

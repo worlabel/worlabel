@@ -113,8 +113,15 @@
 //   });
 // };
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createProject, updateProject, deleteProject, addProjectMember, removeProjectMember } from '@/api/projectApi';
-import { ProjectResponse, ProjectRequest, ProjectMemberRequest } from '@/types';
+import {
+  createProject,
+  updateProject,
+  deleteProject,
+  addProjectMember,
+  updateProjectMemberPrivilege,
+  removeProjectMember,
+} from '@/api/projectApi';
+import { ProjectResponse, ProjectRequest, ProjectMemberRequest, ProjectMemberResponse } from '@/types';
 
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
@@ -151,23 +158,41 @@ export const useDeleteProject = () => {
 
 export const useAddProjectMember = () => {
   const queryClient = useQueryClient();
-
-  return useMutation<void, Error, { projectId: number; memberId: number; data: ProjectMemberRequest }>({
-    mutationFn: ({ projectId, memberId, data }) =>
-      addProjectMember(projectId, memberId, data.memberId, data.privilegeType),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project', variables.projectId] });
+  return useMutation<
+    ProjectMemberResponse,
+    Error,
+    { projectId: number; memberId: number; newMember: ProjectMemberRequest }
+  >({
+    mutationFn: ({ projectId, memberId, newMember }) => addProjectMember(projectId, memberId, newMember),
+    onSuccess: (_, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
     },
   });
 };
 
+// 프로젝트 멤버 권한 수정 훅
+export const useUpdateProjectMemberPrivilege = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    ProjectMemberResponse,
+    Error,
+    { projectId: number; memberId: number; privilegeData: ProjectMemberRequest }
+  >({
+    mutationFn: ({ projectId, memberId, privilegeData }) =>
+      updateProjectMemberPrivilege(projectId, memberId, privilegeData),
+    onSuccess: (_, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
+    },
+  });
+};
+
+// 프로젝트 멤버 삭제 훅
 export const useRemoveProjectMember = () => {
   const queryClient = useQueryClient();
-
   return useMutation<void, Error, { projectId: number; memberId: number; targetMemberId: number }>({
     mutationFn: ({ projectId, memberId, targetMemberId }) => removeProjectMember(projectId, memberId, targetMemberId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['project', variables.projectId] });
+    onSuccess: (_, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
     },
   });
 };

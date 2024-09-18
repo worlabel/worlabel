@@ -1,5 +1,5 @@
 import api from '@/api/axiosConfig';
-import { ProjectListResponse, ProjectResponse } from '@/types';
+import { ProjectListResponse, ProjectResponse, ProjectMemberRequest, ProjectMemberResponse } from '@/types';
 
 export async function getProjectList(
   workspaceId: number,
@@ -46,32 +46,6 @@ export async function deleteProject(projectId: number, memberId: number) {
     .then(({ data }) => data);
 }
 
-export async function addProjectMember(
-  projectId: number,
-  memberId: number,
-  newMemberId: number,
-  privilegeType: string
-) {
-  return api
-    .post(
-      `/projects/${projectId}/members`,
-      { memberId: newMemberId, privilegeType },
-      {
-        params: { memberId },
-      }
-    )
-    .then(({ data }) => data);
-}
-
-export async function removeProjectMember(projectId: number, memberId: number, targetMemberId: number) {
-  return api
-    .delete(`/projects/${projectId}/members`, {
-      params: { memberId },
-      data: { memberId: targetMemberId },
-    })
-    .then(({ data }) => data);
-}
-
 export async function createProject(
   workspaceId: number,
   memberId: number,
@@ -80,6 +54,46 @@ export async function createProject(
   return api
     .post(`/workspaces/${workspaceId}/projects`, data, {
       params: { memberId },
+    })
+    .then(({ data }) => data);
+}
+
+// 프로젝트 멤버 조회
+export async function getProjectMembers(projectId: number, memberId: number) {
+  return api
+    .get<ProjectMemberResponse[]>(`/projects/${projectId}/members`, {
+      params: { memberId },
+    })
+    .then(({ data }) => data);
+}
+
+// 프로젝트 멤버 추가
+export async function addProjectMember(projectId: number, memberId: number, newMember: ProjectMemberRequest) {
+  return api
+    .post<ProjectMemberResponse>(`/projects/${projectId}/members`, newMember, {
+      params: { memberId },
+    })
+    .then(({ data }) => data);
+}
+
+// 프로젝트 멤버 권한 수정
+export async function updateProjectMemberPrivilege(
+  projectId: number,
+  memberId: number,
+  privilegeData: ProjectMemberRequest
+) {
+  return api
+    .put<ProjectMemberResponse>(`/projects/${projectId}/members`, privilegeData, {
+      params: { memberId },
+    })
+    .then(({ data }) => data);
+}
+
+// 프로젝트 멤버 삭제
+export async function removeProjectMember(projectId: number, memberId: number, targetMemberId: number) {
+  return api
+    .delete(`/projects/${projectId}/members`, {
+      params: { memberId, targetMemberId },
     })
     .then(({ data }) => data);
 }

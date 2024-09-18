@@ -5,8 +5,6 @@ import { cn } from '@/lib/utils';
 const sortOptions = [
   { value: 'latest', label: '최신 순' },
   { value: 'oldest', label: '오래된 순' },
-  { value: 'comments', label: '댓글 많은 순' },
-  { value: 'updates', label: '업데이트 많은 순' },
 ];
 
 interface ReviewSearchInputProps {

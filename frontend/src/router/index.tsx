@@ -9,16 +9,13 @@ import ReviewList from '@/components/ReviewList';
 import AdminMemberManage from '@/components/AdminMemberManage';
 import OAuthCallback from '@/components/OAuthCallback';
 import { createBrowserRouter } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
 import { Suspense } from 'react';
 import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
-
+import AdminIndex from '@/pages/AdminIndex';
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
   workspace: () => '/workspace',
-  // workspace: (workspaceId: string, projectId?: string) =>
-  //   projectId ? `/workspace/${workspaceId}/project/${projectId}` : `/workspace/${workspaceId}`,
   admin: () => `/admin`,
   oauthCallback: () => '/redirect/oauth2',
 };
@@ -73,15 +70,15 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: `${webPath.admin()}/:workspaceId`,
+    path: `${webPath.admin()}/:workspaceId/project/:projectId?`,
     element: <AdminLayout />,
     children: [
       {
         index: true,
-        element: <Navigate to="review" />,
+        element: <AdminIndex />,
       },
       {
-        path: 'review',
+        path: 'reviews',
         element: <ReviewList />,
       },
       {
