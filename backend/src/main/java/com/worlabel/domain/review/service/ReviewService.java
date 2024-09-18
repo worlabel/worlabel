@@ -5,6 +5,7 @@ import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
+import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
@@ -17,6 +18,7 @@ import com.worlabel.domain.review.entity.dto.ReviewResponse;
 import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
 import com.worlabel.domain.review.repository.ReviewImageRepository;
 import com.worlabel.domain.review.repository.ReviewRepository;
+import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +42,8 @@ public class ReviewService {
     private final ProjectRepository projectRepository;
     private final ParticipantService participantService;
 
+    @CheckPrivilege(PrivilegeType.EDITOR)
     public ReviewResponse createReview(final Integer memberId, final Integer projectId, final ReviewRequest reviewRequest) {
-        // 권한 체크 편집자 이상만 리뷰 신청 가능
-        participantService.checkEditorUnauthorized(memberId, projectId);
-
         Project project = getProject(projectId);
         Member member = getMember(memberId);
 
@@ -69,13 +69,12 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewByProjectId(final Integer memberId, final Integer projectId, final ReviewStatusRequest reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
-        participantService.checkViewerUnauthorized(memberId, projectId);
-
+    @CheckPrivilege(PrivilegeType.VIEWER)
+    public List<ReviewResponse> getReviewByProjectId(final Integer memberId, final Integer projectId, final String reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
         // 리뷰 조회 쿼리 호출
         List<Review> reviews = reviewRepository.findReviewsNativeWithLimit(
             projectId,
-            reviewStatusRequest != null ? reviewStatusRequest.getReviewStatus().toValue() : null,
+            reviewStatusRequest == null ? null : ReviewStatus.valueOf(reviewStatusRequest),
             lastReviewId,
             limitPage
         );
@@ -88,9 +87,8 @@ public class ReviewService {
 
 
     @Transactional(readOnly = true)
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public ReviewDetailResponse getReviewById(final Integer memberId, final Integer projectId, final Integer reviewId) {
-        participantService.checkViewerUnauthorized(memberId, projectId);
-
         Review review = getReview(reviewId);
 
         List<ImageResponse> images = reviewImageRepository.findAllByReviewIdWithImage(reviewId).stream()
@@ -118,9 +116,8 @@ public class ReviewService {
     }
 
     // 상태 변경
+    @CheckPrivilege(PrivilegeType.MANAGER)
     public ReviewResponse updateReviewStatus(final Integer memberId, final Integer projectId, final Integer reviewId, final ReviewStatusRequest reviewStatusRequest) {
-        participantService.checkManagerUnauthorized(memberId, projectId);
-
         Review review = getReview(reviewId);
         review.updateReviewStatus(reviewStatusRequest.getReviewStatus());
 
