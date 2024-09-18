@@ -169,3 +169,8 @@ def save_file(path, file):
 
     with open(path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
+
+def get_file_name(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError()
+    return os.path.basename(path)
