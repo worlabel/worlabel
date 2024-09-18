@@ -20,6 +20,8 @@ import com.worlabel.domain.review.repository.ReviewRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,15 +68,24 @@ public class ReviewService {
         return ReviewResponse.from(review);
     }
 
-    // 리뷰 조회
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewByProjectId(final Integer memberId, final Integer projectId, final ReviewStatusRequest reviewStatusRequest) {
+    public List<ReviewResponse> getReviewByProjectId(final Integer memberId, final Integer projectId, final ReviewStatusRequest reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
         participantService.checkViewerUnauthorized(memberId, projectId);
 
-        return reviewRepository.findAllByProjectIdAndReviewStatus(projectId, reviewStatusRequest.getReviewStatus()).stream()
+        // 리뷰 조회 쿼리 호출
+        List<Review> reviews = reviewRepository.findReviewsNativeWithLimit(
+            projectId,
+            reviewStatusRequest != null ? reviewStatusRequest.getReviewStatus().toValue() : null,
+            lastReviewId,
+            limitPage
+        );
+
+        // ReviewResponse로 변환
+        return reviews.stream()
             .map(ReviewResponse::from)
             .toList();
     }
+
 
     @Transactional(readOnly = true)
     public ReviewDetailResponse getReviewById(final Integer memberId, final Integer projectId, final Integer reviewId) {
