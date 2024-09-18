@@ -16,4 +16,8 @@ public class ReviewStatusRequest {
     @Schema(description = "리뷰 상태", example = "거부")
     @NotNull(message = "상태를 입력하세요.")
     private ReviewStatus reviewStatus;
+
+    public static ReviewStatusRequest of(String status){
+        return new ReviewStatusRequest(ReviewStatus.valueOf(status));
+    }
 }
