@@ -155,6 +155,93 @@ export const handlers = [
     return HttpResponse.json({});
   }),
 
+  http.post('/api/projects/:projectId/label/auto', () => {
+    const response: AutoLabelingResponse = {
+      imageId: 1,
+      imageUrl: 'image-url.jpg',
+      data: `{
+        "version": "0.1.0",
+        "task_type": "cls",
+        "shapes": [
+          {
+            "label": "NG",
+            "color": "#FF0000",
+            "points": [[0, 0]],
+            "group_id": null,
+            "shape_type": "point",
+            "flags": {}
+          }
+        ],
+        "split": "none",
+        "imageHeight": 2000,
+        "imageWidth": 4000,
+        "imageDepth": 4
+      }`,
+    };
+    return HttpResponse.json(response);
+  }),
+
+  // DELETE: 프로젝트 멤버 제거 핸들러
+  http.delete('/api/projects/:projectId/members', ({ params }) => {
+    const { projectId } = params;
+
+    return HttpResponse.json({ message: `프로젝트 ${projectId}에서 멤버 제거 성공` });
+  }),
+  // PUT: 프로젝트 멤버 권한 수정 핸들러
+  http.put('/api/projects/:projectId/members', () => {
+    return HttpResponse.json({});
+  }),
+  // POST: 워크스페이스 멤버 추가 핸들러
+  http.post('/api/workspaces/:workspaceId/members/:memberId', ({ params }) => {
+    const { workspaceId, memberId } = params;
+
+    if (!workspaceId || !memberId) {
+      const errorResponse: ErrorResponse = {
+        status: 400,
+        code: 1002,
+        message: '잘못된 요청입니다. 요청을 확인해주세요.',
+        isSuccess: false,
+      };
+      return HttpResponse.json(errorResponse, { status: 400 });
+    }
+
+    // 성공 응답
+    const response: WorkspaceResponse = {
+      id: parseInt(workspaceId as string, 10),
+      memberId: parseInt(memberId as string, 10),
+      title: 'Workspace 1',
+      content: 'Workspace for testing',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    return HttpResponse.json(response, { status: 200 });
+  }),
+
+  // GET: 프로젝트 멤버 리스트 조회 핸들러 (가상)
+  // 실제 구현 시 API 경로와 메서드를 확인 후 업데이트 필요
+  http.get('/api/projects/:projectId/members', () => {
+    const members: MemberResponse[] = [
+      { id: 1, nickname: 'admin', profileImage: 'admin.jpg' },
+      { id: 2, nickname: 'editor', profileImage: 'editor.jpg' },
+      { id: 3, nickname: 'viewer', profileImage: 'viewer.jpg' },
+    ];
+
+    return HttpResponse.json(members);
+  }),
+
+  // GET: 워크스페이스 멤버 리스트 조회 핸들러 (가상)
+  // 실제 구현 시 API 경로와 메서드를 확인 후 업데이트 필요
+  http.get('/api/workspaces/:workspaceId/members', () => {
+    const members: MemberResponse[] = [
+      { id: 1, nickname: 'admin', profileImage: 'admin.jpg' },
+      { id: 2, nickname: 'editor', profileImage: 'editor.jpg' },
+      { id: 3, nickname: 'viewer', profileImage: 'viewer.jpg' },
+    ];
+
+    return HttpResponse.json(members);
+  }),
+
   // Folder and Image Handlers
   http.get('/api/projects/:projectId/folders/:folderId', ({ params }) => {
     const { folderId } = params;
