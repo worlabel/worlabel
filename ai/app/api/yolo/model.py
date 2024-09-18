@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
 from schemas.model_create_request import ModelCreateRequest
-from services.init_model import create_pretrained_model, create_default_model, upload_tmp_model
+from services.create_model import create_new_model, upload_tmp_model
 from services.load_model import load_model
 from utils.file_utils import get_model_paths, delete_file, join_path, save_file, get_file_name
 import re
@@ -32,19 +32,15 @@ def get_model_list(project_id:int):
                         detail= "프로젝트가 찾을 수 없거나 생성된 모델이 없습니다.")
 
 @router.post("/create", status_code=201)
-def model_create(request: ModelCreateRequest):
+def create_model(request: ModelCreateRequest):
     if request.type not in ["seg", "det", "cls"]:
         raise HTTPException(status_code=400,
                              detail= f"Invalid type '{request.type}'. Must be one of \"seg\", \"det\", \"cls\".")
-    if request.pretrained:
-        model_path = create_pretrained_model(request.project_id, request.type)
-    else:
-        labels = list(map(lambda x:x.label, request.labelCategories))
-        model_path = create_default_model(request.project_id, request.type, labels)
+    model_path = create_new_model(request.project_id, request.type, request.pretrained)
     return {"model_path": model_path}
 
 @router.delete("/delete", status_code=204)
-def model_delete(model_path:str):
+def delete_model(model_path:str):
     pattern = r'^resources[/\\]projects[/\\](\d+)[/\\]models[/\\]([a-f0-9\-]+)\.pt$'
     if not re.match(pattern, model_path):
         raise HTTPException(status_code=400,
@@ -81,7 +77,7 @@ def upload_model(project_id:int, file: UploadFile = File(...)):
 
 
 @router.get("/download")
-async def download_model(model_path: str):
+def download_model(model_path: str):
     pattern = r'^resources[/\\]projects[/\\](\d+)[/\\]models[/\\]([a-f0-9\-]+)\.pt$'
     if not re.match(pattern, model_path):
         raise HTTPException(status_code=400,
