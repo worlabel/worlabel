@@ -20,7 +20,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query(value = "SELECT r.*, m.* " +
         "FROM review r JOIN member m ON r.member_id = m.member_id " +
-        "WHERE r.project_id = :projectId AND (:reviewStatus IS NULL OR r.review_status = :reviewStatus) AND (:lastReviewId IS NULL OR r.review_id < :lastReviewId) " +
+        "WHERE r.project_id = :projectId AND (:reviewStatus IS NULL OR r.status = :reviewStatus) AND (:lastReviewId IS NULL OR r.review_id < :lastReviewId) " +
         "ORDER BY r.review_id DESC LIMIT :limit", nativeQuery = true)
     List<Review> findReviewsNativeWithLimit(
         @Param("projectId") Integer projectId,
