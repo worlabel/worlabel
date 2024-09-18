@@ -33,7 +33,6 @@ export type Label = {
   type: 'polygon' | 'rect';
   coordinates: Array<[number, number]>;
 };
-
 export interface FolderRequest {
   title: string;
   parentId: number;
@@ -55,7 +54,7 @@ export interface ImageResponse {
   id: number;
   imageTitle: string;
   imageUrl: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'NEED_REVIEW' | 'COMPLETED';
+  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
 export interface ImageMoveRequest {
@@ -63,7 +62,7 @@ export interface ImageMoveRequest {
 }
 
 export interface ImageStatusChangeRequest {
-  labelStatus: 'PENDING' | 'IN_PROGRESS' | 'NEED_REVIEW' | 'COMPLETED';
+  labelStatus: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
 export interface MemberResponse {
@@ -79,7 +78,7 @@ export interface WorkspaceRequest {
 
 export interface WorkspaceResponse {
   id: number;
-  memberId: string;
+  memberId: number;
   title: string;
   content: string;
   createdAt: string;
@@ -88,15 +87,6 @@ export interface WorkspaceResponse {
 
 export interface WorkspaceListResponse {
   workspaceResponses: WorkspaceResponse[];
-}
-
-export interface SuccessResponse<T> {
-  status: number;
-  code: number;
-  message: string;
-  data: T;
-  errors: CustomError[];
-  isSuccess: boolean;
 }
 
 export interface ProjectRequest {
@@ -115,31 +105,6 @@ export interface ProjectResponse {
 
 export interface ProjectListResponse {
   workspaceResponses: ProjectResponse[];
-}
-
-export interface CustomError {
-  field: string;
-  code: string;
-  message: string;
-  objectName: string;
-}
-
-export interface ErrorResponse {
-  status: number;
-  code: number;
-  message: string;
-  data: CustomError;
-  errors: CustomError[];
-  isSuccess: boolean;
-}
-
-export interface BaseResponse<T> {
-  status: number;
-  code: number;
-  message: string;
-  data: T;
-  errors: CustomError[];
-  isSuccess: boolean;
 }
 
 export interface RefreshTokenResponse {
@@ -163,6 +128,10 @@ export interface CommentResponse {
   createTime: string; // 작성 일자 (ISO 8601 형식)
 }
 
+export interface CommentListResponse {
+  commentResponses: CommentResponse[];
+}
+
 export interface ProjectMemberRequest {
   memberId: number;
   privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
@@ -178,4 +147,62 @@ export interface AutoLabelingResponse {
   imageId: number;
   imageUrl: string;
   data: string;
+}
+
+export interface ReviewRequest {
+  title: string;
+  content: string;
+  imageIds: number[];
+}
+
+export interface ReviewResponse {
+  reviewId: number;
+  title: string;
+  content: string;
+  status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+}
+
+export interface ReviewStatusRequest {
+  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+}
+
+export interface FolderIdResponse {
+  id: number;
+  title: string;
+}
+
+export interface ImageDetailResponse {
+  id: number;
+  imageTitle: string;
+  imageUrl: string;
+  data: string | null; // PENDING 상태라면 null
+  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+}
+
+export interface CategoryRequest {
+  categoryName: string;
+}
+
+export interface CategoryResponse {
+  id: number;
+  name: string;
+}
+
+export interface LabelSaveRequest {
+  data: string;
+}
+
+export interface ReviewDetailResponse {
+  reviewId: number;
+  title: string;
+  content: string;
+  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  images: ImageResponse[];
+}
+
+export interface ErrorResponse {
+  status: number;
+  code: number;
+  message: string;
+  isSuccess: boolean;
 }
