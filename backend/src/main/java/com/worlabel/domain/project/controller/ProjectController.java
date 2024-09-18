@@ -1,6 +1,7 @@
 package com.worlabel.domain.project.controller;
 
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
+import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
 import com.worlabel.domain.project.entity.dto.ProjectResponses;
@@ -35,9 +36,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/workspaces/{workspace_id}/projects")
     public ProjectResponse createProject(
-            @CurrentUser final Integer memberId,
-            @PathVariable("workspace_id") final Integer workspaceId,
-            @Valid @RequestBody final ProjectRequest projectRequest) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("workspace_id") final Integer workspaceId,
+        @Valid @RequestBody final ProjectRequest projectRequest) {
         return projectService.createProject(memberId, workspaceId, projectRequest);
     }
 
@@ -54,10 +55,10 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.SERVER_ERROR})
     @GetMapping("/workspaces/{workspace_id}/projects")
     public ProjectResponses getProjects(
-            @PathVariable("workspace_id") Integer workspaceId,
-            @CurrentUser final Integer memberId,
-            @Parameter(name = "마지막 프로젝트 id", description = "마지막 프로젝트 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastProjectId,
-            @Parameter(name = "가져올 프로젝트 수", description = "가져올 프로젝트 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage) {
+        @PathVariable("workspace_id") Integer workspaceId,
+        @CurrentUser final Integer memberId,
+        @Parameter(name = "마지막 프로젝트 id", description = "마지막 프로젝트 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastProjectId,
+        @Parameter(name = "가져올 프로젝트 수", description = "가져올 프로젝트 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage) {
         List<ProjectResponse> projects = projectService.getProjectsByWorkspaceId(workspaceId, memberId, lastProjectId, limitPage);
         return ProjectResponses.from(projects);
     }
@@ -67,9 +68,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}")
     public ProjectResponse updateProject(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @Valid @RequestBody final ProjectRequest projectRequest) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @Valid @RequestBody final ProjectRequest projectRequest) {
         return projectService.updateProject(memberId, projectId, projectRequest);
     }
 
@@ -78,8 +79,8 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/train")
     public void trainModel(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId) {
         projectService.train(memberId, projectId);
     }
 
@@ -88,8 +89,8 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/auto")
     public void autoLabeling(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId) {
         projectService.autoLabeling(memberId, projectId);
     }
 
@@ -107,9 +108,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/members")
     public void addProjectMember(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @Valid @RequestBody final ParticipantRequest participantRequest) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @Valid @RequestBody final ParticipantRequest participantRequest) {
         projectService.addProjectMember(memberId, projectId, participantRequest);
     }
 
@@ -118,9 +119,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}/members")
     public void changeProjectMember(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @Valid @RequestBody final ParticipantRequest participantRequest) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @Valid @RequestBody final ParticipantRequest participantRequest) {
         projectService.changeProjectMember(memberId, projectId, participantRequest);
     }
 
@@ -129,9 +130,19 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @DeleteMapping("/projects/{project_id}/members")
     public void removeProjectMember(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @Valid @RequestBody final Integer removeMemberId) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @Valid @RequestBody final Integer removeMemberId) {
         projectService.removeProjectMember(memberId, projectId, removeMemberId);
+    }
+
+    @Operation(summary = "프로젝트 멤버 조회", description = "프로젝트 멤버를 조회합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 조회합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @DeleteMapping("/projects/{project_id}/members")
+    public List<ProjectMemberResponse> getProjectMember(
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId) {
+        return projectService.getProjectMember(memberId, projectId);
     }
 }
