@@ -75,14 +75,12 @@ function HeaderSection({
 function EmptyStateMessage({ workspaceId }: { workspaceId: number }) {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center">
-      <div className="flex flex-col items-center">
-        <Smile
-          size={48}
-          className="mb-2 text-gray-300"
-        />
-        <div className="body text-gray-400">
-          {!workspaceId ? '작업할 워크스페이스를 선택하세요.' : '작업할 프로젝트가 없습니다.'}
-        </div>
+      <Smile
+        size={48}
+        className="mb-2 text-gray-300"
+      />
+      <div className="body-strong text-gray-400">
+        {!workspaceId ? '작업할 워크스페이스를 선택하세요.' : '작업할 프로젝트가 없습니다.'}
       </div>
     </div>
   );
@@ -104,7 +102,7 @@ function ProjectList({
           size={48}
           className="mb-2 text-gray-300"
         />
-        <div className="body text-gray-400">작업할 프로젝트가 없습니다.</div>
+        <div className="body-strong text-gray-400">작업할 프로젝트가 없습니다.</div>
       </div>
     );
   }
