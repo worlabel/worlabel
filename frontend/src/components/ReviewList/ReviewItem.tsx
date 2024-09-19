@@ -1,13 +1,13 @@
 import { Briefcase, Tag, Box, Layers } from 'lucide-react';
-import { ProjectResponse } from '@/types';
-
+import useProjectQuery from '@/queries/projects/useProjectQuery';
+import useAuthStore from '@/stores/useAuthStore';
 interface ReviewItemProps {
   title: string;
   createdTime: string;
   creatorName: string;
-  project: ProjectResponse;
-  status: string;
-  type: { text: 'classification' | 'detection' | 'segmentation'; color: string };
+  projectId: number;
+  status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  type?: { text: 'classification' | 'detection' | 'segmentation'; color: string };
 }
 
 const typeIcons: Record<'classification' | 'detection' | 'segmentation', JSX.Element> = {
@@ -16,9 +16,11 @@ const typeIcons: Record<'classification' | 'detection' | 'segmentation', JSX.Ele
   segmentation: <Layers className="h-4 w-4 text-white" />,
 };
 
-export default function ReviewItem({ title, createdTime, creatorName, project, status, type }: ReviewItemProps) {
-  const icon = typeIcons[project.projectType];
-
+export default function ReviewItem({ title, createdTime, creatorName, projectId, status, type }: ReviewItemProps) {
+  const profile = useAuthStore((state) => state.profile);
+  const memberId = profile?.id || 0;
+  const icon = type ? typeIcons[type.text] : null;
+  const { data: projectData } = useProjectQuery(projectId, memberId);
   return (
     <div className="flex h-[100px] w-full items-center justify-between border-b-[0.67px] border-[#ececef] bg-[#fbfafd] p-4">
       <div className="flex flex-col">
@@ -26,7 +28,7 @@ export default function ReviewItem({ title, createdTime, creatorName, project, s
         <p className="mt-1 text-xs text-[#737278]">by {creatorName}</p>
         <div className="mt-1 flex items-center">
           <Briefcase className="h-3 w-3 text-[#737278]" />
-          <p className="ml-1 text-xs text-[#737278]">{project.title}</p>
+          <p className="ml-1 text-xs text-[#737278]">{projectData.title}</p>
         </div>
         {type && (
           <div

@@ -3,11 +3,17 @@ import { cn } from '@/lib/utils';
 
 export default function AdminMenuSidebar() {
   const navigate = useNavigate();
-  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId?: string }>();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
 
   const menuItems = [
-    { label: '리뷰', path: `/admin/${workspaceId}${projectId ? `/project/${projectId}` : ''}/reviews` },
-    { label: '멤버 관리', path: `/admin/${workspaceId}${projectId ? `/project/${projectId}` : ''}/members` },
+    {
+      label: '리뷰',
+      path: `/admin/${workspaceId}/reviews`,
+    },
+    {
+      label: '멤버 관리',
+      path: `/admin/${workspaceId}/members`,
+    },
   ];
 
   return (

@@ -71,7 +71,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: `${webPath.admin()}/:workspaceId/project/:projectId?`,
+    path: `${webPath.admin()}/:workspaceId`,
     element: (
       <Suspense fallback={<div></div>}>
         <AdminLayout />
