@@ -98,11 +98,11 @@ public class WorkspaceController {
         workspaceService.removeWorkspaceMember(memberId, workspaceId, newMemberId);
     }
 
-    @Operation(summary = "프로젝트 멤버 조회", description = "프로젝트 멤버를 조회합니다.")
-    @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 조회합니다.")
+    @Operation(summary = "워크스페이스 멤버 조회", description = "워크스페이스 멤버를 조회합니다.")
+    @SwaggerApiSuccess(description = "워크스페이스 멤버를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/{workspace_id}/members")
-    public List<WorkspaceMemberResponse> getProjectMember(
+    public List<WorkspaceMemberResponse> getWorkspaceMember(
             @CurrentUser final Integer memberId,
             @PathVariable("workspace_id") final Integer workspaceId) {
         return workspaceService.getWorkspaceMember(memberId, workspaceId);
