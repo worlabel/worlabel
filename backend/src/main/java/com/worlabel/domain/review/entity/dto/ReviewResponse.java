@@ -17,6 +17,9 @@ public class ReviewResponse {
     @Schema(description = "리뷰 ID", example = "1")
     private Integer reviewId;
 
+    @Schema(description = "프로젝트 ID", example = "2")
+    private Integer projectId;
+
     @Schema(description = "리뷰 제목", example = "확인 부탁드립니다.")
     private String title;
 
@@ -40,14 +43,15 @@ public class ReviewResponse {
 
     public static ReviewResponse from(final Review review) {
         return new ReviewResponse(
-            review.getId(),
-            review.getTitle(),
-            review.getContent(),
-            review.getReviewStatus(),
-            review.getMember().getNickname(),
-            review.getMember().getEmail(),
-            review.getCreatedAt(),
-            review.getUpdatedAt());
+                review.getId(),
+                review.getProject().getId(),
+                review.getTitle(),
+                review.getContent(),
+                review.getReviewStatus(),
+                review.getMember().getNickname(),
+                review.getMember().getEmail(),
+                review.getCreatedAt(),
+                review.getUpdatedAt());
     }
 }
 
