@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ReviewItem from './ReviewItem';
 import ReviewSearchInput from './ReviewSearchInput';
 import useReviewByStatusQuery from '@/queries/useReviewByStatusQuery';
+import useProjectQuery from '@/queries/useProjectQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import { useParams } from 'react-router-dom';
 
@@ -13,6 +14,8 @@ export default function ReviewList(): JSX.Element {
   const [activeTab, setActiveTab] = useState<'REQUESTED' | 'APPROVED' | 'REJECTED' | 'all'>('REQUESTED');
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
+
+  const { data: project } = useProjectQuery(Number(projectId), memberId);
 
   const { data: reviews = [] } = useReviewByStatusQuery(
     Number(projectId),
@@ -77,9 +80,17 @@ export default function ReviewList(): JSX.Element {
             title={item.title}
             createdTime={item.createAt}
             creatorName={item.nickname}
-            project={item.content}
+            project={project}
             status={item.status}
-            type={{ text: 'Classification', color: '#a2eeef' }}
+            type={{
+              text: project.projectType,
+              color:
+                project.projectType === 'classification'
+                  ? '#a2eeef'
+                  : project.projectType === 'detection'
+                    ? '#d4c5f9'
+                    : '#f9c5d4',
+            }}
           />
         ))}
       </div>
