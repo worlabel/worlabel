@@ -1,5 +1,6 @@
 package com.worlabel.domain.image.controller;
 
+import com.worlabel.domain.folder.entity.dto.FolderResponse;
 import com.worlabel.domain.image.entity.dto.*;
 import com.worlabel.domain.image.service.ImageService;
 import com.worlabel.global.annotation.CurrentUser;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -35,6 +37,17 @@ public class ImageController {
             @PathVariable("project_id") final Integer projectId,
             @Parameter(name = "폴더에 추가 할 이미지 리스트", description = "MultiPartFile을 imageList로 추가해준다.", example = "") @RequestBody final List<MultipartFile> imageList) {
         imageService.uploadImageList(imageList, folderId, projectId, memberId);
+    }
+
+    @PostMapping("/upload")
+    @SwaggerApiSuccess(description = "폴더와 이미지 파일을 성공적으로 업로드합니다.")
+    @Operation(summary = "폴더 업로드", description = "폴더와 이미지 파일을 업로드합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    public void uploadFolder(
+            @RequestParam("folderZip") MultipartFile folderZip,
+            @PathVariable("project_id") Integer projectId,
+            @RequestParam(value = "parentId", defaultValue = "0") Integer parentId) throws IOException {
+        imageService.uploadFolderWithImages(folderZip, projectId, parentId);
     }
 
     @GetMapping("/{image_id}")

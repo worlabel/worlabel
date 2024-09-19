@@ -3,12 +3,11 @@ package com.worlabel.domain.image.service;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
-import com.worlabel.domain.image.entity.dto.DetailImageResponse;
-import com.worlabel.domain.image.entity.dto.ImageLabelRequest;
-import com.worlabel.domain.image.entity.dto.ImageResponse;
-import com.worlabel.domain.image.entity.dto.ImageStatusRequest;
+import com.worlabel.domain.image.entity.dto.*;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
+import com.worlabel.domain.project.entity.Project;
+import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -19,7 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Slf4j
 @Service
@@ -30,6 +36,9 @@ public class ImageService {
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
     private final FolderRepository folderRepository;
+    private final ProjectRepository projectRepository;
+
+    private static int orderCount = 0;
 
     /**
      * 이미지 리스트 업로드
@@ -40,7 +49,7 @@ public class ImageService {
         for (int order = 0; order < imageList.size(); order++) {
             MultipartFile file = imageList.get(order);
             String extension = getExtension(file);
-            String imageKey = s3UploadService.upload(file,extension, projectId);
+            String imageKey = s3UploadService.upload(file, extension, projectId);
             Image image = Image.of(file.getOriginalFilename(), imageKey, extension, order, folder);
             imageRepository.save(image);
         }
@@ -105,6 +114,86 @@ public class ImageService {
         save(imageId, labelRequest.getData());
     }
 
+    // 폴더 압축 파일을 받아 폴더와 이미지 파일을 저장하는 메서드
+    public void uploadFolderWithImages(MultipartFile folderZip, Integer projectId, Integer parentId) throws IOException {
+        orderCount = 0;
+        // 프로젝트 정보 가져오기
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+
+        // 압축 해제 경로 설정 (임시 폴더에 압축 해제)
+        Path tempDir = Files.createTempDirectory("uploadedFolder");
+        unzip(folderZip, tempDir.toString());
+
+        // 부모 폴더가 최상위인지 확인
+        Folder parentFolder = (parentId == 0) ? null : folderRepository.findById(parentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+
+        // 압축 풀린 폴더를 재귀적으로 탐색하여 하위 폴더 및 이미지 파일을 저장
+        processFolderRecursively(tempDir.toFile(), parentFolder, project);
+    }
+
+    // 폴더 내부 구조를 재귀적으로 탐색하여 저장
+    private void processFolderRecursively(File directory, Folder parentFolder, Project project) {
+        if (directory.exists() && directory.isDirectory()) {
+            Folder currentFolder = Folder.of(directory.getName(), parentFolder, project);
+            folderRepository.save(currentFolder);
+
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        // 하위 폴더인 경우 재귀 호출
+                        processFolderRecursively(file, currentFolder, project);
+                    } else if (isImageFile(file)) {
+                        // 이미지 파일인 경우
+                        String fileName = file.getName();
+                        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+                        // todo MultipartFile 업 캐스팅 하면 안됨 이거 수정해야함
+                        String imageKey = s3UploadService.upload((MultipartFile) file, extension, project.getId());
+
+                        Image image = Image.of(file.getName(), imageKey, extension, orderCount++, currentFolder);
+                        imageRepository.save(image);
+                    }
+                }
+            }
+        }
+    }
+
+    // 이미지 파일인지 확인하는 메서드
+    private boolean isImageFile(File file) {
+        String fileName = file.getName().toLowerCase();
+        return fileName.endsWith(".jpg") || fileName.endsWith(".png") || fileName.endsWith(".jpeg");
+    }
+
+    // 압축 파일을 임시 폴더에 압축 해제하는 메서드
+    private void unzip(MultipartFile zipFile, String destDir) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                Path newPath = zipSlipProtect(zipEntry, Paths.get(destDir));
+                if (zipEntry.isDirectory()) {
+                    Files.createDirectories(newPath);
+                } else {
+                    Files.createDirectories(newPath.getParent());
+                    Files.copy(zis, newPath);
+                }
+                zis.closeEntry();
+            }
+        }
+    }
+
+    // 보안 보호를 위해 압축 파일 경로를 보호하는 메서드
+    private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir) throws IOException {
+        Path targetDirResolved = targetDir.resolve(zipEntry.getName());
+        Path normalizePath = targetDirResolved.normalize();
+        if (!normalizePath.startsWith(targetDir)) {
+            throw new IOException("Zip entry is outside of the target dir: " + zipEntry.getName());
+        }
+        return normalizePath;
+    }
+
     private void save(final long imageId, final String data) {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
@@ -117,14 +206,14 @@ public class ImageService {
         String fileName = file.getOriginalFilename();
         return fileName.substring(fileName.lastIndexOf(".") + 1); // 파일 확장자
     }
-
     // 폴더 가져오기
+
     private Folder getFolder(final Integer folderId) {
         return folderRepository.findById(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
-
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
+
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
