@@ -81,8 +81,8 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectResponse> getProjectsByWorkspaceId(final Integer workspaceId, final Integer memberId, final Integer lastProjectId, final Integer pageSize) {
         return projectRepository.findProjectsByWorkspaceIdAndMemberIdWithPagination(workspaceId, memberId, lastProjectId, pageSize).stream()
-            .map(ProjectResponse::from)
-            .toList();
+                .map(ProjectResponse::from)
+                .toList();
     }
 
     @CheckPrivilege(PrivilegeType.ADMIN)
@@ -98,13 +98,13 @@ public class ProjectService {
         projectRepository.deleteById(projectId);
     }
 
-    @CheckPrivilege(PrivilegeType.MANAGER)
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public List<ProjectMemberResponse> getProjectMember(final Integer memberId, final Integer projectId) {
         List<Participant> participants = participantRepository.findAllByProjectIdWithMember(projectId);
 
         return participants.stream()
-            .map(ProjectMemberResponse::from)
-            .toList();
+                .map(ProjectMemberResponse::from)
+                .toList();
     }
 
     @CheckPrivilege(PrivilegeType.ADMIN)
@@ -127,7 +127,7 @@ public class ProjectService {
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId)
-            .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
         participant.updatePrivilege(participantRequest.getPrivilegeType());
     }
 
@@ -136,7 +136,7 @@ public class ProjectService {
         checkNotAdminParticipant(removeMemberId, projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId)
-            .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED));
 
         participantRepository.delete(participant);
     }
@@ -168,17 +168,17 @@ public class ProjectService {
 
     public Project getProject(final Integer projectId) {
         return projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private Workspace getWorkspace(final Integer memberId, final Integer workspaceId) {
         return workspaceRepository.findByMemberIdAndId(memberId, workspaceId)
-            .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
     }
 
     private Member getMember(final Integer memberId) {
         return memberRepository.findById(memberId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void checkNotAdminParticipant(final Integer memberId, final Integer projectId) {
@@ -204,8 +204,8 @@ public class ProjectService {
 
         List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
-            .map(AutoLabelingImageRequest::of)
-            .toList();
+                .map(AutoLabelingImageRequest::of)
+                .toList();
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
         sendRequestToApi(autoLabelingRequest, project);
     }
@@ -222,12 +222,12 @@ public class ProjectService {
             log.debug("요청 서버 : {}", url);
             // AI 서버로 POST 요청
             ResponseEntity<String> response = restTemplate.exchange(url, // 요청을 보낼 URL
-                HttpMethod.POST, // HTTP 메서드 (POST)
-                request, // HTTP 요청 본문과 헤더가 포함된 객체
-                String.class // 응답을 String 타입으로
+                    HttpMethod.POST, // HTTP 메서드 (POST)
+                    request, // HTTP 요청 본문과 헤더가 포함된 객체
+                    String.class // 응답을 String 타입으로
             );
             String responseBody = Optional.ofNullable(response.getBody())
-                .orElseThrow(() -> new CustomException(ErrorCode.AI_SERVER_ERROR));
+                    .orElseThrow(() -> new CustomException(ErrorCode.AI_SERVER_ERROR));
         } catch (Exception e) {
             log.error("AI 서버 요청 중 오류 발생: ", e);
             throw new CustomException(ErrorCode.AI_SERVER_ERROR);
