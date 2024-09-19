@@ -17,9 +17,9 @@ export default function ImageCanvas() {
   const stageRef = useRef<Konva.Stage>(null);
   const dragLayerRef = useRef<Konva.Layer>(null);
   const scale = useRef<number>(0);
-  const imageUrl = '/sample.jpg';
+  const imageUrl = useCanvasStore((state) => state.image);
   const labels = useCanvasStore((state) => state.labels) ?? [];
-  const [image, imageStatus] = useImage(imageUrl);
+  const [image] = useImage(imageUrl);
   const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
   const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
   const drawState = useCanvasStore((state) => state.drawState);
@@ -184,15 +184,26 @@ export default function ImageCanvas() {
   };
 
   useEffect(() => {
+    if (!image) {
+      scale.current = 0;
+      return;
+    }
+    const widthRatio = stageWidth / image!.width;
+    const heightRatio = stageHeight / image!.height;
+
+    scale.current = Math.min(widthRatio, heightRatio);
+  }, [image, stageHeight, stageWidth]);
+
+  useEffect(() => {
     if (!stageRef.current) return;
     stageRef.current.container().style.cursor = drawState === 'pointer' ? 'default' : 'crosshair';
 
     if (drawState !== 'pointer') {
       setSelectedLabelId(null);
     }
-  }, [drawState]);
+  }, [drawState, setSelectedLabelId]);
 
-  return imageStatus === 'loaded' ? (
+  return image ? (
     <div>
       <Stage
         ref={stageRef}

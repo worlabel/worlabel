@@ -2,7 +2,6 @@ import * as React from 'react';
 import ProjectCreateForm, { ProjectCreateFormValues } from './ProjectCreateForm';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { ProjectRequest } from '@/types';
 
 interface ProjectCreateModalProps {
@@ -16,19 +15,6 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
 
-  const formatLabelType = (
-    labelType: 'Classification' | 'Detection' | 'Segmentation'
-  ): ProjectRequest['projectType'] => {
-    switch (labelType) {
-      case 'Classification':
-        return 'classification';
-      case 'Detection':
-        return 'detection';
-      case 'Segmentation':
-        return 'segmentation';
-    }
-  };
-
   return (
     <Dialog
       open={isOpen}
@@ -38,10 +24,10 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
         <Button
           variant="outlinePrimary"
           className={`${buttonClass}`}
+          size={'xs'}
           onClick={handleOpen}
         >
-          <Plus size={16} />
-          <span>프로젝트 추가</span>
+          <span>새 프로젝트</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -50,7 +36,8 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
           onSubmit={(data: ProjectCreateFormValues) => {
             const formattedData: ProjectRequest = {
               title: data.projectName,
-              projectType: formatLabelType(data.labelType),
+              projectType: (data.labelType.charAt(0).toUpperCase() +
+                data.labelType.slice(1)) as ProjectRequest['projectType'],
             };
             onSubmit(formattedData);
             handleClose();

@@ -1,19 +1,20 @@
-import { DirectoryItem } from '@/types';
+import { ChildFolder } from '@/types';
 import { ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import ProjectFileItem from './ProjectFileItem';
 import { cn } from '@/lib/utils';
 
 export default function ProjectDirectoryItem({
   className = '',
   item,
-  depth = 1,
+  depth = 0,
+  initialExpanded = false,
 }: {
   className?: string;
-  item: DirectoryItem;
+  item: ChildFolder;
   depth?: number;
+  initialExpanded?: boolean;
 }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(initialExpanded);
   const paddingLeft = depth * 12;
 
   return (
@@ -31,28 +32,9 @@ export default function ProjectDirectoryItem({
             className={`stroke-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
           />
         </button>
-        <span className="overflow-hidden text-ellipsis whitespace-nowrap">{item.name}</span>
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap">{item.title}</span>
       </div>
-      {item.children?.map((child) => {
-        const childProps = {
-          className: isExpanded ? '' : 'hidden',
-          depth: depth + 1,
-        };
-
-        return child.type === 'directory' ? (
-          <ProjectDirectoryItem
-            key={`${item.name}-${child.name}`}
-            item={child}
-            {...childProps}
-          />
-        ) : (
-          <ProjectFileItem
-            key={`${item.name}-${child.name}`}
-            item={child}
-            {...childProps}
-          />
-        );
-      })}
+      {/* TODO: nested 폴더 구조 적용 */}
     </>
   );
 }
