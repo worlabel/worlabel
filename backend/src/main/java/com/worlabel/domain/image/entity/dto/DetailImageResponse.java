@@ -22,17 +22,17 @@ public class DetailImageResponse {
     private String imageUrl;
 
     @Schema(description = "폴리곤 데이터", example = "PENDING 상태라면 data null")
-    private String data;
+    private String dataPath;
 
     @Schema(description = "이미지 상태", example = "PENDING")
     private LabelStatus status;
 
-    public static DetailImageResponse from(final Image image, final String data) {
+    public static DetailImageResponse from(final Image image) {
         return new DetailImageResponse(
                 image.getId(),
                 image.getTitle(),
                 image.getImagePath(),
-                data,
+                image.getDataPath(),
                 image.getStatus()
         );
     }
