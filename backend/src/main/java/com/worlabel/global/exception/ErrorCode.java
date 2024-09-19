@@ -25,7 +25,7 @@ public enum ErrorCode {
     // Workspace - 3000
     NOT_AUTHOR(HttpStatus.FORBIDDEN, 3001, "작성자가 아닙니다. 이 작업을 수행할 권한이 없습니다."),
     WORKSPACE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3002, "해당 워크스페이스는 존재하지 않습니다."),
-    EARLY_ADD_MEMBER(HttpStatus.BAD_REQUEST, 3003, "이미 추가된 멤버입니다."),
+    EARLY_ADD_MEMBER(HttpStatus.BAD_REQUEST, 3003,z "이미 추가된 멤버입니다."),
 
     // Project - 4000
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, 4000, "프로젝트를 찾을 수 없습니다"),
