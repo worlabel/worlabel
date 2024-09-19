@@ -18,8 +18,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     Optional<Review> findByIdAndMemberId(Integer reviewId, Integer memberId);
 
-    @Query("SELECT r, m " +
-            "FROM Review r JOIN Member m ON r.id = m.id " +
+    @Query("SELECT r " +
+            "FROM Review r " +
             "WHERE r.project.id = :projectId AND (:reviewStatus IS NULL OR r.reviewStatus = :reviewStatus) AND (:lastReviewId IS NULL OR r.id < :lastReviewId) " +
             "ORDER BY r.id DESC LIMIT :limit")
     List<Review> findReviewsNativeWithLimit(
@@ -35,4 +35,25 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
             "LEFT JOIN FETCH r.reviewer " +  // 리뷰어 정보 (없을 수도 있으므로 LEFT JOIN)
             "WHERE r.id = :reviewId")
     Optional<Review> findByIdFetchMemberAndReviewer(@Param("reviewId") Integer reviewId);
+
+    @Query(value = """
+            SELECT r.* 
+            FROM review r
+            JOIN project p ON r.project_id = p.project_id
+            JOIN participant part ON part.project_id = p.project_id
+            WHERE p.workspace_id = :workspaceId
+            AND part.member_id = :memberId
+            AND (:status IS NULL OR r.status = :status)
+            AND (:lastReviewId IS NULL OR r.review_id < :lastReviewId)
+            ORDER BY r.review_id DESC
+            LIMIT :limitPage
+            """, nativeQuery = true)
+    List<Review> findAllReviewsByWorkspaceAndMember(
+            @Param("workspaceId") Integer workspaceId,
+            @Param("memberId") Integer memberId,
+            @Param("status") String status,
+            @Param("lastReviewId") Integer lastReviewId,
+            @Param("limitPage") Integer limitPage
+    );
+
 }

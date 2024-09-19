@@ -111,6 +111,10 @@ public class ProjectService {
     public void addProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
         checkSelfParticipant(memberId, participantRequest.getMemberId());
 
+        if (participantRepository.existsByMemberIdAndProjectId(participantRequest.getMemberId(), projectId)) {
+            throw new CustomException(ErrorCode.EARLY_ADD_MEMBER);
+        }
+
         Project project = getProject(projectId);
         Member member = getMember(participantRequest.getMemberId());
         Participant participant = Participant.of(project, member, participantRequest.getPrivilegeType());
@@ -182,7 +186,6 @@ public class ProjectService {
     }
 
     private void checkNotAdminParticipant(final Integer memberId, final Integer projectId) {
-        checkSelfParticipant(memberId, projectId);
         if (participantRepository.existsByProjectIdAndMemberIdAndPrivilege(projectId, memberId, PrivilegeType.ADMIN)) {
             throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }

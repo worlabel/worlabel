@@ -1,5 +1,8 @@
 package com.worlabel.domain.workspace.controller;
 
+import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
+import com.worlabel.domain.review.entity.dto.ReviewResponse;
+import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
@@ -9,6 +12,8 @@ import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
+import com.worlabel.global.response.BaseResponse;
+import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -103,5 +108,19 @@ public class WorkspaceController {
             @CurrentUser final Integer memberId,
             @PathVariable("workspace_id") final Integer workspaceId) {
         return workspaceService.getWorkspaceMember(memberId, workspaceId);
+    }
+
+    // 리뷰 조회(상태별로)
+    @GetMapping("/{workspace_id}/reviews")
+    @SwaggerApiSuccess(description = "워크스페이스 단위 리뷰를 상태별로 성공적으로 조회합니다.")
+    @Operation(summary = "워크스페이스 단위 리뷰를 상태별로 조회", description = "워크스페이스 단위 리뷰를 상태별로 조회합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public List<ReviewResponse> getReviewByWorkspace(
+            @CurrentUser final Integer memberId,
+            @PathVariable("workspace_id") final Integer workspaceId,
+            @Parameter(name = "리뷰 상태", description = "리뷰 상태", example = "APPROVED") @RequestParam(value = "reviewStatus", required = false) final ReviewStatusRequest reviewStatusRequest,
+            @Parameter(name = "마지막 리뷰 id", description = "마지막 리뷰 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastReviewId,
+            @Parameter(name = "가져올 리뷰 수", description = "가져올 리뷰 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage) {
+        return workspaceService.getReviewByWorkspace(memberId, workspaceId, reviewStatusRequest, lastReviewId, limitPage);
     }
 }
