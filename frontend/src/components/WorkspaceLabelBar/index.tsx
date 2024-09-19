@@ -1,15 +1,18 @@
-import { Label } from '@/types';
 import LabelButton from './LabelButton';
 import { Button } from '../ui/button';
 import { Play } from 'lucide-react';
+import useCanvasStore from '@/stores/useCanvasStore';
 
-export default function WorkspaceLabelBar({ labels }: { labels: Label[] }) {
+export default function WorkspaceLabelBar() {
+  const labels = useCanvasStore((state) => state.labels);
+  const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
+  const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
   const handleAutoLabeling = () => {
     console.log('Auto labeling');
   };
 
   return (
-    <div className="flex h-full w-[280px] flex-col justify-between border-l border-gray-300 bg-gray-100">
+    <div className="flex h-full w-[280px] flex-col justify-between border-l border-gray-300 bg-gray-50">
       <div className="flex flex-col gap-2.5">
         <header className="subheading flex w-full items-center gap-2 px-5 py-2.5">
           <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">레이블 목록</h1>
@@ -19,6 +22,8 @@ export default function WorkspaceLabelBar({ labels }: { labels: Label[] }) {
             <LabelButton
               key={label.id}
               {...label}
+              selected={selectedLabelId === label.id}
+              setSelectedLabelId={setSelectedLabelId}
             />
           ))}
         </div>

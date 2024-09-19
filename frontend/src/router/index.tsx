@@ -12,6 +12,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { Suspense } from 'react';
 import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
 import AdminIndex from '@/pages/AdminIndex';
+import LabelCanvas from '@/pages/LabelCanvas';
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
@@ -61,11 +62,11 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <ImageCanvas />,
+        element: <LabelCanvas />,
       },
       {
         path: 'project/:projectId',
-        element: <ImageCanvas />,
+        element: <LabelCanvas />,
       },
     ],
   },
