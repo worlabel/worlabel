@@ -21,11 +21,19 @@ public class ImageResponse {
     @Schema(description = "이미지 상태", example = "PENDING")
     private LabelStatus status;
 
+    @Schema(description = "이미지 주소", example = "https://abc.jpg")
+    private String imagePath;
+
+    @Schema(description = "이미지 데이터 주소", example = "https://abc.json")
+    private String dataPath;
+
     public static ImageResponse from(final Image image) {
         return new ImageResponse(
                 image.getId(),
                 image.getTitle(),
-                image.getStatus()
+                image.getStatus(),
+                image.getImagePath(),
+                image.getDataPath()
         );
     }
 }
