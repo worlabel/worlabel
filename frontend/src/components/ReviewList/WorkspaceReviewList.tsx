@@ -57,6 +57,8 @@ export default function WorkspaceReviewList({ workspaceId }: WorkspaceReviewList
           workspaceReviews.map((item) => (
             <ReviewItem
               key={item.reviewId}
+              workspaceId={workspaceId}
+              reviewId={item.reviewId}
               title={item.title}
               createdTime={item.createAt}
               creatorName={item.nickname}

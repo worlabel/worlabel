@@ -9,7 +9,7 @@ interface ProjectReviewListProps {
   workspaceId: number;
 }
 
-export default function ProjectReviewList({ projectId }: ProjectReviewListProps): JSX.Element {
+export default function ProjectReviewList({ projectId, workspaceId }: ProjectReviewListProps): JSX.Element {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
@@ -58,6 +58,8 @@ export default function ProjectReviewList({ projectId }: ProjectReviewListProps)
           projectReviews.map((item) => (
             <ReviewItem
               key={item.reviewId}
+              workspaceId={workspaceId}
+              reviewId={item.reviewId}
               title={item.title}
               createdTime={item.createAt}
               creatorName={item.nickname}
