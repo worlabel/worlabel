@@ -36,7 +36,7 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
           </button>
           <ProjectCreateModal
             onSubmit={(data) => console.log('프로젝트 생성:', data)}
-            buttonClass="caption border-primary bg-gray-50"
+            buttonClass="caption bg-gray-50"
           />
         </header>
         <div className="p-2">
