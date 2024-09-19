@@ -58,8 +58,8 @@ public class ReviewService {
 
         // 리뷰 이미지 객체 생성 및 배치 저장
         List<ReviewImage> reviewImages = images.stream()
-            .map(image -> ReviewImage.of(review, image))
-            .collect(Collectors.toList());
+                .map(image -> ReviewImage.of(review, image))
+                .collect(Collectors.toList());
 
         reviewImageRepository.saveAll(reviewImages);
 
@@ -71,27 +71,27 @@ public class ReviewService {
     public List<ReviewResponse> getReviewByProjectId(final Integer memberId, final Integer projectId, final String reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
         // 리뷰 조회 쿼리 호출
         List<Review> reviews = reviewRepository.findReviewsNativeWithLimit(
-            projectId,
-            reviewStatusRequest == null ? null : ReviewStatus.valueOf(reviewStatusRequest),
-            lastReviewId,
-            limitPage
+                projectId,
+                reviewStatusRequest == null ? null : ReviewStatus.valueOf(reviewStatusRequest),
+                lastReviewId,
+                limitPage
         );
 
         // ReviewResponse로 변환
         return reviews.stream()
-            .map(ReviewResponse::from)
-            .toList();
+                .map(ReviewResponse::from)
+                .toList();
     }
 
 
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
     public ReviewDetailResponse getReviewById(final Integer memberId, final Integer projectId, final Integer reviewId) {
-        Review review = getReview(reviewId);
+        Review review = getReviewWithMember(reviewId);
 
         List<ImageResponse> images = reviewImageRepository.findAllByReviewIdWithImage(reviewId).stream()
-            .map(reviewImage -> ImageResponse.from(reviewImage.getImage()))
-            .toList();
+                .map(reviewImage -> ImageResponse.from(reviewImage.getImage()))
+                .toList();
 
         return ReviewDetailResponse.of(review, images);
     }
@@ -103,8 +103,8 @@ public class ReviewService {
         reviewImageRepository.deleteAllByReview(review);
         List<Image> images = imageRepository.findAllById(reviewUpdateRequest.getImageIds());
         List<ReviewImage> reviewImages = images.stream()
-            .map(image -> ReviewImage.of(review, image))
-            .collect(Collectors.toList());
+                .map(image -> ReviewImage.of(review, image))
+                .collect(Collectors.toList());
 
         reviewImageRepository.saveAll(reviewImages);
 
@@ -114,10 +114,16 @@ public class ReviewService {
     }
 
     // 상태 변경
+
     @CheckPrivilege(PrivilegeType.MANAGER)
     public ReviewResponse updateReviewStatus(final Integer memberId, final Integer projectId, final Integer reviewId, final ReviewStatusRequest reviewStatusRequest) {
         Review review = getReview(reviewId);
+        Member member = getMember(memberId);
         review.updateReviewStatus(reviewStatusRequest.getReviewStatus());
+
+        if (reviewStatusRequest.getReviewStatus().isApproved()) {
+            review.assignReviewer(member);
+        }
 
         return ReviewResponse.from(review);
     }
@@ -132,21 +138,26 @@ public class ReviewService {
 
     private Member getMember(final Integer memberId) {
         return memberRepository.findById(memberId)
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     private Project getProject(final Integer projectId) {
         return projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
     }
 
     private Review getReview(final Integer reviewId) {
         return reviewRepository.findById(reviewId)
-            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    private Review getReviewWithMember(final Integer reviewId) {
+        return reviewRepository.findByIdFetchMemberAndReviewer(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Review getReviewWithMemberId(final Integer reviewId, final Integer memberId) {
         return reviewRepository.findByIdAndMemberId(reviewId, memberId)
-            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }

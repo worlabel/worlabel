@@ -65,6 +65,13 @@ public class Review extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ReviewStatus reviewStatus = ReviewStatus.REQUESTED;
 
+    /**
+     * Merge한 사람 (Reviewer)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewer_id", nullable = true)  // Merge 시점에 설정되므로 NULL 가능
+    private Member reviewer;
+
     private Review(final String title,
                    final String content,
                    final Member member,
@@ -92,5 +99,10 @@ public class Review extends BaseEntity {
 
     public void updateReviewStatus(final ReviewStatus reviewStatus) {
         this.reviewStatus = reviewStatus;
+    }
+
+    // Merge한 사람을 설정하는 메서드
+    public void assignReviewer(final Member reviewer) {
+        this.reviewer = reviewer;
     }
 }
