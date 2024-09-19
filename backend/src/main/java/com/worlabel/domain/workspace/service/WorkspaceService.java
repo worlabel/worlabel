@@ -4,6 +4,11 @@ import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
+import com.worlabel.domain.review.entity.Review;
+import com.worlabel.domain.review.entity.ReviewStatus;
+import com.worlabel.domain.review.entity.dto.ReviewResponse;
+import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
+import com.worlabel.domain.review.repository.ReviewRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
@@ -25,6 +30,7 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
+    private final ReviewRepository reviewRepository;
 
     /**
      * 새로운 워크스페이스 생성
@@ -106,9 +112,28 @@ public class WorkspaceService {
     public List<WorkspaceMemberResponse> getWorkspaceMember(final Integer memberId, Integer workspaceId) {
         checkWorkspaceAuthorized(memberId, workspaceId);
 
-       return workspaceParticipantRepository.findAllByWorkspaceIdFetchJoin(workspaceId).stream()
-               .map(WorkspaceMemberResponse::from)
-               .toList();
+        return workspaceParticipantRepository.findAllByWorkspaceIdFetchJoin(workspaceId).stream()
+                .map(WorkspaceMemberResponse::from)
+                .toList();
+    }
+
+    /**
+     * 워크스페이스 단위 리뷰 조회
+     */
+    public List<ReviewResponse> getReviewByWorkspace(final Integer memberId, final Integer workspaceId, final ReviewStatusRequest reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
+        checkWorkspaceAuthorized(memberId, workspaceId);
+
+        List<Review> reviews = reviewRepository.findAllReviewsByWorkspaceAndMember(
+                workspaceId,
+                memberId,
+                reviewStatusRequest == null ? null : reviewStatusRequest.getReviewStatus().toString(),
+                lastReviewId,
+                limitPage
+        );
+
+        return reviews.stream()
+                .map(ReviewResponse::from)
+                .toList();
     }
 
     private Member getMember(final Integer memberId) {

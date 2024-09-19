@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,7 +84,6 @@ public class ReviewService {
                 .toList();
     }
 
-
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
     public ReviewDetailResponse getReviewById(final Integer memberId, final Integer projectId, final Integer reviewId) {
@@ -114,12 +114,15 @@ public class ReviewService {
     }
 
     // 상태 변경
-
     @CheckPrivilege(PrivilegeType.MANAGER)
     public ReviewResponse updateReviewStatus(final Integer memberId, final Integer projectId, final Integer reviewId, final ReviewStatusRequest reviewStatusRequest) {
         Review review = getReview(reviewId);
         Member member = getMember(memberId);
         review.updateReviewStatus(reviewStatusRequest.getReviewStatus());
+
+        if (!Objects.equals(review.getProject().getId(), projectId)) {
+            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
+        }
 
         if (reviewStatusRequest.getReviewStatus().isApproved()) {
             review.assignReviewer(member);

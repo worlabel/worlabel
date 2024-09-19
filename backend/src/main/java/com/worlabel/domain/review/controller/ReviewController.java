@@ -78,8 +78,8 @@ public class ReviewController {
 
     // 리뷰 상태 수정
     @PutMapping("/{review_id}/status")
-    @SwaggerApiSuccess(description = "리뷰상태를 성공적으로 삭제합니다.")
-    @Operation(summary = "리뷰 상태를 삭제", description = "리뷰 상태를 삭제합니다.")
+    @SwaggerApiSuccess(description = "리뷰상태를 성공적으로 수정합니다.")
+    @Operation(summary = "리뷰 상태를 수정", description = "리뷰 상태를 수정합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public ReviewResponse updateReviewStatus(
         @CurrentUser final Integer memberId,
