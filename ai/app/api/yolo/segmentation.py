@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.predict_response import PredictResponse, LabelData
-from services.ai_service import load_segmentation_model
+from services.load_model import load_segmentation_model
 from typing import List
 
 router = APIRouter()
 
-@router.post("/segmentation", response_model=List[PredictResponse])
+@router.post("/predict", response_model=List[PredictResponse])
 def predict(request: PredictRequest):
     version = "0.1.0"
 

@@ -149,3 +149,28 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
 def join_path(path, *paths):
     """os.path.join()과 같은 기능, os import 하기 싫어서 만듦"""
     return os.path.join(path, *paths)
+
+def get_model_paths(project_id:int):
+    path = os.path.join("resources","projects",str(project_id), "models")
+    if not os.path.exists(path):
+        raise FileNotFoundError()
+    files = os.listdir(path)
+    return [os.path.join(path, file) for file in files if file.endswith(".pt")]
+
+def delete_file(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError()
+    os.remove(path)
+
+def save_file(path, file):
+    # 경로에서 디렉토리 부분만 추출 (파일명을 제외한 경로)
+    dir_path = os.path.dirname(path)
+    os.makedirs(dir_path, exist_ok=True)
+
+    with open(path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+def get_file_name(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError()
+    return os.path.basename(path)

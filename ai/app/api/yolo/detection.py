@@ -1,47 +1,46 @@
 import json
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
-from services.ai_service import load_detection_model
-from typing import List
-from utils.websocket_utils import WebSocketClient
+from services.load_model import load_detection_model
+from utils.dataset_utils import split_data
+from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
+from utils.websocket_utils import WebSocketClient, WebSocketConnectionException
 import asyncio
 
 
 router = APIRouter()
 
-
-@router.post("/detection", response_model=List[PredictResponse])
-async def predict(request: PredictRequest):
+@router.post("/predict")
+async def detection_predict(request: PredictRequest):
     version = "0.1.0"
-    print("여기")
 
     # Spring 서버의 WebSocket URL
     # TODO: 배포 시 변경
     spring_server_ws_url = f"ws://localhost:8080/ws"
     
-    print("여기")
     # WebSocketClient 인스턴스 생성
     ws_client = WebSocketClient(spring_server_ws_url)
 
+    # 모델 로드
+    try:
+        model = load_detection_model(request.path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="load model exception: " + str(e))
+
+    # 웹소켓 연결
     try:
         await ws_client.connect()
-
-        # 모델 로드
-        try:
-            model = load_detection_model()
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="load model exception: " + str(e))
+        if not ws_client.is_connected():
+            raise WebSocketConnectionException()
 
         # 추론
-        results = []
         total_images = len(request.image_list)
         for idx, image in enumerate(request.image_list):
             try:
                 # URL에서 이미지를 메모리로 로드 TODO: 추후 메모리에 할지 어떻게 해야할지 or 병렬 처리 고민
-
                 predict_results = model.predict(
                     source=image.image_url,
                     iou=request.iou_threshold,
@@ -86,22 +85,34 @@ async def predict(request: PredictRequest):
                 message = {
                     "project_id": request.project_id,
                     "progress": progress,
-                    "result": response_item.dict()
+                    "result": response_item.model_dump()
                 }
 
                 await ws_client.send_message("/app/ai/predict/progress", json.dumps(message))
 
             except Exception as e:
                 raise HTTPException(status_code=500, detail="model predict exception: " + str(e))
-
-        # 추론 결과 -> 레이블 객체 파싱
+        return Response(status_code=204)
+    
+    # 웹소켓 연결 안된 경우
+    except WebSocketConnectionException as e:
+        # 추론
         response = []
-        try:
-            for (image, result) in zip(request.image_list, results):
-                label_data: LabelData = {
-                    "version": version,
-                    "task_type": "det",
-                    "shapes": [
+        for image in request.image_list:
+            try:
+                predict_results = model.predict(
+                    source=image.image_url,
+                    iou=request.iou_threshold,
+                    conf=request.conf_threshold,
+                    classes=request.classes
+                )
+
+                # 예측 결과 처리
+                result = predict_results[0]
+                label_data = LabelData(
+                    version=version,
+                    task_type="det",
+                    shapes=[
                         {
                             "label": summary['name'],
                             "color": "#ff0000",
@@ -115,21 +126,24 @@ async def predict(request: PredictRequest):
                         }
                         for summary in result.summary()
                     ],
-                    "split": "none",
-                    "imageHeight": result.orig_img.shape[0],
-                    "imageWidth": result.orig_img.shape[1],
-                    "imageDepth": result.orig_img.shape[2]
-                }
-                response.append({
-                    "image_id": image.image_id,
-                    "image_url": image.image_url,
-                    "data": label_data
-                })
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="label parsing exception: " + str(e))
+                    split="none",
+                    imageHeight=result.orig_img.shape[0],
+                    imageWidth=result.orig_img.shape[1],
+                    imageDepth=result.orig_img.shape[2]
+                )
 
+                response_item = PredictResponse(
+                    image_id=image.image_id,
+                    image_url=image.image_url,
+                    data=label_data
+                )
+
+                response.append(response_item)
+
+            except Exception as e:
+                raise HTTPException(status_code=500, detail="model predict exception: " + str(e))
+            
         return response
-
     except Exception as e:
         print(f"Prediction process failed: {str(e)}")
         raise HTTPException(status_code=500, detail="Prediction process failed")
@@ -139,8 +153,8 @@ async def predict(request: PredictRequest):
             await ws_client.close()
 
 
-@router.post("/detection/train")
-async def train(request: TrainRequest):
+@router.post("/train")
+async def detection_train(request: TrainRequest):
     # 데이터셋 루트 경로 얻기
     dataset_root_path = get_dataset_root_path(request.project_id)
 
@@ -202,7 +216,3 @@ async def train(request: TrainRequest):
     finally:
         if ws_client.is_connected():
             await ws_client.close()
-    
-
-
-    

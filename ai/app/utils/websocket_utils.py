@@ -1,4 +1,5 @@
 import websockets
+from websockets import WebSocketException
 
 class WebSocketClient:
     def __init__(self, url: str):
@@ -34,3 +35,7 @@ class WebSocketClient:
 
     def is_connected(self):
         return self.websocket is not None and self.websocket.open
+    
+class WebSocketConnectionException(WebSocketException):
+    def __init__(self, message="Failed to connect to WebSocket"):
+        super().__init__(message)
