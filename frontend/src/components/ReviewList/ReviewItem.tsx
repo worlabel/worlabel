@@ -1,31 +1,23 @@
-import { Briefcase, Tag, Box, Layers, Pen } from 'lucide-react';
+import { Briefcase, Tag, Box, Layers } from 'lucide-react';
+import { ProjectResponse } from '@/types';
 
 interface ReviewItemProps {
   title: string;
   createdTime: string;
   creatorName: string;
-  project: string;
+  project: ProjectResponse;
   status: string;
-  type: { text: 'Classification' | 'Detection' | 'Polygon' | 'Polyline'; color: string };
+  type: { text: 'classification' | 'detection' | 'segmentation'; color: string };
 }
 
-const typeIcons: Record<'Classification' | 'Detection' | 'Polygon' | 'Polyline', JSX.Element> = {
-  Classification: <Tag className="h-4 w-4 text-white" />,
-  Detection: <Box className="h-4 w-4 text-white" />,
-  Polygon: <Layers className="h-4 w-4 text-white" />,
-  Polyline: <Pen className="h-4 w-4 text-white" />,
-};
-
-const typeStyles: Record<'Classification' | 'Detection' | 'Polygon' | 'Polyline', string> = {
-  Classification: '#a2eeef',
-  Detection: '#d4c5f9',
-  Polygon: '#f9c5d4',
-  Polyline: '#c5f9d4',
+const typeIcons: Record<'classification' | 'detection' | 'segmentation', JSX.Element> = {
+  classification: <Tag className="h-4 w-4 text-white" />,
+  detection: <Box className="h-4 w-4 text-white" />,
+  segmentation: <Layers className="h-4 w-4 text-white" />,
 };
 
 export default function ReviewItem({ title, createdTime, creatorName, project, status, type }: ReviewItemProps) {
-  const icon = typeIcons[type.text];
-  const bgColor = typeStyles[type.text];
+  const icon = typeIcons[project.projectType];
 
   return (
     <div className="flex h-[100px] w-full items-center justify-between border-b-[0.67px] border-[#ececef] bg-[#fbfafd] p-4">
@@ -34,12 +26,12 @@ export default function ReviewItem({ title, createdTime, creatorName, project, s
         <p className="mt-1 text-xs text-[#737278]">by {creatorName}</p>
         <div className="mt-1 flex items-center">
           <Briefcase className="h-3 w-3 text-[#737278]" />
-          <p className="ml-1 text-xs text-[#737278]">{project}</p>
+          <p className="ml-1 text-xs text-[#737278]">{project.title}</p>
         </div>
         {type && (
           <div
             className="mt-1 inline-flex max-w-fit items-center gap-1 rounded-full px-3 py-1 text-xs text-white"
-            style={{ backgroundColor: bgColor, padding: '1px 5px' }}
+            style={{ backgroundColor: type.color, padding: '1px 5px' }}
           >
             {icon}
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">{type.text}</span>

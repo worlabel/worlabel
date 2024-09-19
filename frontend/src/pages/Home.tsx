@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
-import { getProfile, reissueToken } from '@/api/authApi';
+import { getProfile } from '@/api/authApi';
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
@@ -17,19 +17,9 @@ export default function Home() {
       hasFetchedProfile.current = true;
     });
   }
-
-  const handleReissueToken = async () => {
-    try {
-      const response = await reissueToken();
-      console.log('토큰 재발급 성공:', response);
-      alert('토큰 재발급 성공! 새로운 액세스 토큰을 콘솔에서 확인하세요.');
-    } catch (error) {
-      console.error('토큰 재발급 실패:', error);
-      alert('토큰 재발급에 실패했습니다. 다시 시도해 주세요.');
-    }
+  const handleGoogleSignIn = () => {
+    window.location.href = `${BASE_URL}/api/login/oauth2/authorization/google`;
   };
-
-  const isHidden = true;
 
   return (
     <div className="flex h-full flex-col items-center justify-center bg-gray-50 p-8">
@@ -53,9 +43,19 @@ export default function Home() {
       </div>
 
       {!isLoggedIn ? (
-        <Link
-          to={`${BASE_URL}/api/login/oauth2/authorization/google`}
-          // onClick={handleGoogleSignIn}
+        // <Link
+        //   to={`${BASE_URL}/api/login/oauth2/authorization/google`}
+        //   // onClick={handleGoogleSignIn}
+        //   className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
+        // >
+        //   <img
+        //     src={GoogleLogo}
+        //     alt="Sign in with Google"
+        //     className="h-auto w-full"
+        //   />
+        // </Link>
+        <button
+          onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
         >
           <img
@@ -63,7 +63,7 @@ export default function Home() {
             alt="Sign in with Google"
             className="h-auto w-full"
           />
-        </Link>
+        </button> // 404 에러 방지
       ) : (
         <>
           <Button
@@ -72,15 +72,6 @@ export default function Home() {
             size="lg"
           >
             <Link to="/browse">시작하기</Link>
-          </Button>
-          <Button
-            variant="outlinePrimary"
-            size="lg"
-            onClick={handleReissueToken}
-            className="mt-4"
-            style={{ display: isHidden ? 'none' : 'block' }}
-          >
-            리프레시 토큰 재발급 테스트
           </Button>
         </>
       )}
