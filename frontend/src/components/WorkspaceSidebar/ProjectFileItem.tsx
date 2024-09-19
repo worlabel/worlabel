@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { FileItem } from '@/types';
+import { ImageResponse } from '@/types';
 import { Check, Image, Minus } from 'lucide-react';
 import useCanvasStore from '@/stores/useCanvasStore';
 
@@ -7,29 +7,38 @@ export default function ProjectFileItem({
   className = '',
   item,
   depth = 1,
+  selected,
 }: {
   className?: string;
-  item: FileItem;
+  item: ImageResponse;
   depth?: number;
+  selected: boolean;
 }) {
   const paddingLeft = depth * 12;
   const changeImage = useCanvasStore((state) => state.changeImage);
 
   const handleClick = () => {
-    changeImage(item.url, [
+    // TODO: fetch image
+    changeImage(item.imageUrl, [
       {
         id: item.id,
-        name: item.name,
+        name: item.imageTitle,
         type: 'rect',
         color: '#FF0000',
-        coordinates: [],
+        coordinates: [
+          [0, 0],
+          [100, 100],
+        ],
       },
     ]);
   };
 
   return (
     <button
-      className={cn('flex w-full gap-2 rounded-md py-0.5 pr-1 hover:bg-gray-200', className)}
+      className={cn(
+        `flex w-full gap-2 rounded-md py-0.5 pr-1 ${selected ? 'bg-gray-200' : 'hover:bg-gray-100'}`,
+        className
+      )}
       style={{
         paddingLeft,
       }}
@@ -41,16 +50,16 @@ export default function ProjectFileItem({
           className="stroke-gray-500"
         />
       </div>
-      <span className="grow overflow-hidden text-ellipsis whitespace-nowrap text-left">{item.name}</span>
-      {item.status === 'idle' ? (
-        <Minus
-          size={16}
-          className="shrink-0 stroke-gray-400"
-        />
-      ) : (
+      <span className="grow overflow-hidden text-ellipsis whitespace-nowrap text-left">{item.imageTitle}</span>
+      {item.status === 'COMPLETED' ? (
         <Check
           size={16}
           className="shrink-0 stroke-green-500"
+        />
+      ) : (
+        <Minus
+          size={16}
+          className="shrink-0 stroke-gray-400"
         />
       )}
     </button>

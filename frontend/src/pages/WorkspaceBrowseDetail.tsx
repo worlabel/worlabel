@@ -63,7 +63,7 @@ function HeaderSection({
       <div className="flex flex-col">
         <div className="flex gap-3">
           <ProjectCreateModal
-            buttonClass="mt-4 flex items-center gap-2"
+            buttonClass="mt-4 flex items-center gap-2 body-small-strong"
             onSubmit={onCreateProject}
           />
         </div>
