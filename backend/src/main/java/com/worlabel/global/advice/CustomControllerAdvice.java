@@ -2,8 +2,6 @@ package com.worlabel.global.advice;
 
 import com.amazonaws.Response;
 import com.worlabel.global.exception.CustomException;
-import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.ErrorResponse;
 import com.worlabel.global.service.NotificationManager;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.lang.reflect.Executable;

@@ -1,8 +1,5 @@
 package com.worlabel.domain.auth.handler;
 
-import com.worlabel.global.exception.CustomException;
-import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.ErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
