@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -150,16 +152,21 @@ public class ImageService {
                         String fileName = file.getName();
                         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 
-                        // todo MultipartFile 업 캐스팅 하면 안됨 이거 수정해야함
-                        String imageKey = s3UploadService.upload((MultipartFile) file, extension, project.getId());
+                        try (InputStream inputStream = new FileInputStream(file)) {
+                            // InputStream으로 S3 업로드
+                            String imageKey = s3UploadService.uploadFromInputStream(inputStream, extension, project.getId(), file.getName());
 
-                        Image image = Image.of(file.getName(), imageKey, extension, orderCount++, currentFolder);
-                        imageRepository.save(image);
+                            Image image = Image.of(file.getName(), imageKey, extension, orderCount++, currentFolder);
+                            imageRepository.save(image);
+                        } catch (IOException e) {
+                            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+                        }
                     }
                 }
             }
         }
     }
+
 
     // 이미지 파일인지 확인하는 메서드
     private boolean isImageFile(File file) {

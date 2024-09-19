@@ -171,4 +171,26 @@ public class S3UploadService {
             throw new CustomException(ErrorCode.INVALID_FILE_PATH);
         }
     }
+
+    public String uploadFromInputStream(InputStream inputStream, String extension, Integer projectId, String fileName) {
+        try {
+            String s3Key = getS3FileName(projectId);
+            String s3FileName = s3Key + "." + extension;
+
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType("image/" + extension);
+            metadata.setContentLength(bytes.length);
+
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
+                PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, byteArrayInputStream, metadata);
+                amazonS3.putObject(putRequest);
+            }
+
+            return s3Key;
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
 }
