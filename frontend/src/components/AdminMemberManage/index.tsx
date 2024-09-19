@@ -1,35 +1,35 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import useAuthStore from '@/stores/useAuthStore';
 import useAddWorkspaceMemberQuery from '@/queries/workspaces/useAddWorkspaceMemberQuery';
 import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
-import useWorkspaceMembersQuery from '@/queries/workspaces/useWorkspaceMembersQuery';
-import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
 import MemberAddModal from '../MemberAddModal';
 import { MemberAddFormValues } from '../MemberAddModal/MemberAddForm';
 import WorkspaceMemberManageForm from './WorkspaceMemberManageForm';
 import ProjectMemberManageForm from './ProjectMemberManageForm';
 
 export default function AdminMemberManage() {
-  const { workspaceId, projectId } = useParams<{ workspaceId?: string; projectId?: string }>();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const projectId = searchParams.get('projectId');
+
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
+
+  const addWorkspaceMember = useAddWorkspaceMemberQuery();
+  const addProjectMember = useAddProjectMemberQuery();
 
   const [, setInviteModalOpen] = useState(false);
 
   const handleMemberInvite = (data: MemberAddFormValues) => {
     if (workspaceId) {
-      const addWorkspaceMember = useAddWorkspaceMemberQuery();
       addWorkspaceMember.mutate({
         workspaceId: Number(workspaceId),
         memberId: memberId,
-        newMember: {
-          memberId: 0,
-          privilegeType: data.role,
-        },
+        newMemberId: data.memberId,
       });
-    } else if (projectId) {
-      const addProjectMember = useAddProjectMemberQuery();
+    } else if (projectId && Number(projectId) > 0) {
       addProjectMember.mutate({
         projectId: Number(projectId),
         memberId: memberId,
@@ -49,10 +49,8 @@ export default function AdminMemberManage() {
         <MemberAddModal onSubmit={handleMemberInvite} />
       </header>
 
-      {workspaceId && <WorkspaceMemberManageForm members={useWorkspaceMembersQuery(Number(workspaceId)).data || []} />}
-      {projectId && (
-        <ProjectMemberManageForm members={useProjectMembersQuery(Number(projectId), memberId).data || []} />
-      )}
+      {workspaceId && <WorkspaceMemberManageForm />}
+      {projectId && <ProjectMemberManageForm />}
     </div>
   );
 }
