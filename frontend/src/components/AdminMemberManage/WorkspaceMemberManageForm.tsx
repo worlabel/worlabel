@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ProjectMemberResponse } from '@/types';
+import { WorkspaceMemberResponse } from '@/types';
 import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
 
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
@@ -29,17 +29,17 @@ const formSchema = z.object({
   ),
 });
 
-export type MemberManageFormValues = z.infer<typeof formSchema>;
+export type WorkspaceMemberManageFormValues = z.infer<typeof formSchema>;
 
-interface AdminMemberManageFormProps {
-  members: ProjectMemberResponse[];
+interface WorkspaceMemberManageFormProps {
+  members: WorkspaceMemberResponse[];
 }
 
-export default function AdminMemberManageForm({ members }: AdminMemberManageFormProps) {
-  const { projectId } = useParams<{ projectId: string }>();
+export default function WorkspaceMemberManageForm({ members }: WorkspaceMemberManageFormProps) {
+  const { workspaceId } = useParams<{ workspaceId: string }>();
   const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
 
-  const form = useForm<MemberManageFormValues>({
+  const form = useForm<WorkspaceMemberManageFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       members: members.map((m) => ({
@@ -52,7 +52,7 @@ export default function AdminMemberManageForm({ members }: AdminMemberManageForm
 
   const handleRoleChange = (memberId: number, role: Role) => {
     updatePrivilege({
-      projectId: Number(projectId),
+      workspaceId: Number(workspaceId),
       memberId,
       privilegeData: {
         memberId,

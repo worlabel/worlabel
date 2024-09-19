@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import SearchInput from '../ui/search-input';
+import useSearchMembersByEmailQuery from '@/queries/members/useSearchMembersByEmailQuery';
 
 type PrivilegeType = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 
@@ -43,6 +45,9 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
     defaultValues,
   });
 
+  const [keyword, setKeyword] = useState('');
+  const { data: members } = useSearchMembersByEmailQuery(keyword);
+
   return (
     <Form {...form}>
       <form
@@ -56,16 +61,39 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
             <FormItem>
               <FormLabel className="body-strong">이메일</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="초대할 멤버의 이메일 주소를 입력해주세요."
-                  maxLength={40}
-                  {...field}
+                <SearchInput
+                  placeholder="초대할 멤버의 이메일을 검색하세요."
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setKeyword(e.target.value);
+                  }}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {members && (
+          <ul className="mt-2">
+            {members.map((member) => (
+              <li
+                key={member.id}
+                className="py-1"
+              >
+                <img
+                  src={member.profileImage}
+                  alt={member.nickname}
+                  className="h-8 w-8 rounded-full"
+                />
+                <span className="ml-2">
+                  {member.nickname} ({member.email})
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <FormField
           name="role"
           control={form.control}

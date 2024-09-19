@@ -13,6 +13,8 @@ import { Suspense } from 'react';
 import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
 import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
+import ReviewDetail from '@/components/ReviewDetail';
+
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
@@ -85,6 +87,10 @@ const router = createBrowserRouter([
       {
         path: 'reviews',
         element: <ReviewList />,
+      },
+      {
+        path: 'reviews/:projectId/:reviewId',
+        element: <ReviewDetail />,
       },
       {
         path: 'members',
