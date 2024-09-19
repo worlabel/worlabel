@@ -3,7 +3,6 @@ package com.worlabel.domain.image.service;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
-import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.DetailImageResponse;
 import com.worlabel.domain.image.entity.dto.ImageLabelRequest;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
@@ -108,7 +107,7 @@ public class ImageService {
 
     private void save(final long imageId, final String data) {
         Image image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
 
         String dataPath = image.getDataPath();
         s3UploadService.uploadJson(data, dataPath);
@@ -122,12 +121,12 @@ public class ImageService {
     // 폴더 가져오기
     private Folder getFolder(final Integer folderId) {
         return folderRepository.findById(folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }

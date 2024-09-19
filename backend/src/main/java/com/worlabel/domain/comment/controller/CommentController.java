@@ -2,7 +2,6 @@ package com.worlabel.domain.comment.controller;
 
 import com.worlabel.domain.comment.entity.dto.CommentRequest;
 import com.worlabel.domain.comment.entity.dto.CommentResponse;
-import com.worlabel.domain.comment.entity.dto.CommentResponses;
 import com.worlabel.domain.comment.service.CommentService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -27,18 +26,17 @@ public class CommentController {
     @SwaggerApiSuccess(description = "댓글 목록을 성공적으로 조회합니다.")
     @Operation(summary = "댓글 목록 조회", description = "댓글 목록을 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
-    public CommentResponses getAllComments(
+    public List<CommentResponse> getAllComments(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
-        List<CommentResponse> comments = commentService.getAllComments(memberId, projectId, imageId);
-        return CommentResponses.from(comments);
+        return commentService.getAllComments(memberId, projectId, imageId);
     }
 
     @GetMapping("/{comment_id}")
     @SwaggerApiSuccess(description = "댓글을 성공적으로 조회합니다.")
     @Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
-    @SwaggerApiError({ErrorCode.COMMENT_NOT_FOUND, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    @SwaggerApiError({ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public CommentResponse getCommentById(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,

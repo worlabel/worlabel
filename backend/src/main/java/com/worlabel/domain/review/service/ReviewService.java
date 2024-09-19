@@ -22,8 +22,6 @@ import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +53,7 @@ public class ReviewService {
         List<Image> images = imageRepository.findAllById(reviewRequest.getImageIds());
 
         if (images.size() != reviewRequest.getImageIds().size()) {
-            throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
 
         // 리뷰 이미지 객체 생성 및 배치 저장
@@ -144,11 +142,11 @@ public class ReviewService {
 
     private Review getReview(final Integer reviewId) {
         return reviewRepository.findById(reviewId)
-            .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Review getReviewWithMemberId(final Integer reviewId, final Integer memberId) {
         return reviewRepository.findByIdAndMemberId(reviewId, memberId)
-            .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }
