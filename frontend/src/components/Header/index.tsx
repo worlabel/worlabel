@@ -7,7 +7,7 @@ export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export default function Header({ className, ...props }: HeaderProps) {
   const location = useLocation();
-  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId?: string }>();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
   const isWorkspaceIdNaN = isNaN(Number(workspaceId));
 
   const isHomePage = location.pathname === '/';
@@ -46,7 +46,7 @@ export default function Header({ className, ...props }: HeaderProps) {
                   labeling
                 </Link>
                 <Link
-                  to={`/admin/${workspaceId}/project/${projectId ?? ''}`}
+                  to={`/admin/${workspaceId}}`}
                   className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
                 >
                   admin
