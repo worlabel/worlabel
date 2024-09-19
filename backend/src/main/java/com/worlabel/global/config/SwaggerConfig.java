@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -56,8 +57,9 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("token 필요 API")
                 .pathsToExclude(noRequiredTokenApi)
-                .addOperationCustomizer(operationCustomizer)
+                .addOperationCustomizer((operation, handlerMethod) ->
+                        operation.addSecurityItem(new SecurityRequirement().addList("Authorization"))
+                )
                 .build();
     }
 }
-
