@@ -34,7 +34,6 @@ public class ImageController {
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
             @Parameter(name = "폴더에 추가 할 이미지 리스트", description = "MultiPartFile을 imageList로 추가해준다.", example = "") @RequestBody final List<MultipartFile> imageList) {
-        log.debug("project: {} , folder: {}, imageList upload, 현재 로그인 중인 사용자 : {}, 이미지 개수 : {}", projectId, folderId, memberId, imageList.size());
         imageService.uploadImageList(imageList, folderId, projectId, memberId);
     }
 

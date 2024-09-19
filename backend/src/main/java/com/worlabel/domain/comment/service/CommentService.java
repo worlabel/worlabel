@@ -10,7 +10,9 @@ import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
+import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
+import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +27,14 @@ import java.util.List;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
     private final FolderRepository folderRepository;
 
     @Transactional(readOnly = true)
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public List<CommentResponse> getAllComments(final Integer memberId, final Integer projectId, final Long imageId) {
-        checkAuthorizedAndImageProjectRelation(memberId, projectId, imageId);
+        checkImageProjectRelation(imageId, projectId);
 
         return commentRepository.findByImageId(imageId).stream()
                 .map(CommentResponse::from)
@@ -40,15 +42,17 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public CommentResponse getCommentById(final Integer memberId, final Integer projectId, final Integer commentId) {
-        checkAuthorizedAndCommentProjectRelation(memberId, projectId, commentId);
+        checkAuthorizedAndCommentProjectRelation(projectId, commentId);
         Comment comment = getComment(commentId);
 
         return CommentResponse.from(comment);
     }
 
-    public CommentResponse createComment(final CommentRequest commentRequest, Integer memberId, final Integer projectId, final Long imageId) {
-        checkAuthorizedAndImageProjectRelation(memberId, projectId, imageId);
+    @CheckPrivilege(PrivilegeType.VIEWER)
+    public CommentResponse createComment(final CommentRequest commentRequest, final Integer memberId, final Integer projectId, final Long imageId) {
+        checkImageProjectRelation(imageId, projectId);
         Member member = getMember(memberId);
         Image image = getImage(imageId);
 
@@ -71,14 +75,11 @@ public class CommentService {
     }
 
     /**
-     * 프로젝트에 속한 멤버인지 검증하고, 이미지가 해당 프로젝트에 속하는지 검증
+     * 이미지가 해당 프로젝트에 속하는지 검증
      */
-    private void checkAuthorizedAndImageProjectRelation(final Integer memberId, final Integer projectId, final Long imageId) {
-        checkAuthorized(memberId, projectId);
-        Image image = getImage(imageId);
-        Folder folder = image.getFolder(); // 이미지가 속한 폴더를 가져옴
-
-        if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
+    private void checkImageProjectRelation(final Long imageId, final Integer projectId) {
+        // imageId
+        if (!imageRepository.existsByIdAndProjectId(imageId, projectId)) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
     }
@@ -86,23 +87,13 @@ public class CommentService {
     /**
      * 프로젝트에 속한 멤버인지 검증하고, 코멘트가 속한 이미지가 해당 프로젝트에 속하는지 검증
      */
-    private void checkAuthorizedAndCommentProjectRelation(final Integer memberId, final Integer projectId, final Integer commentId) {
-        checkAuthorized(memberId, projectId);
+    private void checkAuthorizedAndCommentProjectRelation(final Integer projectId, final Integer commentId) {
         Comment comment = getComment(commentId);
         Image image = comment.getImage();
         Folder folder = image.getFolder(); // 코멘트가 속한 이미지의 폴더를 가져옴
 
         if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
-        }
-    }
-
-    /**
-     * 멤버가 해당 프로젝트에 참여하고 있는지, 권한이 있는지 검증
-     */
-    private void checkAuthorized(final Integer memberId, final Integer projectId) {
-        if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }
 
