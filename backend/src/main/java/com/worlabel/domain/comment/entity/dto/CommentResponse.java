@@ -1,6 +1,7 @@
 package com.worlabel.domain.comment.entity.dto;
 
 import com.worlabel.domain.comment.entity.Comment;
+import com.worlabel.domain.member.entity.dto.MemberResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,14 +16,8 @@ public class CommentResponse {
     @Schema(description = "댓글 ID", example = "1")
     private Integer id;
 
-    @Schema(description = "작성자 ID", example = "1")
-    private Integer memberId;
-
-    @Schema(description = "작성자 닉네임", example = "javajoha")
-    private String memberNickname;
-
-    @Schema(description = "작성자 프로필", example = "profile.jpg")
-    private String memberProfileImage;
+    @Schema(description = "작성자", example = "")
+    private MemberResponse author;
 
     @Schema(description = "y좌표", example = "3.16324")
     private double positionY;
@@ -38,9 +33,7 @@ public class CommentResponse {
 
     public static CommentResponse from(final Comment comment) {
         return new CommentResponse(comment.getId(),
-                comment.getMember().getId(),
-                comment.getMember().getNickname(),
-                comment.getMember().getProfileImage(),
+                MemberResponse.of(comment.getMember()),
                 comment.getPositionY(),
                 comment.getPositionX(),
                 comment.getContent(),
