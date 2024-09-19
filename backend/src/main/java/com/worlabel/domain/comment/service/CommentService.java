@@ -11,7 +11,6 @@ import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -44,17 +43,16 @@ public class CommentService {
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
     public CommentResponse getCommentById(final Integer memberId, final Integer projectId, final Integer commentId) {
-        checkAuthorizedAndCommentProjectRelation(projectId, commentId);
         Comment comment = getComment(commentId);
+        checkImageProjectRelation(comment.getImage().getId(), projectId);
 
         return CommentResponse.from(comment);
     }
 
     @CheckPrivilege(PrivilegeType.VIEWER)
     public CommentResponse createComment(final CommentRequest commentRequest, final Integer memberId, final Integer projectId, final Long imageId) {
-        checkImageProjectRelation(imageId, projectId);
         Member member = getMember(memberId);
-        Image image = getImage(imageId);
+        Image image = getImage(imageId, projectId);
 
         Comment comment = Comment.of(commentRequest.getContent(), commentRequest.getPositionX(), commentRequest.getPositionY(), member, image);
         comment = commentRepository.save(comment);
@@ -79,26 +77,25 @@ public class CommentService {
      */
     private void checkImageProjectRelation(final Long imageId, final Integer projectId) {
         // imageId
-        if (!imageRepository.existsByIdAndProjectId(imageId, projectId)) {
+        if (imageRepository.findByIdAndProjectId(imageId, projectId).isEmpty()) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
     }
 
     /**
-     * 프로젝트에 속한 멤버인지 검증하고, 코멘트가 속한 이미지가 해당 프로젝트에 속하는지 검증
+     * 코멘트가 속한 이미지가 해당 프로젝트에 속하는지 검증
      */
     private void checkAuthorizedAndCommentProjectRelation(final Integer projectId, final Integer commentId) {
         Comment comment = getComment(commentId);
         Image image = comment.getImage();
-        Folder folder = image.getFolder(); // 코멘트가 속한 이미지의 폴더를 가져옴
 
-        if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
+        if (imageRepository.findByIdAndProjectId(image.getId(), projectId).isEmpty()) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
     }
 
     private Comment getComment(final Integer commentId) {
-        return commentRepository.findById(commentId)
+        return commentRepository.findByCommentId(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
@@ -112,8 +109,8 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private Image getImage(final Long imageId) {
-        return imageRepository.findById(imageId)
+    private Image getImage(final Long imageId, final Integer projectId) {
+        return imageRepository.findByIdAndProjectId(imageId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }

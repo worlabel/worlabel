@@ -12,11 +12,17 @@ import java.util.Optional;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-    @Query("SELECT c FROm Comment c " +
+    @Query("SELECT c FROM Comment c " +
             "JOIN FETCH c.image " +
             "JOIN FETCH c.member " +
             "WHERE c.image.id = :imageId")
     List<Comment> findByImageId(@Param("imageId") Long imageId);
 
     Optional<Comment> findByIdAndMemberId(Integer commentId, Integer memberId);
+
+    @Query("SELECT c FROM Comment c " +
+            "JOIN FETCH c.member " +
+            "JOIN FETCH c.image " +
+            "WHERE c.id = :commentId")
+    Optional<Comment> findByCommentId(@Param("commentId") Integer commentId);
 }
