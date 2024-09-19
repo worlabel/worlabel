@@ -70,6 +70,17 @@ export interface MemberResponse {
   nickname: string;
   profileImage: string;
 }
+export interface MemberSearchResponse {
+  id: number;
+  nickname: string;
+  profileImage: string;
+  email: string;
+}
+export interface WorkspaceMemberResponse {
+  memberId: number;
+  nickname: string;
+  profileImage: string;
+}
 
 export interface WorkspaceRequest {
   title: string;
