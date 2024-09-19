@@ -70,6 +70,17 @@ export interface MemberResponse {
   nickname: string;
   profileImage: string;
 }
+export interface MemberSearchResponse {
+  id: number;
+  nickname: string;
+  profileImage: string;
+  email: string;
+}
+export interface WorkspaceMemberResponse {
+  memberId: number;
+  nickname: string;
+  profileImage: string;
+}
 
 export interface WorkspaceRequest {
   title: string;
@@ -159,6 +170,7 @@ export interface ReviewRequest {
 // 리뷰 응답 DTO
 export interface ReviewResponse {
   reviewId: number;
+  projectId: number;
   title: string;
   content: string;
   status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
@@ -175,9 +187,11 @@ export interface ReviewStatusRequest {
 
 // 리뷰 이미지 응답 DTO
 export interface ReviewImageResponse {
-  id: number; // 이미지 ID
-  imageTitle: string; // 이미지 파일 제목
+  id: number;
+  imageTitle: string;
   status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+  imagePath: string;
+  dataPath: string;
 }
 
 // 리뷰 디테일 응답 DTO
@@ -187,6 +201,14 @@ export interface ReviewDetailResponse {
   content: string;
   reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
   images: ReviewImageResponse[];
+  createAt: string;
+  updateAt: string;
+  email: string;
+  profileImage: string;
+  nickname: string;
+  reviewerEmail: string;
+  reviewerProfileImage: string;
+  reviewerNickname: string;
 }
 // 프로젝트 멤버 응답 DTO
 export interface ProjectMemberResponse {

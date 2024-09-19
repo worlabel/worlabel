@@ -1,12 +1,13 @@
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ProjectMemberResponse } from '@/types';
 import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
+import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
+import useAuthStore from '@/stores/useAuthStore';
 
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 
@@ -29,17 +30,19 @@ const formSchema = z.object({
   ),
 });
 
-export type MemberManageFormValues = z.infer<typeof formSchema>;
+export type ProjectMemberManageFormValues = z.infer<typeof formSchema>;
 
-interface AdminMemberManageFormProps {
-  members: ProjectMemberResponse[];
-}
+export default function ProjectMemberManageForm() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const projectId = searchParams.get('projectId');
+  const profile = useAuthStore((state) => state.profile);
+  const memberId = profile?.id || 0;
 
-export default function AdminMemberManageForm({ members }: AdminMemberManageFormProps) {
-  const { projectId } = useParams<{ projectId: string }>();
+  const { data: members = [] } = useProjectMembersQuery(Number(projectId), memberId);
   const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
 
-  const form = useForm<MemberManageFormValues>({
+  const form = useForm<ProjectMemberManageFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       members: members.map((m) => ({

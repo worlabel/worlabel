@@ -1,34 +1,44 @@
 import { useState } from 'react';
-import AdminMemberManageForm from './AdminMemberManageForm';
-import { useParams } from 'react-router-dom';
-import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
+import { useParams, useLocation } from 'react-router-dom';
 import useAuthStore from '@/stores/useAuthStore';
+import useAddWorkspaceMemberQuery from '@/queries/workspaces/useAddWorkspaceMemberQuery';
 import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
 import MemberAddModal from '../MemberAddModal';
 import { MemberAddFormValues } from '../MemberAddModal/MemberAddForm';
+import WorkspaceMemberManageForm from './WorkspaceMemberManageForm';
+import ProjectMemberManageForm from './ProjectMemberManageForm';
 
 export default function AdminMemberManage() {
-  const { projectId } = useParams<{ workspaceId: string; projectId: string }>();
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const projectId = searchParams.get('projectId');
+
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const { data: members = [] } = useProjectMembersQuery(Number(projectId), memberId);
+  const addWorkspaceMember = useAddWorkspaceMemberQuery();
   const addProjectMember = useAddProjectMemberQuery();
 
   const [, setInviteModalOpen] = useState(false);
 
   const handleMemberInvite = (data: MemberAddFormValues) => {
-    addProjectMember.mutate({
-      projectId: Number(projectId),
-      memberId: memberId,
-      newMember: {
-        // Todo : 멤버 id로 수정하는 로직 수정해야한다.
-        // memberId: data.email,
-        memberId: 0,
-        privilegeType: data.role,
-      },
-    });
-    console.log('Invited:', data);
+    if (workspaceId) {
+      addWorkspaceMember.mutate({
+        workspaceId: Number(workspaceId),
+        memberId: memberId,
+        newMemberId: data.memberId,
+      });
+    } else if (projectId && Number(projectId) > 0) {
+      addProjectMember.mutate({
+        projectId: Number(projectId),
+        memberId: memberId,
+        newMember: {
+          memberId: 0,
+          privilegeType: data.role,
+        },
+      });
+    }
     setInviteModalOpen(false);
   };
 
@@ -39,7 +49,8 @@ export default function AdminMemberManage() {
         <MemberAddModal onSubmit={handleMemberInvite} />
       </header>
 
-      <AdminMemberManageForm members={members} />
+      {workspaceId && <WorkspaceMemberManageForm />}
+      {projectId && <ProjectMemberManageForm />}
     </div>
   );
 }
