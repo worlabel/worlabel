@@ -79,7 +79,7 @@ public class CommentService {
         Folder folder = image.getFolder(); // 이미지가 속한 폴더를 가져옴
 
         if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
-            throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
     }
 
@@ -93,7 +93,7 @@ public class CommentService {
         Folder folder = image.getFolder(); // 코멘트가 속한 이미지의 폴더를 가져옴
 
         if (!folderRepository.existsByIdAndProjectId(folder.getId(), projectId)) {
-            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
     }
 
@@ -102,18 +102,18 @@ public class CommentService {
      */
     private void checkAuthorized(final Integer memberId, final Integer projectId) {
         if (!participantRepository.existsByMemberIdAndProjectId(memberId, projectId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.PARTICIPANT_UNAUTHORIZED);
         }
     }
 
     private Comment getComment(final Integer commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Comment getCommentWithMemberId(final Integer commentId, final Integer memberId) {
         return commentRepository.findByIdAndMemberId(commentId, memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Member getMember(final Integer memberId) {
@@ -123,6 +123,6 @@ public class CommentService {
 
     private Image getImage(final Long imageId) {
         return imageRepository.findById(imageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.IMAGE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }

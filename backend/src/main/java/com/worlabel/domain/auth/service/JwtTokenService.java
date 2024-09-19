@@ -53,10 +53,7 @@ public class JwtTokenService {
     }
 
     public JwtToken generateTokenByRefreshToken(String refreshToken) throws Exception {
-        if (isTokenExpired(refreshToken)) {
-            throw new CustomException(ErrorCode.REFRESH_TOKEN_EXPIRED);
-        }
-        if (!isRefreshToken(refreshToken)) {
+        if (isTokenExpired(refreshToken) | !isRefreshToken(refreshToken)) {
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 

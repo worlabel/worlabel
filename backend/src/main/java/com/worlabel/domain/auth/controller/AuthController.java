@@ -44,7 +44,7 @@ public class AuthController {
 
     @Operation(summary = "JWT 토큰 재발급", description = "Refresh Token을 확인하여 JWT 토큰 재발급")
     @SwaggerApiSuccess(description = "Return Access Token")
-    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN})
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN})
     @PostMapping("/reissue")
     public AccessTokenResponse reissue(HttpServletRequest request, HttpServletResponse response) {
         log.debug("reissue request");
@@ -66,7 +66,7 @@ public class AuthController {
 
     @Operation(summary = "로그인 중인 사용자 정보를 반환", description = "현재 로그인중인 사용자의 정보를 반환합니다.")
     @SwaggerApiSuccess(description = "Return Member Info")
-    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.USER_ALREADY_SIGN_OUT, ErrorCode.REFRESH_TOKEN_EXPIRED, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @GetMapping("/profile")
     public MemberResponse getMemberInfo(@CurrentUser Integer currentMember){
         return memberService.getMemberId(currentMember);

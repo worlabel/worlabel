@@ -4,8 +4,6 @@ import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.folder.entity.dto.FolderRequest;
 import com.worlabel.domain.folder.entity.dto.FolderResponse;
-import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
@@ -104,6 +102,6 @@ public class FolderService {
 
     private Folder getFolder(final Integer folderId, final Integer projectId) {
         return folderRepository.findAllByProjectIdAndId(projectId, folderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.FOLDER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }

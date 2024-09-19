@@ -54,7 +54,7 @@ public class ImageController {
     @PutMapping("/{image_id}")
     @SwaggerApiSuccess(description = "이미지 폴더 이동.")
     @Operation(summary = "이미지 폴더 이동", description = "이미지가 위치한 폴더를 변경합니다.")
-    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.FOLDER_NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND})
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED})
     public void moveFolderImage(
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
@@ -68,7 +68,7 @@ public class ImageController {
     @DeleteMapping("/{image_id}")
     @SwaggerApiSuccess(description = "이미지 삭제.")
     @Operation(summary = "이미지 삭제", description = "폴더에서 해당 이미지를 제거합니다.")
-    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.FOLDER_NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND})
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED})
     public void deleteImage(
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
@@ -81,7 +81,7 @@ public class ImageController {
     @PutMapping("/{image_id}/status")
     @SwaggerApiSuccess(description = "이미지 상태 변경.")
     @Operation(summary = "이미지 상태 변경", description = "특정 이미지의 상태를 변경합니다.")
-    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.FOLDER_NOT_FOUND, ErrorCode.IMAGE_NOT_FOUND})
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED})
     public ImageResponse changeImageStatus(
             @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,

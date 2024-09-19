@@ -93,7 +93,7 @@ public class S3UploadService {
      */
     public String upload(final MultipartFile image, final String extension, final Integer projectId) {
         if (image.isEmpty() || Objects.isNull(image.getOriginalFilename())) {
-            throw new CustomException(ErrorCode.EMPTY_FILE);
+            throw new CustomException(ErrorCode.BAD_REQUEST);
         }
         return url + "/" + uploadImage(image, extension, projectId);
     }

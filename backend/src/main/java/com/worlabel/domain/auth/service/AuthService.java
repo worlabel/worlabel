@@ -26,7 +26,7 @@ public class AuthService {
         int id = jwtTokenService.parseId(refreshToken);
         String redisRefreshToken = authCacheRepository.find(id);
         if(!refreshToken.equals(redisRefreshToken)){
-            throw new CustomException(ErrorCode.USER_ALREADY_SIGN_OUT);
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
         return jwtTokenService.generateTokenByRefreshToken(refreshToken);
     }
