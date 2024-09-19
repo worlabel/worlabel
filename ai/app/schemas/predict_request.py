@@ -1,14 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 
 class ImageInfo(BaseModel):
     image_id: int
-    image_url: str    
+    image_url: str
+
+class LabelCategory(BaseModel):
+    label_id: int
+    label_name: str
 
 class PredictRequest(BaseModel):
     project_id: int
     image_list: List[ImageInfo]
-    version: Optional[str] = "latest"
-    conf_threshold: Optional[float] = 0.25
-    iou_threshold: Optional[float] = 0.45
+    version: str = "latest"
+    conf_threshold: float = 0.25
+    iou_threshold: float = 0.45
     classes: Optional[List[int]] = None
+    path: Optional[str] = Field(None, alias="model_path")
+    label_categories: Optional[List[LabelCategory]] = None
