@@ -1,5 +1,7 @@
 package com.worlabel.domain.workspace.controller;
 
+import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
+import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponses;
@@ -62,7 +64,7 @@ public class WorkspaceController {
     public WorkspaceResponse updateWorkspace(
             @CurrentUser final Integer memberId,
             @PathVariable("workspace_id") final Integer workspaceId,
-            @Valid @RequestBody final WorkspaceRequest updatedWorkspace ) {
+            @Valid @RequestBody final WorkspaceRequest updatedWorkspace) {
         return workspaceService.updateWorkspace(memberId, workspaceId, updatedWorkspace);
     }
 
@@ -94,5 +96,15 @@ public class WorkspaceController {
             @PathVariable("workspace_id") final Integer workspaceId,
             @PathVariable("member_id") final Integer newMemberId) {
         workspaceService.removeWorkspaceMember(memberId, workspaceId, newMemberId);
+    }
+
+    @Operation(summary = "워크스페이스 멤버 조회", description = "워크스페이스 멤버를 조회합니다.")
+    @SwaggerApiSuccess(description = "워크스페이스 멤버를 성공적으로 조회합니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @GetMapping("/{workspace_id}/members")
+    public List<WorkspaceMemberResponse> getWorkspaceMember(
+            @CurrentUser final Integer memberId,
+            @PathVariable("workspace_id") final Integer workspaceId) {
+        return workspaceService.getWorkspaceMember(memberId, workspaceId);
     }
 }

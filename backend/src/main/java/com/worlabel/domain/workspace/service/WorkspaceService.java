@@ -5,6 +5,7 @@ import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
+import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
@@ -99,6 +100,17 @@ public class WorkspaceService {
         workspaceParticipantRepository.delete(workspaceParticipant);
     }
 
+    /**
+     * 워크스페이스 멤버 조회
+     */
+    public List<WorkspaceMemberResponse> getWorkspaceMember(final Integer memberId, Integer workspaceId) {
+        checkWorkspaceAuthorized(memberId, workspaceId);
+
+       return workspaceParticipantRepository.findAllByWorkspaceIdFetchJoin(workspaceId).stream()
+               .map(WorkspaceMemberResponse::from)
+               .toList();
+    }
+
     private Member getMember(final Integer memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -120,7 +132,7 @@ public class WorkspaceService {
     }
 
     private void checkExistWorkspaceMember(final Integer workspaceId, final Integer newMemberId) {
-        if (workspaceParticipantRepository.existsByWorkspaceIdAndMemberId(workspaceId, newMemberId)) {
+        if (workspaceParticipantRepository.existsByMemberIdAndWorkspaceId(newMemberId, workspaceId)) {
             throw new CustomException(ErrorCode.EARLY_ADD_MEMBER);
         }
     }
