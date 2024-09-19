@@ -1,7 +1,7 @@
 import api from '@/api/axiosConfig';
 import { FolderRequest, FolderResponse } from '@/types';
 
-export async function fetchFolder(projectId: number, folderId: number, memberId: number) {
+export async function getFolder(projectId: number, folderId: number, memberId: number) {
   return api
     .get<FolderResponse>(`/projects/${projectId}/folders/${folderId}`, {
       params: { memberId },
