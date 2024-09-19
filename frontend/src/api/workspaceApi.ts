@@ -1,5 +1,11 @@
 import api from '@/api/axiosConfig';
-import { WorkspaceListResponse, WorkspaceRequest, WorkspaceResponse, ReviewResponse } from '@/types';
+import {
+  WorkspaceListResponse,
+  WorkspaceRequest,
+  WorkspaceResponse,
+  ReviewResponse,
+  WorkspaceMemberResponse,
+} from '@/types';
 
 export async function getWorkspaceList(memberId: number, lastWorkspaceId?: number, limit?: number) {
   return api
@@ -66,4 +72,15 @@ export async function getWorkspaceReviews(
       },
     })
     .then(({ data }) => data);
+}
+export async function removeWorkspaceMember(workspaceId: number, memberId: number, targetMemberId: number) {
+  return api
+    .delete(`/workspaces/${workspaceId}/members/${targetMemberId}`, {
+      params: { memberId },
+    })
+    .then(({ data }) => data);
+}
+
+export async function getWorkspaceMembers(workspaceId: number) {
+  return api.get<WorkspaceMemberResponse[]>(`/workspaces/${workspaceId}/members`).then(({ data }) => data);
 }
