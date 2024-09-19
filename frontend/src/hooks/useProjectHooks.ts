@@ -112,87 +112,87 @@
 //     },
 //   });
 // };
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  createProject,
-  updateProject,
-  deleteProject,
-  addProjectMember,
-  updateProjectMemberPrivilege,
-  removeProjectMember,
-} from '@/api/projectApi';
-import { ProjectResponse, ProjectRequest, ProjectMemberRequest, ProjectMemberResponse } from '@/types';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import {
+//   createProject,
+//   updateProject,
+//   deleteProject,
+//   addProjectMember,
+//   updateProjectMemberPrivilege,
+//   removeProjectMember,
+// } from '@/api/projectApi';
+// import { ProjectResponse, ProjectRequest, ProjectMemberRequest, ProjectMemberResponse } from '@/types';
 
-export const useCreateProject = () => {
-  const queryClient = useQueryClient();
+// export const useCreateProject = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<ProjectResponse, Error, { workspaceId: number; memberId: number; data: ProjectRequest }>({
-    mutationFn: ({ workspaceId, memberId, data }) => createProject(workspaceId, memberId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', variables.workspaceId] });
-    },
-  });
-};
+//   return useMutation<ProjectResponse, Error, { workspaceId: number; memberId: number; data: ProjectRequest }>({
+//     mutationFn: ({ workspaceId, memberId, data }) => createProject(workspaceId, memberId, data),
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: ['projects', variables.workspaceId] });
+//     },
+//   });
+// };
 
-export const useUpdateProject = () => {
-  const queryClient = useQueryClient();
+// export const useUpdateProject = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<ProjectResponse, Error, { projectId: number; memberId: number; data: ProjectRequest }>({
-    mutationFn: ({ projectId, memberId, data }) => updateProject(projectId, memberId, data),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['project', data.id] });
-    },
-  });
-};
+//   return useMutation<ProjectResponse, Error, { projectId: number; memberId: number; data: ProjectRequest }>({
+//     mutationFn: ({ projectId, memberId, data }) => updateProject(projectId, memberId, data),
+//     onSuccess: (data) => {
+//       queryClient.invalidateQueries({ queryKey: ['project', data.id] });
+//     },
+//   });
+// };
 
-export const useDeleteProject = () => {
-  const queryClient = useQueryClient();
+// export const useDeleteProject = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, { projectId: number; memberId: number }>({
-    mutationFn: ({ projectId, memberId }) => deleteProject(projectId, memberId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['projects', variables.projectId] });
-    },
-  });
-};
+//   return useMutation<void, Error, { projectId: number; memberId: number }>({
+//     mutationFn: ({ projectId, memberId }) => deleteProject(projectId, memberId),
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: ['projects', variables.projectId] });
+//     },
+//   });
+// };
 
-export const useAddProjectMember = () => {
-  const queryClient = useQueryClient();
-  return useMutation<
-    ProjectMemberResponse,
-    Error,
-    { projectId: number; memberId: number; newMember: ProjectMemberRequest }
-  >({
-    mutationFn: ({ projectId, memberId, newMember }) => addProjectMember(projectId, memberId, newMember),
-    onSuccess: (_, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
-    },
-  });
-};
+// export const useAddProjectMember = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation<
+//     ProjectMemberResponse,
+//     Error,
+//     { projectId: number; memberId: number; newMember: ProjectMemberRequest }
+//   >({
+//     mutationFn: ({ projectId, memberId, newMember }) => addProjectMember(projectId, memberId, newMember),
+//     onSuccess: (_, { projectId }) => {
+//       queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
+//     },
+//   });
+// };
 
-// 프로젝트 멤버 권한 수정 훅
-export const useUpdateProjectMemberPrivilege = () => {
-  const queryClient = useQueryClient();
-  return useMutation<
-    ProjectMemberResponse,
-    Error,
-    { projectId: number; memberId: number; privilegeData: ProjectMemberRequest }
-  >({
-    mutationFn: ({ projectId, memberId, privilegeData }) =>
-      updateProjectMemberPrivilege(projectId, memberId, privilegeData),
-    onSuccess: (_, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
-    },
-  });
-};
+// // 프로젝트 멤버 권한 수정 훅
+// export const useUpdateProjectMemberPrivilege = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation<
+//     ProjectMemberResponse,
+//     Error,
+//     { projectId: number; memberId: number; privilegeData: ProjectMemberRequest }
+//   >({
+//     mutationFn: ({ projectId, memberId, privilegeData }) =>
+//       updateProjectMemberPrivilege(projectId, memberId, privilegeData),
+//     onSuccess: (_, { projectId }) => {
+//       queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
+//     },
+//   });
+// };
 
-// 프로젝트 멤버 삭제 훅
-export const useRemoveProjectMember = () => {
-  const queryClient = useQueryClient();
-  return useMutation<void, Error, { projectId: number; memberId: number; targetMemberId: number }>({
-    mutationFn: ({ projectId, memberId, targetMemberId }) => removeProjectMember(projectId, memberId, targetMemberId),
-    onSuccess: (_, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
-    },
-  });
-};
+// // 프로젝트 멤버 삭제 훅
+// export const useRemoveProjectMember = () => {
+//   const queryClient = useQueryClient();
+//   return useMutation<void, Error, { projectId: number; memberId: number; targetMemberId: number }>({
+//     mutationFn: ({ projectId, memberId, targetMemberId }) => removeProjectMember(projectId, memberId, targetMemberId),
+//     onSuccess: (_, { projectId }) => {
+//       queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
+//     },
+//   });
+// };

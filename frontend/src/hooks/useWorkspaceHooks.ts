@@ -88,68 +88,68 @@
 //   });
 // };
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  createWorkspace,
-  updateWorkspace,
-  deleteWorkspace,
-  addWorkspaceMember,
-  removeWorkspaceMember,
-} from '@/api/workspaceApi';
-import { WorkspaceResponse, WorkspaceRequest } from '@/types';
+// import { useMutation, useQueryClient } from '@tanstack/react-query';
+// import {
+//   createWorkspace,
+//   updateWorkspace,
+//   deleteWorkspace,
+//   addWorkspaceMember,
+//   removeWorkspaceMember,
+// } from '@/api/workspaceApi';
+// import { WorkspaceResponse, WorkspaceRequest } from '@/types';
 
-export const useCreateWorkspace = () => {
-  const queryClient = useQueryClient();
+// export const useCreateWorkspace = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<WorkspaceResponse, Error, { memberId: number; data: WorkspaceRequest }>({
-    mutationFn: ({ memberId, data }) => createWorkspace(memberId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['workspaceList'] });
-    },
-  });
-};
+//   return useMutation<WorkspaceResponse, Error, { memberId: number; data: WorkspaceRequest }>({
+//     mutationFn: ({ memberId, data }) => createWorkspace(memberId, data),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ['workspaceList'] });
+//     },
+//   });
+// };
 
-export const useUpdateWorkspace = () => {
-  const queryClient = useQueryClient();
+// export const useUpdateWorkspace = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<WorkspaceResponse, Error, { workspaceId: number; memberId: number; data: WorkspaceRequest }>({
-    mutationFn: ({ workspaceId, memberId, data }) => updateWorkspace(workspaceId, memberId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
-    },
-  });
-};
+//   return useMutation<WorkspaceResponse, Error, { workspaceId: number; memberId: number; data: WorkspaceRequest }>({
+//     mutationFn: ({ workspaceId, memberId, data }) => updateWorkspace(workspaceId, memberId, data),
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
+//     },
+//   });
+// };
 
-export const useDeleteWorkspace = () => {
-  const queryClient = useQueryClient();
+// export const useDeleteWorkspace = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, { workspaceId: number; memberId: number }>({
-    mutationFn: ({ workspaceId, memberId }) => deleteWorkspace(workspaceId, memberId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
-    },
-  });
-};
+//   return useMutation<void, Error, { workspaceId: number; memberId: number }>({
+//     mutationFn: ({ workspaceId, memberId }) => deleteWorkspace(workspaceId, memberId),
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
+//     },
+//   });
+// };
 
-export const useAddWorkspaceMember = () => {
-  const queryClient = useQueryClient();
+// export const useAddWorkspaceMember = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, { workspaceId: number; memberId: number; newMemberId: number }>({
-    mutationFn: ({ workspaceId, memberId, newMemberId }) => addWorkspaceMember(workspaceId, memberId, newMemberId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
-    },
-  });
-};
+//   return useMutation<void, Error, { workspaceId: number; memberId: number; newMemberId: number }>({
+//     mutationFn: ({ workspaceId, memberId, newMemberId }) => addWorkspaceMember(workspaceId, memberId, newMemberId),
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
+//     },
+//   });
+// };
 
-export const useRemoveWorkspaceMember = () => {
-  const queryClient = useQueryClient();
+// export const useRemoveWorkspaceMember = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, { workspaceId: number; memberId: number; targetMemberId: number }>({
-    mutationFn: ({ workspaceId, memberId, targetMemberId }) =>
-      removeWorkspaceMember(workspaceId, memberId, targetMemberId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
-    },
-  });
-};
+//   return useMutation<void, Error, { workspaceId: number; memberId: number; targetMemberId: number }>({
+//     mutationFn: ({ workspaceId, memberId, targetMemberId }) =>
+//       removeWorkspaceMember(workspaceId, memberId, targetMemberId),
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
+//     },
+//   });
+// };
