@@ -20,4 +20,8 @@ public enum ReviewStatus {
     public String toValue() {
         return name();
     }
+
+    public boolean isApproved() {
+        return this == ReviewStatus.APPROVED;
+    }
 }
