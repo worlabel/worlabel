@@ -4,8 +4,8 @@ import Header from '../Header';
 import useAuthStore from '@/stores/useAuthStore';
 import WorkSpaceCreateModal from '../WorkSpaceCreateModal';
 import { WorkspaceRequest, WorkspaceResponse } from '@/types';
-import useWorkspaceListQuery from '@/queries/useWorkspaceListQuery';
-import { useCreateWorkspace } from '@/hooks/useWorkspaceHooks';
+import useWorkspaceListQuery from '@/queries/workspaces/useWorkspaceListQuery';
+import useCreateWorkspaceQuery from '@/queries/workspaces/useCreateWorkspaceQuery';
 
 export default function WorkspaceBrowseLayout() {
   const { profile, isLoggedIn } = useAuthStore();
@@ -19,7 +19,7 @@ export default function WorkspaceBrowseLayout() {
   }, [isLoggedIn, memberId, navigate]);
 
   const { data: workspacesResponse } = useWorkspaceListQuery(memberId ?? 0);
-  const createWorkspace = useCreateWorkspace();
+  const createWorkspace = useCreateWorkspaceQuery();
 
   const handleCreateWorkspace = (data: WorkspaceRequest) => {
     createWorkspace.mutate({

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import ReviewItem from './ReviewItem';
 import ReviewSearchInput from './ReviewSearchInput';
-import useReviewByStatusQuery from '@/queries/useReviewByStatusQuery';
-import useProjectQuery from '@/queries/useProjectQuery';
+import useReviewByStatusQuery from '@/queries/reviews/useReviewByStatusQuery';
+import useProjectQuery from '@/queries/projects/useProjectQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import { useParams } from 'react-router-dom';
 

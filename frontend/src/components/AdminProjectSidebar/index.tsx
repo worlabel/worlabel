@@ -1,8 +1,8 @@
 import { ResizablePanel, ResizableHandle } from '../ui/resizable';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SquarePen } from 'lucide-react';
-import useProjectListQuery from '@/queries/useProjectListQuery';
-import { useCreateProject } from '@/hooks/useProjectHooks';
+import useProjectListQuery from '@/queries/projects/useProjectListQuery';
+import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
 import { ProjectRequest } from '@/types';
 import useAuthStore from '@/stores/useAuthStore';
 import ProjectCreateModal from '../ProjectCreateModal';
@@ -17,7 +17,7 @@ export default function AdminProjectSidebar(): JSX.Element {
 
   const projects = projectsResponse?.workspaceResponses ?? [];
 
-  const createProject = useCreateProject();
+  const createProject = useCreateProjectQuery();
 
   const handleCreateProject = (data: ProjectRequest) => {
     createProject.mutate({

@@ -6,7 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '../ui/form'
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ProjectMemberResponse } from '@/types';
-import { useUpdateProjectMemberPrivilege } from '@/hooks/useProjectHooks';
+import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
 
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 
@@ -37,7 +37,7 @@ interface AdminMemberManageFormProps {
 
 export default function AdminMemberManageForm({ members }: AdminMemberManageFormProps) {
   const { projectId } = useParams<{ projectId: string }>();
-  const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilege();
+  const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
 
   const form = useForm<MemberManageFormValues>({
     resolver: zodResolver(formSchema),
