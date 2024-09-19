@@ -1,6 +1,5 @@
 package com.worlabel.domain.workspace.controller;
 
-import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
@@ -10,8 +9,6 @@ import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.BaseResponse;
-import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
