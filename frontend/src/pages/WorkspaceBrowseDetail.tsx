@@ -4,9 +4,9 @@ import { Smile } from 'lucide-react';
 import ProjectCreateModal from '../components/ProjectCreateModal';
 import useAuthStore from '@/stores/useAuthStore';
 import { ProjectResponse, ProjectRequest } from '@/types';
-import useProjectListQuery from '@/queries/useProjectListQuery';
-import useWorkspaceQuery from '@/queries/useWorkspaceQuery';
-import { useCreateProject } from '@/hooks/useProjectHooks';
+import useProjectListQuery from '@/queries/projects/useProjectListQuery';
+import useWorkspaceQuery from '@/queries/workspaces/useWorkspaceQuery';
+import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
 import { webPath } from '@/router';
 
 export default function WorkspaceBrowseDetail() {
@@ -18,7 +18,8 @@ export default function WorkspaceBrowseDetail() {
 
   const { data: workspaceData } = useWorkspaceQuery(workspaceId, memberId);
   const { data: projectsResponse, isError } = useProjectListQuery(workspaceId, memberId);
-  const createProject = useCreateProject();
+
+  const createProject = useCreateProjectQuery();
 
   const handleCreateProject = (data: ProjectRequest) => {
     createProject.mutate({

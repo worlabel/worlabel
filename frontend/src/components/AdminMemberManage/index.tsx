@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import AdminMemberManageForm from './AdminMemberManageForm';
 import { useParams } from 'react-router-dom';
-import useProjectMembersQuery from '@/queries/useProjectMembersQuery';
+import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
 import useAuthStore from '@/stores/useAuthStore';
-import { useAddProjectMember } from '@/hooks/useProjectHooks';
+import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
 import MemberAddModal from '../MemberAddModal';
 import { MemberAddFormValues } from '../MemberAddModal/MemberAddForm';
 
@@ -13,7 +13,7 @@ export default function AdminMemberManage() {
   const memberId = profile?.id || 0;
 
   const { data: members = [] } = useProjectMembersQuery(Number(projectId), memberId);
-  const addProjectMember = useAddProjectMember();
+  const addProjectMember = useAddProjectMemberQuery();
 
   const [, setInviteModalOpen] = useState(false);
 

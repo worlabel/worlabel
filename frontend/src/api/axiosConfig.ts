@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import useAuthStore from '@/stores/useAuthStore';
-import { RefreshTokenResponse } from '../types';
+import { RefreshTokenResponse } from '@/types';
 
 const REFRESH_URL = '/auth/reissue';
 const api = axios.create({

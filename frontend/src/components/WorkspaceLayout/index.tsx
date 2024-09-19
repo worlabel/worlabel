@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Outlet } from 'react-router-dom';
 import Header from '../Header';
-import { Project } from '@/types';
-import { ResizablePanelGroup, ResizablePanel } from '../ui/resizable';
+import { Label, Project } from '@/types';
+import { ResizablePanelGroup } from '../ui/resizable';
+// import { ResizablePanel } from '../ui/resizable';
 import WorkspaceSidebar from '../WorkspaceSidebar';
 import useAuthStore from '@/stores/useAuthStore';
 import useCanvasStore from '@/stores/useCanvasStore';
-import useFolderQuery from '@/queries/useFolderQuery';
-import useWorkspaceQuery from '@/queries/useWorkspaceQuery';
-import useProjectListQuery from '@/queries/useProjectListQuery';
+import useFolderQuery from '@/queries/folders/useFolderQuery';
+import useWorkspaceQuery from '@/queries/workspaces/useWorkspaceQuery';
+import useProjectListQuery from '@/queries/projects/useProjectListQuery';
 
 const mockLabels: Label[] = [
   {

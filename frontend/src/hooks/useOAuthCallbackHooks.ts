@@ -1,7 +1,7 @@
 import useAuthStore from '@/stores/useAuthStore';
-import useProfileQuery from '@/queries/useProfileQuery';
+import useProfileQuery from '@/queries/auth/useProfileQuery';
 
-export function useHandleOAuthCallback() {
+export default function useHandleOAuthCallback() {
   const queryParams = new URLSearchParams(window.location.search);
   const accessToken = queryParams.get('accessToken');
   const setLoggedIn = useAuthStore((state) => state.setLoggedIn);

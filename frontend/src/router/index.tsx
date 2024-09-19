@@ -1,5 +1,5 @@
 import PageLayout from '@/components/PageLayout';
-import ImageCanvas from '@/components/ImageCanvas';
+// import ImageCanvas from '@/components/ImageCanvas';
 import Home from '@/pages/Home';
 import WorkspaceBrowseDetail from '@/pages/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';

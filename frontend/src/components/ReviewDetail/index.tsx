@@ -1,5 +1,6 @@
-import useReviewDetailQuery from '@/queries/useReviewDetailQuery';
-import { useUpdateReview, useDeleteReview } from '@/hooks/useReviewHooks';
+import useReviewDetailQuery from '@/queries/reviews/useReviewDetailQuery';
+import useUpdateReviewQuery from '@/queries/reviews/useUpdateReviewQuery';
+import useDeleteReviewQuery from '@/queries/reviews/useDeleteReviewQuery';
 import { useParams } from 'react-router-dom';
 
 export default function ReviewDetail() {
@@ -7,8 +8,8 @@ export default function ReviewDetail() {
   const memberId = 1;
 
   const { data: reviewDetail } = useReviewDetailQuery(Number(projectId), Number(reviewId), memberId);
-  const updateReview = useUpdateReview();
-  const deleteReview = useDeleteReview();
+  const updateReview = useUpdateReviewQuery();
+  const deleteReview = useDeleteReviewQuery();
 
   const handleUpdate = () => {
     updateReview.mutate({
