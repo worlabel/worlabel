@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 @Getter
 public class ErrorResponse extends BaseResponse<CustomError> {
 
-
-
     public ErrorResponse(boolean isSuccess, int status, int code, String message, Errors errors) {
         super(isSuccess, status, code, message);
         super.errors = parseErrors(errors);
