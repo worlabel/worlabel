@@ -18,7 +18,7 @@ export default function Home() {
     });
   }
   const handleGoogleSignIn = () => {
-    window.location.href = `${BASE_URL}/api/login/oauth2/authorization/google`;
+    window.location.href = `${BASE_URL}/login/oauth2/authorization/google`;
   };
 
   return (
@@ -43,17 +43,6 @@ export default function Home() {
       </div>
 
       {!isLoggedIn ? (
-        // <Link
-        //   to={`${BASE_URL}/api/login/oauth2/authorization/google`}
-        //   // onClick={handleGoogleSignIn}
-        //   className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
-        // >
-        //   <img
-        //     src={GoogleLogo}
-        //     alt="Sign in with Google"
-        //     className="h-auto w-full"
-        //   />
-        // </Link>
         <button
           onClick={handleGoogleSignIn}
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
