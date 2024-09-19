@@ -9,6 +9,8 @@ import LabelPolygon from './LabelPolygon';
 import CanvasControlBar from '../CanvasControlBar';
 
 export default function ImageCanvas() {
+  const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
+  const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
   const sidebarSize = useCanvasStore((state) => state.sidebarSize);
   const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 280;
   const stageHeight = window.innerHeight - 64;
@@ -17,7 +19,6 @@ export default function ImageCanvas() {
   const scale = useRef<number>(0);
   const imageUrl = '/sample.jpg';
   const labels = useCanvasStore((state) => state.labels) ?? [];
-  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [image, imageStatus] = useImage(imageUrl);
   const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
   const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
@@ -82,7 +83,7 @@ export default function ImageCanvas() {
       coordinates: polygonPoints.slice(0, -1),
     });
     setDrawState('pointer');
-    setSelectedId(id);
+    setSelectedLabelId(id);
   };
   const updateDrawingRect = () => {
     if (rectPoints.length === 0) return;
@@ -109,7 +110,7 @@ export default function ImageCanvas() {
       coordinates: rectPoints,
     });
     setDrawState('pointer');
-    setSelectedId(id);
+    setSelectedLabelId(id);
   };
   const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     e.evt.preventDefault();
@@ -128,7 +129,7 @@ export default function ImageCanvas() {
       return;
     }
     if (e.target === e.target.getStage() || e.target.getClassName() === 'Image') {
-      setSelectedId(null);
+      setSelectedLabelId(null);
     }
   };
   const handleMouseMove = () => {
@@ -187,7 +188,7 @@ export default function ImageCanvas() {
     stageRef.current.container().style.cursor = drawState === 'pointer' ? 'default' : 'crosshair';
 
     if (drawState !== 'pointer') {
-      setSelectedId(null);
+      setSelectedLabelId(null);
     }
   }, [drawState]);
 
@@ -217,16 +218,16 @@ export default function ImageCanvas() {
             label.type === 'rect' ? (
               <LabelRect
                 key={label.id}
-                isSelected={label.id === selectedId}
-                onSelect={() => setSelectedId(label.id)}
+                isSelected={label.id === selectedLabelId}
+                onSelect={() => setSelectedLabelId(label.id)}
                 info={label}
                 dragLayer={dragLayerRef.current as Konva.Layer}
               />
             ) : (
               <LabelPolygon
                 key={label.id}
-                isSelected={label.id === selectedId}
-                onSelect={() => setSelectedId(label.id)}
+                isSelected={label.id === selectedLabelId}
+                onSelect={() => setSelectedLabelId(label.id)}
                 info={label}
                 stage={stageRef.current as Konva.Stage}
                 dragLayer={dragLayerRef.current as Konva.Layer}
