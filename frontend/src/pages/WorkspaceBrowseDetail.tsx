@@ -102,13 +102,10 @@ function ProjectList({ projects, workspaceId }: { projects: ProjectResponse[]; w
       {projects.map((project: ProjectResponse) => (
         <Link
           key={project.id}
-          to={`${webPath.workspace()}/${workspaceId}/project/${project.id}`}
-        >
-          <ProjectCard
-            title={project.title}
-            description={project.projectType}
-          />
-        </Link>
+          title={project.title}
+          to={`${webPath.workspace()}/${workspaceId}/${project.id}`}
+          description={project.projectType}
+        />
       ))}
     </div>
   );
