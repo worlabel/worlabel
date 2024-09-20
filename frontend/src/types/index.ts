@@ -266,3 +266,10 @@ export interface LabelJson {
   imageWidth: number;
   imageDepth: number;
 }
+
+export interface ErrorResponse {
+  status: number;
+  code: number;
+  message: string;
+  isSuccess: boolean;
+}
