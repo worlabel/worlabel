@@ -1,5 +1,5 @@
 import { ResizablePanel, ResizableHandle } from '../ui/resizable';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { SquarePen } from 'lucide-react';
 import useProjectListQuery from '@/queries/projects/useProjectListQuery';
 import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 
 export default function AdminProjectSidebar(): JSX.Element {
   const location = useLocation();
+  const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
@@ -33,6 +34,13 @@ export default function AdminProjectSidebar(): JSX.Element {
 
   const selectedProjectId = new URLSearchParams(location.search).get('projectId');
 
+  const handleHeaderClick = () => {
+    navigate({
+      pathname: location.pathname,
+      search: '',
+    });
+  };
+
   return (
     <>
       <ResizablePanel
@@ -44,9 +52,7 @@ export default function AdminProjectSidebar(): JSX.Element {
         <header className="flex w-full items-center justify-between gap-2 border-b border-gray-200 p-4">
           <h1
             className="heading w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold text-gray-900"
-            onClick={() => {
-              window.history.replaceState({}, '', location.pathname);
-            }}
+            onClick={handleHeaderClick}
           >
             {workspaceTitle}
           </h1>

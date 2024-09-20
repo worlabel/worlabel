@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ProjectCard from '@/components/ProjectCard';
 import { Smile } from 'lucide-react';
 import ProjectCreateModal from '../components/ProjectCreateModal';
@@ -14,6 +14,7 @@ export default function WorkspaceBrowseDetail() {
   const workspaceId = Number(params.workspaceId);
   const { profile } = useAuthStore();
   const memberId = profile?.id ?? 0;
+  const navigate = useNavigate();
 
   const { data: workspaceData } = useWorkspaceQuery(workspaceId, memberId);
   const { data: projectsResponse, isError } = useProjectListQuery(workspaceId, memberId);
@@ -42,6 +43,7 @@ export default function WorkspaceBrowseDetail() {
         <ProjectList
           projects={projects}
           workspaceId={workspaceId}
+          navigate={navigate}
         />
       )}
     </div>
@@ -84,7 +86,14 @@ function EmptyStateMessage({ workspaceId }: { workspaceId: number }) {
   );
 }
 
-function ProjectList({ projects, workspaceId }: { projects: ProjectResponse[]; workspaceId: number }) {
+function ProjectList({
+  projects,
+  workspaceId,
+}: {
+  projects: ProjectResponse[];
+  workspaceId: number;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
   if (projects.length === 0) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center">
@@ -100,7 +109,7 @@ function ProjectList({ projects, workspaceId }: { projects: ProjectResponse[]; w
   return (
     <div className="flex flex-wrap gap-6">
       {projects.map((project: ProjectResponse) => (
-        <Link
+        <ProjectCard
           key={project.id}
           title={project.title}
           to={`${webPath.workspace()}/${workspaceId}/${project.id}`}
