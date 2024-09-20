@@ -150,12 +150,12 @@ def join_path(path, *paths):
     """os.path.join()과 같은 기능, os import 하기 싫어서 만듦"""
     return os.path.join(path, *paths)
 
-def get_model_paths(project_id:int):
+def get_model_keys(project_id:int):
     path = os.path.join("resources","projects",str(project_id), "models")
     if not os.path.exists(path):
         raise FileNotFoundError()
     files = os.listdir(path)
-    return [os.path.join(path, file) for file in files if file.endswith(".pt")]
+    return files
 
 def delete_file(path):
     if not os.path.exists(path):
@@ -174,3 +174,6 @@ def get_file_name(path):
     if not os.path.exists(path):
         raise FileNotFoundError()
     return os.path.basename(path)
+
+def get_model_path(project_id:int, model_key:str):
+    return os.path.join("resources", "projects", str(project_id), "models", model_key)

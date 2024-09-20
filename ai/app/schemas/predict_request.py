@@ -11,10 +11,10 @@ class LabelCategory(BaseModel):
 
 class PredictRequest(BaseModel):
     project_id: int
+    m_key: Optional[str] = Field(None, alias="model_key")
     image_list: List[ImageInfo]
     version: str = "latest"
     conf_threshold: float = 0.25
     iou_threshold: float = 0.45
     classes: Optional[List[int]] = None
-    path: Optional[str] = Field(None, alias="model_path")
     label_categories: Optional[List[LabelCategory]] = None
