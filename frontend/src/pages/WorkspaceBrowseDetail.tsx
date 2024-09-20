@@ -113,10 +113,8 @@ function ProjectList({
         <ProjectCard
           key={project.id}
           title={project.title}
+          to={`${webPath.workspace()}/${workspaceId}/${project.id}`}
           description={project.projectType}
-          onClick={() => {
-            navigate(`${webPath.workspace()}/${workspaceId}/project/${project.id}`);
-          }}
         />
       ))}
     </div>
