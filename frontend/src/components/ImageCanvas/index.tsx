@@ -7,8 +7,13 @@ import LabelRect from './LabelRect';
 import { Vector2d } from 'konva/lib/types';
 import LabelPolygon from './LabelPolygon';
 import CanvasControlBar from '../CanvasControlBar';
+import useLabelJsonQuery from '@/queries/labelJson/useLabelJsonQuery';
+import { Label } from '@/types';
 
 export default function ImageCanvas() {
+  const { imagePath, dataPath } = useCanvasStore((state) => state.image)!;
+  const { data: labelData } = useLabelJsonQuery(dataPath);
+  const { shapes } = labelData;
   const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
   const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
   const sidebarSize = useCanvasStore((state) => state.sidebarSize);
@@ -17,14 +22,27 @@ export default function ImageCanvas() {
   const stageRef = useRef<Konva.Stage>(null);
   const dragLayerRef = useRef<Konva.Layer>(null);
   const scale = useRef<number>(0);
-  const imageUrl = useCanvasStore((state) => state.image);
   const labels = useCanvasStore((state) => state.labels) ?? [];
-  const [image] = useImage(imageUrl);
-  const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
-  const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
+  const [image] = useImage(imagePath);
   const drawState = useCanvasStore((state) => state.drawState);
   const setDrawState = useCanvasStore((state) => state.setDrawState);
   const addLabel = useCanvasStore((state) => state.addLabel);
+  const setLabels = useCanvasStore((state) => state.setLabels);
+  const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
+  const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
+
+  useEffect(() => {
+    setLabels(
+      shapes.map<Label>(({ label, color, points, shape_type }, index) => ({
+        id: index,
+        name: label,
+        color,
+        type: shape_type === 'polygon' ? 'polygon' : 'rect',
+        coordinates: points,
+      }))
+    );
+  }, [setLabels, shapes]);
+
   const startDrawRect = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
     setRectPoints([

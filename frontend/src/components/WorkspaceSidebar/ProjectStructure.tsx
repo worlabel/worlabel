@@ -9,6 +9,18 @@ export default function ProjectStructure({ project }: { project: Project }) {
   const image = useCanvasStore((state) => state.image);
   const { data: folderData } = useFolderQuery(project.id.toString(), 0);
 
+  // TODO: 더미 데이터 제거
+  folderData.images = [
+    {
+      id: 1,
+      imagePath: 'https://worlabel-file-bucket.s3.ap-northeast-2.amazonaws.com/dummy.jpg',
+      // dataPath: 'https://worlabel-file-bucket.s3.ap-northeast-2.amazonaws.com/detection.json',
+      dataPath: 'https://worlabel-file-bucket.s3.ap-northeast-2.amazonaws.com/segmentation.json',
+      imageTitle: 'dummy',
+      status: 'PENDING',
+    },
+  ];
+
   return (
     <div className="flex h-full flex-col overflow-y-auto px-1 pb-2">
       <header className="flex w-full items-center gap-2 rounded p-1">
@@ -45,7 +57,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
             <ProjectFileItem
               key={`${project.id}-${item.imageTitle}`}
               item={item}
-              selected={image === item.imageUrl}
+              selected={image?.id === item.id}
             />
           ))}
         </div>

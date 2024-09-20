@@ -5,13 +5,13 @@ import useCanvasStore from '@/stores/useCanvasStore';
 import { Suspense } from 'react';
 
 export default function LabelCanvas() {
-  const imageUrl = useCanvasStore((state) => state.image);
+  const image = useCanvasStore((state) => state.image);
 
   return (
     <ResizablePanel className="flex w-full items-center">
       <Suspense fallback={<div></div>}>
         <main className="h-full grow">
-          {imageUrl ? (
+          {image ? (
             <ImageCanvas />
           ) : (
             <div className="body flex h-full w-full select-none items-center justify-center bg-gray-200 text-gray-400">
