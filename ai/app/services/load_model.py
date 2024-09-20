@@ -7,7 +7,7 @@ import os
 import torch
 import re
 
-def load_detection_model(model_path:str):
+def load_detection_model(model_path:str|None):
     """
     지정된 경로에서 YOLO 모델을 로드합니다.
 
@@ -29,7 +29,7 @@ def load_detection_model(model_path:str):
         raise TypeError(f"Invalid model type: {model.task}. Expected a DetectionModel.")
     return model
     
-def load_segmentation_model(model_path: str): 
+def load_segmentation_model(model_path: str|None): 
     if model_path:
         model = YOLO(model_path)
     else:
@@ -41,11 +41,6 @@ def load_segmentation_model(model_path: str):
     return model
 
 def load_model(model_path: str):
-    # model_path 검증
-    pattern = r'^resources[/\\]projects[/\\](\d+)[/\\]models[/\\]([a-f0-9\-]+)\.pt$'
-    if not re.match(pattern, model_path):
-        raise Exception("Invalid path format")
-
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model file not found at path: {model_path}")
     

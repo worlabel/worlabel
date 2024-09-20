@@ -27,7 +27,7 @@ def create_new_model(project_id: int, type:str, pretrained:bool):
     # 기본 모델 저장
     model.save(filename=model_path)
 
-    return model_path
+    return f"{unique_id}.pt"
 
 def upload_tmp_model(project_id: int, tmp_path:str):
     # 모델 불러오기
@@ -46,4 +46,4 @@ def upload_tmp_model(project_id: int, tmp_path:str):
     # 기본 모델 저장
     model.save(filename=model_path)
 
-    return model_path
+    return f"{unique_id}.pt"

@@ -6,7 +6,7 @@ from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
 from services.load_model import load_detection_model
 from utils.dataset_utils import split_data
-from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
+from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path, get_model_path
 from utils.websocket_utils import WebSocketClient, WebSocketConnectionException
 import asyncio
 
@@ -26,7 +26,8 @@ async def detection_predict(request: PredictRequest):
 
     # 모델 로드
     try:
-        model = load_detection_model(request.path)
+        model_path = request.m_key and get_model_path(request.project_id, request.m_key)
+        model = load_detection_model(model_path=model_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail="load model exception: " + str(e))
 
