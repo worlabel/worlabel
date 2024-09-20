@@ -2,7 +2,7 @@ package com.worlabel.domain.member.service;
 
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.entity.dto.MemberResponse;
-import com.worlabel.domain.member.entity.dto.SearchMemberResponse;
+import com.worlabel.domain.member.entity.dto.MemberDetailResponse;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -32,10 +32,10 @@ public class MemberService {
         return MemberResponse.of(member);
     }
 
-    public List<SearchMemberResponse> getSearchMember(final Integer memberId, final String keyword) {
+    public List<MemberDetailResponse> getSearchMember(final Integer memberId, final String keyword) {
         return memberRepository.findAllByKeyword(memberId, keyword.isEmpty() ? null : keyword)
                 .stream()
-                .map(SearchMemberResponse::of)
+                .map(MemberDetailResponse::of)
                 .toList();
     }
 }

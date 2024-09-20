@@ -1,15 +1,12 @@
 package com.worlabel.domain.member.controller;
 
-import com.worlabel.domain.member.entity.dto.MemberResponse;
-import com.worlabel.domain.member.entity.dto.SearchMemberResponse;
+import com.worlabel.domain.member.entity.dto.MemberDetailResponse;
 import com.worlabel.domain.member.service.MemberService;
-import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
@@ -31,7 +28,7 @@ public class MemberController {
     @SwaggerApiSuccess(description = "keyword가 포함된 사용자를 검색합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     @GetMapping
-    public List<SearchMemberResponse> getWorkspace(
+    public List<MemberDetailResponse> getWorkspace(
             @CurrentUser final Integer memberId,
             @Param("keyword") final String keyword
     ) {
