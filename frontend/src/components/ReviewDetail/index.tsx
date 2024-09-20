@@ -1,41 +1,56 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Slider from 'react-slick';
 import useReviewDetailQuery from '@/queries/reviews/useReviewDetailQuery';
 import useUpdateReviewStatusQuery from '@/queries/reviews/useUpdateReviewStatusQuery';
-import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 export default function ReviewDetail(): JSX.Element {
-  const { projectId, reviewId } = useParams<{ projectId: string; reviewId: string }>();
+  const { workspaceId, projectId, reviewId } = useParams<{
+    workspaceId: string;
+    projectId: string;
+    reviewId: string;
+  }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
   const { data: reviewDetail } = useReviewDetailQuery(Number(projectId), Number(reviewId), memberId);
-  const { data: projectMembers } = useProjectMembersQuery(Number(projectId), memberId);
 
   const updateReviewStatus = useUpdateReviewStatusQuery();
   const [activeTab, setActiveTab] = useState<'content' | 'images'>('content');
+  const [isReviewed, setIsReviewed] = useState(
+    reviewDetail?.reviewStatus === 'APPROVED' || reviewDetail?.reviewStatus === 'REJECTED'
+  );
 
   const handleApprove = () => {
-    updateReviewStatus.mutate({
-      projectId: Number(projectId),
-      reviewId: Number(reviewId),
-      memberId,
-      reviewStatus: 'APPROVED',
-    });
+    updateReviewStatus.mutate(
+      {
+        projectId: Number(projectId),
+        reviewId: Number(reviewId),
+        memberId,
+        reviewStatus: 'APPROVED',
+      },
+      {
+        onSuccess: () => setIsReviewed(true),
+      }
+    );
   };
 
   const handleReject = () => {
-    updateReviewStatus.mutate({
-      projectId: Number(projectId),
-      reviewId: Number(reviewId),
-      memberId,
-      reviewStatus: 'REJECTED',
-    });
+    updateReviewStatus.mutate(
+      {
+        projectId: Number(projectId),
+        reviewId: Number(reviewId),
+        memberId,
+        reviewStatus: 'REJECTED',
+      },
+      {
+        onSuccess: () => setIsReviewed(true),
+      }
+    );
   };
 
   const settings = {
@@ -51,7 +66,7 @@ export default function ReviewDetail(): JSX.Element {
       <div className="header mb-4">
         <h1 className="text-2xl font-bold">{reviewDetail.title}</h1>
         <p className="text-sm text-gray-500">
-          작성자: {reviewDetail.nickname} ({reviewDetail.email})
+          작성자: {reviewDetail.author.nickname} ({reviewDetail.author.email})
         </p>
         <p className="text-sm text-gray-500">작성일: {new Date(reviewDetail.createAt).toLocaleDateString()}</p>
         <p className="text-sm text-gray-500">수정일: {new Date(reviewDetail.updateAt).toLocaleDateString()}</p>
@@ -99,54 +114,54 @@ export default function ReviewDetail(): JSX.Element {
         )}
       </div>
 
-      {reviewDetail.reviewStatus === 'APPROVED' && (
+      {(reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED') && (
         <div className="reviewer-info mt-6">
-          <h2 className="text-lg font-semibold">리뷰어</h2>
+          <h2 className="text-lg font-semibold">
+            리뷰 상태: {reviewDetail.reviewStatus === 'APPROVED' ? '승인됨' : '거부됨'}
+          </h2>
           <div className="flex items-center">
             <img
-              src={reviewDetail.reviewerProfileImage}
+              src={reviewDetail.reviewer.profileImage}
               alt="리뷰어 프로필"
               className="h-10 w-10 rounded-full"
             />
             <div className="ml-4">
-              <p className="font-bold">{reviewDetail.reviewerNickname}</p>
-              <p className="text-gray-500">{reviewDetail.reviewerEmail}</p>
+              <p className="font-bold">{reviewDetail.reviewer.nickname}</p>
+              <p className="text-gray-500">{reviewDetail.reviewer.email}</p>
+              <p className="text-gray-500">
+                {reviewDetail.reviewStatus === 'APPROVED' ? '승인한 사람:' : '거부한 사람:'}{' '}
+                {reviewDetail.reviewer.nickname}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="meta-info mt-6">
-        <h2 className="text-lg font-semibold">프로젝트 멤버</h2>
-        <ul className="list-disc pl-6">
-          {projectMembers.map((member) => (
-            <li
-              key={member.memberId}
-              className="text-gray-700"
+      {!isReviewed && (
+        <div className="actions mt-6 flex justify-end space-x-2">
+          {reviewDetail.reviewStatus !== 'APPROVED' && (
+            <Button
+              variant="default"
+              onClick={handleApprove}
             >
-              {member.nickname} - {member.privilegeType}
-            </li>
-          ))}
-        </ul>
-      </div>
+              승인
+            </Button>
+          )}
+          {reviewDetail.reviewStatus !== 'REJECTED' && (
+            <Button
+              variant="destructive"
+              onClick={handleReject}
+            >
+              거부
+            </Button>
+          )}
+        </div>
+      )}
 
-      <div className="actions mt-6 flex justify-end space-x-2">
-        {reviewDetail.reviewStatus !== 'APPROVED' && (
-          <Button
-            variant="default"
-            onClick={handleApprove}
-          >
-            승인
-          </Button>
-        )}
-        {reviewDetail.reviewStatus !== 'REJECTED' && (
-          <Button
-            variant="destructive"
-            onClick={handleReject}
-          >
-            거부
-          </Button>
-        )}
+      <div className="mt-6">
+        <Link to={`/admin/${workspaceId}/reviews`}>
+          <Button variant="outlinePrimary">목록으로 돌아가기</Button>
+        </Link>
       </div>
     </div>
   );
