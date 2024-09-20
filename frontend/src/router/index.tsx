@@ -67,7 +67,7 @@ const router = createBrowserRouter([
         element: <LabelCanvas />,
       },
       {
-        path: 'project/:projectId',
+        path: ':projectId',
         element: <LabelCanvas />,
       },
     ],

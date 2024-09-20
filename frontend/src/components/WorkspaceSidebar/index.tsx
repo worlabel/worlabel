@@ -17,7 +17,7 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
   // const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>();
   const handleSelectProject = (projectId: string) => {
     // setSelectedProjectId(projectId);
-    navigate(`${webPath.workspace()}/${workspaceId}/project/${projectId}`);
+    navigate(`${webPath.workspace()}/${workspaceId}/${projectId}`);
   };
 
   return (
