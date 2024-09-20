@@ -1,34 +1,20 @@
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Button } from '../ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import SearchInput from '../ui/search-input';
 import useSearchMembersByEmailQuery from '@/queries/members/useSearchMembersByEmailQuery';
 
-type PrivilegeType = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
-
-const privilegeTypes: readonly ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER'] = ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER'];
-
-const privilegeTypeToStr: { [key in PrivilegeType]: string } = {
-  ADMIN: '관리자',
-  MANAGER: '매니저',
-  EDITOR: '에디터',
-  VIEWER: '뷰어',
-};
-
 const formSchema = z.object({
   memberId: z.number().nonnegative({ message: '멤버를 선택하세요.' }),
-  role: z.enum(privilegeTypes, { errorMap: () => ({ message: '역할을 선택하세요.' }) }),
 });
 
 export type MemberAddFormValues = z.infer<typeof formSchema>;
 
 const defaultValues: Partial<MemberAddFormValues> = {
   memberId: 0,
-  role: undefined,
 };
 
 export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAddFormValues) => void }) {
@@ -40,11 +26,8 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
   const [keyword, setKeyword] = useState('');
   const { data: members } = useSearchMembersByEmailQuery(keyword);
 
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
-
   const handleMemberSelect = (memberId: number) => {
     form.setValue('memberId', memberId);
-    setSelectedMemberId(memberId);
   };
 
   return (
@@ -70,8 +53,8 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
             {members.map((member) => (
               <li
                 key={member.id}
-                className={`cursor-pointer rounded-md px-2 py-1 transition-all ${
-                  selectedMemberId === member.id ? 'border-2 border-blue-400 bg-blue-200' : 'hover:bg-gray-100'
+                className={`cursor-pointer rounded-md px-3 py-2 ${
+                  form.watch('memberId') === member.id ? 'bg-blue-100' : 'hover:bg-gray-100'
                 }`}
                 onClick={() => handleMemberSelect(member.id)}
               >
@@ -88,41 +71,10 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
           </ul>
         )}
 
-        <Controller
-          name="role"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="body-strong">역할</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="초대할 멤버의 역할을 선택해주세요." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {privilegeTypes.map((role) => (
-                      <SelectItem
-                        key={role}
-                        value={role}
-                      >
-                        {privilegeTypeToStr[role]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <Button
           type="submit"
           variant="outlinePrimary"
-          disabled={!form.formState.isValid || !form.getValues('memberId')}
+          disabled={form.watch('memberId') === 0}
         >
           멤버 초대하기
         </Button>

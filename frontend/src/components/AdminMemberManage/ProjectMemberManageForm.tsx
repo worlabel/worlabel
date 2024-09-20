@@ -1,9 +1,11 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
 import useRemoveProjectMemberQuery from '@/queries/projects/useRemoveProjectMemberQuery';
 import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
+import useWorkspaceMembersQuery from '@/queries/workspaces/useWorkspaceMembersQuery';
 import useAuthStore from '@/stores/useAuthStore';
+import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
 
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER' | 'NONE';
 
@@ -17,55 +19,78 @@ const roleToStr: { [key in Role]: string } = {
   NONE: '역할 없음',
 };
 
-interface ProjectMemberManageFormProps {
-  workspaceMembers: Array<{ memberId: number; nickname: string }>;
-}
-
-export default function ProjectMemberManageForm({ workspaceMembers }: ProjectMemberManageFormProps) {
+export default function ProjectMemberManageForm() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const projectId = searchParams.get('projectId');
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
+  const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
   const { data: projectMembers = [] } = useProjectMembersQuery(Number(projectId), memberId);
   const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
   const { mutate: removeMember } = useRemoveProjectMemberQuery();
+  const { mutate: addProjectMember } = useAddProjectMemberQuery();
 
-  const noRoleMembers = workspaceMembers.filter((wm) => !projectMembers.some((pm) => pm.memberId === wm.memberId));
+  const noRoleMembers = workspaceMembers
+    .filter((workspaceMember) => !projectMembers.some((projectMember) => projectMember.memberId === workspaceMember.id))
+    .map((member) => ({
+      memberId: member.id,
+      nickname: member.nickname,
+      profileImage: member.profileImage,
+      privilegeType: 'NONE',
+    }));
+
+  const sortedMembers = [...projectMembers, ...noRoleMembers].sort((a, b) => {
+    const aPrivilege = a.privilegeType || 'NONE';
+    const bPrivilege = b.privilegeType || 'NONE';
+    return roles.indexOf(aPrivilege as Role) - roles.indexOf(bPrivilege as Role);
+  });
 
   const handleRoleChange = (memberId: number, role: Role) => {
     if (role === 'NONE') {
       removeMember({
         projectId: Number(projectId),
-        memberId: memberId,
         targetMemberId: memberId,
       });
     } else {
-      updatePrivilege({
-        projectId: Number(projectId),
-        memberId,
-        privilegeData: {
+      if (projectMembers.some((m) => m.memberId === memberId)) {
+        updatePrivilege({
+          projectId: Number(projectId),
           memberId,
-          privilegeType: role,
-        },
-      });
+          privilegeData: {
+            memberId,
+            privilegeType: role,
+          },
+        });
+      } else {
+        addProjectMember({
+          projectId: Number(projectId),
+          memberId,
+          newMember: {
+            memberId,
+            privilegeType: role,
+          },
+        });
+      }
     }
   };
 
   return (
     <div className="flex w-full flex-col gap-4">
-      {[...projectMembers, ...noRoleMembers].map((member) => (
+      {sortedMembers.map((member) => (
         <div
-          key={member.memberId}
+          key={`${member.memberId}-${member.nickname}`}
           className="flex items-center gap-4"
         >
           <span className="flex-1">{member.nickname}</span>
           <div className="flex-1">
             <Select
               onValueChange={(value) => handleRoleChange(member.memberId, value as Role)}
-              defaultValue={projectMembers.find((m) => m.memberId === member.memberId)?.privilegeType || 'NONE'}
-              disabled={projectMembers.some((m) => m.memberId === member.memberId && m.privilegeType === 'ADMIN')}
+              defaultValue={member.privilegeType || 'NONE'}
+              disabled={member.privilegeType === 'ADMIN'}
             >
               <SelectTrigger>
                 <SelectValue placeholder="역할을 선택해주세요." />
@@ -75,6 +100,7 @@ export default function ProjectMemberManageForm({ workspaceMembers }: ProjectMem
                   <SelectItem
                     key={role}
                     value={role}
+                    disabled={role === 'ADMIN'}
                   >
                     {roleToStr[role]}
                   </SelectItem>

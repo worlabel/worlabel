@@ -5,15 +5,8 @@ export default function useRemoveProjectMemberQuery() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      projectId,
-      memberId,
-      targetMemberId,
-    }: {
-      projectId: number;
-      memberId: number;
-      targetMemberId: number;
-    }) => removeProjectMember(projectId, memberId, targetMemberId),
+    mutationFn: ({ projectId, targetMemberId }: { projectId: number; targetMemberId: number }) =>
+      removeProjectMember(projectId, targetMemberId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['projectMembers', variables.projectId] });
     },

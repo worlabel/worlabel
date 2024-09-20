@@ -27,6 +27,7 @@ export const handlers = [
       id: 1,
       nickname: 'javajoha',
       profileImage: 'profile.jpg',
+      email: 'j9@naver.com',
     };
     return HttpResponse.json(response);
   }),
@@ -37,7 +38,7 @@ export const handlers = [
     const { workspaceId } = params;
     const response: WorkspaceResponse = {
       id: parseInt(workspaceId as string, 10),
-      memberId: 1,
+      memberId: 'abc1324',
       title: 'workspace1',
       content: '갤럭시 s24 불량 검증',
       createdAt: '2024-09-18T05:04:44.668Z',
@@ -51,7 +52,7 @@ export const handlers = [
     const { workspaceId } = params;
     const response: WorkspaceResponse = {
       id: parseInt(workspaceId as string, 10),
-      memberId: 1,
+      memberId: 'abc1324',
       title: 'Updated Workspace Title',
       content: 'Updated Workspace Content',
       createdAt: '2024-09-18T05:04:44.668Z',
@@ -71,7 +72,7 @@ export const handlers = [
     const response: WorkspaceResponse[] = [
       {
         id: 1,
-        memberId: 1,
+        memberId: 'abc1324',
         title: 'Workspace 1',
         content: 'Content 1',
         createdAt: '2024-09-18T05:04:44.668Z',
@@ -208,7 +209,7 @@ export const handlers = [
     // 성공 응답
     const response: WorkspaceResponse = {
       id: parseInt(workspaceId as string, 10),
-      memberId: parseInt(memberId as string, 10),
+      memberId: 'abc1324',
       title: 'Workspace 1',
       content: 'Workspace for testing',
       createdAt: new Date().toISOString(),
@@ -222,9 +223,9 @@ export const handlers = [
   // 실제 구현 시 API 경로와 메서드를 확인 후 업데이트 필요
   http.get('/api/projects/:projectId/members', () => {
     const members: MemberResponse[] = [
-      { id: 1, nickname: 'admin', profileImage: 'admin.jpg' },
-      { id: 2, nickname: 'editor', profileImage: 'editor.jpg' },
-      { id: 3, nickname: 'viewer', profileImage: 'viewer.jpg' },
+      { id: 1, nickname: 'admin', profileImage: 'admin.jpg', email: 'j9@naver.com' },
+      { id: 2, nickname: 'editor', profileImage: 'editor.jpg', email: 'j9@naver.com' },
+      { id: 3, nickname: 'viewer', profileImage: 'viewer.jpg', email: 'j9@naver.com' },
     ];
 
     return HttpResponse.json(members);
@@ -234,9 +235,9 @@ export const handlers = [
   // 실제 구현 시 API 경로와 메서드를 확인 후 업데이트 필요
   http.get('/api/workspaces/:workspaceId/members', () => {
     const members: MemberResponse[] = [
-      { id: 1, nickname: 'admin', profileImage: 'admin.jpg' },
-      { id: 2, nickname: 'editor', profileImage: 'editor.jpg' },
-      { id: 3, nickname: 'viewer', profileImage: 'viewer.jpg' },
+      { id: 1, nickname: 'admin', profileImage: 'admin.jpg', email: 'j9@naver.com' },
+      { id: 2, nickname: 'editor', profileImage: 'editor.jpg', email: 'j9@naver.com' },
+      { id: 3, nickname: 'viewer', profileImage: 'viewer.jpg', email: 'j9@naver.com' },
     ];
 
     return HttpResponse.json(members);

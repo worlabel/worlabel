@@ -15,7 +15,7 @@ export default function useAddWorkspaceMemberQuery() {
       newMemberId: number;
     }) => addWorkspaceMember(workspaceId, memberId, newMemberId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceMembers', variables.workspaceId] });
     },
   });
 }

@@ -15,7 +15,7 @@ export default function useRemoveWorkspaceMemberQuery() {
       targetMemberId: number;
     }) => removeWorkspaceMember(workspaceId, memberId, targetMemberId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['workspace', variables.workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceMembers', variables.workspaceId] });
     },
   });
 }
