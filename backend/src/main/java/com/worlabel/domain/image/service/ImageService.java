@@ -119,6 +119,10 @@ public class ImageService {
     public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId, Integer parentId) throws IOException {
         orderCount = 0;
 
+        if (parentId == null) {
+            parentId = 0;
+        }
+
         // 프로젝트 정보 가져오기
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
