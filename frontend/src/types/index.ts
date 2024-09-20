@@ -18,7 +18,7 @@ export type DirectoryItem = {
 export type Project = {
   id: number;
   name: string;
-  type: 'Classification' | 'Detection' | 'Segmentation';
+  type: 'classification' | 'detection' | 'segmentation';
   children: Array<DirectoryItem | FileItem>;
 };
 
@@ -71,7 +71,8 @@ export interface FolderResponse {
 export interface ImageResponse {
   id: number;
   imageTitle: string;
-  imageUrl: string;
+  imagePath: string;
+  dataPath: string;
   status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
@@ -245,4 +246,23 @@ export interface ImageDetailResponse {
 // 리프레시 토큰 응답 DTO
 export interface RefreshTokenResponse {
   accessToken: string;
+}
+
+export interface Shape {
+  label: string;
+  color: string;
+  points: [number, number][];
+  group_id: number;
+  shape_type: 'polygon' | 'rectangle';
+  flags: Record<string, never>;
+}
+
+export interface LabelJson {
+  version: string;
+  task_type: 'det' | 'seg';
+  shapes: Shape[];
+  split: string;
+  imageHeight: number;
+  imageWidth: number;
+  imageDepth: number;
 }

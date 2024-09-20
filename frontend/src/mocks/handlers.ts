@@ -242,51 +242,54 @@
 //     return HttpResponse.json(members);
 //   }),
 
-//   // Folder and Image Handlers
-//   http.get('/api/projects/:projectId/folders/:folderId', ({ params }) => {
-//     const { folderId } = params;
-//     const response: FolderResponse = {
-//       id: parseInt(folderId as string, 10),
-//       title: 'My Folder',
-//       images: [
-//         {
-//           id: 1,
-//           imageTitle: 'image.jpg',
-//           imageUrl: 'https://example.com/image.jpg',
-//           status: 'PENDING',
-//         },
-//         {
-//           id: 2,
-//           imageTitle: 'another_image.jpg',
-//           imageUrl: 'https://example.com/another_image.jpg',
-//           status: 'IN_PROGRESS',
-//         },
-//       ],
-//       children: [
-//         {
-//           id: 1,
-//           title: 'Car',
-//         },
-//         {
-//           id: 2,
-//           title: 'Bike',
-//         },
-//       ],
-//     };
-//     return HttpResponse.json(response);
-//   }),
+  // Folder and Image Handlers
+  http.get('/api/projects/:projectId/folders/:folderId', ({ params }) => {
+    const { folderId } = params;
+    const response: FolderResponse = {
+      id: parseInt(folderId as string, 10),
+      title: 'My Folder',
+      images: [
+        {
+          id: 1,
+          imageTitle: 'image.jpg',
+          imagePath: 'https://example.com/image.jpg',
+          dataPath: 'https://example.com/image.json',
+          status: 'PENDING',
+        },
+        {
+          id: 2,
+          imageTitle: 'another_image.jpg',
+          imagePath: 'https://example.com/another_image.jpg',
+          dataPath: 'https://example.com/another_image.json',
+          status: 'IN_PROGRESS',
+        },
+      ],
+      children: [
+        {
+          id: 1,
+          title: 'Car',
+        },
+        {
+          id: 2,
+          title: 'Bike',
+        },
+      ],
+    };
+    return HttpResponse.json(response);
+  }),
 
-//   http.get('/api/projects/:projectId/folders/:folderId/images/:imageId', ({ params }) => {
-//     // 이미지 조회 핸들러
-//     const { imageId } = params;
-//     const response: ImageResponse = {
-//       id: parseInt(imageId as string, 10),
-//       imageTitle: 'Image Title',
-//       imageUrl: 'image-url.jpg',
-//       status: 'PENDING',
-//     };
-//     return HttpResponse.json(response);
-//   }),
+  http.get('/api/projects/:projectId/folders/:folderId/images/:imageId', ({ params }) => {
+    // 이미지 조회 핸들러
+    const { imageId } = params;
+    const response: ImageResponse = {
+      id: parseInt(imageId as string, 10),
+      imageTitle: 'Image Title',
+      imagePath: 'image-url.jpg',
+      dataPath: 'data-url.json',
+      status: 'PENDING',
+    };
+    return HttpResponse.json(response);
+  }),
 
 //   // Auto Labeling Handler
 //   http.post('/api/projects/:projectId/label/auto', () => {

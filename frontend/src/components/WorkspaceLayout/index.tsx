@@ -34,10 +34,7 @@ export default function WorkspaceLayout() {
       (project): Project => ({
         id: project.id,
         name: project.title,
-        type: (project.projectType.charAt(0).toUpperCase() + project.projectType.slice(1)) as
-          | 'Classification'
-          | 'Detection'
-          | 'Segmentation',
+        type: project.projectType,
         children: [],
       })
     );

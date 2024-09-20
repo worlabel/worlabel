@@ -6,7 +6,7 @@ import useCanvasStore from '@/stores/useCanvasStore';
 export default function ProjectFileItem({
   className = '',
   item,
-  depth = 1,
+  depth = 0,
   selected,
 }: {
   className?: string;
@@ -15,22 +15,11 @@ export default function ProjectFileItem({
   selected: boolean;
 }) {
   const paddingLeft = depth * 12;
-  const changeImage = useCanvasStore((state) => state.changeImage);
+  // const changeImage = useCanvasStore((state) => state.changeImage);
+  const setImage = useCanvasStore((state) => state.setImage);
 
   const handleClick = () => {
-    // TODO: fetch image
-    changeImage(item.imageUrl, [
-      {
-        id: item.id,
-        name: item.imageTitle,
-        type: 'rect',
-        color: '#FF0000',
-        coordinates: [
-          [0, 0],
-          [100, 100],
-        ],
-      },
-    ]);
+    setImage(item);
   };
 
   return (
