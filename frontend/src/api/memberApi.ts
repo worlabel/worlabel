@@ -3,7 +3,7 @@ import { MemberSearchResponse } from '@/types';
 
 export async function searchMembersByEmail(keyword: string) {
   return api
-    .get<MemberSearchResponse[]>(`/api/members`, {
+    .get<MemberSearchResponse[]>(`/members`, {
       params: { keyword },
       withCredentials: true,
     })
