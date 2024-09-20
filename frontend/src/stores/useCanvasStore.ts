@@ -1,14 +1,14 @@
-import { Label } from '@/types';
+import { ImageResponse, Label } from '@/types';
 import { create } from 'zustand';
 
 interface CanvasState {
   sidebarSize: number;
-  image: string;
+  image: ImageResponse | null;
   labels: Label[];
   drawState: 'pen' | 'rect' | 'pointer';
   selectedLabelId: number | null;
   setSidebarSize: (width: number) => void;
-  changeImage: (image: string, labels: Label[]) => void;
+  setImage: (image: ImageResponse) => void;
   setLabels: (labels: Label[]) => void;
   addLabel: (label: Label) => void;
   removeLabel: (labelId: number) => void;
@@ -19,12 +19,12 @@ interface CanvasState {
 
 const useCanvasStore = create<CanvasState>()((set) => ({
   sidebarSize: 20,
-  image: '',
+  image: null,
   labels: [],
   drawState: 'pointer',
   selectedLabelId: null,
   setSidebarSize: (width) => set({ sidebarSize: width }),
-  changeImage: (image: string, labels: Label[]) => set({ image, labels }),
+  setImage: (image) => set({ image }),
   addLabel: (label: Label) => set((state) => ({ labels: [...state.labels, label] })),
   setLabels: (labels) => set({ labels }),
   removeLabel: (labelId: number) => set((state) => ({ labels: state.labels.filter((label) => label.id !== labelId) })),
