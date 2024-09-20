@@ -10,6 +10,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Schema(name = "멤버 응답 DTO", description = "사용자에 대한 응답 DTO")
 public class MemberResponse {
+
     @Schema(description = "사용자 ID", example = "1")
     private Integer id;
 
