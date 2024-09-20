@@ -1,9 +1,9 @@
 import api from '@/api/axiosConfig';
-import { MemberSearchResponse } from '@/types';
+import { MemberResponse } from '@/types';
 
 export async function searchMembersByEmail(keyword: string) {
   return api
-    .get<MemberSearchResponse[]>(`/members`, {
+    .get<MemberResponse[]>(`/members`, {
       params: { keyword },
       withCredentials: true,
     })

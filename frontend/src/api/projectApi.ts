@@ -90,10 +90,13 @@ export async function updateProjectMemberPrivilege(
 }
 
 // 프로젝트 멤버 삭제
-export async function removeProjectMember(projectId: number, memberId: number, targetMemberId: number) {
+export async function removeProjectMember(projectId: number, targetMemberId: number) {
   return api
     .delete(`/projects/${projectId}/members`, {
-      params: { memberId, targetMemberId },
+      data: targetMemberId,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
     .then(({ data }) => data);
 }
