@@ -2,6 +2,7 @@ package com.worlabel.domain.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.worlabel.domain.labelcategory.entity.LabelCategory;
+import com.worlabel.domain.model.entity.AIModel;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -52,6 +53,12 @@ public class Project extends BaseEntity {
      */
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LabelCategory> category = new ArrayList<>();
+
+    /**
+     * 프로젝트에 속한 모델
+     */
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    private List<AIModel> modelList = new ArrayList<>();
 
     private Project(final String title, final Workspace workspace, final ProjectType projectType) {
         this.title = title;
