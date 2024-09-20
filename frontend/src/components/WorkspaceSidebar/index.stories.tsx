@@ -19,7 +19,7 @@ const projects: Project[] = [
   {
     id: 1,
     name: 'project-111',
-    type: 'Segmentation',
+    type: 'segmentation',
     children: [
       {
         id: 12,
@@ -45,7 +45,7 @@ const projects: Project[] = [
   {
     id: 2,
     name: 'very-extremely-long-long-project-name-222',
-    type: 'Classification',
+    type: 'classification',
     children: [
       {
         id: 23,

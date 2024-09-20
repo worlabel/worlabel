@@ -252,13 +252,15 @@ export const handlers = [
         {
           id: 1,
           imageTitle: 'image.jpg',
-          imageUrl: 'https://example.com/image.jpg',
+          imagePath: 'https://example.com/image.jpg',
+          dataPath: 'https://example.com/image.json',
           status: 'PENDING',
         },
         {
           id: 2,
           imageTitle: 'another_image.jpg',
-          imageUrl: 'https://example.com/another_image.jpg',
+          imagePath: 'https://example.com/another_image.jpg',
+          dataPath: 'https://example.com/another_image.json',
           status: 'IN_PROGRESS',
         },
       ],
@@ -282,7 +284,8 @@ export const handlers = [
     const response: ImageResponse = {
       id: parseInt(imageId as string, 10),
       imageTitle: 'Image Title',
-      imageUrl: 'image-url.jpg',
+      imagePath: 'image-url.jpg',
+      dataPath: 'data-url.json',
       status: 'PENDING',
     };
     return HttpResponse.json(response);
