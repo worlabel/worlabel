@@ -46,7 +46,7 @@ export default function Header({ className, ...props }: HeaderProps) {
                   labeling
                 </Link>
                 <Link
-                  to={`/admin/${workspaceId}}`}
+                  to={`/admin/${workspaceId}`}
                   className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
                 >
                   admin
