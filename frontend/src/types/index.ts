@@ -1,3 +1,4 @@
+// 파일 및 디렉터리 관련 타입
 export type FileItem = {
   id: number;
   name: string;
@@ -13,6 +14,7 @@ export type DirectoryItem = {
   children: Array<DirectoryItem | FileItem>;
 };
 
+// 프로젝트 관련 타입
 export type Project = {
   id: number;
   name: string;
@@ -20,12 +22,14 @@ export type Project = {
   children: Array<DirectoryItem | FileItem>;
 };
 
+// 워크스페이스 관련 타입
 export type Workspace = {
   id: number;
   name: string;
   projects: Array<Project>;
 };
 
+// 레이블 관련 타입
 export type Label = {
   id: number;
   name: string;
@@ -33,6 +37,20 @@ export type Label = {
   type: 'polygon' | 'rect';
   coordinates: Array<[number, number]>;
 };
+
+export interface LabelingRequest {
+  memberId: number;
+  projectId: number;
+  imageId: number;
+}
+
+export interface AutoLabelingResponse {
+  imageId: number;
+  imageUrl: string;
+  data: string;
+}
+
+// 폴더 및 이미지 관련 DTO
 export interface FolderRequest {
   title: string;
   parentId: number;
@@ -57,6 +75,7 @@ export interface ImageResponse {
   status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
+// 이미지 이동 및 상태변경 요청 DTO
 export interface ImageMoveRequest {
   moveFolderId: number;
 }
@@ -65,23 +84,20 @@ export interface ImageStatusChangeRequest {
   labelStatus: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
+// 멤버 관련 DTO
 export interface MemberResponse {
-  id: number;
-  nickname: string;
-  profileImage: string;
-}
-export interface MemberSearchResponse {
   id: number;
   nickname: string;
   profileImage: string;
   email: string;
 }
+
+// 워크스페이스 관련 DTO
 export interface WorkspaceMemberResponse {
-  memberId: number;
+  id: number;
   nickname: string;
   profileImage: string;
 }
-
 export interface WorkspaceRequest {
   title: string;
   content: string;
@@ -89,7 +105,7 @@ export interface WorkspaceRequest {
 
 export interface WorkspaceResponse {
   id: number;
-  memberId: number;
+  memberId: string;
   title: string;
   content: string;
   createdAt: string;
@@ -118,10 +134,7 @@ export interface ProjectListResponse {
   workspaceResponses: ProjectResponse[];
 }
 
-export interface RefreshTokenResponse {
-  accessToken: string;
-}
-
+// 댓글 관련 DTO
 export interface CommentRequest {
   content: string;
   positionX: number;
@@ -137,55 +150,48 @@ export interface CommentResponse {
   positionY: number;
   content: string;
   createTime: string; // 작성 일자 (ISO 8601 형식)
+  author: MemberResponse; // 추가됨
 }
 
 export interface CommentListResponse {
   commentResponses: CommentResponse[];
 }
 
+// 프로젝트 멤버 관련 DTO
 export interface ProjectMemberRequest {
   memberId: number;
   privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 }
 
-export interface LabelingRequest {
+export interface ProjectMemberResponse {
   memberId: number;
-  projectId: number;
-  imageId: number;
+  nickname: string;
+  profileImage: string;
+  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 }
 
-export interface AutoLabelingResponse {
-  imageId: number;
-  imageUrl: string;
-  data: string;
-}
-
-// 리뷰 요청 DTO
+// 리뷰 관련 DTO
 export interface ReviewRequest {
   title: string;
   content: string;
   imageIds: number[];
 }
 
-// 리뷰 응답 DTO
 export interface ReviewResponse {
   reviewId: number;
   projectId: number;
   title: string;
   content: string;
   status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
-  nickname: string;
-  email: string;
+  author: MemberResponse;
   createAt: string;
   updateAt: string;
 }
 
-// 리뷰 상태 요청 DTO
 export interface ReviewStatusRequest {
   reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
 }
 
-// 리뷰 이미지 응답 DTO
 export interface ReviewImageResponse {
   id: number;
   imageTitle: string;
@@ -194,7 +200,6 @@ export interface ReviewImageResponse {
   dataPath: string;
 }
 
-// 리뷰 디테일 응답 DTO
 export interface ReviewDetailResponse {
   reviewId: number;
   title: string;
@@ -203,33 +208,11 @@ export interface ReviewDetailResponse {
   images: ReviewImageResponse[];
   createAt: string;
   updateAt: string;
-  email: string;
-  profileImage: string;
-  nickname: string;
-  reviewerEmail: string;
-  reviewerProfileImage: string;
-  reviewerNickname: string;
-}
-// 프로젝트 멤버 응답 DTO
-export interface ProjectMemberResponse {
-  memberId: number;
-  nickname: string;
-  profileImage: string;
-  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
-}
-export interface FolderIdResponse {
-  id: number;
-  title: string;
+  author: MemberResponse;
+  reviewer: MemberResponse;
 }
 
-export interface ImageDetailResponse {
-  id: number;
-  imageTitle: string;
-  imageUrl: string;
-  data: string | null;
-  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
-}
-
+// 카테고리 관련 DTO
 export interface CategoryRequest {
   categoryName: string;
 }
@@ -239,25 +222,27 @@ export interface CategoryResponse {
   name: string;
 }
 
+// 레이블 저장 요청 DTO
 export interface LabelSaveRequest {
   data: string;
 }
 
-export interface ProjectMemberResponse {
-  memberId: number;
-  nickname: string;
-  profileImage: string;
-  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
+// 폴더 ID 응답 DTO
+export interface FolderIdResponse {
+  id: number;
+  title: string;
 }
 
-export interface ProjectMemberRequest {
-  memberId: number;
-  privilegeType: 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
+// 이미지 상세 조회 응답 DTO
+export interface ImageDetailResponse {
+  id: number;
+  imageTitle: string;
+  imageUrl: string;
+  data: string | null;
+  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
 }
 
-export interface ErrorResponse {
-  status: number;
-  code: number;
-  message: string;
-  isSuccess: boolean;
+// 리프레시 토큰 응답 DTO
+export interface RefreshTokenResponse {
+  accessToken: string;
 }
