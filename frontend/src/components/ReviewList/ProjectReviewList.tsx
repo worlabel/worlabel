@@ -62,7 +62,7 @@ export default function ProjectReviewList({ projectId, workspaceId }: ProjectRev
               reviewId={item.reviewId}
               title={item.title}
               createdTime={item.createAt}
-              creatorName={item.nickname}
+              creatorName={item.author.nickname}
               projectId={item.projectId}
               status={item.status}
             />
