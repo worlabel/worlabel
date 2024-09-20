@@ -14,6 +14,7 @@ import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
 import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
 import ReviewDetail from '@/components/ReviewDetail';
+import FolderUploadTest from '@/components/FolderUploadTest';
 
 export const webPath = {
   home: () => '/',
@@ -21,6 +22,7 @@ export const webPath = {
   workspace: () => '/workspace',
   admin: () => `/admin`,
   oauthCallback: () => '/redirect/oauth2',
+  folderUploadTest: () => '/folderuploadtest',
 };
 
 const router = createBrowserRouter([
@@ -105,6 +107,10 @@ const router = createBrowserRouter([
         <OAuthCallback />
       </Suspense>
     ),
+  },
+  {
+    path: `${webPath.folderUploadTest()}/:projectId`,
+    element: <FolderUploadTest />,
   },
 ]);
 

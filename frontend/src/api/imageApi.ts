@@ -39,11 +39,23 @@ export async function changeImageStatus(
     .then(({ data }) => data);
 }
 
-export async function uploadImageList(projectId: number, folderId: number, memberId: number, imageList: string[]) {
+export async function uploadImageList(projectId: number, folderId: number, memberId: number, imageList: File[]) {
   return api
     .post(
       `/projects/${projectId}/folders/${folderId}/images`,
       { imageList },
+      {
+        params: { memberId },
+      }
+    )
+    .then(({ data }) => data);
+}
+
+export async function uploadImageFolder(projectId: number, folderZip: File[], parentId: number, memberId: number) {
+  return api
+    .post(
+      `/projects/${projectId}/folders/0/images/upload`,
+      { folderZip, parentId },
       {
         params: { memberId },
       }
