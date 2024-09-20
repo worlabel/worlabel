@@ -116,23 +116,34 @@ public class ImageService {
         save(imageId, labelRequest.getData());
     }
 
-    // 폴더 압축 파일을 받아 폴더와 이미지 파일을 저장하는 메서드
-    public void uploadFolderWithImages(MultipartFile folderZip, Integer projectId, Integer parentId) throws IOException {
+    public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId, Integer parentId) throws IOException {
         orderCount = 0;
+
         // 프로젝트 정보 가져오기
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
-
-        // 압축 해제 경로 설정 (임시 폴더에 압축 해제)
-        Path tempDir = Files.createTempDirectory("uploadedFolder");
-        unzip(folderZip, tempDir.toString());
 
         // 부모 폴더가 최상위인지 확인
         Folder parentFolder = (parentId == 0) ? null : folderRepository.findById(parentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
 
-        // 압축 풀린 폴더를 재귀적으로 탐색하여 하위 폴더 및 이미지 파일을 저장
-        processFolderRecursively(tempDir.toFile(), parentFolder, project);
+        // 파일이 zip 파일인지 확인
+        String originalFilename = folderOrZip.getOriginalFilename();
+        if (originalFilename != null && originalFilename.endsWith(".zip")) {
+            // 압축 파일인 경우
+            Path tempDir = Files.createTempDirectory("uploadedFolder");
+            unzip(folderOrZip, tempDir.toString());
+
+            // 압축 풀린 폴더를 재귀적으로 탐색하여 하위 폴더 및 이미지 파일을 저장
+            processFolderRecursively(tempDir.toFile(), parentFolder, project);
+        } else {
+            // 압축 파일이 아닌 경우 (단일 폴더 또는 파일)
+            File tempFolder = new File(System.getProperty("java.io.tmpdir"), originalFilename);
+            folderOrZip.transferTo(tempFolder); // 파일을 임시 디렉토리에 저장
+
+            // 폴더 또는 파일을 재귀적으로 탐색하여 저장
+            processFolderRecursively(tempFolder, parentFolder, project);
+        }
     }
 
     // 폴더 내부 구조를 재귀적으로 탐색하여 저장

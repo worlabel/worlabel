@@ -188,7 +188,7 @@ public class S3UploadService {
                 amazonS3.putObject(putRequest);
             }
 
-            return s3Key;
+            return url + "/" + s3Key;
         } catch (IOException e) {
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
