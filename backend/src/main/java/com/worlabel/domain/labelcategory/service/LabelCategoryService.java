@@ -28,16 +28,17 @@ public class LabelCategoryService {
     @CheckPrivilege(PrivilegeType.EDITOR)
     public LabelCategoryResponse createCategory(final Integer memberId, final Integer projectId, final LabelCategoryRequest categoryRequest) {
         // 이미 존재하는지 확인 있다면 예외
-        if (labelCategoryRepository.existsByNameAndProjectId(categoryRequest.getCategoryName(), projectId)) {
-            throw new CustomException(ErrorCode.PROJECT_CATEGORY_EXIST);
-        }
+//        if (labelCategoryRepository.existsByNameAndProjectId(categoryRequest.getCategoryName(), projectId)) {
+//            throw new CustomException(ErrorCode.PROJECT_CATEGORY_EXIST);
+//        }
 
-        Project project = projectService.getProject(projectId);
+//        Project project = projectService.getProject(projectId);
+//
+//        LabelCategory labelCategory = LabelCategory.of(categoryRequest.getCategoryName(), project);
+//        labelCategoryRepository.save(labelCategory);
 
-        LabelCategory labelCategory = LabelCategory.of(categoryRequest.getCategoryName(), project);
-        labelCategoryRepository.save(labelCategory);
-
-        return LabelCategoryResponse.from(labelCategory);
+//        return LabelCategoryResponse.from(labelCategory);
+        return null;
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
@@ -53,13 +54,15 @@ public class LabelCategoryService {
 
     @CheckPrivilege(PrivilegeType.VIEWER)
     public boolean existByCategoryName(final int memberId, final int projectId, final String categoryName) {
-        return labelCategoryRepository.existsByNameAndProjectId(categoryName, projectId);
+//        return labelCategoryRepository.existsByNameAndProjectId(categoryName, projectId);
+        return true;
     }
 
     @CheckPrivilege(PrivilegeType.VIEWER)
     public List<LabelCategoryResponse> getCategoryList(final Integer memberId, final Integer projectId) {
-        List<LabelCategory> labelCategoryList = labelCategoryRepository.findAllByProjectId(projectId);
-        return labelCategoryList.stream().map(LabelCategoryResponse::from).toList();
+//        List<LabelCategory> labelCategoryList = labelCategoryRepository.findAllByProjectId(projectId);
+//        return labelCategoryList.stream().map(LabelCategoryResponse::from).toList();
+        return null;
     }
 
     private LabelCategory getCategory(final Integer categoryId) {

@@ -1,7 +1,7 @@
 package com.worlabel.domain.labelcategory.entity;
 
 
-import com.worlabel.domain.model.entity.AIModel;
+import com.worlabel.domain.model.entity.AiModel;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ public class LabelCategory extends BaseEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "model_id", nullable = false)
-    private AIModel aiModel;
+    private AiModel aiModel;
 
     /**
      * 레이블 카테고리 이름
@@ -41,13 +41,13 @@ public class LabelCategory extends BaseEntity {
     @Column(name = "ai_category_id", nullable = false)
     private Integer aiCategoryId;
 
-    private LabelCategory(final AIModel aiModel, final String name, final int aiCategoryId) {
+    private LabelCategory(final AiModel aiModel, final String name, final int aiCategoryId) {
         this.aiModel = aiModel;
         this.name = name;
         this.aiCategoryId = aiCategoryId;
     }
 
-    public static LabelCategory of(final AIModel aiModel, final String name, final int aiCategoryId) {
+    public static LabelCategory of(final AiModel aiModel, final String name, final int aiCategoryId) {
         return new LabelCategory(aiModel, name, aiCategoryId);
     }
 }

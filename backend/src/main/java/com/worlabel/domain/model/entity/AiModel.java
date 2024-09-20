@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "ai_model")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AIModel extends BaseEntity {
+public class AiModel extends BaseEntity {
 
     /**
      * Model ID
@@ -35,7 +35,7 @@ public class AIModel extends BaseEntity {
     /**
      * model key
      */
-    @Column(name = "key", length = 50)
+    @Column(name = "model_key", length = 50)
     private String key;
 
     /**
@@ -58,15 +58,19 @@ public class AIModel extends BaseEntity {
     @OneToMany(mappedBy = "aiModel", fetch = FetchType.LAZY)
     private List<LabelCategory> categoryList = new ArrayList<>();
 
-    private AIModel(String name, String key, int version, Project project) {
+    private AiModel(String name, String key, int version, Project project) {
         this.name = name;
         this.key = key;
         this.version = version;
         this.project = project;
     }
 
-    public static AIModel of(final String name, final String key, final int version, final Project project) {
-        return new AIModel(name, key, version, project);
+    public static AiModel of(final String name, final String key, final int version, final Project project) {
+        return new AiModel(name, key, version, project);
+    }
+
+    public static AiModel of(final String name, final Project project) {
+        return new AiModel(name, null, 0, project);
     }
 
 }

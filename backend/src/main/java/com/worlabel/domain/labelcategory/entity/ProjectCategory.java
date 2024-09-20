@@ -1,6 +1,5 @@
 package com.worlabel.domain.labelcategory.entity;
 
-import com.worlabel.domain.model.entity.AIModel;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -18,7 +17,7 @@ public class ProjectCategory extends BaseEntity {
      * 레이블 카테고리 PK
      */
     @Id
-    @Column(name = "label_category_id", nullable = false)
+    @Column(name = "project_category_id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
