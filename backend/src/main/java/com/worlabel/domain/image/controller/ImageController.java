@@ -44,9 +44,9 @@ public class ImageController {
     @Operation(summary = "폴더 업로드", description = "폴더와 이미지 파일을 업로드합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public void uploadFolder(
-            @RequestParam("folderZip") MultipartFile folderZip,
+            @Parameter(name = "폴더", description = "MultiPartFile을 폴더나 zip으로 추가해준다.", example = "") @RequestBody final MultipartFile folderZip,
             @PathVariable("project_id") Integer projectId,
-            @RequestParam(value = "parentId", defaultValue = "0") Integer parentId) throws IOException {
+            @Parameter(name = "최상위 폴더", description = "최상위 폴더", example = "") @RequestBody(required = false) Integer parentId) throws IOException {
         imageService.uploadFolderWithImages(folderZip, projectId, parentId);
     }
 
