@@ -2,7 +2,7 @@ package com.worlabel.domain.review.entity.dto;
 
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.member.entity.Member;
-import com.worlabel.domain.member.entity.dto.MemberResponse;
+import com.worlabel.domain.member.entity.dto.MemberDetailResponse;
 import com.worlabel.domain.review.entity.Review;
 import com.worlabel.domain.review.entity.ReviewStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,10 +41,10 @@ public class ReviewDetailResponse {
     private LocalDateTime updateAt;
 
     @Schema(description = "작성자 정보", example = "")
-    private MemberResponse author;
+    private MemberDetailResponse author;
 
     @Schema(description = "리뷰어 정보", example = "")
-    private MemberResponse reviewer;
+    private MemberDetailResponse reviewer;
 
     public static ReviewDetailResponse of(final Review review, final List<ImageResponse> images) {
         Member writer = review.getMember();
@@ -57,8 +57,8 @@ public class ReviewDetailResponse {
                 images,
                 review.getCreatedAt(),
                 review.getUpdatedAt(),
-                MemberResponse.of(writer),
-                Optional.ofNullable(reviewer).map(MemberResponse::of).orElse(null)
+                MemberDetailResponse.of(writer),
+                Optional.ofNullable(reviewer).map(MemberDetailResponse::of).orElse(null)
         );
 
     }

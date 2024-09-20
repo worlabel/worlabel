@@ -1,10 +1,8 @@
 package com.worlabel.domain.workspace.controller;
 
 import com.worlabel.domain.member.entity.dto.MemberResponse;
-import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.review.entity.dto.ReviewResponse;
 import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
-import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponses;

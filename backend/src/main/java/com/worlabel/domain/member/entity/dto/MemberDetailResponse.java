@@ -2,17 +2,14 @@ package com.worlabel.domain.member.entity.dto;
 
 import com.worlabel.domain.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Schema(name = "멤버 검색 DTO", description = "이메일 검색에 대한 응답 DTO")
-public class SearchMemberResponse {
+@Schema(name = "멤버 상세 DTO", description = "멤버 상세 응답 DTO")
+public class MemberDetailResponse {
     @Schema(description = "ID", example = "1")
     private Integer id;
 
@@ -25,7 +22,7 @@ public class SearchMemberResponse {
     @Schema(description = "이메일", example = "xxx@gmail.com")
     private String email;
 
-    public static SearchMemberResponse of(final Member member) {
-        return new SearchMemberResponse(member.getId(), member.getNickname(), member.getProfileImage(), member.getEmail());
+    public static MemberDetailResponse of(final Member member) {
+        return new MemberDetailResponse(member.getId(), member.getNickname(), member.getProfileImage(), member.getEmail());
     }
 }

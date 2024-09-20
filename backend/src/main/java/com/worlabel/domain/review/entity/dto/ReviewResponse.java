@@ -1,5 +1,6 @@
 package com.worlabel.domain.review.entity.dto;
 
+import com.worlabel.domain.member.entity.dto.MemberDetailResponse;
 import com.worlabel.domain.review.entity.Review;
 import com.worlabel.domain.review.entity.ReviewStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,11 +30,8 @@ public class ReviewResponse {
     @Schema(description = "리뷰 상태", example = "요청")
     private ReviewStatus status;
 
-    @Schema(description = "작성자 닉네임", example = "javajoha")
-    private String nickname;
-
-    @Schema(description = "작성자 이메일", example = "jaa@naver.com")
-    private String email;
+    @Schema(description = "작성자 정보", example = "")
+    private MemberDetailResponse author;
 
     @Schema(description = "리뷰 작성일", example = "")
     private LocalDateTime createAt;
@@ -48,8 +46,7 @@ public class ReviewResponse {
                 review.getTitle(),
                 review.getContent(),
                 review.getReviewStatus(),
-                review.getMember().getNickname(),
-                review.getMember().getEmail(),
+                MemberDetailResponse.of(review.getMember()),
                 review.getCreatedAt(),
                 review.getUpdatedAt());
     }
