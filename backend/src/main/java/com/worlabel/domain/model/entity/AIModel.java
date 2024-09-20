@@ -1,18 +1,22 @@
 package com.worlabel.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.worlabel.domain.labelcategory.entity.LabelCategory;
 import com.worlabel.domain.project.entity.Project;
+import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
 @Table(name = "ai_model")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AIModel {
+public class AIModel extends BaseEntity {
 
     /**
      * Model ID
@@ -47,6 +51,12 @@ public class AIModel {
     @JoinColumn(name = "project_id", nullable = true)
     @JsonIgnore
     private Project project;
+
+    /**
+     * 모델에 속한 카테고리
+     */
+    @OneToMany(mappedBy = "aiModel", fetch = FetchType.LAZY)
+    private List<LabelCategory> categoryList = new ArrayList<>();
 
     private AIModel(String name, String key, int version, Project project) {
         this.name = name;

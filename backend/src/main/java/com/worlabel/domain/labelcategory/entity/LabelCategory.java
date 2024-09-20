@@ -1,7 +1,8 @@
 package com.worlabel.domain.labelcategory.entity;
 
 
-import com.worlabel.domain.project.entity.Project;
+import com.worlabel.domain.model.entity.AIModel;
+import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "label_category")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class LabelCategory {
+public class LabelCategory extends BaseEntity {
 
     /**
      * 레이블 카테고리 PK
@@ -22,24 +23,31 @@ public class LabelCategory {
     private Integer id;
 
     /**
+     * 속한 모델
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_id", nullable = false)
+    private AIModel aiModel;
+
+    /**
      * 레이블 카테고리 이름
      */
-    @Column(name = "name", nullable = false)
+    @Column(name = "label_category_name", nullable = false)
     private String name;
 
     /**
-     * 속한 프로젝트
+     * 실제 AI 모델의 ai 카테고리 id
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
+    @Column(name = "ai_category_id", nullable = false)
+    private Integer aiCategoryId;
 
-    private LabelCategory(final String name,final Project project) {
+    private LabelCategory(final AIModel aiModel, final String name, final int aiCategoryId) {
+        this.aiModel = aiModel;
         this.name = name;
-        this.project = project;
+        this.aiCategoryId = aiCategoryId;
     }
 
-    public static LabelCategory of(final String title, final Project project) {
-        return new LabelCategory(title, project);
+    public static LabelCategory of(final AIModel aiModel, final String name, final int aiCategoryId) {
+        return new LabelCategory(aiModel, name, aiCategoryId);
     }
 }
