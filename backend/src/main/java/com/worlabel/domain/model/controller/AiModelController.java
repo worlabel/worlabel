@@ -56,5 +56,15 @@ public class AiModelController {
         aiModelService.addModel(memberId, projectId, aiModelRequest);
     }
 
-
+    @Operation(summary = "프로젝트 모델 이름 변경", description = "프로젝트에 있는 모델의 이름을 변경합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 모델의 이름이 변경됩니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PutMapping("/projects/{project_id}/models/{model_id}")
+    public void renameModel(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("model_id") final Integer modelId,
+            @Valid @RequestBody final AiModelRequest aiModelRequest) {
+        aiModelService.renameModel(memberId, projectId,modelId, aiModelRequest);
+    }
 }

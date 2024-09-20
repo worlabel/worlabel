@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AiModelRepository extends JpaRepository<AiModel, Integer> {
 
@@ -13,4 +14,8 @@ public interface AiModelRepository extends JpaRepository<AiModel, Integer> {
             "WHERE a.project IS NULL " +
             "OR a.project.id = :projectId ")
     List<AiModel> findAllByProjectId(@Param("projectId") Integer projectId);
+
+    @Query("SELECT a FROM AiModel a " +
+            "WHERE a.project IS NOT NULL AND a.id = :modelId")
+    Optional<AiModel> findCustomModelById(@Param("modelId") int modelId);
 }

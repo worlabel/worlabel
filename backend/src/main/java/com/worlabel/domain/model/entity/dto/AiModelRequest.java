@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Schema(name = "모델 생성 dto", description = "모델 생성 DTO")
+@Schema(name = "모델 요청 dto", description = "모델 요청 DTO")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Getter

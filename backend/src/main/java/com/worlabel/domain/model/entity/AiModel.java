@@ -73,4 +73,7 @@ public class AiModel extends BaseEntity {
         return new AiModel(name, null, 0, project);
     }
 
+    public void rename(final String newName) {
+        this.name = newName;
+    }
 }
