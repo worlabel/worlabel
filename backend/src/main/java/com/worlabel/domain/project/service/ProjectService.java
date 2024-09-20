@@ -2,6 +2,7 @@ package com.worlabel.domain.project.service;
 
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
+import com.worlabel.domain.labelcategory.entity.ProjectCategory;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.Participant;
@@ -170,7 +171,7 @@ public class ProjectService {
         }
     }
 
-    public Project getProject(final Integer projectId) {
+    private Project getProject(final Integer projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
     }
@@ -253,5 +254,7 @@ public class ProjectService {
     private String createApiUrl(String endPoint) {
         return aiServer + "/" + endPoint;
     }
+
+
 }
 
