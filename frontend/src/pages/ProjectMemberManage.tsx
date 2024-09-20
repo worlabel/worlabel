@@ -1,16 +1,16 @@
-import { useLocation, useParams } from 'react-router-dom';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
-import useRemoveProjectMemberQuery from '@/queries/projects/useRemoveProjectMemberQuery';
+import { useParams, useLocation } from 'react-router-dom';
 import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
 import useWorkspaceMembersQuery from '@/queries/workspaces/useWorkspaceMembersQuery';
 import useAuthStore from '@/stores/useAuthStore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
+import useRemoveProjectMemberQuery from '@/queries/projects/useRemoveProjectMemberQuery';
 import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER' | 'NONE';
-
 const roles: Role[] = ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER', 'NONE'];
-
 const roleToStr: { [key in Role]: string } = {
   ADMIN: '관리자',
   MANAGER: '매니저',
@@ -19,17 +19,22 @@ const roleToStr: { [key in Role]: string } = {
   NONE: '역할 없음',
 };
 
-export default function ProjectMemberManageForm() {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const projectId = searchParams.get('projectId');
-  const { workspaceId } = useParams<{ workspaceId: string }>();
-
+export default function ProjectMemberManage() {
+  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
+  const queryClient = useQueryClient();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (projectId) {
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId, memberId] });
+    }
+  }, [location.pathname, projectId, memberId, queryClient]);
+
   const { data: projectMembers = [] } = useProjectMembersQuery(Number(projectId), memberId);
+  const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
   const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
   const { mutate: removeMember } = useRemoveProjectMemberQuery();
   const { mutate: addProjectMember } = useAddProjectMemberQuery();
@@ -79,7 +84,11 @@ export default function ProjectMemberManageForm() {
   };
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-6 border-b-[0.67px] border-[#dcdcde] bg-[#fbfafd] p-6">
+      <header className="flex w-full items-center gap-4">
+        <h1 className="flex-1 text-lg font-semibold text-[#333238]">프로젝트 멤버 관리</h1>
+      </header>
+
       {sortedMembers.map((member) => (
         <div
           key={`${member.memberId}-${member.nickname}`}
@@ -89,8 +98,7 @@ export default function ProjectMemberManageForm() {
           <div className="flex-1">
             <Select
               onValueChange={(value) => handleRoleChange(member.memberId, value as Role)}
-              defaultValue={member.privilegeType || 'NONE'}
-              disabled={member.privilegeType === 'ADMIN'}
+              defaultValue={member.privilegeType}
             >
               <SelectTrigger>
                 <SelectValue placeholder="역할을 선택해주세요." />
@@ -100,7 +108,6 @@ export default function ProjectMemberManageForm() {
                   <SelectItem
                     key={role}
                     value={role}
-                    disabled={role === 'ADMIN'}
                   >
                     {roleToStr[role]}
                   </SelectItem>

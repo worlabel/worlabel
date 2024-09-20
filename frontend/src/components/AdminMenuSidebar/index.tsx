@@ -28,7 +28,7 @@ export default function AdminMenuSidebar() {
             return (
               <Link
                 key={item.label}
-                to={`${item.path}${location.search}`}
+                to={item.path}
                 className={cn(
                   'body cursor-pointer rounded-md px-3 py-2 text-left text-gray-800 hover:bg-gray-200',
                   'transition-colors focus:bg-gray-300 focus:outline-none',

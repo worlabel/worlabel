@@ -1,19 +1,21 @@
 import PageLayout from '@/components/PageLayout';
 // import ImageCanvas from '@/components/ImageCanvas';
-import Home from '@/pages/Home';
 import WorkspaceBrowseDetail from '@/pages/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
 import AdminLayout from '@/components/AdminLayout';
-import ReviewList from '@/components/ReviewList';
-import AdminMemberManage from '@/components/AdminMemberManage';
+import WorkspaceReviewList from '@/pages/WorkspaceReviewList';
+import ProjectReviewList from '@/pages/ProjectReviewList';
+import WorkspaceMemberManage from '@/pages/WorkspaceMemberManage';
+import ProjectMemberManage from '@/pages/ProjectMemberManage';
 import OAuthCallback from '@/components/OAuthCallback';
 import { createBrowserRouter } from 'react-router-dom';
 import { Suspense } from 'react';
+import Home from '@/pages/Home';
 import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
 import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
-import ReviewDetail from '@/components/ReviewDetail';
+import ReviewDetail from '@/pages/ReviewDetail';
 
 export const webPath = {
   home: () => '/',
@@ -86,15 +88,33 @@ const router = createBrowserRouter([
       },
       {
         path: 'reviews',
-        element: <ReviewList />,
-      },
-      {
-        path: 'reviews/:projectId/:reviewId',
-        element: <ReviewDetail />,
+        children: [
+          {
+            index: true,
+            element: <WorkspaceReviewList />,
+          },
+          {
+            path: ':projectId',
+            element: <ProjectReviewList />,
+          },
+          {
+            path: ':projectId/:reviewId',
+            element: <ReviewDetail />,
+          },
+        ],
       },
       {
         path: 'members',
-        element: <AdminMemberManage />,
+        children: [
+          {
+            index: true,
+            element: <WorkspaceMemberManage />,
+          },
+          {
+            path: ':projectId',
+            element: <ProjectMemberManage />,
+          },
+        ],
       },
     ],
   },

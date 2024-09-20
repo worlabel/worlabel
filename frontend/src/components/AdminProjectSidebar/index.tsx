@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 export default function AdminProjectSidebar(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId?: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
@@ -32,13 +32,21 @@ export default function AdminProjectSidebar(): JSX.Element {
     });
   };
 
-  const selectedProjectId = new URLSearchParams(location.search).get('projectId');
-
   const handleHeaderClick = () => {
     navigate({
       pathname: location.pathname,
       search: '',
     });
+  };
+
+  const getNewPath = (newProjectId: string) => {
+    if (location.pathname.includes('reviews')) {
+      return `/admin/${workspaceId}/reviews/${newProjectId}`;
+    }
+    if (location.pathname.includes('members')) {
+      return `/admin/${workspaceId}/members/${newProjectId}`;
+    }
+    return location.pathname;
   };
 
   return (
@@ -66,14 +74,11 @@ export default function AdminProjectSidebar(): JSX.Element {
         </header>
         <div className="flex flex-col gap-2 p-4">
           {projects.map((project) => {
-            const isActive = String(project.id) === selectedProjectId;
+            const isActive = projectId === String(project.id);
             return (
               <Link
                 key={project.id}
-                to={{
-                  pathname: location.pathname,
-                  search: `?projectId=${project.id}`,
-                }}
+                to={getNewPath(String(project.id))}
                 className={cn(
                   'body cursor-pointer rounded-md px-3 py-2 text-left hover:bg-gray-200',
                   isActive ? 'bg-gray-300 font-semibold' : ''
