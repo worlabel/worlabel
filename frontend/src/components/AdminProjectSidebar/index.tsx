@@ -1,5 +1,5 @@
 import { ResizablePanel, ResizableHandle } from '../ui/resizable';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { SquarePen } from 'lucide-react';
 import useProjectListQuery from '@/queries/projects/useProjectListQuery';
 import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
@@ -7,9 +7,9 @@ import useWorkspaceQuery from '@/queries/workspaces/useWorkspaceQuery';
 import { ProjectRequest } from '@/types';
 import useAuthStore from '@/stores/useAuthStore';
 import ProjectCreateModal from '../ProjectCreateModal';
+import { cn } from '@/lib/utils';
 
 export default function AdminProjectSidebar(): JSX.Element {
-  const navigate = useNavigate();
   const location = useLocation();
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
@@ -31,20 +31,7 @@ export default function AdminProjectSidebar(): JSX.Element {
     });
   };
 
-  const handleProjectClick = (projectId: number) => {
-    const searchParams = new URLSearchParams(location.search);
-    searchParams.set('projectId', String(projectId));
-    navigate({
-      search: `?${searchParams.toString()}`,
-    });
-  };
-
-  const handleHeaderClick = () => {
-    navigate({
-      pathname: `/admin/${workspaceId}`,
-      search: '',
-    });
-  };
+  const selectedProjectId = new URLSearchParams(location.search).get('projectId');
 
   return (
     <>
@@ -57,7 +44,9 @@ export default function AdminProjectSidebar(): JSX.Element {
         <header className="flex w-full items-center justify-between gap-2 border-b border-gray-200 p-4">
           <h1
             className="heading w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold text-gray-900"
-            onClick={handleHeaderClick}
+            onClick={() => {
+              window.history.replaceState({}, '', location.pathname);
+            }}
           >
             {workspaceTitle}
           </h1>
@@ -70,15 +59,24 @@ export default function AdminProjectSidebar(): JSX.Element {
           />
         </header>
         <div className="flex flex-col gap-2 p-4">
-          {projects.map((project) => (
-            <button
-              key={project.id}
-              className="body cursor-pointer rounded-md px-3 py-2 text-left hover:bg-gray-200"
-              onClick={() => handleProjectClick(project.id)}
-            >
-              {project.title}
-            </button>
-          ))}
+          {projects.map((project) => {
+            const isActive = String(project.id) === selectedProjectId;
+            return (
+              <Link
+                key={project.id}
+                to={{
+                  pathname: location.pathname,
+                  search: `?projectId=${project.id}`,
+                }}
+                className={cn(
+                  'body cursor-pointer rounded-md px-3 py-2 text-left hover:bg-gray-200',
+                  isActive ? 'bg-gray-300 font-semibold' : ''
+                )}
+              >
+                {project.title}
+              </Link>
+            );
+          })}
         </div>
       </ResizablePanel>
       <ResizableHandle className="bg-gray-300" />

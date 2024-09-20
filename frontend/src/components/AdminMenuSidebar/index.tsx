@@ -1,8 +1,8 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 export default function AdminMenuSidebar() {
-  const navigate = useNavigate();
+  const location = useLocation();
   const { workspaceId } = useParams<{ workspaceId: string }>();
 
   const menuItems = [
@@ -23,18 +23,22 @@ export default function AdminMenuSidebar() {
           <h2 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">메뉴</h2>
         </header>
         <div className="flex flex-col gap-1 px-2.5">
-          {menuItems.map((item) => (
-            <button
-              key={item.label}
-              className={cn(
-                'body cursor-pointer rounded-md px-3 py-2 text-left text-gray-800 hover:bg-gray-200',
-                'transition-colors focus:bg-gray-300 focus:outline-none'
-              )}
-              onClick={() => navigate(item.path)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = location.pathname.startsWith(item.path);
+            return (
+              <Link
+                key={item.label}
+                to={`${item.path}${location.search}`}
+                className={cn(
+                  'body cursor-pointer rounded-md px-3 py-2 text-left text-gray-800 hover:bg-gray-200',
+                  'transition-colors focus:bg-gray-300 focus:outline-none',
+                  isActive ? 'bg-gray-300 font-semibold' : ''
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
