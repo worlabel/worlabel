@@ -3,6 +3,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import useAuthStore from '@/stores/useAuthStore';
 import useAddWorkspaceMemberQuery from '@/queries/workspaces/useAddWorkspaceMemberQuery';
 import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
+import useWorkspaceMembersQuery from '@/queries/workspaces/useWorkspaceMembersQuery';
 import MemberAddModal from '../MemberAddModal';
 import { MemberAddFormValues } from '../MemberAddModal/MemberAddForm';
 import WorkspaceMemberManageForm from './WorkspaceMemberManageForm';
@@ -16,6 +17,8 @@ export default function AdminMemberManage() {
 
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
+
+  const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
 
   const addWorkspaceMember = useAddWorkspaceMemberQuery();
   const addProjectMember = useAddProjectMemberQuery();
@@ -49,8 +52,8 @@ export default function AdminMemberManage() {
         <MemberAddModal onSubmit={handleMemberInvite} />
       </header>
 
-      {workspaceId && <WorkspaceMemberManageForm />}
-      {projectId && <ProjectMemberManageForm />}
+      {workspaceId && !projectId && <WorkspaceMemberManageForm members={workspaceMembers} />}
+      {projectId && <ProjectMemberManageForm workspaceMembers={workspaceMembers} />}
     </div>
   );
 }

@@ -1,11 +1,14 @@
-import { useParams } from 'react-router-dom';
-import useWorkspaceMembersQuery from '@/queries/workspaces/useWorkspaceMembersQuery';
+interface WorkspaceMember {
+  memberId: number;
+  nickname: string;
+  profileImage: string;
+}
 
-export default function WorkspaceMemberManageForm() {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+interface WorkspaceMemberManageFormProps {
+  members: WorkspaceMember[];
+}
 
-  const { data: members = [] } = useWorkspaceMembersQuery(Number(workspaceId));
-
+export default function WorkspaceMemberManageForm({ members }: WorkspaceMemberManageFormProps) {
   return (
     <div className="flex w-full flex-col gap-4">
       {members.length === 0 ? (
