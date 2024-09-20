@@ -24,4 +24,8 @@ public enum ReviewStatus {
     public boolean isApproved() {
         return this == ReviewStatus.APPROVED;
     }
+
+    public boolean isRequested() {
+        return this == ReviewStatus.REQUESTED;
+    }
 }

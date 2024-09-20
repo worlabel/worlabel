@@ -124,7 +124,7 @@ public class ReviewService {
             throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
         }
 
-        if (reviewStatusRequest.getReviewStatus().isApproved()) {
+        if (!reviewStatusRequest.getReviewStatus().isRequested()) {
             review.assignReviewer(member);
         }
 
