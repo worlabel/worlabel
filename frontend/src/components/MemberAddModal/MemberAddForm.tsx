@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Form, FormControl, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import SearchInput from '../ui/search-input';
@@ -21,7 +21,7 @@ const privilegeTypeToStr: { [key in PrivilegeType]: string } = {
 
 const formSchema = z.object({
   memberId: z.number().nonnegative({ message: '멤버를 선택하세요.' }),
-  role: z.enum(privilegeTypes),
+  role: z.enum(privilegeTypes, { errorMap: () => ({ message: '역할을 선택하세요.' }) }),
 });
 
 export type MemberAddFormValues = z.infer<typeof formSchema>;
@@ -40,8 +40,11 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
   const [keyword, setKeyword] = useState('');
   const { data: members } = useSearchMembersByEmailQuery(keyword);
 
+  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+
   const handleMemberSelect = (memberId: number) => {
     form.setValue('memberId', memberId);
+    setSelectedMemberId(memberId);
   };
 
   return (
@@ -67,7 +70,9 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
             {members.map((member) => (
               <li
                 key={member.id}
-                className={`cursor-pointer py-1 ${form.getValues('memberId') === member.id ? 'bg-gray-200' : ''}`}
+                className={`cursor-pointer rounded-md px-2 py-1 transition-all ${
+                  selectedMemberId === member.id ? 'border-2 border-blue-400 bg-blue-200' : 'hover:bg-gray-100'
+                }`}
                 onClick={() => handleMemberSelect(member.id)}
               >
                 <img
@@ -83,7 +88,7 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
           </ul>
         )}
 
-        <FormField
+        <Controller
           name="role"
           control={form.control}
           render={({ field }) => (
@@ -92,7 +97,7 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="초대할 멤버의 역할을 선택해주세요." />
