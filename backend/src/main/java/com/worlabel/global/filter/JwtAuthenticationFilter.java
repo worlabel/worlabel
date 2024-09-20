@@ -49,7 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 throw new JwtException("유효한 JWT 토큰이 없습니다.");
             }
         } catch (Exception e) {
-            log.debug("message: {}", e.getMessage());
             request.setAttribute("error-message", e.getMessage());
         }
         filterChain.doFilter(request, response);

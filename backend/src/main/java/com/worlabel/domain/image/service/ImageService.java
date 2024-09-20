@@ -64,8 +64,8 @@ public class ImageService {
     @Transactional(readOnly = true)
     public DetailImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
-//        String data = s3UploadService.getData(image.getDataPath());
-        return DetailImageResponse.from(image);
+        String data = s3UploadService.getData(image.getDataPath());
+        return DetailImageResponse.from(image, data);
     }
 
     /**

@@ -1,9 +1,8 @@
 package com.worlabel.domain.workspace.controller;
 
-import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
+import com.worlabel.domain.member.entity.dto.MemberResponse;
 import com.worlabel.domain.review.entity.dto.ReviewResponse;
 import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
-import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponses;
@@ -12,8 +11,6 @@ import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.response.BaseResponse;
-import com.worlabel.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -104,7 +101,7 @@ public class WorkspaceController {
     @SwaggerApiSuccess(description = "워크스페이스 멤버를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/{workspace_id}/members")
-    public List<WorkspaceMemberResponse> getWorkspaceMember(
+    public List<MemberResponse> getWorkspaceMember(
             @CurrentUser final Integer memberId,
             @PathVariable("workspace_id") final Integer workspaceId) {
         return workspaceService.getWorkspaceMember(memberId, workspaceId);

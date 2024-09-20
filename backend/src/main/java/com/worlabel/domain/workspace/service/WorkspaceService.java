@@ -1,16 +1,15 @@
 package com.worlabel.domain.workspace.service;
 
 import com.worlabel.domain.member.entity.Member;
+import com.worlabel.domain.member.entity.dto.MemberResponse;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
 import com.worlabel.domain.review.entity.Review;
-import com.worlabel.domain.review.entity.ReviewStatus;
 import com.worlabel.domain.review.entity.dto.ReviewResponse;
 import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
 import com.worlabel.domain.review.repository.ReviewRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
-import com.worlabel.domain.workspace.entity.dto.WorkspaceMemberResponse;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceRequest;
 import com.worlabel.domain.workspace.entity.dto.WorkspaceResponse;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
@@ -109,11 +108,11 @@ public class WorkspaceService {
     /**
      * 워크스페이스 멤버 조회
      */
-    public List<WorkspaceMemberResponse> getWorkspaceMember(final Integer memberId, Integer workspaceId) {
+    public List<MemberResponse> getWorkspaceMember(final Integer memberId, Integer workspaceId) {
         checkWorkspaceAuthorized(memberId, workspaceId);
 
         return workspaceParticipantRepository.findAllByWorkspaceIdFetchJoin(workspaceId).stream()
-                .map(WorkspaceMemberResponse::from)
+                .map(o -> MemberResponse.of(o.getMember()))
                 .toList();
     }
 
