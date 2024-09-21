@@ -3,6 +3,7 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { uploadImageFolder } from '@/api/imageApi';
 import useAuthStore from '@/stores/useAuthStore';
+import { X } from 'lucide-react';
 
 export default function ImageFolderUploadForm({
   onClose,
@@ -46,6 +47,10 @@ export default function ImageFolderUploadForm({
 
   const handleDrop = () => {
     setIsDragging(false);
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles(files.filter((_, i) => i != index));
   };
 
   const handleUpload = async () => {
@@ -93,9 +98,24 @@ export default function ImageFolderUploadForm({
         </div>
       )}
       {files.length > 0 && (
-        <ul>
+        <ul className="m-0 list-none p-0">
           {files.map((file, index) => (
-            <li key={index}>{file.webkitRelativePath || file.name}</li>
+            <li
+              key={index}
+              className={cn('flex items-center justify-between p-1')}
+            >
+              <span className="truncate">{file.webkitRelativePath || file.name}</span>
+              <button
+                className={'cursor-pointer p-2'}
+                onClick={() => handleRemoveFile(index)}
+              >
+                <X
+                  color="red"
+                  size={16}
+                  strokeWidth="2"
+                />
+              </button>
+            </li>
           ))}
         </ul>
       )}
