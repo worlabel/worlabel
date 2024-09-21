@@ -2,7 +2,7 @@ package com.worlabel.domain.labelcategory.controller;
 
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryRequest;
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
-import com.worlabel.domain.labelcategory.service.LabelCategoryService;
+import com.worlabel.domain.labelcategory.service.ProjectLabelCategoryService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
@@ -19,15 +19,19 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/projects/{project_id}/categories")
-public class LabelCategoryController {
+public class CategoryController {
 
-    private final LabelCategoryService categoryService;
+    private final ProjectLabelCategoryService categoryService;
 
-    @Operation(summary = "커스텀 레이블 카테고리 생성", description = "사용자가 프로젝트 카테고리를 직접 생성합니다.")
+    @Operation(summary = "프로젝트 레이블 카테고리 생성", description = "프로젝트 레이블 카테고리를 직접 생성합니다.")
     @SwaggerApiSuccess(description = "카테고리 성공적으로 생성합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping
-    public LabelCategoryResponse createFolder(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId, @RequestBody final LabelCategoryRequest categoryRequest) {
+    public LabelCategoryResponse createFolder(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @RequestBody final LabelCategoryRequest categoryRequest
+    ) {
         return categoryService.createCategory(memberId, projectId, categoryRequest);
     }
 

@@ -4,6 +4,7 @@ import com.worlabel.domain.labelcategory.entity.LabelCategory;
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryRequest;
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
 import com.worlabel.domain.labelcategory.repository.LabelCategoryRepository;
+import com.worlabel.domain.labelcategory.repository.ProjectLabelCategoryRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
@@ -17,23 +18,20 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class LabelCategoryService {
+public class ProjectLabelCategoryService {
 
-    private final LabelCategoryRepository labelCategoryRepository;
+    private final ProjectLabelCategoryRepository projectLabelCategoryRepository;
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public LabelCategoryResponse createCategory(final Integer memberId, final Integer projectId, final LabelCategoryRequest categoryRequest) {
-        // 이미 존재하는지 확인 있다면 예외
-//        if (labelCategoryRepository.existsByNameAndProjectId(categoryRequest.getCategoryName(), projectId)) {
-//            throw new CustomException(ErrorCode.PROJECT_CATEGORY_EXIST);
-//        }
+        // 해당 프로젝트에 이미 존재하는지 확인, 있다면 예외
         return null;
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void deleteCategory(final int memberId, final int projectId, final int categoryId) {
-        LabelCategory category = getCategory(categoryId);
-        labelCategoryRepository.delete(category);
+//        LabelCategory category = getCategory(categoryId);
+//        labelCategoryRepository.delete(category);
     }
 
     @CheckPrivilege(PrivilegeType.VIEWER)
@@ -55,6 +53,6 @@ public class LabelCategoryService {
     }
 
     private LabelCategory getCategory(final Integer categoryId) {
-        return labelCategoryRepository.findById(categoryId).orElseThrow(() -> new CustomException(ErrorCode.PROJECT_CATEGORY_NOT_FOUND));
+       return null;
     }
 }
