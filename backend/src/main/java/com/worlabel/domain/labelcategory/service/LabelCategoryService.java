@@ -5,9 +5,6 @@ import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryRequest;
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
 import com.worlabel.domain.labelcategory.repository.LabelCategoryRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.participant.service.ParticipantService;
-import com.worlabel.domain.project.entity.Project;
-import com.worlabel.domain.project.service.ProjectService;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -23,7 +20,6 @@ import java.util.List;
 public class LabelCategoryService {
 
     private final LabelCategoryRepository labelCategoryRepository;
-    private final ProjectService projectService;
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public LabelCategoryResponse createCategory(final Integer memberId, final Integer projectId, final LabelCategoryRequest categoryRequest) {
@@ -31,13 +27,6 @@ public class LabelCategoryService {
 //        if (labelCategoryRepository.existsByNameAndProjectId(categoryRequest.getCategoryName(), projectId)) {
 //            throw new CustomException(ErrorCode.PROJECT_CATEGORY_EXIST);
 //        }
-
-//        Project project = projectService.getProject(projectId);
-//
-//        LabelCategory labelCategory = LabelCategory.of(categoryRequest.getCategoryName(), project);
-//        labelCategoryRepository.save(labelCategory);
-
-//        return LabelCategoryResponse.from(labelCategory);
         return null;
     }
 
