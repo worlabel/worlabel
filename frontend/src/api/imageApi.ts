@@ -51,11 +51,11 @@ export async function uploadImageList(projectId: number, folderId: number, membe
     .then(({ data }) => data);
 }
 
-export async function uploadImageFolder(projectId: number, folderZip: File[], parentId: number, memberId: number) {
+export async function uploadImageFolder(memberId: number, projectId: number, files: File[], parentId: number = 0) {
   return api
     .post(
       `/projects/${projectId}/folders/0/images/upload`,
-      { folderZip, parentId },
+      { files, parentId },
       {
         params: { memberId },
       }

@@ -261,3 +261,10 @@ export interface ErrorResponse {
   message: string;
   isSuccess: boolean;
 }
+
+export interface ImageFolderRequest {
+  memberId: number;
+  projectId: number;
+  parentId: number;
+  files: File[];
+}
