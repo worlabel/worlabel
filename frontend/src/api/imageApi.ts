@@ -55,7 +55,22 @@ export async function uploadImageFolder(memberId: number, projectId: number, fil
   return api
     .post(
       `/projects/${projectId}/folders/0/images/upload`,
-      { files, parentId },
+      { folderZip: files, parentId },
+      {
+        params: { memberId },
+      }
+    )
+    .then(({ data }) => data)
+    .catch((error) => {
+      return Promise.reject(error);
+    });
+}
+
+export async function uploadImageFolderZip(memberId: number, projectId: number, file: File, parentId: number = 0) {
+  return api
+    .post(
+      `/projects/${projectId}/folders/0/images/upload`,
+      { folderZip: file, parentId },
       {
         params: { memberId },
       }
