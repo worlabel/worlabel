@@ -23,7 +23,7 @@ import com.worlabel.domain.workspace.repository.WorkspaceRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
-import com.worlabel.global.service.AiService;
+import com.worlabel.global.service.AiRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,7 +45,7 @@ public class ProjectService {
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final ImageRepository imageRepository;
 
-    private final AiService aiService;
+    private final AiRequestService aiService;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -136,7 +136,7 @@ public class ProjectService {
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer memberId, final Integer projectId) {
-        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다.
+        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다. -> 용수 추후 구현 예정
         /*
             없으면 redis 상태 테이블을 만든다. progressTable
          */
@@ -150,7 +150,7 @@ public class ProjectService {
         trainRequest.setData(List.of());
 
         // FastAPI 서버로 POST 요청 전송
-        String modelKey = aiService.postRequest(endPoint, trainRequest, String.class);
+        String modelKey = aiService.postRequest(endPoint, trainRequest, String.class, response -> response);
 
         // TODO: 모델 생성 후 Default 이름과 Key 값 설정
     }
@@ -169,7 +169,8 @@ public class ProjectService {
                 .toList();
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
 
-        aiService.postRequest(endPoint,autoLabelingRequest, Void.class);
+        // 응답없음
+        aiService.postRequest(endPoint, autoLabelingRequest, Void.class, response -> null);
     }
 
     private Project getProject(final Integer projectId) {

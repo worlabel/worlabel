@@ -67,4 +67,8 @@ public class AiModelController {
             @Valid @RequestBody final AiModelRequest aiModelRequest) {
         aiModelService.renameModel(memberId, projectId,modelId, aiModelRequest);
     }
+
+    // TODO: 여기서 모델 학습을 따로 만들어야 할 듯 Project 있는 모델 학습을 여기로 옮겨서 진행
+    // 아마도 필요한 요청 값들은 ModelID
+
 }

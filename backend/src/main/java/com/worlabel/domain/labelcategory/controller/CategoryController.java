@@ -23,8 +23,8 @@ public class CategoryController {
 
     private final ProjectLabelCategoryService categoryService;
 
-    @Operation(summary = "프로젝트 레이블 카테고리 생성", description = "프로젝트 레이블 카테고리를 직접 생성합니다.")
-    @SwaggerApiSuccess(description = "카테고리 성공적으로 생성합니다.")
+    @Operation(summary = "프로젝트 레이블 카테고리 선택", description = "프로젝트 레이블 카테고리를 추가합니다.")
+    @SwaggerApiSuccess(description = "카테고리 성공적으로 추가합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping
     public LabelCategoryResponse createFolder(
