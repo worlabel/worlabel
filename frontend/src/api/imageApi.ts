@@ -60,5 +60,8 @@ export async function uploadImageFolder(memberId: number, projectId: number, fil
         params: { memberId },
       }
     )
-    .then(({ data }) => data);
+    .then(({ data }) => data)
+    .catch((error) => {
+      return Promise.reject(error);
+    });
 }

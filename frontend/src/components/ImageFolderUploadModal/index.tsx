@@ -7,7 +7,7 @@ export default function WorkSpaceCreateModal({ projectId, parentId = 0 }: { proj
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
-  // const handleClose = () => setIsOpen(false);
+  const handleClose = () => setIsOpen(false);
 
   return (
     <Dialog
@@ -25,6 +25,7 @@ export default function WorkSpaceCreateModal({ projectId, parentId = 0 }: { proj
       <DialogContent className="max-w-2xl">
         <DialogHeader title="폴더 업로드" />
         <ImageFolderUploadForm
+          onClose={handleClose}
           projectId={projectId}
           parentId={parentId}
         />
