@@ -18,4 +18,6 @@ public interface AiModelRepository extends JpaRepository<AiModel, Integer> {
     @Query("SELECT a FROM AiModel a " +
             "WHERE a.project IS NOT NULL AND a.id = :modelId")
     Optional<AiModel> findCustomModelById(@Param("modelId") int modelId);
+
+    List<AiModel> findAllByModelKeyIn(List<String> allModelKeys);
 }

@@ -72,15 +72,15 @@ public class ProjectController {
         return projectService.updateProject(memberId, projectId, projectRequest);
     }
 
-    @Operation(summary = "프로젝트 모델 학습", description = "프로젝트 모델을 학습시킵니다.")
-    @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 학습됩니다.")
-    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
-    @PostMapping("/projects/{project_id}/train")
-    public void trainModel(
-        @CurrentUser final Integer memberId,
-        @PathVariable("project_id") final Integer projectId) {
-        projectService.train(memberId, projectId);
-    }
+//    @Operation(summary = "프로젝트 모델 학습", description = "프로젝트 모델을 학습시킵니다.")
+//    @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 학습됩니다.")
+//    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+//    @PostMapping("/projects/{project_id}/train")
+//    public void trainModel(
+//        @CurrentUser final Integer memberId,
+//        @PathVariable("project_id") final Integer projectId) {
+//        projectService.train(memberId, projectId);
+//    }
 
     @Operation(summary = "프로젝트 오토 레이블링", description = "해당 프로젝트 이미지를 오토레이블링합니다.")
     @SwaggerApiSuccess(description = "해당 프로젝트가 오토 레이블링 됩니다.")

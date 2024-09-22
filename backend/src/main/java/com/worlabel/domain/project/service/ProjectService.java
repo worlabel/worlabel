@@ -134,26 +134,26 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
-    @CheckPrivilege(PrivilegeType.EDITOR)
-    public void train(final Integer memberId, final Integer projectId) {
-        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다. -> 용수 추후 구현 예정
-        /*
-            없으면 redis 상태 테이블을 만든다. progressTable
-         */
-
-        // FastAPI 서버로 학습 요청을 전송
-        Project project = getProject(projectId);
-        String endPoint = project.getProjectType().getValue() + "/train";
-
-        TrainRequest trainRequest = new TrainRequest();
-        trainRequest.setProjectId(projectId);
-        trainRequest.setData(List.of());
-
-        // FastAPI 서버로 POST 요청 전송
-        String modelKey = aiService.postRequest(endPoint, trainRequest, String.class, response -> response);
-
-        // TODO: 모델 생성 후 Default 이름과 Key 값 설정
-    }
+//    @CheckPrivilege(PrivilegeType.EDITOR)
+//    public void train(final Integer memberId, final Integer projectId) {
+//        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다. -> 용수 추후 구현 예정
+//        /*
+//            없으면 redis 상태 테이블을 만든다. progressTable
+//         */
+//
+//        // FastAPI 서버로 학습 요청을 전송
+//        Project project = getProject(projectId);
+//        String endPoint = project.getProjectType().getValue() + "/train";
+//
+//        TrainRequest trainRequest = new TrainRequest();
+//        trainRequest.setProjectId(projectId);
+//        trainRequest.setData(List.of());
+//
+//        // FastAPI 서버로 POST 요청 전송
+//        String modelKey = aiService.postRequest(endPoint, trainRequest, String.class, response -> response);
+//
+//        // TODO: 모델 생성 후 Default 이름과 Key 값 설정
+//    }
 
     /**
      * 프로젝트별 오토 레이블링
