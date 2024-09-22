@@ -1,7 +1,7 @@
+import ImageFolderUploadModal from '@/components/ImageFolderUploadModal';
 import { useParams } from 'react-router-dom';
-import ImageFolderUploadModal from '../ImageFolderUploadModal';
 
-export default function FolderUploadTest() {
+export default function ImageFolderUploadTest() {
   const params = useParams<{ workspaceId: string; projectId: string }>();
   const projectId = Number(params.projectId);
 

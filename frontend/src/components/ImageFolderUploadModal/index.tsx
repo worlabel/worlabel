@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog
 import { Plus } from 'lucide-react';
 import ImageFolderUploadForm from './ImageFolderUploadForm';
 
-export default function WorkSpaceCreateModal({ projectId, parentId = 0 }: { projectId: number; parentId: number }) {
+export default function ImageFolderUploadModal({ projectId, parentId = 0 }: { projectId: number; parentId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
