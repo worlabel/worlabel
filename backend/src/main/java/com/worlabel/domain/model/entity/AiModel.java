@@ -36,7 +36,7 @@ public class AiModel extends BaseEntity {
      * model key
      */
     @Column(name = "model_key", length = 50)
-    private String key;
+    private String modelKey;
 
     /**
      * version
@@ -58,9 +58,9 @@ public class AiModel extends BaseEntity {
     @OneToMany(mappedBy = "aiModel", fetch = FetchType.LAZY)
     private List<LabelCategory> categoryList = new ArrayList<>();
 
-    private AiModel(String name, String key, int version, Project project) {
+    private AiModel(String name, String modelKey, int version, Project project) {
         this.name = name;
-        this.key = key;
+        this.modelKey = modelKey;
         this.version = version;
         this.project = project;
     }

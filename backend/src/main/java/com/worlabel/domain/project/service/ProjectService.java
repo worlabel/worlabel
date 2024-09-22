@@ -2,7 +2,6 @@ package com.worlabel.domain.project.service;
 
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
-import com.worlabel.domain.labelcategory.entity.ProjectCategory;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.Participant;
@@ -24,20 +23,14 @@ import com.worlabel.domain.workspace.repository.WorkspaceRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
+import com.worlabel.global.service.AiRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -50,14 +43,9 @@ public class ProjectService {
     private final ParticipantRepository participantRepository;
     private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
-    private final RestTemplate restTemplate;
     private final ImageRepository imageRepository;
 
-    /**
-     * AI SERVER 주소
-     */
-    @Value("${ai.server}")
-    private String aiServer;
+    private final AiRequestService aiService;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -148,27 +136,41 @@ public class ProjectService {
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer memberId, final Integer projectId) {
-        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다.
+        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다. -> 용수 추후 구현 예정
         /*
             없으면 redis 상태 테이블을 만든다. progressTable
          */
 
         // FastAPI 서버로 학습 요청을 전송
-        String url = aiServer + "/detection/train";
+        Project project = getProject(projectId);
+        String endPoint = project.getProjectType().getValue() + "/train";
 
         TrainRequest trainRequest = new TrainRequest();
         trainRequest.setProjectId(projectId);
         trainRequest.setData(List.of());
 
         // FastAPI 서버로 POST 요청 전송
-        try {
-            ResponseEntity<String> result = restTemplate.postForEntity(url, trainRequest, String.class);
-            log.debug("응답 결과 {} ", result);
-            log.debug("FastAPI 서버에 학습 요청을 성공적으로 전송했습니다. Project ID: {}", projectId);
-        } catch (Exception e) {
-            log.error("FastAPI 서버에 학습 요청을 전송하는 중 오류가 발생했습니다 {}", e.getMessage());
-            throw new CustomException(ErrorCode.AI_SERVER_ERROR);
-        }
+        String modelKey = aiService.postRequest(endPoint, trainRequest, String.class, response -> response);
+
+        // TODO: 모델 생성 후 Default 이름과 Key 값 설정
+    }
+
+    /**
+     * 프로젝트별 오토 레이블링
+     */
+    @CheckPrivilege(PrivilegeType.EDITOR)
+    public void autoLabeling(final Integer memberId, final Integer projectId) {
+        Project project = getProject(projectId);
+        String endPoint = "auto/" + project.getProjectType().getValue();
+
+        List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
+        List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
+                .map(AutoLabelingImageRequest::of)
+                .toList();
+        AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
+
+        // 응답없음
+        aiService.postRequest(endPoint, autoLabelingRequest, Void.class, response -> null);
     }
 
     private Project getProject(final Integer projectId) {
@@ -197,64 +199,4 @@ public class ProjectService {
             throw new CustomException(ErrorCode.PARTICIPANT_BAD_REQUEST);
         }
     }
-
-    /**
-     * 프로젝트별 오토 레이블링
-     */
-    @CheckPrivilege(PrivilegeType.EDITOR)
-    public void autoLabeling(final Integer memberId, final Integer projectId) {
-        Project project = getProject(projectId);
-        log.debug("{}번 프로젝트 이미지 {} 진행", projectId, project.getProjectType());
-
-        List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
-        List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
-                .map(AutoLabelingImageRequest::of)
-                .toList();
-        AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
-        sendRequestToApi(autoLabelingRequest, project);
-    }
-
-    private void sendRequestToApi(AutoLabelingRequest autoLabelingRequest, Project project) {
-        String url = createApiUrl("/auto" + project.getProjectType());
-
-        HttpHeaders headers = createJsonHeaders();
-
-        // 요청 본문 설정
-        HttpEntity<AutoLabelingRequest> request = new HttpEntity<>(autoLabelingRequest, headers);
-
-        try {
-            log.debug("요청 서버 : {}", url);
-            // AI 서버로 POST 요청
-            ResponseEntity<String> response = restTemplate.exchange(url, // 요청을 보낼 URL
-                    HttpMethod.POST, // HTTP 메서드 (POST)
-                    request, // HTTP 요청 본문과 헤더가 포함된 객체
-                    String.class // 응답을 String 타입으로
-            );
-            String responseBody = Optional.ofNullable(response.getBody())
-                    .orElseThrow(() -> new CustomException(ErrorCode.AI_SERVER_ERROR));
-        } catch (Exception e) {
-            log.error("AI 서버 요청 중 오류 발생: ", e);
-            throw new CustomException(ErrorCode.AI_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * 요청 헤더 설정
-     */
-    private HttpHeaders createJsonHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        return headers;
-    }
-
-
-    /**
-     * API URL 구성
-     */
-    private String createApiUrl(String endPoint) {
-        return aiServer + "/" + endPoint;
-    }
-
-
 }
-
