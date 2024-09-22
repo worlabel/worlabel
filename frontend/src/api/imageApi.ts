@@ -60,10 +60,10 @@ export async function uploadImageFolder(memberId: number, projectId: number, fil
   return api
     .post(
       `/projects/${projectId}/folders/${0}/images/upload`,
-      { folderZip: files, parentId }
-      // {
-      //   params: { memberId },
-      // }
+      { folderZip: files, parentId },
+      {
+        params: { memberId },
+      }
     )
     .then(({ data }) => data)
     .catch((error) => {
@@ -83,13 +83,9 @@ export async function uploadImageFolderZip(memberId: number, projectId: number, 
   // formData.append('parentId', blob);
 
   return api
-    .post(
-      `/projects/${projectId}/folders/${0}/images/upload`,
-      formData
-      // {
-      //   params: { memberId },
-      // }
-    )
+    .post(`/projects/${projectId}/folders/${0}/images/upload`, formData, {
+      params: { memberId },
+    })
     .then(({ data }) => data)
     .catch((error) => {
       return Promise.reject(error);
