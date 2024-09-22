@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
+    // todo N + 1 발생할듯
     @Query("select i from Image i " +
             "where i.folder.project.id = :projectId")
     List<Image> findImagesByProjectId(@Param("projectId") Integer projectId);

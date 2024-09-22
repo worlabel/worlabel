@@ -32,7 +32,7 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/projects/{project_id}/models")
     public List<AiModelResponse> getModelList(
-            @PathVariable("project_id") final Integer projectId) {
+        @PathVariable("project_id") final Integer projectId) {
         return aiModelService.getModelList(projectId);
     }
 
@@ -41,7 +41,7 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/models/{model_id}/categories")
     public List<LabelCategoryResponse> getCategories(
-            @PathVariable("model_id") final Integer modelId) {
+        @PathVariable("model_id") final Integer modelId) {
         return aiModelService.getCategories(modelId);
     }
 
@@ -50,9 +50,9 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/models")
     public void addModel(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @Valid @RequestBody final AiModelRequest aiModelRequest) {
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @Valid @RequestBody final AiModelRequest aiModelRequest) {
         aiModelService.addModel(memberId, projectId, aiModelRequest);
     }
 
@@ -61,14 +61,21 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}/models/{model_id}")
     public void renameModel(
-            @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
-            @PathVariable("model_id") final Integer modelId,
-            @Valid @RequestBody final AiModelRequest aiModelRequest) {
-        aiModelService.renameModel(memberId, projectId,modelId, aiModelRequest);
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @PathVariable("model_id") final Integer modelId,
+        @Valid @RequestBody final AiModelRequest aiModelRequest) {
+        aiModelService.renameModel(memberId, projectId, modelId, aiModelRequest);
     }
 
-    // TODO: 여기서 모델 학습을 따로 만들어야 할 듯 Project 있는 모델 학습을 여기로 옮겨서 진행
-    // 아마도 필요한 요청 값들은 ModelID
-
+    @Operation(summary = "프로젝트 모델 학습", description = "프로젝트 모델을 학습시킵니다.")
+    @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 학습됩니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PostMapping("/projects/{project_id}/train")
+    public void trainModel(
+        @CurrentUser final Integer memberId,
+        @PathVariable("project_id") final Integer projectId,
+        @RequestBody final Integer modelId) {
+        aiModelService.train(memberId, projectId, modelId);
+    }
 }
