@@ -1,4 +1,4 @@
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import useProjectMembersQuery from '@/queries/projects/useProjectMembersQuery';
 import useWorkspaceMembersQuery from '@/queries/workspaces/useWorkspaceMembersQuery';
 import useAuthStore from '@/stores/useAuthStore';
@@ -25,19 +25,19 @@ export default function ProjectMemberManage() {
   const memberId = profile?.id || 0;
 
   const queryClient = useQueryClient();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (projectId) {
-      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId, memberId] });
-    }
-  }, [location.pathname, projectId, memberId, queryClient]);
 
   const { data: projectMembers = [] } = useProjectMembersQuery(Number(projectId), memberId);
   const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
+
   const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
   const { mutate: removeMember } = useRemoveProjectMemberQuery();
   const { mutate: addProjectMember } = useAddProjectMemberQuery();
+
+  useEffect(() => {
+    if (projectId) {
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
+    }
+  }, [projectId, queryClient]);
 
   const noRoleMembers = workspaceMembers
     .filter((workspaceMember) => !projectMembers.some((projectMember) => projectMember.memberId === workspaceMember.id))
@@ -56,29 +56,12 @@ export default function ProjectMemberManage() {
 
   const handleRoleChange = (memberId: number, role: Role) => {
     if (role === 'NONE') {
-      removeMember({
-        projectId: Number(projectId),
-        targetMemberId: memberId,
-      });
+      removeMember({ projectId: Number(projectId), targetMemberId: memberId });
     } else {
       if (projectMembers.some((m) => m.memberId === memberId)) {
-        updatePrivilege({
-          projectId: Number(projectId),
-          memberId,
-          privilegeData: {
-            memberId,
-            privilegeType: role,
-          },
-        });
+        updatePrivilege({ projectId: Number(projectId), memberId, privilegeData: { memberId, privilegeType: role } });
       } else {
-        addProjectMember({
-          projectId: Number(projectId),
-          memberId,
-          newMember: {
-            memberId,
-            privilegeType: role,
-          },
-        });
+        addProjectMember({ projectId: Number(projectId), memberId, newMember: { memberId, privilegeType: role } });
       }
     }
   };
