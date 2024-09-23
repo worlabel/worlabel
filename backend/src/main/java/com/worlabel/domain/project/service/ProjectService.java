@@ -24,6 +24,7 @@ import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
+import com.worlabel.domain.project.entity.dto.ProjectWithThumbnailResponse;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
@@ -43,6 +44,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -82,10 +84,11 @@ public class ProjectService {
         return ProjectResponse.from(project);
     }
 
-    public List<ProjectResponse> getProjectsByWorkspaceId(final Integer workspaceId, final Integer memberId, final Integer lastProjectId, final Integer pageSize) {
+    @Transactional(readOnly = true)
+    public List<ProjectWithThumbnailResponse> getProjectsByWorkspaceId(final Integer workspaceId, final Integer memberId, final Integer lastProjectId, final Integer pageSize) {
         return projectRepository.findProjectsByWorkspaceIdAndMemberIdWithPagination(workspaceId, memberId, lastProjectId, pageSize).stream()
-                .map(ProjectResponse::from)
-                .toList();
+            .map(project -> ProjectWithThumbnailResponse.from(project, getFirstImageWithProject(project)))
+            .toList();
     }
 
     @Transactional
@@ -269,5 +272,14 @@ public class ProjectService {
         if (Objects.equals(memberId, addMemberId)) {
             throw new CustomException(ErrorCode.PARTICIPANT_BAD_REQUEST);
         }
+    }
+
+    private String getFirstImageWithProject(final Project project) {
+        Optional<Image> image = imageRepository.findFirstImageByProjectId(project.getId());
+        if (image.isPresent()) {
+            return image.get().getImagePath();
+        }
+
+        return "https://www.shoshinsha-design.com/wp-content/uploads/2020/05/noimage-760x460.png";
     }
 }
