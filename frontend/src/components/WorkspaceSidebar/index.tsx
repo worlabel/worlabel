@@ -22,13 +22,13 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
         minSize={10}
         maxSize={35}
         defaultSize={20}
-        className="flex h-full flex-col bg-gray-50"
+        className="flex h-full flex-col gap-2 bg-gray-50 p-3"
         onResize={(size) => setSidebarSize(size)}
       >
-        <header className="body flex w-full items-center gap-2 p-2">
-          <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>
+        <header className="body flex w-full items-center gap-2">
+          <h1 className="subheading w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>
         </header>
-        <div className="p-2">
+        <div className="">
           <Select
             onValueChange={handleSelectProject}
             defaultValue={selectedProjectId}
