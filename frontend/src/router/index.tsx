@@ -18,7 +18,7 @@ import LabelCanvas from '@/pages/LabelCanvas';
 import ReviewDetail from '@/pages/ReviewDetail';
 import ImageFolderUploadTest from '@/pages/ImageFolderUploadTest';
 import NotFound from '@/pages/NotFound';
-
+import ModelManage from '@/pages/ModelManage';
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
@@ -120,6 +120,15 @@ const router = createBrowserRouter([
           {
             path: ':projectId',
             element: <ProjectMemberManage />,
+          },
+        ],
+      },
+      {
+        path: 'models',
+        children: [
+          {
+            index: true,
+            element: <ModelManage />,
           },
         ],
       },
