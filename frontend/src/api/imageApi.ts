@@ -31,14 +31,14 @@ export async function changeImageStatus(
     .then(({ data }) => data);
 }
 
-export async function uploadImageFile(memberId: number, files: File[]) {
+export async function uploadImageFile(memberId: number, projectId: number, folderId: number, files: File[]) {
   const formData = new FormData();
   files.forEach((file) => {
     formData.append('imageList', file);
   });
 
   return api
-    .post(`/images/file`, formData, {
+    .post(`/projects/${projectId}/folders/${folderId}/images/file`, formData, {
       params: { memberId },
     })
     .then(({ data }) => data);
