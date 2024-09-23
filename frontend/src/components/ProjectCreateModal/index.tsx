@@ -36,8 +36,7 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
           onSubmit={(data: ProjectCreateFormValues) => {
             const formattedData: ProjectRequest = {
               title: data.projectName,
-              projectType: (data.labelType.charAt(0).toUpperCase() +
-                data.labelType.slice(1)) as ProjectRequest['projectType'],
+              projectType: data.labelType.toLowerCase() as ProjectRequest['projectType'],
             };
             onSubmit(formattedData);
             handleClose();

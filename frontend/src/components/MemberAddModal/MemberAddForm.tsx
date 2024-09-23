@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import SearchInput from '../ui/search-input';
 import useSearchMembersByEmailQuery from '@/queries/members/useSearchMembersByEmailQuery';
+import debounce from 'lodash/debounce';
 
 type PrivilegeType = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
 
@@ -38,9 +39,21 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
   });
 
   const [keyword, setKeyword] = useState('');
-  const { data: members } = useSearchMembersByEmailQuery(keyword);
+  const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
+  const { data: members } = useSearchMembersByEmailQuery(debouncedKeyword);
 
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
+
+  const handleKeywordChange = debounce((value: string) => {
+    setDebouncedKeyword(value);
+  }, 300);
+
+  useEffect(() => {
+    handleKeywordChange(keyword);
+    return () => {
+      handleKeywordChange.cancel();
+    };
+  }, [handleKeywordChange, keyword]);
 
   const handleMemberSelect = (memberId: number) => {
     form.setValue('memberId', memberId);

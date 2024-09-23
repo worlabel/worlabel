@@ -6,9 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import useUpdateProjectMemberPrivilegeQuery from '@/queries/projects/useUpdateProjectMemberPrivilegeQuery';
 import useRemoveProjectMemberQuery from '@/queries/projects/useRemoveProjectMemberQuery';
 import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
-import { useEffect } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-
+import MemberAddModal from '@/components/MemberAddModal';
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER' | 'NONE';
 const roles: Role[] = ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER', 'NONE'];
 const roleToStr: { [key in Role]: string } = {
@@ -26,50 +26,72 @@ export default function ProjectMemberManage() {
 
   const queryClient = useQueryClient();
 
+  const previousProjectId = useRef(projectId);
+
   const { data: projectMembers = [] } = useProjectMembersQuery(Number(projectId), memberId);
   const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
 
-  const { mutate: updatePrivilege } = useUpdateProjectMemberPrivilegeQuery();
-  const { mutate: removeMember } = useRemoveProjectMemberQuery();
-  const { mutate: addProjectMember } = useAddProjectMemberQuery();
+  const updatePrivilege = useUpdateProjectMemberPrivilegeQuery();
+  const removeMember = useRemoveProjectMemberQuery();
+  const addProjectMember = useAddProjectMemberQuery();
 
   useEffect(() => {
-    if (projectId) {
-      queryClient.invalidateQueries({ queryKey: ['projectMembers', projectId] });
+    if (projectId && previousProjectId.current !== projectId) {
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', Number(previousProjectId.current), memberId] }); // 이전 projectId의 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['workspaceMembers', Number(workspaceId)] }); // workspaceMembers 무효화
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', Number(projectId), memberId] });
+
+      previousProjectId.current = projectId;
     }
-  }, [projectId, queryClient]);
+  }, [projectId, workspaceId, memberId, queryClient]);
 
-  const noRoleMembers = workspaceMembers
-    .filter((workspaceMember) => !projectMembers.some((projectMember) => projectMember.memberId === workspaceMember.id))
-    .map((member) => ({
-      memberId: member.id,
-      nickname: member.nickname,
-      profileImage: member.profileImage,
-      privilegeType: 'NONE',
-    }));
+  const sortedMembers = useMemo(() => {
+    const noRoleMembers = workspaceMembers
+      .filter(
+        (workspaceMember) => !projectMembers.some((projectMember) => projectMember.memberId === workspaceMember.id)
+      )
+      .map((member) => ({
+        memberId: member.id,
+        nickname: member.nickname,
+        profileImage: member.profileImage,
+        privilegeType: 'NONE',
+      }));
 
-  const sortedMembers = [...projectMembers, ...noRoleMembers].sort((a, b) => {
-    const aPrivilege = a.privilegeType || 'NONE';
-    const bPrivilege = b.privilegeType || 'NONE';
-    return roles.indexOf(aPrivilege as Role) - roles.indexOf(bPrivilege as Role);
-  });
+    return [...projectMembers, ...noRoleMembers].sort((a, b) => {
+      const aPrivilege = a.privilegeType || 'NONE';
+      const bPrivilege = b.privilegeType || 'NONE';
+      return roles.indexOf(aPrivilege as Role) - roles.indexOf(bPrivilege as Role);
+    });
+  }, [projectMembers, workspaceMembers]);
 
   const handleRoleChange = (memberId: number, role: Role) => {
     if (role === 'NONE') {
-      removeMember({ projectId: Number(projectId), targetMemberId: memberId });
+      removeMember.mutate({ projectId: Number(projectId), targetMemberId: memberId });
     } else {
       if (projectMembers.some((m) => m.memberId === memberId)) {
-        updatePrivilege({ projectId: Number(projectId), memberId, privilegeData: { memberId, privilegeType: role } });
+        updatePrivilege.mutate({
+          projectId: Number(projectId),
+          memberId,
+          privilegeData: { memberId, privilegeType: role },
+        });
       } else {
-        addProjectMember({ projectId: Number(projectId), memberId, newMember: { memberId, privilegeType: role } });
+        addProjectMember.mutate({
+          projectId: Number(projectId),
+          memberId,
+          newMember: { memberId, privilegeType: role },
+        });
       }
     }
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 border-b-[0.67px] border-[#dcdcde] bg-[#fbfafd] p-6">
+    <div
+      key={projectId}
+      className="flex w-full flex-col gap-6 border-b-[0.67px] border-[#dcdcde] bg-[#fbfafd] p-6"
+    >
       <header className="flex w-full items-center gap-4">
         <h1 className="flex-1 text-lg font-semibold text-[#333238]">프로젝트 멤버 관리</h1>
+        <MemberAddModal projectId={projectId ? Number(projectId) : 0} />
       </header>
 
       {sortedMembers.map((member) => (
