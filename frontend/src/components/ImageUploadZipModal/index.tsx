@@ -1,15 +1,9 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Plus } from 'lucide-react';
-import ImageFolderZipUploadForm from './ImageFolderZipUploadForm';
+import ImageUploadZipForm from './ImageUploadZipForm';
 
-export default function ImageFolderZipUploadModal({
-  projectId,
-  parentId = 0,
-}: {
-  projectId: number;
-  parentId: number;
-}) {
+export default function ImageUploadZipModal({ projectId }: { projectId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -30,10 +24,9 @@ export default function ImageFolderZipUploadModal({
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader title="폴더 압축파일 업로드" />
-        <ImageFolderZipUploadForm
+        <ImageUploadZipForm
           onClose={handleClose}
           projectId={projectId}
-          parentId={parentId}
         />
       </DialogContent>
     </Dialog>

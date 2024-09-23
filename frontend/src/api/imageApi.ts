@@ -42,7 +42,7 @@ export async function changeImageStatus(
 export async function uploadImageList(projectId: number, folderId: number, memberId: number, imageList: File[]) {
   return api
     .post(
-      `/projects/${projectId}/folders/${folderId}/images`,
+      `/projects/${projectId}/folders/${folderId}/images/file`,
       { imageList },
       {
         params: { memberId },
@@ -51,43 +51,26 @@ export async function uploadImageList(projectId: number, folderId: number, membe
     .then(({ data }) => data);
 }
 
-export async function uploadImageFolder(memberId: number, projectId: number, files: File[], parentId: number = 0) {
+export async function uploadImageFolder(memberId: number, projectId: number, files: File[]) {
   const formData = new FormData();
   files.forEach((file) => {
-    formData.append('files', file);
+    formData.append('folderZip', file);
   });
 
   return api
-    .post(
-      `/projects/${projectId}/folders/${0}/images/upload`,
-      { folderZip: files, parentId },
-      {
-        params: { memberId },
-      }
-    )
-    .then(({ data }) => data)
-    .catch((error) => {
-      return Promise.reject(error);
-    });
-}
-
-export async function uploadImageFolderZip(memberId: number, projectId: number, file: File, parentId: number = 0) {
-  const formData = new FormData();
-  formData.append('folderZip', file);
-  formData.append('parentId', parentId.toString());
-
-  // const jsonData = {
-  //   parentId,
-  // };
-  // const blob = new Blob([JSON.stringify(jsonData)], { type: 'application/json' });
-  // formData.append('parentId', blob);
-
-  return api
-    .post(`/projects/${projectId}/folders/${0}/images/upload`, formData, {
+    .post(`/projects/${projectId}/folders/${0}/images/zip`, formData, {
       params: { memberId },
     })
-    .then(({ data }) => data)
-    .catch((error) => {
-      return Promise.reject(error);
-    });
+    .then(({ data }) => data);
+}
+
+export async function uploadImageZip(memberId: number, projectId: number, file: File) {
+  const formData = new FormData();
+  formData.append('folderZip', file);
+
+  return api
+    .post(`/projects/${projectId}/folders/${0}/images/zip`, formData, {
+      params: { memberId },
+    })
+    .then(({ data }) => data);
 }
