@@ -56,6 +56,7 @@ public class ImageService {
             Project project = projectRepository.findById(projectId)
                     .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
             folder = Folder.of(currentDateTime, null, project);
+            folderRepository.save(folder);  // 새로운 폴더를 저장
         }
 
         for (MultipartFile file : imageList) {
@@ -137,6 +138,7 @@ public class ImageService {
         } else {
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             parentFolder = Folder.of(currentDateTime, null, project);
+            folderRepository.save(parentFolder);  // 새로운 폴더를 저장
         }
 
         // 파일이 zip 파일인지 확인
