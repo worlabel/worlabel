@@ -32,6 +32,7 @@ import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
+import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,7 @@ public class ProjectService {
     private final AiModelRepository aiModelRepository;
     private final AiRequestService aiService;
     private final Gson gson;
+    private final S3UploadService s3UploadService;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -170,10 +172,21 @@ public class ProjectService {
         // 응답없음
         log.debug("요청");
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
-        log.debug("list: {}", list);
+        saveAutoLabelList(list);
     }
 
-    public List<AutoLabelingResult> converter(String data) {
+    public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
+        for(AutoLabelingResult result: resultList) {
+            Image image = getImage(result.getImageId());
+            String dataPath = image.getDataPath();
+            s3UploadService.uploadJson(result.getData(), dataPath);
+        }
+    }
+
+    /**
+     * 데이터 변환
+     */
+    private List<AutoLabelingResult> converter(String data) {
         try {
             log.debug("data :{}", data);
             // Gson에서 리스트 형태로 변환할 타입을 지정
@@ -203,6 +216,11 @@ public class ProjectService {
             labelMap.put(aiId, projectCategory.getId());
         }
         return labelMap;
+    }
+
+    private Image getImage(final Long imageId){
+        return imageRepository.findById(imageId)
+                .orElseThrow(()-> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Project getProject(final Integer projectId) {
