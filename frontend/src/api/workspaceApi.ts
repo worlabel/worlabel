@@ -60,7 +60,7 @@ export async function getWorkspaceReviews(
   memberId: number,
   reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
   lastReviewId?: number,
-  limitPage: number = 10
+  limitPage: number = 50
 ) {
   return api
     .get<ReviewResponse[]>(`/workspaces/${workspaceId}/reviews`, {

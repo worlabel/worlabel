@@ -5,7 +5,7 @@ export async function getProjectList(
   workspaceId: number,
   memberId: number,
   lastProjectId?: number,
-  limit: number = 10
+  limit: number = 50
 ) {
   return api
     .get<ProjectListResponse>(`/workspaces/${workspaceId}/projects`, {
