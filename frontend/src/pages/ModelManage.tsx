@@ -1,12 +1,11 @@
-import { Rabbit, Bird, Turtle, Settings, Share } from 'lucide-react';
+import { Rabbit, Bird, Turtle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ModelLineChart from '@/components/ModelLineChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ModelBarChart from '@/components/ModelBarChart';
 
 export default function ModelManage() {
@@ -27,17 +26,7 @@ export default function ModelManage() {
 
   const [lossData] = useState<MetricData[]>(dummyLossData);
   const [training, setTraining] = useState(false);
-
-  useEffect(() => {
-    if (training) {
-      const socket = new WebSocket('ws://localhost:8080/ws');
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log('Received data:', data);
-      };
-      return () => socket.close();
-    }
-  }, [training]);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const handleTrainingToggle = () => {
     setTraining((prev) => !prev);
@@ -48,32 +37,6 @@ export default function ModelManage() {
       <div className="flex flex-col">
         <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
           <h1 className="text-xl font-semibold">모델 관리</h1>
-          <Drawer>
-            <DrawerTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-              >
-                <Settings className="size-4" />
-                <span className="sr-only">설정</span>
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="max-h-[80vh]">
-              <DrawerHeader>
-                <DrawerTitle>설정</DrawerTitle>
-              </DrawerHeader>
-              <SettingsForm />
-            </DrawerContent>
-          </Drawer>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto gap-1.5 text-sm"
-          >
-            <Share className="size-3.5" />
-            공유
-          </Button>
         </header>
 
         <main className="grid flex-1 gap-4 overflow-auto p-4">
@@ -86,42 +49,61 @@ export default function ModelManage() {
               <TabsTrigger value="results">모델 평가</TabsTrigger>
             </TabsList>
 
+            {/* 모델 학습 탭 */}
             <TabsContent value="train">
               <div className="grid gap-8 md:grid-cols-2">
                 <div className="flex flex-col gap-6">
                   <SettingsForm />
                   <Button
-                    variant={training ? 'destructive' : 'default'}
+                    variant={training ? 'destructive' : 'outlinePrimary'}
                     size="lg"
                     onClick={handleTrainingToggle}
                   >
                     {training ? '학습 중단' : '학습 시작'}
                   </Button>
                 </div>
-
                 <div className="flex flex-col justify-center">
                   <ModelLineChart data={lossData} />
                 </div>
               </div>
             </TabsContent>
 
+            {/* 모델 평가 탭 */}
             <TabsContent value="results">
-              <div className="grid gap-8 md:grid-cols-2">
-                <div className="flex flex-col gap-6">
-                  <ModelBarChart
-                    data={[
-                      { name: 'precision', value: 0.734, fill: 'var(--color-precision)' },
-                      { name: 'recall', value: 0.75, fill: 'var(--color-recall)' },
-                      { name: 'mAP50', value: 0.995, fill: 'var(--color-map50)' },
-                      { name: 'mAP50_95', value: 0.97, fill: 'var(--color-map50-95)' },
-                      { name: 'fitness', value: 0.973, fill: 'var(--color-fitness)' },
-                    ]}
-                  />
-                </div>
-                <div className="flex flex-col justify-center">
-                  <LabelingPreview />
-                </div>
+              {/* 모델 선택 */}
+              <div className="mb-4">
+                <Label htmlFor="select-model">모델 선택</Label>
+                <Select onValueChange={setSelectedModel}>
+                  <SelectTrigger id="select-model">
+                    <SelectValue placeholder="모델을 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="genesis">Genesis</SelectItem>
+                    <SelectItem value="explorer">Explorer</SelectItem>
+                    <SelectItem value="quantum">Quantum</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* 선택된 모델에 따른 BarChart 및 Labeling Preview */}
+              {selectedModel && (
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div className="flex flex-col gap-6">
+                    <ModelBarChart
+                      data={[
+                        { name: 'precision', value: 0.734, fill: 'var(--color-precision)' },
+                        { name: 'recall', value: 0.75, fill: 'var(--color-recall)' },
+                        { name: 'mAP50', value: 0.995, fill: 'var(--color-map50)' },
+                        { name: 'mAP50_95', value: 0.97, fill: 'var(--color-map50-95)' },
+                        { name: 'fitness', value: 0.973, fill: 'var(--color-fitness)' },
+                      ]}
+                    />
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <LabelingPreview />
+                  </div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </main>
@@ -190,10 +172,21 @@ function SettingsForm() {
             placeholder="-1"
             id="batch"
           />
+          <SelectWithLabel
+            label="옵티마이저"
+            id="optimizer"
+            options={['SGD', 'Adam', 'AdamW', 'NAdam', 'RAdam', 'RMSProp']}
+            placeholder="옵티마이저 선택"
+          />
           <InputWithLabel
             label="학습률(LR0)"
             placeholder="0.01"
             id="lr0"
+          />
+          <InputWithLabel
+            label="학습률(LRF)"
+            placeholder="0.01"
+            id="lrf"
           />
         </div>
       </fieldset>
@@ -241,6 +234,35 @@ function InputWithLabel({ label, id, placeholder }: InputWithLabelProps) {
         type="number"
         placeholder={placeholder}
       />
+    </div>
+  );
+}
+interface SelectWithLabelProps {
+  label: string;
+  id: string;
+  options: string[];
+  placeholder: string;
+}
+
+function SelectWithLabel({ label, id, options, placeholder }: SelectWithLabelProps) {
+  return (
+    <div className="grid gap-3">
+      <Label htmlFor={id}>{label}</Label>
+      <Select>
+        <SelectTrigger id={id}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem
+              key={option}
+              value={option}
+            >
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
