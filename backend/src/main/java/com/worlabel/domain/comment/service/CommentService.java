@@ -28,11 +28,10 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final MemberRepository memberRepository;
     private final ImageRepository imageRepository;
-    private final FolderRepository folderRepository;
 
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public List<CommentResponse> getAllComments(final Integer memberId, final Integer projectId, final Long imageId) {
+    public List<CommentResponse> getAllComments(final Integer projectId, final Long imageId) {
         checkImageProjectRelation(imageId, projectId);
 
         return commentRepository.findByImageId(imageId).stream()
@@ -42,7 +41,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public CommentResponse getCommentById(final Integer memberId, final Integer projectId, final Integer commentId) {
+    public CommentResponse getCommentById(final Integer projectId, final Integer commentId) {
         Comment comment = getComment(commentId);
         checkImageProjectRelation(comment.getImage().getId(), projectId);
 
@@ -78,18 +77,6 @@ public class CommentService {
     private void checkImageProjectRelation(final Long imageId, final Integer projectId) {
         // imageId
         if (imageRepository.findByIdAndProjectId(imageId, projectId).isEmpty()) {
-            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
-        }
-    }
-
-    /**
-     * 코멘트가 속한 이미지가 해당 프로젝트에 속하는지 검증
-     */
-    private void checkAuthorizedAndCommentProjectRelation(final Integer projectId, final Integer commentId) {
-        Comment comment = getComment(commentId);
-        Image image = comment.getImage();
-
-        if (imageRepository.findByIdAndProjectId(image.getId(), projectId).isEmpty()) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
     }

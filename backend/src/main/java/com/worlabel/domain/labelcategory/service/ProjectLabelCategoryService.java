@@ -30,7 +30,7 @@ public class ProjectLabelCategoryService {
     private final ProjectRepository projectRepository;
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void createCategory(final Integer memberId, final Integer projectId, final LabelCategoryRequest categoryRequest) {
+    public void createCategory(final Integer projectId, final LabelCategoryRequest categoryRequest) {
         Project project = getProject(projectId);
         List<LabelCategory> labelCategoryList = labelCategoryRepository.findAllByIdsAndModelId(categoryRequest.getLabelCategoryList(), categoryRequest.getModelId());
         List<ProjectCategory> projectCategoryList = labelCategoryList.stream().map(o -> ProjectCategory.of(o, project)).toList();
@@ -38,13 +38,13 @@ public class ProjectLabelCategoryService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void deleteCategory(final int memberId, final int projectId, final int projectCategoryId) {
+    public void deleteCategory(final int projectId, final int projectCategoryId) {
         ProjectCategory projectCategory = getProjectCategory(projectCategoryId);
         projectLabelCategoryRepository.delete(projectCategory);
     }
 
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public LabelCategoryResponse getCategoryById(final int memberId, final int projectId, final int categoryId) {
+    public LabelCategoryResponse getCategoryById(final int projectId, final int categoryId) {
         return LabelCategoryResponse.from(getProjectCategory(categoryId).getLabelCategory());
     }
 
@@ -53,7 +53,7 @@ public class ProjectLabelCategoryService {
     }
 
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public List<LabelCategoryResponse> getCategoryList(final Integer memberId, final Integer projectId) {
+    public List<LabelCategoryResponse> getCategoryList(final Integer projectId) {
         return projectLabelCategoryRepository.findAllByProjectId(projectId)
                 .stream()
                 .map(ProjectCategory::getLabelCategory)

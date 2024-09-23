@@ -111,7 +111,7 @@ class ProjectServiceUnitTest {
         given(participantRepository.existsByMemberIdAndProjectId(anyInt(), anyInt())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> projectService.getProjectById(1, 1))
+        assertThatThrownBy(() -> projectService.getProjectById( 1))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.PROJECT_NOT_FOUND.getMessage());
     }
@@ -124,7 +124,7 @@ class ProjectServiceUnitTest {
         given(projectRepository.findById(anyInt())).willReturn(Optional.of(project));
 
         // when
-        var response = projectService.getProjectById(1, 1);
+        var response = projectService.getProjectById( 1);
 
         // then
         assertNotNull(response);
@@ -139,7 +139,7 @@ class ProjectServiceUnitTest {
                 .willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> projectService.updateProject(1, 1, request))
+        assertThatThrownBy(() -> projectService.updateProject(1, request))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED.getMessage());
     }
@@ -154,7 +154,7 @@ class ProjectServiceUnitTest {
         given(projectRepository.findById(anyInt())).willReturn(Optional.of(project));
 
         // when
-        var response = projectService.updateProject(1, 1, request);
+        var response = projectService.updateProject(1, request);
 
         // then
         assertNotNull(response);

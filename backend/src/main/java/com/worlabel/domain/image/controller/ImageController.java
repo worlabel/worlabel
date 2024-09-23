@@ -32,11 +32,10 @@ public class ImageController {
     @Operation(summary = "이미지 목록 업로드", description = "이미지 목록을 업로드합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public void uploadImage(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId,
             @Parameter(name = "폴더에 추가 할 이미지 리스트", description = "MultiPartFile을 imageList로 추가해준다.", example = "") @RequestPart final List<MultipartFile> imageList) {
-        imageService.uploadImageList(imageList, folderId, projectId, memberId);
+        imageService.uploadImageList(imageList, folderId, projectId);
     }
 
     @PostMapping("/folders/{folder_id}/images/zip")
@@ -55,12 +54,11 @@ public class ImageController {
     @Operation(summary = "이미지 단일 조회", description = "이미지 정보를 단일 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public ImageResponse getImageById(
-            @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
-        log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, memberId, imageId);
-        return imageService.getImageById(projectId, folderId, imageId, memberId);
+        log.debug("project: {} , folder: {}, image: {}", projectId, folderId, imageId);
+        return imageService.getImageById(projectId, folderId, imageId);
     }
 
     @PutMapping("/folders/{folder_id}/images/{image_id}")
@@ -73,8 +71,8 @@ public class ImageController {
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId,
             @RequestBody final ImageMoveRequest imageMoveRequest) {
-        log.debug("project: {} , folder: {}, image: {}, 현재 로그인 중인 사용자 : {}, 이동하는 폴더 {}", projectId, folderId, memberId, imageId, imageMoveRequest.getMoveFolderId());
-        imageService.moveFolder(projectId, folderId, imageMoveRequest.getMoveFolderId(), imageId, memberId);
+        log.debug("project: {} , folder: {}, image: {}, 이동하는 폴더 {}", projectId, folderId, imageId, imageMoveRequest.getMoveFolderId());
+        imageService.moveFolder(projectId, folderId, imageMoveRequest.getMoveFolderId(), imageId);
     }
 
     @DeleteMapping("/folders/{folder_id}/images/{image_id}")
@@ -82,12 +80,11 @@ public class ImageController {
     @Operation(summary = "이미지 삭제", description = "폴더에서 해당 이미지를 제거합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED})
     public void deleteImage(
-            @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
-        log.debug("project: {} , folder: {}, 삭제하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId, memberId);
-        imageService.deleteImage(projectId, folderId, imageId, memberId);
+        log.debug("project: {} , folder: {}, 삭제하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId);
+        imageService.deleteImage(projectId, folderId, imageId);
     }
 
     @PutMapping("/folders/{folder_id}/images/{image_id}/status")
@@ -95,13 +92,12 @@ public class ImageController {
     @Operation(summary = "이미지 상태 변경", description = "특정 이미지의 상태를 변경합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED})
     public ImageResponse changeImageStatus(
-            @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId,
             @RequestBody final ImageStatusRequest imageStatusRequest) {
-        log.debug("project: {} , folder: {}, 수정하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId, memberId);
-        return imageService.changeImageStatus(projectId, folderId, imageId, memberId, imageStatusRequest);
+        log.debug("project: {} , folder: {}, 수정하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId);
+        return imageService.changeImageStatus(projectId, folderId, imageId, imageStatusRequest);
     }
 
     @Operation(summary = "이미지 단위 레이블링", description = "진행한 레이블링을 저장합니다.")
@@ -109,11 +105,10 @@ public class ImageController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/images/{image_id}/label")
     public void imageLabeling(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId,
             @RequestBody final ImageLabelRequest labelRequest
     ) {
-        imageService.saveUserLabel(memberId, projectId, imageId, labelRequest);
+        imageService.saveUserLabel(projectId, imageId, labelRequest);
     }
 }

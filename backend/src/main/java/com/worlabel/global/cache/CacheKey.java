@@ -6,4 +6,8 @@ public class CacheKey {
     public static String trainProgressKey() {
         return "trainProgress";
     }
+
+    public static String autoLabelingProgressKey() {
+        return "autoLabelingProgress";
+    }
 }

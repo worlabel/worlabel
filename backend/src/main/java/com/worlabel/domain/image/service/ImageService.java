@@ -46,7 +46,7 @@ public class ImageService {
      * 이미지 리스트 업로드
      */
     @CheckPrivilege(value = PrivilegeType.EDITOR)
-    public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
+    public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
         Folder folder;
 
         if (folderId != 0) {
@@ -72,7 +72,7 @@ public class ImageService {
      */
     @CheckPrivilege(PrivilegeType.VIEWER)
     @Transactional(readOnly = true)
-    public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
+    public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId) {
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
         return ImageResponse.from(image);
     }
@@ -81,7 +81,7 @@ public class ImageService {
      * 이미지 폴더 위치 변경
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void moveFolder(final Integer projectId, final Integer folderId, final Integer moveFolderId, final Long imageId, final Integer memberId) {
+    public void moveFolder(final Integer projectId, final Integer folderId, final Integer moveFolderId, final Long imageId) {
         Folder folder = null;
         if (moveFolderId != null) {
             folder = getFolder(moveFolderId);
@@ -94,7 +94,7 @@ public class ImageService {
      * 이미지 삭제
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId) {
+    public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId) {
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
 
@@ -106,7 +106,7 @@ public class ImageService {
      * 이미지 상태 변경
      */
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final Integer memberId, final ImageStatusRequest imageStatusRequest) {
+    public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final ImageStatusRequest imageStatusRequest) {
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
 
@@ -120,7 +120,7 @@ public class ImageService {
      * 사용자가 수정한 레이블링 설정
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void saveUserLabel(final Integer memberId, final Integer projectId, final Long imageId, final ImageLabelRequest labelRequest) {
+    public void saveUserLabel(final Integer projectId, final Long imageId, final ImageLabelRequest labelRequest) {
         save(imageId, labelRequest.getData());
     }
 

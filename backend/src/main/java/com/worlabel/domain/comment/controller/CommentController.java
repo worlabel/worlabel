@@ -27,10 +27,9 @@ public class CommentController {
     @Operation(summary = "댓글 목록 조회", description = "댓글 목록을 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public List<CommentResponse> getAllComments(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
-        return commentService.getAllComments(memberId, projectId, imageId);
+        return commentService.getAllComments(projectId, imageId);
     }
 
     @GetMapping("/{comment_id}")
@@ -38,10 +37,9 @@ public class CommentController {
     @Operation(summary = "댓글 조회", description = "댓글을 조회합니다.")
     @SwaggerApiError({ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public CommentResponse getCommentById(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("comment_id") final Integer commentId) {
-        return commentService.getCommentById(memberId, projectId, commentId);
+        return commentService.getCommentById(projectId, commentId);
     }
 
     @PostMapping("/images/{image_id}")

@@ -111,7 +111,7 @@ class ImageServiceUnitTest {
         given(participantRepository.existsByMemberIdAndProjectId(anyInt(), anyInt())).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> imageService.getImageById(1, 1, 1L, 1))
+        assertThatThrownBy(() -> imageService.getImageById(1, 1, 1L))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.BAD_REQUEST.getMessage());
     }

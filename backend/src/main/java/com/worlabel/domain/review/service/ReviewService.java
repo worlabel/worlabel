@@ -6,7 +6,6 @@ import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.domain.review.entity.Review;
@@ -39,7 +38,6 @@ public class ReviewService {
     private final ImageRepository imageRepository;
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
-    private final ParticipantService participantService;
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public ReviewResponse createReview(final Integer memberId, final Integer projectId, final ReviewRequest reviewRequest) {
@@ -69,7 +67,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public List<ReviewResponse> getReviewByProjectId(final Integer memberId, final Integer projectId, final String reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
+    public List<ReviewResponse> getReviewByProjectId(final Integer projectId, final String reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
         // 리뷰 조회 쿼리 호출
         List<Review> reviews = reviewRepository.findReviewsNativeWithLimit(
                 projectId,
@@ -86,7 +84,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public ReviewDetailResponse getReviewById(final Integer memberId, final Integer projectId, final Integer reviewId) {
+    public ReviewDetailResponse getReviewById(final Integer projectId, final Integer reviewId) {
         Review review = getReviewWithMember(reviewId);
 
         List<ImageResponse> images = reviewImageRepository.findAllByReviewIdWithImage(reviewId).stream()

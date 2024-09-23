@@ -29,9 +29,8 @@ public class CategoryController {
     @PostMapping
     public void createFolder(
             @CurrentUser final Integer memberId,
-            @PathVariable("project_id") final Integer projectId,
             @RequestBody final LabelCategoryRequest categoryRequest) {
-        categoryService.createCategory(memberId, projectId, categoryRequest);
+        categoryService.createCategory(memberId, categoryRequest);
     }
 
     @Operation(summary = "레이블 카테고리 존재 여부 조회", description = "해당 프로젝트에 같은 레이블 카테고리 이름이 있는지 조회합니다.")
@@ -48,15 +47,15 @@ public class CategoryController {
     @SwaggerApiSuccess(description = "카테고리 리스트를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping
-    public List<LabelCategoryResponse> getCategoryList(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId) {
-        return categoryService.getCategoryList(memberId, projectId);
+    public List<LabelCategoryResponse> getCategoryList(@PathVariable("project_id") final Integer projectId) {
+        return categoryService.getCategoryList(projectId);
     }
 
     @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @SwaggerApiSuccess(description = "카테고리를 성공적으로 삭제합니다.")
     @DeleteMapping("/{category_id}")
-    public void deleteCategoryById(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId, @PathVariable("category_id") final Integer categoryId) {
-        categoryService.deleteCategory(memberId, projectId, categoryId);
+    public void deleteCategoryById(@PathVariable("project_id") final Integer projectId, @PathVariable("category_id") final Integer categoryId) {
+        categoryService.deleteCategory(projectId, categoryId);
     }
 }

@@ -99,7 +99,7 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void addModel(final Integer memberId, final Integer projectId, final AiModelRequest aiModelRequest) {
+    public void addModel(final Integer projectId, final AiModelRequest aiModelRequest) {
         Project project = getProject(projectId);
         AiModel aiModel = AiModel.of(aiModelRequest.getName(), project);
 
@@ -107,7 +107,7 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void renameModel(final Integer memberId, final Integer projectId, final int modelId, final AiModelRequest aiModelRequest) {
+    public void renameModel(final Integer projectId, final int modelId, final AiModelRequest aiModelRequest) {
         AiModel customModel = getCustomModel(modelId);
         customModel.rename(aiModelRequest.getName());
 
@@ -127,17 +127,8 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void train(final Integer memberId, final Integer projectId, Integer modelId) {
-        String trainProgressKey = CacheKey.trainProgressKey();
-
-        // 존재 확인
-        Boolean isProjectExist = redisTemplate.opsForSet().isMember(trainProgressKey, projectId);
-        if (Boolean.TRUE.equals(isProjectExist)) {
-            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
-        }
-
-        // 학습 진행 중으로 상태 등록
-        redisTemplate.opsForSet().add(trainProgressKey, projectId);
+    public void train(final Integer projectId, Integer modelId) {
+        trainProgressCheck(projectId);
 
         // FastAPI 서버로 학습 요청을 전송
         Project project = getProject(projectId);
@@ -168,6 +159,22 @@ public class AiModelService {
 
         AiModel newModel = AiModel.of(currentDateTime, modelKey, model.getVersion() + 1, project);
         aiModelRepository.save(newModel);
+    }
+
+    /**
+     * Redis 중복 요청 체크
+     */
+    private void trainProgressCheck(Integer projectId) {
+        String trainProgressKey = CacheKey.trainProgressKey();
+
+        // 존재 확인
+        Boolean isProjectExist = redisTemplate.opsForSet().isMember(trainProgressKey, projectId);
+        if (Boolean.TRUE.equals(isProjectExist)) {
+            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+        }
+
+        // 학습 진행 중으로 상태 등록
+        redisTemplate.opsForSet().add(trainProgressKey, projectId);
     }
 
     /**
