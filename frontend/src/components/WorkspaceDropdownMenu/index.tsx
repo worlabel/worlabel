@@ -28,7 +28,7 @@ export default function WorkspaceDropdownMenu({ projectId, folderId }: { project
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Menu size={16} />
+          <Menu size={20} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuItem

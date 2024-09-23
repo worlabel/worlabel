@@ -23,18 +23,10 @@ export default function ProjectStructure({ project }: { project: Project }) {
           <div className="flex w-full items-center gap-1 overflow-hidden pr-1">
             <h3 className="caption overflow-hidden text-ellipsis whitespace-nowrap">{project.type}</h3>
           </div>
-          <button
-            className="flex gap-1"
-            onClick={() => console.log('edit project')}
-          >
-            <SquarePenIcon size={16} />
-          </button>
-          <button
-            className="flex gap-1"
-            onClick={() => console.log('upload image')}
-          >
-            <Upload size={16} />
-          </button>
+          <WorkspaceDropdownMenu
+            projectId={project.id}
+            folderId={0}
+          />
         </header>
         {folderData.children.length === 0 && folderData.images.length === 0 ? (
           <div className="body-small flex h-full select-none items-center justify-center text-gray-400">
