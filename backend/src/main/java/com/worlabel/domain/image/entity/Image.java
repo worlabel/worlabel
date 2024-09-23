@@ -51,7 +51,7 @@ public class Image extends BaseEntity {
      * 속한 폴더
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "folder_id", nullable = true)
+    @JoinColumn(name = "folder_id", nullable = false)
     @JsonIgnore
     private Folder folder;
 

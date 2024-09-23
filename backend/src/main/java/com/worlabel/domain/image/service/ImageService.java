@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -45,9 +47,15 @@ public class ImageService {
      */
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
-        Folder folder = null;
+        Folder folder;
+
         if (folderId != 0) {
             folder = getFolder(folderId);
+        } else {
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+            folder = Folder.of(currentDateTime, null, project);
         }
 
         for (MultipartFile file : imageList) {
@@ -122,9 +130,13 @@ public class ImageService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
 
-        Folder parentFolder = null;
+        Folder parentFolder;
+
         if (folderId != 0) {
             parentFolder = getFolder(folderId);
+        } else {
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            parentFolder = Folder.of(currentDateTime, null, project);
         }
 
         // 파일이 zip 파일인지 확인
