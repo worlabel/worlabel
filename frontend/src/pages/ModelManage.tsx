@@ -1,4 +1,4 @@
-import { Rabbit, Bird, Turtle, Share } from 'lucide-react';
+import { Rabbit, Bird, Turtle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,14 +37,6 @@ export default function ModelManage() {
       <div className="flex flex-col">
         <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
           <h1 className="text-xl font-semibold">모델 관리</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto gap-1.5 text-sm"
-          >
-            <Share className="size-3.5" />
-            공유
-          </Button>
         </header>
 
         <main className="grid flex-1 gap-4 overflow-auto p-4">
