@@ -8,6 +8,7 @@ import { ProjectRequest } from '@/types';
 import useAuthStore from '@/stores/useAuthStore';
 import ProjectCreateModal from '../ProjectCreateModal';
 import { cn } from '@/lib/utils';
+
 export default function AdminProjectSidebar(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
