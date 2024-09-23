@@ -289,6 +289,7 @@ export default function ImageCanvas() {
                 isSelected={label.id === selectedLabelId}
                 onSelect={() => setSelectedLabelId(label.id)}
                 info={label}
+                setLabel={setLabel(label.id)}
                 stage={stageRef.current as Konva.Stage}
                 dragLayer={dragLayerRef.current as Konva.Layer}
               />
