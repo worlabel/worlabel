@@ -29,9 +29,9 @@ def create_new_model(project_id: int, type:str, pretrained:bool):
 
     return f"{unique_id}.pt"
 
-def upload_tmp_model(project_id: int, tmp_path:str):
+def save_model(project_id: int, path:str):
     # 모델 불러오기
-    model = load_model(tmp_path)
+    model = load_model(path)
 
     # 모델을 저장할 폴더 경로
     base_path = os.path.join("resources","projects",str(project_id),"models")
@@ -47,3 +47,4 @@ def upload_tmp_model(project_id: int, tmp_path:str):
     model.save(filename=model_path)
 
     return f"{unique_id}.pt"
+    
