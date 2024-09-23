@@ -1,9 +1,9 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Plus } from 'lucide-react';
-import ImageFolderUploadForm from './ImageFolderUploadForm';
+import ImageUploadFolderForm from './ImageUploadFolderForm';
 
-export default function ImageFolderUploadModal({ projectId, parentId = 0 }: { projectId: number; parentId: number }) {
+export default function ImageUploadFolderModal({ projectId }: { projectId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -24,10 +24,9 @@ export default function ImageFolderUploadModal({ projectId, parentId = 0 }: { pr
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader title="폴더 업로드" />
-        <ImageFolderUploadForm
+        <ImageUploadFolderForm
           onClose={handleClose}
           projectId={projectId}
-          parentId={parentId}
         />
       </DialogContent>
     </Dialog>
