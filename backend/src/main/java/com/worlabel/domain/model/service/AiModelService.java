@@ -48,7 +48,7 @@ public class AiModelService {
     private final AiRequestService aiRequestService;
     private final Gson gson;
 
-    @PostConstruct
+//    @PostConstruct
     public void loadDefaultModel() {
         String url = "model/default";
         List<DefaultResponse> defaultResponseList = aiRequestService.getRequest(url, this::converter);

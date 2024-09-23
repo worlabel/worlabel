@@ -116,20 +116,15 @@ public class ImageService {
         save(imageId, labelRequest.getData());
     }
 
-    public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId, Integer parentId) throws IOException {
+    public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId) throws IOException {
         orderCount = 0;
-
-        if (parentId == null) {
-            parentId = 0;
-        }
 
         // 프로젝트 정보 가져오기
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
 
         // 부모 폴더가 최상위인지 확인
-        Folder parentFolder = (parentId == 0) ? null : folderRepository.findById(parentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+        Folder parentFolder = null;
 
         // 파일이 zip 파일인지 확인
         String originalFilename = folderOrZip.getOriginalFilename();
@@ -181,7 +176,6 @@ public class ImageService {
             }
         }
     }
-
 
     // 이미지 파일인지 확인하는 메서드
     private boolean isImageFile(File file) {
