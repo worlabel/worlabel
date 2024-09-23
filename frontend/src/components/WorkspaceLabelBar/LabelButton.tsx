@@ -1,3 +1,4 @@
+import useCanvasStore from '@/stores/useCanvasStore';
 import { Label } from '@/types';
 import { Trash2 } from 'lucide-react';
 import { MouseEventHandler } from 'react';
@@ -9,6 +10,7 @@ export default function LabelButton({
   selected,
   setSelectedLabelId,
 }: Label & { selected: boolean; setSelectedLabelId: (id: number) => void }) {
+  const { labels, setLabels } = useCanvasStore();
   const handleClick: MouseEventHandler = () => {
     console.log(`LabelButton ${id} clicked`);
     setSelectedLabelId(id);
@@ -16,6 +18,7 @@ export default function LabelButton({
   const handleDelete: MouseEventHandler = (event) => {
     event.stopPropagation();
     console.log(`Delete LabelButton ${id}`);
+    setLabels(labels.filter((label) => label.id !== id));
   };
 
   return (

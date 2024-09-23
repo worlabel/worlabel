@@ -41,7 +41,7 @@ export default function LabelRect({
     ];
 
     setLabel(points);
-    rectRef.current?.setAbsolutePosition({ x: 0, y: 0 });
+    rectRef.current?.setPosition({ x: 0, y: 0 });
     rectRef.current?.scale({ x: 1, y: 1 });
   };
 

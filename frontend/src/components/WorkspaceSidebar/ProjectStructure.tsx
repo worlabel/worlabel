@@ -5,22 +5,16 @@ import ProjectDirectoryItem from './ProjectDirectoryItem';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
 import useCanvasStore from '@/stores/useCanvasStore';
 import { Button } from '../ui/button';
+import { useEffect } from 'react';
 
 export default function ProjectStructure({ project }: { project: Project }) {
+  const setProject = useCanvasStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData } = useFolderQuery(project.id.toString(), 0);
 
-  // TODO: 더미 데이터 제거
-  folderData.images = [
-    {
-      id: 1,
-      imagePath: 'https://worlabel-file-bucket.s3.ap-northeast-2.amazonaws.com/dummy.jpg',
-      // dataPath: 'https://worlabel-file-bucket.s3.ap-northeast-2.amazonaws.com/detection.json',
-      dataPath: 'https://worlabel-file-bucket.s3.ap-northeast-2.amazonaws.com/segmentation.json',
-      imageTitle: 'dummy',
-      status: 'PENDING',
-    },
-  ];
+  useEffect(() => {
+    setProject(project);
+  }, [project, setProject]);
 
   return (
     <div className="flex h-full flex-col justify-between">
@@ -51,6 +45,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
             {folderData.children.map((item) => (
               <ProjectDirectoryItem
                 key={`${project.id}-${item.title}`}
+                projectId={project.id}
                 item={item}
                 initialExpanded={true}
               />

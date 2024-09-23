@@ -7,7 +7,7 @@ export async function saveImageLabels(
     data: string;
   }
 ) {
-  return api.post(`/projects/${projectId}/label/image/${imageId}`, data).then(({ data }) => data);
+  return api.post(`/projects/${projectId}/images/${imageId}/label`, data).then(({ data }) => data);
 }
 
 export async function runAutoLabel(projectId: number, memberId: number) {
