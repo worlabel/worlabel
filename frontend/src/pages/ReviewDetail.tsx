@@ -7,6 +7,7 @@ import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import ImageWithLabels from '@/components/ImageWithLabels';
 
 export default function ReviewDetail(): JSX.Element {
   const { workspaceId, projectId, reviewId } = useParams<{
@@ -99,10 +100,9 @@ export default function ReviewDetail(): JSX.Element {
               <Slider {...settings}>
                 {reviewDetail.images.map((image) => (
                   <div key={image.id}>
-                    <img
-                      src={image.imagePath}
-                      alt="리뷰 이미지"
-                      className="h-auto w-full rounded"
+                    <ImageWithLabels
+                      imagePath={image.imagePath}
+                      labelData={image.dataPath}
                     />
                   </div>
                 ))}
