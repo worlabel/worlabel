@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -40,19 +42,27 @@ public class ImageService {
     private final FolderRepository folderRepository;
     private final ProjectRepository projectRepository;
 
-    private static int orderCount = 0;
-
     /**
      * 이미지 리스트 업로드
      */
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
-        Folder folder = getFolder(folderId);
-        for (int order = 0; order < imageList.size(); order++) {
-            MultipartFile file = imageList.get(order);
+        Folder folder;
+
+        if (folderId != 0) {
+            folder = getFolder(folderId);
+        } else {
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            Project project = projectRepository.findById(projectId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+            folder = Folder.of(currentDateTime, null, project);
+            folderRepository.save(folder);  // 새로운 폴더를 저장
+        }
+
+        for (MultipartFile file : imageList) {
             String extension = getExtension(file);
             String imageKey = s3UploadService.upload(file, extension, projectId);
-            Image image = Image.of(file.getOriginalFilename(), imageKey, extension, order, folder);
+            Image image = Image.of(file.getOriginalFilename(), imageKey, extension, folder);
             imageRepository.save(image);
         }
     }
@@ -116,15 +126,20 @@ public class ImageService {
         save(imageId, labelRequest.getData());
     }
 
-    public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId) throws IOException {
-        orderCount = 0;
-
+    public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId, Integer folderId) throws IOException {
         // 프로젝트 정보 가져오기
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
 
-        // 부모 폴더가 최상위인지 확인
-        Folder parentFolder = null;
+        Folder parentFolder;
+
+        if (folderId != 0) {
+            parentFolder = getFolder(folderId);
+        } else {
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            parentFolder = Folder.of(currentDateTime, null, project);
+            folderRepository.save(parentFolder);  // 새로운 폴더를 저장
+        }
 
         // 파일이 zip 파일인지 확인
         String originalFilename = folderOrZip.getOriginalFilename();
@@ -166,7 +181,7 @@ public class ImageService {
                             // InputStream으로 S3 업로드
                             String imageKey = s3UploadService.uploadFromInputStream(inputStream, extension, project.getId(), file.getName());
 
-                            Image image = Image.of(file.getName(), imageKey, extension, orderCount++, currentFolder);
+                            Image image = Image.of(file.getName(), imageKey, extension, currentFolder);
                             imageRepository.save(image);
                         } catch (IOException e) {
                             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
