@@ -27,7 +27,7 @@ public class ImageController {
 
     private final ImageService imageService;
 
-    @PostMapping("")
+    @PostMapping("/file")
     @SwaggerApiSuccess(description = "이미지 목록을 성공적으로 업로드합니다.")
     @Operation(summary = "이미지 목록 업로드", description = "이미지 목록을 업로드합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
@@ -39,7 +39,7 @@ public class ImageController {
         imageService.uploadImageList(imageList, folderId, projectId, memberId);
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/zip")
     @SwaggerApiSuccess(description = "폴더와 이미지 파일을 성공적으로 업로드합니다.")
     @Operation(summary = "폴더 업로드", description = "폴더와 이미지 파일을 업로드합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
