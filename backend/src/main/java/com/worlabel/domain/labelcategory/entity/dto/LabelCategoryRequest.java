@@ -13,6 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 public class LabelCategoryRequest {
 
+    @Schema(description = "Model Id", example = "1")
+    private Integer modelId;
+
     @Schema(description = "카테고리 Id 리스트", example = "[0,3,6,8]")
     private List<Integer> labelCategoryList;
 }

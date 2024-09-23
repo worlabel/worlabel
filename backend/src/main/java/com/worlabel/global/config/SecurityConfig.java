@@ -33,6 +33,9 @@ public class SecurityConfig {
     @Value("${frontend.url}")
     private String frontend;
 
+    @Value("${ai.server}")
+    private String aiServer;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // HTTP Basic 인증 방식 비활성화
@@ -90,7 +93,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of(frontend, "http://localhost:5173"));  // 프론트엔드 URL 사용
+        configuration.setAllowedOrigins(List.of(frontend, aiServer,"http://localhost:5173","http://localhost:8000"));  // 프론트엔드 URL 사용
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setMaxAge(3600L);

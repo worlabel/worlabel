@@ -10,9 +10,10 @@ import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
-import com.worlabel.domain.project.dto.AutoLabelingImageRequest;
-import com.worlabel.domain.project.dto.AutoLabelingRequest;
-import com.worlabel.domain.project.dto.RequestDto.TrainRequest;
+import com.worlabel.domain.project.dto.AiRequestDto;
+import com.worlabel.domain.project.dto.AiRequestDto.AutoLabelingImageRequest;
+import com.worlabel.domain.project.dto.AiRequestDto.AutoLabelingRequest;
+import com.worlabel.domain.project.dto.AutoModelRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
@@ -159,11 +160,11 @@ public class ProjectService {
      * 프로젝트별 오토 레이블링
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void autoLabeling(final Integer memberId, final Integer projectId) {
+    public void autoLabeling(final Integer memberId, final Integer projectId, final AutoModelRequest request) {
         Project project = getProject(projectId);
-        String endPoint = "auto/" + project.getProjectType().getValue();
+        String endPoint = project.getProjectType().getValue() + "/predict";
 
-        List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
+        List<Image> imageList = imageRepository.findImagesByProjectIdAndPendingOrInProgress(projectId);
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();

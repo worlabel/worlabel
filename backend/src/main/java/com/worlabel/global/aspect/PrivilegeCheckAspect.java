@@ -1,6 +1,5 @@
 package com.worlabel.global.aspect;
 
-import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.global.annotation.CheckPrivilege;
 import lombok.RequiredArgsConstructor;
