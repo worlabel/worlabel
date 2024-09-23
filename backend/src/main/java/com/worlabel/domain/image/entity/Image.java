@@ -37,7 +37,7 @@ public class Image extends BaseEntity {
     /**
      * 이미지 확장자
      */
-    @Column(name = "image_extenstion", nullable = false, length = 10)
+    @Column(name = "image_extension", nullable = false, length = 10)
     private String extension;
 
     /**
