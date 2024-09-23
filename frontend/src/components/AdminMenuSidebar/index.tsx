@@ -1,6 +1,5 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-
 export default function AdminMenuSidebar() {
   const location = useLocation();
   const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -13,6 +12,10 @@ export default function AdminMenuSidebar() {
     {
       label: '멤버 관리',
       path: `/admin/${workspaceId}/members`,
+    },
+    {
+      label: '모델 관리',
+      path: `/admin/${workspaceId}/models`,
     },
   ];
 

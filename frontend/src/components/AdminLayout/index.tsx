@@ -19,11 +19,6 @@ export default function AdminLayout() {
           </ResizablePanel>
           <AdminMenuSidebar />
         </ResizablePanelGroup>
-        (
-        <main className="h-full w-full">
-          <Outlet />
-        </main>
-        )
       </div>
     </>
   );

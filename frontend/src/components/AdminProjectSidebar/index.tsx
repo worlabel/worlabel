@@ -46,6 +46,9 @@ export default function AdminProjectSidebar(): JSX.Element {
     if (location.pathname.includes('members')) {
       return `/admin/${workspaceId}/members/${newProjectId}`;
     }
+    if (location.pathname.includes('models')) {
+      return `/admin/${workspaceId}/models/${newProjectId}`;
+    }
     return location.pathname;
   };
 

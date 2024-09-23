@@ -1,208 +1,246 @@
-import { Book, Bot, CornerDownLeft, LifeBuoy, Settings, SquareUser, Triangle } from 'lucide-react';
-
-import { Badge } from '@/components/ui/badge';
+import { Rabbit, Bird, Turtle, Settings, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-
-export const description =
-  'An auto-labeling dashboard with a sidebar navigation and a main content area. The dashboard has a header with settings and data upload options. The sidebar has navigation links and user menu. The main content area shows a form to configure the labeling process and datasets.';
+import ModelLineChart from '@/components/ModelLineChart';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState, useEffect } from 'react';
+import ModelBarChart from '@/components/ModelBarChart';
 
 export default function ModelManage() {
+  interface MetricData {
+    epoch: string;
+    loss1: number;
+    loss2: number;
+    loss3: number;
+    fitness: number;
+  }
+
+  const dummyLossData: MetricData[] = [
+    { epoch: '1', loss1: 0.45, loss2: 0.43, loss3: 0.42, fitness: 0.97 },
+    { epoch: '2', loss1: 0.4, loss2: 0.38, loss3: 0.37, fitness: 0.98 },
+    { epoch: '3', loss1: 0.38, loss2: 0.36, loss3: 0.35, fitness: 0.99 },
+    { epoch: '4', loss1: 0.36, loss2: 0.34, loss3: 0.33, fitness: 1.0 },
+  ];
+
+  const [lossData] = useState<MetricData[]>(dummyLossData);
+  const [training, setTraining] = useState(false);
+
+  useEffect(() => {
+    if (training) {
+      const socket = new WebSocket('ws://localhost:8080/ws');
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received data:', data);
+      };
+      return () => socket.close();
+    }
+  }, [training]);
+
+  const handleTrainingToggle = () => {
+    setTraining((prev) => !prev);
+  };
+
   return (
-    <TooltipProvider>
-      <div className="grid h-screen w-full overflow-hidden pl-[56px]">
-        <aside className="sticky inset-y-0 left-0 z-20 flex h-full flex-col border-r">
-          <div className="border-b p-2">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Home"
-            >
-              <Triangle className="fill-foreground size-5" />
-            </Button>
-          </div>
-          <nav className="grid gap-1 p-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-lg"
-                  aria-label="Labeling"
-                >
-                  <Bot className="size-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="right"
-                sideOffset={5}
+    <div className="grid h-screen w-full pl-[56px]">
+      <div className="flex flex-col">
+        <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
+          <h1 className="text-xl font-semibold">모델 관리</h1>
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
               >
-                Labeling
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-lg"
-                  aria-label="Datasets"
-                >
-                  <Book className="size-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="right"
-                sideOffset={5}
-              >
-                Datasets
-              </TooltipContent>
-            </Tooltip>
-          </nav>
-          <nav className="mt-auto grid gap-1 p-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="mt-auto rounded-lg"
-                  aria-label="Help"
-                >
-                  <LifeBuoy className="size-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="right"
-                sideOffset={5}
-              >
-                Help
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="mt-auto rounded-lg"
-                  aria-label="Account"
-                >
-                  <SquareUser className="size-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="right"
-                sideOffset={5}
-              >
-                Account
-              </TooltipContent>
-            </Tooltip>
-          </nav>
-        </aside>
-        <div className="flex flex-col">
-          <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
-            <h1 className="text-xl font-semibold">Auto Labeling</h1>
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                >
-                  <Settings className="size-4" />
-                  <span className="sr-only">Settings</span>
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh]">
-                <DrawerHeader>
-                  <DrawerTitle>Configuration</DrawerTitle>
-                  <DrawerDescription>Configure the settings for the labeling process.</DrawerDescription>
-                </DrawerHeader>
-                <form className="grid w-full items-start gap-6 overflow-auto p-4 pt-0">
-                  <fieldset className="grid gap-6 rounded-lg border p-4">
-                    <legend className="-ml-1 px-1 text-sm font-medium">Labeling Settings</legend>
-                    <div className="grid gap-3">
-                      <Label htmlFor="dataset">Dataset</Label>
-                      <Select>
-                        <SelectTrigger
-                          id="dataset"
-                          className="items-start"
-                        >
-                          <SelectValue placeholder="Select a dataset" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="dataset1">Dataset 1</SelectItem>
-                          <SelectItem value="dataset2">Dataset 2</SelectItem>
-                          <SelectItem value="dataset3">Dataset 3</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-3">
-                      <Label htmlFor="label-type">Label Type</Label>
-                      <Select>
-                        <SelectTrigger
-                          id="label-type"
-                          className="items-start"
-                        >
-                          <SelectValue placeholder="Select a label type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bounding-box">Bounding Box</SelectItem>
-                          <SelectItem value="segmentation">Segmentation</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </fieldset>
-                </form>
-              </DrawerContent>
-            </Drawer>
-          </header>
-          <main className="grid flex-1 gap-4 overflow-auto p-4 md:grid-cols-2 lg:grid-cols-3">
-            <div className="bg-muted/50 relative flex h-full min-h-[50vh] flex-col rounded-xl p-4 lg:col-span-2">
-              <Badge
-                variant="outline"
-                className="absolute right-3 top-3"
-              >
-                Labeling Results
-              </Badge>
-              <div className="flex-1" />
-              <form className="bg-background focus-within:ring-ring relative overflow-hidden rounded-lg border focus-within:ring-1">
-                <Label
-                  htmlFor="upload"
-                  className="sr-only"
-                >
-                  Upload File
-                </Label>
-                <Input
-                  id="upload"
-                  type="file"
-                  className="min-h-12"
-                />
-                <div className="flex items-center p-3 pt-0">
+                <Settings className="size-4" />
+                <span className="sr-only">설정</span>
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="max-h-[80vh]">
+              <DrawerHeader>
+                <DrawerTitle>설정</DrawerTitle>
+              </DrawerHeader>
+              <SettingsForm />
+            </DrawerContent>
+          </Drawer>
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto gap-1.5 text-sm"
+          >
+            <Share className="size-3.5" />
+            공유
+          </Button>
+        </header>
+
+        <main className="grid flex-1 gap-4 overflow-auto p-4">
+          <Tabs
+            defaultValue="train"
+            className="w-full"
+          >
+            <TabsList>
+              <TabsTrigger value="train">모델 학습</TabsTrigger>
+              <TabsTrigger value="results">모델 평가</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="train">
+              <div className="grid gap-8 md:grid-cols-2">
+                <div className="flex flex-col gap-6">
+                  <SettingsForm />
                   <Button
-                    type="submit"
-                    size="sm"
-                    className="ml-auto gap-1.5"
+                    variant={training ? 'destructive' : 'default'}
+                    size="lg"
+                    onClick={handleTrainingToggle}
                   >
-                    Start Labeling
-                    <CornerDownLeft className="size-3.5" />
+                    {training ? '학습 중단' : '학습 시작'}
                   </Button>
                 </div>
-              </form>
-            </div>
-          </main>
-        </div>
+
+                <div className="flex flex-col justify-center">
+                  <ModelLineChart data={lossData} />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="results">
+              <div className="grid gap-8 md:grid-cols-2">
+                <div className="flex flex-col gap-6">
+                  <ModelBarChart
+                    data={[
+                      { name: 'precision', value: 0.734, fill: 'var(--color-precision)' },
+                      { name: 'recall', value: 0.75, fill: 'var(--color-recall)' },
+                      { name: 'mAP50', value: 0.995, fill: 'var(--color-map50)' },
+                      { name: 'mAP50_95', value: 0.97, fill: 'var(--color-map50-95)' },
+                      { name: 'fitness', value: 0.973, fill: 'var(--color-fitness)' },
+                    ]}
+                  />
+                </div>
+                <div className="flex flex-col justify-center">
+                  <LabelingPreview />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </main>
       </div>
-    </TooltipProvider>
+    </div>
+  );
+}
+
+function LabelingPreview() {
+  return (
+    <div className="flex items-center justify-center rounded-lg border bg-white p-4">
+      <p>레이블링 프리뷰</p>
+    </div>
+  );
+}
+
+function SettingsForm() {
+  return (
+    <form className="grid w-full gap-6">
+      <fieldset className="grid gap-6 rounded-lg border p-4">
+        <legend className="-ml-1 px-1 text-sm font-medium">모델 설정</legend>
+        <div className="grid gap-3">
+          <Label htmlFor="model">모델 선택</Label>
+          <Select>
+            <SelectTrigger id="model">
+              <SelectValue placeholder="모델을 선택하세요" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="genesis">
+                <OptionWithIcon
+                  icon={<Rabbit />}
+                  title="Genesis"
+                  description="일반 사용 사례를 위한 빠른 모델"
+                />
+              </SelectItem>
+              <SelectItem value="explorer">
+                <OptionWithIcon
+                  icon={<Bird />}
+                  title="Explorer"
+                  description="효율성을 위한 빠른 모델"
+                />
+              </SelectItem>
+              <SelectItem value="quantum">
+                <OptionWithIcon
+                  icon={<Turtle />}
+                  title="Quantum"
+                  description="복잡한 계산을 위한 강력한 모델"
+                />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <InputWithLabel
+            label="훈련/검증 비율"
+            placeholder="0.8"
+            id="ratio"
+          />
+          <InputWithLabel
+            label="에포크 수"
+            placeholder="50"
+            id="epochs"
+          />
+          <InputWithLabel
+            label="Batch"
+            placeholder="-1"
+            id="batch"
+          />
+          <InputWithLabel
+            label="학습률(LR0)"
+            placeholder="0.01"
+            id="lr0"
+          />
+        </div>
+      </fieldset>
+    </form>
+  );
+}
+
+interface OptionWithIconProps {
+  icon: JSX.Element;
+  title: string;
+  description: string;
+}
+
+function OptionWithIcon({ icon, title, description }: OptionWithIconProps) {
+  return (
+    <div className="text-muted-foreground flex items-start gap-3">
+      {icon}
+      <div className="grid gap-0.5">
+        <p>
+          Neural <span className="text-foreground font-medium">{title}</span>
+        </p>
+        <p
+          className="text-xs"
+          data-description
+        >
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface InputWithLabelProps {
+  label: string;
+  id: string;
+  placeholder: string;
+}
+
+function InputWithLabel({ label, id, placeholder }: InputWithLabelProps) {
+  return (
+    <div className="grid gap-3">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="number"
+        placeholder={placeholder}
+      />
+    </div>
   );
 }
