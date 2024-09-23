@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -131,6 +133,12 @@ public class S3UploadService {
             PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, byteArrayInputStream, metadata);
 
             amazonS3.putObject(putRequest); // S3 파일 업로드
+
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(bytes));
+            int imageWidth = bufferedImage.getWidth();
+            int imageHeight = bufferedImage.getHeight();
+
+            uploadJsonWithDimensions(s3Key, imageWidth, imageHeight);
         } catch (Exception e) {
             log.error("", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
@@ -174,9 +182,11 @@ public class S3UploadService {
 
     public String uploadFromInputStream(InputStream inputStream, String extension, Integer projectId, String fileName) {
         try {
+            // UUID로 S3 파일 이름 생성
             String s3Key = getS3FileName(projectId);
             String s3FileName = s3Key + "." + extension;
 
+            // 이미지 파일 업로드
             byte[] bytes = IOUtils.toByteArray(inputStream);
 
             ObjectMetadata metadata = new ObjectMetadata();
@@ -185,11 +195,43 @@ public class S3UploadService {
 
             try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
                 PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, byteArrayInputStream, metadata);
-                amazonS3.putObject(putRequest);
+                amazonS3.putObject(putRequest);  // 이미지 업로드
             }
+
+            // 이미지 높이와 너비 추출
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(bytes));
+            int imageWidth = bufferedImage.getWidth();
+            int imageHeight = bufferedImage.getHeight();
+
+            // 너비와 높이를 포함한 JSON 업로드
+            uploadJsonWithDimensions(s3Key, imageWidth, imageHeight);  // JSON 파일 업로드 메서드 호출
 
             return url + "/" + s3Key;
         } catch (IOException e) {
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
+
+    // 이미지의 너비와 높이를 포함하는 JSON 파일 업로드
+    private void uploadJsonWithDimensions(String s3Key, int width, int height) {
+        try {
+            // JSON 파일 이름 생성 (s3Key + ".json")
+            String jsonFileName = s3Key + ".json";
+
+            // 이미지의 너비와 높이를 포함한 JSON 데이터 생성
+            String jsonContent = "{\n\"imageHeight\": " + height + ",\n\"imageWidth\": " + width + "\n}";
+
+            byte[] jsonBytes = jsonContent.getBytes(StandardCharsets.UTF_8);
+
+            ObjectMetadata jsonMetadata = new ObjectMetadata();
+            jsonMetadata.setContentType("application/json");
+            jsonMetadata.setContentLength(jsonBytes.length);
+
+            try (ByteArrayInputStream jsonInputStream = new ByteArrayInputStream(jsonBytes)) {
+                PutObjectRequest jsonPutRequest = new PutObjectRequest(bucket, jsonFileName, jsonInputStream, jsonMetadata);
+                amazonS3.putObject(jsonPutRequest);  // JSON 파일 업로드
+            }
+        } catch (Exception e) {
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
     }
