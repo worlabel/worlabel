@@ -30,27 +30,34 @@ public class PrivilegeCheckAspect {
     // CheckPrivilege 어노테이션이 붙은 메서드가 실행되기전 실행
     @Before("@annotation(checkPrivilege)")
     public void checkPrivilege(JoinPoint joinPoint, CheckPrivilege checkPrivilege) {
+        int memberId = getMemberId();
+        int projectId = getProjectId(joinPoint);
+
+        checkPrivilegeUnauthorized(memberId, projectId, checkPrivilege.value());
+    }
+
+    private int getProjectId(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
         Object[] args = joinPoint.getArgs();
         Parameter[] parameters = method.getParameters();
 
-        Object principal = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-        int memberId = ((AuthMemberDto) principal).getId();
-
-        Integer projectId = null;
         for (int paramIdx = 0; paramIdx < parameters.length; paramIdx++) {
             String paramName = parameters[paramIdx].getName();
             if (paramName.equals("projectId")) {
-                projectId = (Integer) args[paramIdx];
-                break;
+                return (Integer) args[paramIdx];
             }
         }
 
-        checkPrivilegeUnauthorized(memberId, projectId, checkPrivilege.value());
+        throw new CustomException(ErrorCode.SERVER_ERROR);
+    }
+
+    private int getMemberId() {
+        Object principal = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        return ((AuthMemberDto) principal).getId();
     }
 
     public void checkPrivilegeUnauthorized(final Integer memberId, final Integer projectId, final PrivilegeType privilegeType) {
