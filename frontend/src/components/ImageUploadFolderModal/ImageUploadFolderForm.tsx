@@ -5,15 +5,7 @@ import { uploadImageFolder } from '@/api/imageApi';
 import useAuthStore from '@/stores/useAuthStore';
 import { X } from 'lucide-react';
 
-export default function ImageFolderUploadForm({
-  onClose,
-  projectId,
-  parentId,
-}: {
-  onClose: () => void;
-  projectId: number;
-  parentId: number;
-}) {
+export default function ImageUploadFolderForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
@@ -57,7 +49,7 @@ export default function ImageFolderUploadForm({
     setIsUploading(true);
     setProgress(0);
 
-    await uploadImageFolder(memberId, projectId, files, parentId)
+    await uploadImageFolder(memberId, projectId, files)
       .then(() => {
         setProgress(100);
       })

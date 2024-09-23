@@ -1,19 +1,11 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
-import { uploadImageFolderZip } from '@/api/imageApi';
+import { uploadImageZip } from '@/api/imageApi';
 import useAuthStore from '@/stores/useAuthStore';
 import { X } from 'lucide-react';
 
-export default function ImageFolderZipUploadForm({
-  onClose,
-  projectId,
-  parentId,
-}: {
-  onClose: () => void;
-  projectId: number;
-  parentId: number;
-}) {
+export default function ImageUploadZipForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
@@ -58,7 +50,7 @@ export default function ImageFolderZipUploadForm({
       setIsUploading(true);
       setProgress(0);
 
-      await uploadImageFolderZip(memberId, projectId, file, parentId)
+      await uploadImageZip(memberId, projectId, file)
         .then(() => {
           setProgress(100);
         })
