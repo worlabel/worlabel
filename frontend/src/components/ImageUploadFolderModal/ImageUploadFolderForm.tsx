@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
-import { uploadImageFolder } from '@/api/imageApi';
 import useAuthStore from '@/stores/useAuthStore';
 import { X } from 'lucide-react';
+import useUploadImageFolderQuery from '@/queries/projects/useUploadImageFolderQuery';
 
 export default function ImageUploadFolderForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
   const profile = useAuthStore((state) => state.profile);
@@ -12,8 +12,10 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
+  const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
+
+  const uploadImageFolder = useUploadImageFolderQuery();
 
   const handleClose = () => {
     onClose();
@@ -47,16 +49,22 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
 
   const handleUpload = async () => {
     setIsUploading(true);
-    setProgress(0);
 
-    await uploadImageFolder(memberId, projectId, files)
-      .then(() => {
-        setProgress(100);
-      })
-      .catch(() => {
-        setProgress(100);
-        setIsFailed(true);
-      });
+    uploadImageFolder.mutate(
+      {
+        memberId,
+        projectId,
+        files,
+      },
+      {
+        onSuccess: () => {
+          setIsUploaded(true);
+        },
+        onError: () => {
+          setIsFailed(true);
+        },
+      }
+    );
   };
 
   return (
@@ -120,9 +128,9 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
               ? 'border-red-500 text-red-500 hover:bg-red-500 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-500'
               : ''
           }
-          disabled={progress != 100}
+          disabled={!isUploaded && !isFailed}
         >
-          {progress === 100 ? (isFailed ? '업로드 실패 (닫기)' : '업로드 완료 (닫기)') : `업로드 중... ${progress}%`}
+          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : '업로드 중...'}
         </Button>
       ) : (
         <Button

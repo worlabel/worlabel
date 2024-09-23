@@ -3,19 +3,27 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
 import { X } from 'lucide-react';
-import useUploadImageZipQuery from '@/queries/projects/useUploadImageZipQuery';
+import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery';
 
-export default function ImageUploadZipForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
+export default function ImageUploadFileForm({
+  onClose,
+  projectId,
+  folderId,
+}: {
+  onClose: () => void;
+  projectId: number;
+  folderId: number;
+}) {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const [file, setFile] = useState<File>();
+  const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
 
-  const uploadImageZip = useUploadImageZipQuery();
+  const uploadImageFile = useUploadImageFileQuery();
 
   const handleClose = () => {
     onClose();
@@ -25,7 +33,12 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
     const newFiles = event.target.files;
 
     if (newFiles) {
-      setFile(newFiles[0]);
+      const newImages = Array.from(newFiles).filter((file) => {
+        const fileExtension = file.name.split('.').pop()?.toLowerCase() ?? '';
+        return ['jpg', 'png', 'jpeg'].includes(fileExtension);
+      });
+
+      setFiles((prevFiles) => [...prevFiles, ...newImages]);
     }
   };
 
@@ -43,30 +56,29 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
     setIsDragging(false);
   };
 
-  const handleRemoveFile = () => {
-    setFile(undefined);
+  const handleRemoveFile = (index: number) => {
+    setFiles(files.filter((_, i) => i != index));
   };
 
   const handleUpload = async () => {
-    if (file) {
-      setIsUploading(true);
+    setIsUploading(true);
 
-      uploadImageZip.mutate(
-        {
-          memberId,
-          projectId,
-          file,
+    uploadImageFile.mutate(
+      {
+        memberId,
+        projectId,
+        folderId,
+        files,
+      },
+      {
+        onSuccess: () => {
+          setIsUploaded(true);
         },
-        {
-          onSuccess: () => {
-            setIsUploaded(true);
-          },
-          onError: () => {
-            setIsFailed(true);
-          },
-        }
-      );
-    }
+        onError: () => {
+          setIsFailed(true);
+        },
+      }
+    );
   };
 
   return (
@@ -80,9 +92,9 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
         >
           <input
             type="file"
-            accept=".zip"
+            accept=".jpg,.jpeg,.png"
             // webkitdirectory=""
-            // multiple
+            multiple
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleChange}
             onDragOver={handleDragOver}
@@ -100,20 +112,27 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
           )}
         </div>
       )}
-      {file && (
-        <div className={'flex items-center justify-between p-1'}>
-          <span className="truncate">{file.webkitRelativePath || file.name}</span>
-          <button
-            className={'cursor-pointer p-2'}
-            onClick={() => handleRemoveFile()}
-          >
-            <X
-              color="red"
-              size={16}
-              strokeWidth="2"
-            />
-          </button>
-        </div>
+      {files.length > 0 && (
+        <ul className="m-0 list-none p-0">
+          {files.map((file, index) => (
+            <li
+              key={index}
+              className={cn('flex items-center justify-between p-1')}
+            >
+              <span className="truncate">{file.webkitRelativePath || file.name}</span>
+              <button
+                className={'cursor-pointer p-2'}
+                onClick={() => handleRemoveFile(index)}
+              >
+                <X
+                  color="red"
+                  size={16}
+                  strokeWidth="2"
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
       {isUploading ? (
         <Button
@@ -132,7 +151,7 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
         <Button
           onClick={handleUpload}
           variant="outlinePrimary"
-          disabled={!file}
+          disabled={files.length === 0}
         >
           업로드
         </Button>
