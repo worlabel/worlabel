@@ -300,3 +300,14 @@ export interface ModelCategoryResponse {
 
 // 프로젝트 모델 리스트 응답 DTO
 export interface ProjectModelsResponse extends Array<ModelResponse> {}
+
+// 카테고리 요청 DTO
+export interface LabelCategoryRequest {
+  labelCategoryList: number[];
+}
+
+// 카테고리 응답 DTO
+export interface LabelCategoryResponse {
+  id: number;
+  name: string;
+}
