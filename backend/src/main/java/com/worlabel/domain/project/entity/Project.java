@@ -52,7 +52,7 @@ public class Project extends BaseEntity {
      * 프로젝트에 속한 카테고리
      */
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProjectCategory> category = new ArrayList<>();
+    private List<ProjectCategory> categoryList = new ArrayList<>();
 
     /**
      * 프로젝트에 속한 모델

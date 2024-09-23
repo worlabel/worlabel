@@ -27,8 +27,4 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
             @Param("memberId") Integer memberId,
             @Param("lastProjectId") Integer lastProjectId,
             @Param("pageSize") Integer pageSize);
-
-    // ProjectType을 가져오는 메서드 추가
-    @Query("SELECT p.projectType FROM Project p WHERE p.id = :projectId")
-    Optional<ProjectType> findProjectTypeById(@Param("projectId") Integer projectId);
 }

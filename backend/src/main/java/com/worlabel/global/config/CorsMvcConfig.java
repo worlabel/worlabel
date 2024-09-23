@@ -11,11 +11,14 @@ public class CorsMvcConfig implements WebMvcConfigurer {
     @Value("${frontend.url}")
     private String frontend;
 
+    @Value("${ai.server}")
+    private String aiServer;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .exposedHeaders("Set-Cookie")
-                .allowedOrigins(frontend,"http://localhost:5173")  // application.yml에서 가져온 값 사용
+                .allowedOrigins(frontend, aiServer, "http://localhost:5173", "http://localhost:8000")  // application.yml에서 가져온 값 사용
                 .allowCredentials(true);
     }
 }

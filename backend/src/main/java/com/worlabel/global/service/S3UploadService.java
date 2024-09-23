@@ -48,6 +48,7 @@ public class S3UploadService {
 
     public void uploadJson(final String json, final String dataUrl) {
         String key = getKeyFromImageAddress(dataUrl);
+        log.debug(key);
 
         try {
             byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);

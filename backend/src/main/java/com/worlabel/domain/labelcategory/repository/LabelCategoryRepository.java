@@ -12,4 +12,11 @@ public interface LabelCategoryRepository extends JpaRepository<LabelCategory, In
     @Query("SELECT l FROM LabelCategory l " +
             "WHERE l.aiModel.id = :modelId")
     List<LabelCategory> findAllByModelId(@Param("modelId") Integer modelId);
+
+
+    @Query("SELECT l FROM LabelCategory l " +
+            "WHERE l.aiModel.id = :modelId AND " +
+            "l.id IN :categoryList")
+    List<LabelCategory> findAllByIdsAndModelId(@Param("categoryList") List<Integer> labelCategoryList,@Param("modelId") Integer modelId);
+
 }

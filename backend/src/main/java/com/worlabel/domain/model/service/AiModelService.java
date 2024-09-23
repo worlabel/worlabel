@@ -16,14 +16,13 @@ import com.worlabel.domain.model.entity.dto.DefaultAiModelResponse;
 import com.worlabel.domain.model.entity.dto.DefaultResponse;
 import com.worlabel.domain.model.repository.AiModelRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.project.dto.RequestDto;
+import com.worlabel.domain.project.dto.AiDto;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -140,13 +139,13 @@ public class AiModelService {
 
         List<Image> images = imageRepository.findImagesByProjectId(projectId);
 
-        List<RequestDto.TrainDataInfo> data = images.stream().filter(image -> image.getStatus() == LabelStatus.COMPLETED)
-            .map(image -> new RequestDto.TrainDataInfo(image.getImagePath(), image.getDataPath()))
+        List<AiDto.TrainDataInfo> data = images.stream().filter(image -> image.getStatus() == LabelStatus.COMPLETED)
+            .map(image -> new AiDto.TrainDataInfo(image.getImagePath(), image.getDataPath()))
             .toList();
 
         String endPoint = project.getProjectType().getValue() + "/train";
 
-        RequestDto.TrainRequest trainRequest = new RequestDto.TrainRequest();
+        AiDto.TrainRequest trainRequest = new AiDto.TrainRequest();
         trainRequest.setProjectId(projectId);
         trainRequest.setCategoryId(categories);
         trainRequest.setData(data);

@@ -34,9 +34,9 @@ public enum ErrorCode {
     PROJECT_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, 4003, "해당 카테고리를 찾을 수 없습니다."),
 
     // Participant - 5000,
-    PARTICIPANT_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 5000, "해당 프로젝트에 참여하고 있지않습니다."),
-    PARTICIPANT_BAD_REQUEST(HttpStatus.UNAUTHORIZED, 5001, "자기 자신의 권한을 바꿀 수 없습니다."),
-    PARTICIPANT_EDITOR_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 5002, "해당 프로젝트에 수정 권한이 없습니다."),
+    PARTICIPANT_UNAUTHORIZED(HttpStatus.FORBIDDEN, 5000, "해당 프로젝트에 참여하고 있지않습니다."),
+    PARTICIPANT_BAD_REQUEST(HttpStatus.FORBIDDEN, 5001, "자기 자신의 권한을 바꿀 수 없습니다."),
+    PARTICIPANT_EDITOR_UNAUTHORIZED(HttpStatus.FORBIDDEN, 5002, "해당 프로젝트에 수정 권한이 없습니다."),
 
     // Folder - 6000,
 

@@ -1,18 +1,26 @@
 package com.worlabel.domain.project.service;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
+import com.worlabel.domain.labelcategory.entity.ProjectCategory;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
+import com.worlabel.domain.model.entity.AiModel;
+import com.worlabel.domain.model.repository.AiModelRepository;
 import com.worlabel.domain.participant.entity.Participant;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
-import com.worlabel.domain.project.dto.AutoLabelingImageRequest;
-import com.worlabel.domain.project.dto.AutoLabelingRequest;
-import com.worlabel.domain.project.dto.RequestDto.TrainRequest;
+import com.worlabel.domain.project.dto.AiDto;
+import com.worlabel.domain.project.dto.AiDto.AutoLabelingImageRequest;
+import com.worlabel.domain.project.dto.AiDto.AutoLabelingRequest;
+import com.worlabel.domain.project.dto.AiDto.AutoLabelingResult;
+import com.worlabel.domain.project.dto.AutoModelRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
@@ -24,11 +32,14 @@ import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
+import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,8 +55,10 @@ public class ProjectService {
     private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
     private final ImageRepository imageRepository;
-
+    private final AiModelRepository aiModelRepository;
     private final AiRequestService aiService;
+    private final Gson gson;
+    private final S3UploadService s3UploadService;
 
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
@@ -134,43 +147,80 @@ public class ProjectService {
         participantRepository.delete(participant);
     }
 
-//    @CheckPrivilege(PrivilegeType.EDITOR)
-//    public void train(final Integer memberId, final Integer projectId) {
-//        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다. -> 용수 추후 구현 예정
-//        /*
-//            없으면 redis 상태 테이블을 만든다. progressTable
-//         */
-//
-//        // FastAPI 서버로 학습 요청을 전송
-//        Project project = getProject(projectId);
-//        String endPoint = project.getProjectType().getValue() + "/train";
-//
-//        TrainRequest trainRequest = new TrainRequest();
-//        trainRequest.setProjectId(projectId);
-//        trainRequest.setData(List.of());
-//
-//        // FastAPI 서버로 POST 요청 전송
-//        String modelKey = aiService.postRequest(endPoint, trainRequest, String.class, response -> response);
-//
-//        // TODO: 모델 생성 후 Default 이름과 Key 값 설정
-//    }
-
     /**
      * 프로젝트별 오토 레이블링
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void autoLabeling(final Integer memberId, final Integer projectId) {
+    public void autoLabeling(final Integer memberId, final Integer projectId, final AutoModelRequest request) {
+        log.debug("project {}", projectId);
         Project project = getProject(projectId);
-        String endPoint = "auto/" + project.getProjectType().getValue();
+        String endPoint = project.getProjectType().getValue() + "/predict";
 
-        List<Image> imageList = imageRepository.findImagesByProjectId(projectId);
+        log.debug("이미지 조회");
+        List<Image> imageList = imageRepository.findImagesByProjectIdAndPending(projectId);
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();
-        AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, imageRequestList);
+
+        log.debug("카테고리 조회 ");
+        HashMap<Integer, Integer> labelMap = getLabelMap(project);
+
+        log.debug("모델 조회");
+        AiModel aiModel = getAiModel(request);
+        AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
         // 응답없음
-        aiService.postRequest(endPoint, autoLabelingRequest, Void.class, response -> null);
+        log.debug("요청");
+        List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
+        saveAutoLabelList(list);
+    }
+
+    public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
+        for(AutoLabelingResult result: resultList) {
+            Image image = getImage(result.getImageId());
+            String dataPath = image.getDataPath();
+            s3UploadService.uploadJson(result.getData(), dataPath);
+        }
+    }
+
+    /**
+     * 데이터 변환
+     */
+    private List<AutoLabelingResult> converter(String data) {
+        try {
+            log.debug("data :{}", data);
+            // Gson에서 리스트 형태로 변환할 타입을 지정
+            Type listType = new TypeToken<List<AutoLabelingResult>>() {
+            }.getType();
+
+            // JSON 배열을 List<AutoLabelingResult>로 변환
+            return gson.fromJson(data, listType);
+        } catch (JsonSyntaxException e) {
+            // JSON 파싱 중 오류가 발생한 경우 처리
+            throw new CustomException(ErrorCode.AI_SERVER_ERROR);
+        }
+    }
+
+    private AiModel getAiModel(AutoModelRequest request) {
+        return aiModelRepository.findById(request.getModelId())
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    private HashMap<Integer, Integer> getLabelMap(Project project) {
+        HashMap<Integer, Integer> labelMap = new HashMap<>();
+        List<ProjectCategory> category = project.getCategoryList();
+        for (ProjectCategory projectCategory : category) {
+            int aiId = projectCategory.getLabelCategory().getAiCategoryId();
+            if (labelMap.containsKey(aiId)) continue;
+
+            labelMap.put(aiId, projectCategory.getId());
+        }
+        return labelMap;
+    }
+
+    private Image getImage(final Long imageId){
+        return imageRepository.findById(imageId)
+                .orElseThrow(()-> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Project getProject(final Integer projectId) {
