@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,6 +6,7 @@ import { Form, FormControl, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { Button } from '../ui/button';
 import SearchInput from '../ui/search-input';
 import useSearchMembersByEmailQuery from '@/queries/members/useSearchMembersByEmailQuery';
+import debounce from 'lodash/debounce'; // 디바운스 사용
 
 const formSchema = z.object({
   memberId: z.number().nonnegative({ message: '멤버를 선택하세요.' }),
@@ -24,7 +25,19 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
   });
 
   const [keyword, setKeyword] = useState('');
-  const { data: members } = useSearchMembersByEmailQuery(keyword);
+  const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
+  const { data: members } = useSearchMembersByEmailQuery(debouncedKeyword);
+
+  const handleKeywordChange = debounce((value: string) => {
+    setDebouncedKeyword(value);
+  }, 300);
+
+  useEffect(() => {
+    handleKeywordChange(keyword);
+    return () => {
+      handleKeywordChange.cancel();
+    };
+  }, [handleKeywordChange, keyword]);
 
   const handleMemberSelect = (memberId: number) => {
     form.setValue('memberId', memberId);
@@ -42,7 +55,7 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
             <SearchInput
               placeholder="초대할 멤버의 이메일을 검색하세요."
               value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              onChange={(e) => setKeyword(e.target.value)} // 사용자 입력에 따라 상태 업데이트
             />
           </FormControl>
           <FormMessage />
