@@ -157,7 +157,7 @@ public class ProjectService {
         String endPoint = project.getProjectType().getValue() + "/predict";
 
         log.debug("이미지 조회");
-        List<Image> imageList = imageRepository.findImagesByProjectIdAndPendingOrInProgress(projectId);
+        List<Image> imageList = imageRepository.findImagesByProjectIdAndPending(projectId);
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();

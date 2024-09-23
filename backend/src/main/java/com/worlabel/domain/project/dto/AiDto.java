@@ -38,8 +38,6 @@ public class AiDto {
 //        private float ratio; // Default = 0.8
 //        private int epochs; // Default = 50
 //        private float batch; // Default = -1
-
-        // Getters and Setters
     }
 
     @Getter
