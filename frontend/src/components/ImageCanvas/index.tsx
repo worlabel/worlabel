@@ -9,9 +9,11 @@ import LabelPolygon from './LabelPolygon';
 import CanvasControlBar from '../CanvasControlBar';
 import useLabelJsonQuery from '@/queries/labelJson/useLabelJsonQuery';
 import { Label } from '@/types';
+import { useParams } from 'react-router-dom';
 
 export default function ImageCanvas() {
-  const { imagePath, dataPath } = useCanvasStore((state) => state.image)!;
+  const { projectId } = useParams<{ projectId: string }>();
+  const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
   const { data: labelData } = useLabelJsonQuery(dataPath);
   const { shapes } = labelData;
   const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
@@ -43,6 +45,25 @@ export default function ImageCanvas() {
     );
   }, [setLabels, shapes]);
 
+  const setLabel = (index: number) => (coordinates: [number, number][]) => {
+    const newLabels = [...labels];
+    newLabels[index].coordinates = coordinates;
+    setLabels(newLabels);
+  };
+  const saveJson = () => {
+    const json = JSON.stringify({
+      ...labelData,
+      shapes: labels.map(({ name, color, coordinates, type }) => ({
+        label: name,
+        color,
+        shape_type: type === 'polygon' ? 'polygon' : 'rectangle',
+        points: coordinates,
+      })),
+    });
+
+    console.log(projectId, imageId, json);
+    // TOOD: api 연결
+  };
   const startDrawRect = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
     setRectPoints([
@@ -250,6 +271,7 @@ export default function ImageCanvas() {
                 isSelected={label.id === selectedLabelId}
                 onSelect={() => setSelectedLabelId(label.id)}
                 info={label}
+                setLabel={setLabel(label.id)}
                 dragLayer={dragLayerRef.current as Konva.Layer}
               />
             ) : (
@@ -312,7 +334,7 @@ export default function ImageCanvas() {
 
         <Layer ref={dragLayerRef} />
       </Stage>
-      <CanvasControlBar />
+      <CanvasControlBar saveJson={saveJson} />
     </div>
   ) : (
     <div></div>
