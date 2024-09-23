@@ -61,11 +61,9 @@ class FolderServiceUnitTest {
     void throws_exception_when_create_folder_without_privileges() {
         // given
         FolderRequest request = new FolderRequest("New Folder", 0);
-        given(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(anyInt(), anyInt()))
-                .willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> folderService.createFolder(1, 1, request))
+        assertThatThrownBy(() -> folderService.createFolder(1, request))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.FOLDER_UNAUTHORIZED.getMessage());
     }
@@ -75,13 +73,11 @@ class FolderServiceUnitTest {
     void success_when_create_folder() {
         // given
         FolderRequest request = new FolderRequest("New Folder", 0);
-        given(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(anyInt(), anyInt()))
-                .willReturn(false);
         given(projectRepository.findById(anyInt())).willReturn(Optional.of(project));
         given(folderRepository.save(any(Folder.class))).willReturn(folder);
 
         // when
-        FolderResponse response = folderService.createFolder(1, 1, request);
+        FolderResponse response = folderService.createFolder(1, request);
 
         // then
         assertNotNull(response);
@@ -95,7 +91,7 @@ class FolderServiceUnitTest {
         given(participantRepository.existsByMemberIdAndProjectId(anyInt(), anyInt())).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> folderService.getFolderById(1, 1, 1))
+        assertThatThrownBy(() -> folderService.getFolderById(1, 1))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.BAD_REQUEST.getMessage());
     }
@@ -108,7 +104,7 @@ class FolderServiceUnitTest {
         given(folderRepository.findAllByProjectIdAndId(anyInt(), anyInt())).willReturn(Optional.of(folder));
 
         // when
-        FolderResponse response = folderService.getFolderById(1, 1, 1);
+        FolderResponse response = folderService.getFolderById(1, 1);
 
         // then
         assertNotNull(response);
@@ -118,12 +114,9 @@ class FolderServiceUnitTest {
     @DisplayName("폴더 삭제 시 참가자 권한이 없으면 예외가 발생한다.")
     @Test
     void throws_exception_when_delete_folder_without_privileges() {
-        // given
-        given(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(anyInt(), anyInt()))
-                .willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> folderService.deleteFolder(1, 1, 1))
+        assertThatThrownBy(() -> folderService.deleteFolder(1, 1))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.FOLDER_UNAUTHORIZED.getMessage());
     }
@@ -132,12 +125,10 @@ class FolderServiceUnitTest {
     @Test
     void success_when_delete_folder() {
         // given
-        given(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(anyInt(), anyInt()))
-                .willReturn(false);
         given(folderRepository.findAllByProjectIdAndId(anyInt(), anyInt())).willReturn(Optional.of(folder));
 
         // when
-        folderService.deleteFolder(1, 1, 1);
+        folderService.deleteFolder(1, 1);
 
         // then
         verify(folderRepository, times(1)).delete(folder);
@@ -148,11 +139,9 @@ class FolderServiceUnitTest {
     void throws_exception_when_update_folder_without_privileges() {
         // given
         FolderRequest request = new FolderRequest("Updated Folder", 0);
-        given(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(anyInt(), anyInt()))
-                .willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> folderService.updateFolder(1, 1, 1, request))
+        assertThatThrownBy(() -> folderService.updateFolder( 1, 1, request))
                 .isInstanceOf(CustomException.class)
                 .hasMessageContaining(ErrorCode.FOLDER_UNAUTHORIZED.getMessage());
     }
@@ -162,12 +151,11 @@ class FolderServiceUnitTest {
     void success_when_update_folder() {
         // given
         FolderRequest request = new FolderRequest("Updated Folder", 0);
-        given(participantRepository.doesParticipantUnauthorizedExistByMemberIdAndProjectId(anyInt(), anyInt()))
-                .willReturn(false);
+
         given(folderRepository.findAllByProjectIdAndId(anyInt(), anyInt())).willReturn(Optional.of(folder));
 
         // when
-        FolderResponse response = folderService.updateFolder(1, 1, 1, request);
+        FolderResponse response = folderService.updateFolder( 1, 1, request);
 
         // then
         assertNotNull(response);

@@ -50,10 +50,9 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/models")
     public void addModel(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId,
         @Valid @RequestBody final AiModelRequest aiModelRequest) {
-        aiModelService.addModel(memberId, projectId, aiModelRequest);
+        aiModelService.addModel(projectId, aiModelRequest);
     }
 
     @Operation(summary = "프로젝트 모델 이름 변경", description = "프로젝트에 있는 모델의 이름을 변경합니다.")
@@ -61,11 +60,10 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}/models/{model_id}")
     public void renameModel(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId,
         @PathVariable("model_id") final Integer modelId,
         @Valid @RequestBody final AiModelRequest aiModelRequest) {
-        aiModelService.renameModel(memberId, projectId, modelId, aiModelRequest);
+        aiModelService.renameModel(projectId, modelId, aiModelRequest);
     }
 
     @Operation(summary = "프로젝트 모델 학습", description = "프로젝트 모델을 학습시킵니다.")
@@ -73,9 +71,8 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/train")
     public void trainModel(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId,
         @RequestBody final Integer modelId) {
-        aiModelService.train(memberId, projectId, modelId);
+        aiModelService.train(projectId, modelId);
     }
 }

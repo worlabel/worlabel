@@ -44,10 +44,7 @@ public enum ErrorCode {
 
     // AI - 8000
     AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 8000, "AI 서버 오류 입니다."),
-
-    // Comment - 9000,
-
-    // review - 10000,
+    AI_IN_PROGRESS(HttpStatus.CONFLICT, 8001, "이미 해당 프로젝트로 요청 진행중입니다."),
 
     ;
     private final HttpStatus status;

@@ -16,7 +16,6 @@ import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
-import com.worlabel.domain.project.dto.AiDto;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingImageRequest;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingRequest;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingResult;
@@ -30,12 +29,14 @@ import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
+import com.worlabel.global.cache.CacheKey;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
 import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,21 +48,23 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ProjectService {
 
-    private final ProjectRepository projectRepository;
-    private final WorkspaceRepository workspaceRepository;
-    private final ParticipantRepository participantRepository;
-    private final MemberRepository memberRepository;
     private final WorkspaceParticipantRepository workspaceParticipantRepository;
-    private final ImageRepository imageRepository;
+    private final ParticipantRepository participantRepository;
+    private final WorkspaceRepository workspaceRepository;
     private final AiModelRepository aiModelRepository;
-    private final AiRequestService aiService;
-    private final Gson gson;
+    private final ProjectRepository projectRepository;
+    private final MemberRepository memberRepository;
     private final S3UploadService s3UploadService;
+    private final ImageRepository imageRepository;
+    private final AiRequestService aiService;
 
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final Gson gson;
+
+    @Transactional
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
         Member member = getMember(memberId);
@@ -75,9 +78,8 @@ public class ProjectService {
         return ProjectResponse.from(project);
     }
 
-    @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public ProjectResponse getProjectById(final Integer memberId, final Integer projectId) {
+    public ProjectResponse getProjectById(final Integer projectId) {
         Project project = getProject(projectId);
         return ProjectResponse.from(project);
     }
@@ -89,21 +91,23 @@ public class ProjectService {
             .toList();
     }
 
+    @Transactional
     @CheckPrivilege(PrivilegeType.ADMIN)
-    public ProjectResponse updateProject(final Integer memberId, final Integer projectId, final ProjectRequest projectRequest) {
+    public ProjectResponse updateProject(final Integer projectId, final ProjectRequest projectRequest) {
         Project project = getProject(projectId);
         project.updateProject(projectRequest.getTitle(), projectRequest.getProjectType());
 
         return ProjectResponse.from(project);
     }
 
+    @Transactional
     @CheckPrivilege(PrivilegeType.ADMIN)
-    public void deleteProject(final Integer memberId, final Integer projectId) {
+    public void deleteProject(final Integer projectId) {
         projectRepository.deleteById(projectId);
     }
 
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public List<ProjectMemberResponse> getProjectMember(final Integer memberId, final Integer projectId) {
+    public List<ProjectMemberResponse> getProjectMember(final Integer projectId) {
         List<Participant> participants = participantRepository.findAllByProjectIdWithMember(projectId);
 
         return participants.stream()
@@ -111,6 +115,7 @@ public class ProjectService {
                 .toList();
     }
 
+    @Transactional
     @CheckPrivilege(PrivilegeType.ADMIN)
     public void addProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
         checkSelfParticipant(memberId, participantRequest.getMemberId());
@@ -131,7 +136,7 @@ public class ProjectService {
     }
 
     @CheckPrivilege(PrivilegeType.ADMIN)
-    public void changeProjectMember(final Integer memberId, final Integer projectId, final ParticipantRequest participantRequest) {
+    public void changeProjectMember(final Integer projectId, final ParticipantRequest participantRequest) {
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(participantRequest.getMemberId(), projectId)
@@ -139,8 +144,9 @@ public class ProjectService {
         participant.updatePrivilege(participantRequest.getPrivilegeType());
     }
 
+    @Transactional
     @CheckPrivilege(PrivilegeType.ADMIN)
-    public void removeProjectMember(final Integer memberId, final Integer projectId, final Integer removeMemberId) {
+    public void removeProjectMember(final Integer projectId, final Integer removeMemberId) {
         checkNotAdminParticipant(removeMemberId, projectId);
 
         Participant participant = participantRepository.findByMemberIdAndProjectId(removeMemberId, projectId)
@@ -153,7 +159,9 @@ public class ProjectService {
      * 프로젝트별 오토 레이블링
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void autoLabeling(final Integer memberId, final Integer projectId, final AutoModelRequest request) {
+    public void autoLabeling(final Integer projectId, final AutoModelRequest request) {
+        autoLabelingProgressCheck(projectId);
+        
         log.debug("project {}", projectId);
         Project project = getProject(projectId);
         String endPoint = project.getProjectType().getValue() + "/predict";
@@ -175,8 +183,22 @@ public class ProjectService {
         log.debug("요청");
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
         saveAutoLabelList(list);
+
     }
 
+    private void autoLabelingProgressCheck(final int projectId) {
+        String key = CacheKey.autoLabelingProgressKey();
+
+        Boolean isProgress = redisTemplate.opsForSet().isMember(key, projectId);
+        if(Boolean.TRUE.equals(isProgress)) {
+            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+        }
+
+        // 학습 진행중으로 등록
+        redisTemplate.opsForSet().add(key, projectId);
+    }
+
+    @Transactional
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
         for(AutoLabelingResult result: resultList) {
             Image image = getImage(result.getImageId());

@@ -26,10 +26,9 @@ public class FolderController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping
     public FolderResponse createFolder(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @RequestBody final FolderRequest folderRequest) {
-        return folderService.createFolder(memberId, projectId, folderRequest);
+        return folderService.createFolder(projectId, folderRequest);
     }
 
     @Operation(summary = "폴더 조회", description = "폴더의 내용을 조회합니다.")
@@ -37,10 +36,9 @@ public class FolderController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/{folder_id}")
     public FolderResponse getFolderById(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) {
-        return folderService.getFolderById(memberId, projectId, folderId);
+        return folderService.getFolderById(projectId, folderId);
     }
 
     @Operation(summary = "폴더 하위 리뷰해야할 목록만 조회", description = "폴더하위 리뷰해야할 목록을 조회합니다.")
@@ -48,10 +46,9 @@ public class FolderController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/{folder_id}/review")
     public FolderResponse getFolderByIdWithNeedReview(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) {
-        return folderService.getFolderByIdWithNeedReview(memberId, projectId, folderId);
+        return folderService.getFolderByIdWithNeedReview(projectId, folderId);
     }
 
     @Operation(summary = "폴더 수정", description = "폴더 정보를 수정합니다.")
@@ -59,11 +56,10 @@ public class FolderController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PutMapping("/{folder_id}")
     public FolderResponse updateFolder(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId,
             @RequestBody FolderRequest folderRequest) {
-        return folderService.updateFolder(memberId, projectId, folderId, folderRequest);
+        return folderService.updateFolder(projectId, folderId, folderRequest);
     }
 
     @Operation(summary = "폴더 삭제", description = "폴더를 삭제합니다.")
@@ -71,9 +67,8 @@ public class FolderController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @DeleteMapping("/{folder_id}")
     public void deleteFolder(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) {
-        folderService.deleteFolder(memberId, projectId, folderId);
+        folderService.deleteFolder(projectId, folderId);
     }
 }

@@ -5,7 +5,6 @@ import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.folder.entity.dto.FolderRequest;
 import com.worlabel.domain.folder.entity.dto.FolderResponse;
 import com.worlabel.domain.participant.entity.PrivilegeType;
-import com.worlabel.domain.participant.service.ParticipantService;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
@@ -27,7 +26,7 @@ public class FolderService {
      * 폴더 생성
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public FolderResponse createFolder(final Integer memberId, final Integer projectId, final FolderRequest folderRequest) {
+    public FolderResponse createFolder(final Integer projectId, final FolderRequest folderRequest) {
         Project project = getProject(projectId);
 
         Folder parent = null;
@@ -46,7 +45,7 @@ public class FolderService {
      */
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public FolderResponse getFolderById(final Integer memberId, final Integer projectId, final Integer folderId) {
+    public FolderResponse getFolderById(final Integer projectId, final Integer folderId) {
         // 최상위 폴더
         if (folderId == 0) {
             return FolderResponse.from(folderRepository.findAllByProjectIdAndParentIsNull(projectId));
@@ -59,7 +58,7 @@ public class FolderService {
      * 폴더 수정
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public FolderResponse updateFolder(final Integer memberId, final Integer projectId, final Integer folderId, final FolderRequest updatedFolderRequest) {
+    public FolderResponse updateFolder(final Integer projectId, final Integer folderId, final FolderRequest updatedFolderRequest) {
         Folder folder = getFolder(folderId, projectId);
 
         Folder parentFolder = folderRepository.findById(updatedFolderRequest.getParentId())
@@ -74,7 +73,7 @@ public class FolderService {
      * 폴더 삭제
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void deleteFolder(final Integer memberId, final Integer projectId, final Integer folderId) {
+    public void deleteFolder(final Integer projectId, final Integer folderId) {
         Folder folder = getFolder(folderId, projectId);
         folderRepository.delete(folder);
     }
@@ -83,7 +82,7 @@ public class FolderService {
      *  리뷰 목록만 조회
      */
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public FolderResponse getFolderByIdWithNeedReview(final Integer memberId, final Integer projectId, final Integer folderId) {
+    public FolderResponse getFolderByIdWithNeedReview(final Integer projectId, final Integer folderId) {
         // 최상위 폴더
         if (folderId == 0) {
             return FolderResponse.from(folderRepository.findAllByProjectIdAndParentIsNull(projectId));

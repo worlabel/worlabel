@@ -20,11 +20,13 @@ import com.worlabel.domain.project.dto.AiDto;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
+import com.worlabel.global.cache.CacheKey;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,27 +47,28 @@ public class AiModelService {
     private final LabelCategoryRepository labelCategoryRepository;
     private final ImageRepository imageRepository;
     private final AiRequestService aiRequestService;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final Gson gson;
 
-//    @PostConstruct
+    //    @PostConstruct
     public void loadDefaultModel() {
         String url = "model/default";
         List<DefaultResponse> defaultResponseList = aiRequestService.getRequest(url, this::converter);
 
         // 1. DefaultResponse의 Key값만 모아서 리스트로 만든다.
         List<String> allModelKeys = defaultResponseList.stream()
-            .map(response -> response.getDefaultAiModelResponse().getModelKey())
-            .toList();
+                .map(response -> response.getDefaultAiModelResponse().getModelKey())
+                .toList();
 
         // 2. 해당 Key값이 DB에 있는지 확인하기 (한 번의 쿼리로)
         List<String> existingModelKeys = aiModelRepository.findAllByModelKeyIn(allModelKeys).stream()
-            .map(AiModel::getModelKey)
-            .toList();
+                .map(AiModel::getModelKey)
+                .toList();
 
         // 3. DB에 없는 Key만 필터링해서 처리
         List<DefaultResponse> newModel = defaultResponseList.stream()
-            .filter(model -> !existingModelKeys.contains(model.getDefaultAiModelResponse().getModelKey()))
-            .toList();
+                .filter(model -> !existingModelKeys.contains(model.getDefaultAiModelResponse().getModelKey()))
+                .toList();
 
 
         // 새롭게 추가된 값을 디비에 저장
@@ -90,13 +93,13 @@ public class AiModelService {
     @Transactional(readOnly = true)
     public List<AiModelResponse> getModelList(final Integer projectId) {
         return aiModelRepository.findAllByProjectId(projectId)
-            .stream()
-            .map(AiModelResponse::of)
-            .toList();
+                .stream()
+                .map(AiModelResponse::of)
+                .toList();
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void addModel(final Integer memberId, final Integer projectId, final AiModelRequest aiModelRequest) {
+    public void addModel(final Integer projectId, final AiModelRequest aiModelRequest) {
         Project project = getProject(projectId);
         AiModel aiModel = AiModel.of(aiModelRequest.getName(), project);
 
@@ -104,7 +107,7 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void renameModel(final Integer memberId, final Integer projectId, final int modelId, final AiModelRequest aiModelRequest) {
+    public void renameModel(final Integer projectId, final int modelId, final AiModelRequest aiModelRequest) {
         AiModel customModel = getCustomModel(modelId);
         customModel.rename(aiModelRequest.getName());
 
@@ -119,29 +122,26 @@ public class AiModelService {
     public List<LabelCategoryResponse> getCategories(final Integer modelId) {
         List<LabelCategory> categoryList = labelCategoryRepository.findAllByModelId(modelId);
         return categoryList.stream()
-            .map(LabelCategoryResponse::from)
-            .toList();
+                .map(LabelCategoryResponse::from)
+                .toList();
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void train(Integer memberId, Integer projectId, Integer modelId) {
-        // TODO: 레디스 train 테이블에 존재하는지 확인 -> 이미 있으면 있다고 예외를 던져준다. -> 용수 추후 구현 예정
-        /*
-            없으면 redis 상태 테이블을 만든다. progressTable
-         */
+    public void train(final Integer projectId, Integer modelId) {
+        trainProgressCheck(projectId);
 
         // FastAPI 서버로 학습 요청을 전송
         Project project = getProject(projectId);
         AiModel model = getModel(modelId);
         List<LabelCategory> labelCategories = labelCategoryRepository.findAllByModelId(modelId);
         List<Integer> categories = labelCategories.stream()
-            .map(LabelCategory::getAiCategoryId).toList();
+                .map(LabelCategory::getAiCategoryId).toList();
 
         List<Image> images = imageRepository.findImagesByProjectId(projectId);
 
         List<AiDto.TrainDataInfo> data = images.stream().filter(image -> image.getStatus() == LabelStatus.COMPLETED)
-            .map(image -> new AiDto.TrainDataInfo(image.getImagePath(), image.getDataPath()))
-            .toList();
+                .map(image -> new AiDto.TrainDataInfo(image.getImagePath(), image.getDataPath()))
+                .toList();
 
         String endPoint = project.getProjectType().getValue() + "/train";
 
@@ -162,6 +162,22 @@ public class AiModelService {
     }
 
     /**
+     * Redis 중복 요청 체크
+     */
+    private void trainProgressCheck(Integer projectId) {
+        String trainProgressKey = CacheKey.trainProgressKey();
+
+        // 존재 확인
+        Boolean isProjectExist = redisTemplate.opsForSet().isMember(trainProgressKey, projectId);
+        if (Boolean.TRUE.equals(isProjectExist)) {
+            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+        }
+
+        // 학습 진행 중으로 상태 등록
+        redisTemplate.opsForSet().add(trainProgressKey, projectId);
+    }
+
+    /**
      * Json -> List<DefaultResponse>
      */
     // TODO: 추후 리팩토링 해야함 이건 예시
@@ -171,18 +187,17 @@ public class AiModelService {
             }.getType();
             return gson.fromJson(data, listType);
         } catch (Exception e) {
-            log.debug("TODO: 추후 리팩토링 해야함 이건 예시");
             throw new CustomException(ErrorCode.BAD_REQUEST);
         }
     }
 
     private Project getProject(Integer projectId) {
         return projectRepository.findById(projectId)
-            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private AiModel getModel(Integer modelId) {
         return aiModelRepository.findById(modelId)
-            .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 }

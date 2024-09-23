@@ -45,8 +45,8 @@ public class ProjectController {
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @GetMapping("/projects/{project_id}")
-    public ProjectResponse getProject(@CurrentUser final Integer memberId, @PathVariable("project_id") final Integer projectId) {
-        return projectService.getProjectById(memberId, projectId);
+    public ProjectResponse getProject(@PathVariable("project_id") final Integer projectId) {
+        return projectService.getProjectById(projectId);
     }
 
     @Operation(summary = "전체 프로젝트 조회", description = "모든 프로젝트를 조회합니다.")
@@ -66,10 +66,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}")
     public ProjectResponse updateProject(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId,
         @Valid @RequestBody final ProjectRequest projectRequest) {
-        return projectService.updateProject(memberId, projectId, projectRequest);
+        return projectService.updateProject(projectId, projectRequest);
     }
 
     @Operation(summary = "프로젝트 오토 레이블링", description = "해당 프로젝트 이미지를 오토레이블링합니다.")
@@ -77,19 +76,17 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/auto")
     public void autoLabeling(
-            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @RequestBody final AutoModelRequest request) {
-        projectService.autoLabeling(memberId, projectId, request);
+        projectService.autoLabeling(projectId, request);
     }
 
     @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제합니다.")
     @SwaggerApiSuccess(description = "프로젝트를 성공적으로 삭제합니다.")
     @SwaggerApiError({ErrorCode.PROJECT_NOT_FOUND, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     @DeleteMapping("/projects/{project_id}")
-    public void deleteProject(@CurrentUser final Integer memberId,
-                              @PathVariable("project_id") final Integer projectId) {
-        projectService.deleteProject(memberId, projectId);
+    public void deleteProject(@PathVariable("project_id") final Integer projectId) {
+        projectService.deleteProject(projectId);
     }
 
     @Operation(summary = "프로젝트 멤버 추가", description = "새로운 프로젝트 멤버를 추가합니다.")
@@ -108,10 +105,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}/members")
     public void changeProjectMember(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId,
         @Valid @RequestBody final ParticipantRequest participantRequest) {
-        projectService.changeProjectMember(memberId, projectId, participantRequest);
+        projectService.changeProjectMember(projectId, participantRequest);
     }
 
     @Operation(summary = "프로젝트 멤버 제거", description = "프로젝트 멤버를 제거합니다.")
@@ -119,10 +115,9 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @DeleteMapping("/projects/{project_id}/members")
     public void removeProjectMember(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId,
         @Valid @RequestBody final Integer removeMemberId) {
-        projectService.removeProjectMember(memberId, projectId, removeMemberId);
+        projectService.removeProjectMember(projectId, removeMemberId);
     }
 
     @Operation(summary = "프로젝트 멤버 조회", description = "프로젝트 멤버를 조회합니다.")
@@ -130,8 +125,7 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/projects/{project_id}/members")
     public List<ProjectMemberResponse> getProjectMember(
-        @CurrentUser final Integer memberId,
         @PathVariable("project_id") final Integer projectId) {
-        return projectService.getProjectMember(memberId, projectId);
+        return projectService.getProjectMember(projectId);
     }
 }
