@@ -33,9 +33,9 @@ public class ImageController {
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public void uploadImage(
             @CurrentUser final Integer memberId,
-            @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
-            @Parameter(name = "폴더에 추가 할 이미지 리스트", description = "MultiPartFile을 imageList로 추가해준다.", example = "") @RequestBody final List<MultipartFile> imageList) {
+            @PathVariable("folder_id") final Integer folderId,
+            @Parameter(name = "폴더에 추가 할 이미지 리스트", description = "MultiPartFile을 imageList로 추가해준다.", example = "") @RequestPart final List<MultipartFile> imageList) {
         imageService.uploadImageList(imageList, folderId, projectId, memberId);
     }
 
@@ -45,8 +45,9 @@ public class ImageController {
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public void uploadFolder(
             @Parameter(name = "폴더", description = "MultiPartFile을 폴더나 zip으로 추가해준다.", example = "") @RequestPart final MultipartFile folderZip,
-            @PathVariable("project_id") Integer projectId) throws IOException {
-        imageService.uploadFolderWithImages(folderZip, projectId);
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("folder_id") final Integer folderId) throws IOException {
+        imageService.uploadFolderWithImages(folderZip, projectId, folderId);
     }
 
     @GetMapping("/{image_id}")

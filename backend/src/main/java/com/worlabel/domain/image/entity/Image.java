@@ -41,12 +41,6 @@ public class Image extends BaseEntity {
     private String extension;
 
     /**
-     * 이미지 순서
-     */
-    @Column(name = "image_order", nullable = false)
-    private Integer order;
-
-    /**
      * 이미지 레이블링 상태
      */
     @Column(name = "status", nullable = false)
@@ -61,16 +55,15 @@ public class Image extends BaseEntity {
     @JsonIgnore
     private Folder folder;
 
-    private Image(final String imageTitle, final String imageKey, final String extension, final Integer order, final Folder folder) {
+    private Image(final String imageTitle, final String imageKey, final String extension, final Folder folder) {
         this.title = imageTitle;
         this.imageKey = imageKey;
         this.extension = extension;
-        this.order = order;
         this.folder = folder;
     }
 
-    public static Image of(final String imageTitle, final String imageKey,final String extension, final Integer order, final Folder folder) {
-        return new Image(imageTitle, imageKey, extension, order, folder);
+    public static Image of(final String imageTitle, final String imageKey, final String extension, final Folder folder) {
+        return new Image(imageTitle, imageKey, extension, folder);
     }
 
     public void moveFolder(final Folder moveFolder) {
@@ -81,11 +74,11 @@ public class Image extends BaseEntity {
         this.status = labelStatus;
     }
 
-    public String getImagePath(){
+    public String getImagePath() {
         return this.imageKey + "." + this.extension;
     }
 
-    public String getDataPath(){
+    public String getDataPath() {
         return this.imageKey + ".json";
     }
 }
