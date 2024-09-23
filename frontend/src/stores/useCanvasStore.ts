@@ -1,12 +1,14 @@
-import { ImageResponse, Label } from '@/types';
+import { ImageResponse, Label, Project } from '@/types';
 import { create } from 'zustand';
 
 interface CanvasState {
+  project: Project | null;
   sidebarSize: number;
   image: ImageResponse | null;
   labels: Label[];
   drawState: 'pen' | 'rect' | 'pointer';
   selectedLabelId: number | null;
+  setProject: (project: Project | null) => void;
   setSidebarSize: (width: number) => void;
   setImage: (image: ImageResponse) => void;
   setLabels: (labels: Label[]) => void;
@@ -18,11 +20,13 @@ interface CanvasState {
 }
 
 const useCanvasStore = create<CanvasState>()((set) => ({
+  project: null,
   sidebarSize: 20,
   image: null,
   labels: [],
   drawState: 'pointer',
   selectedLabelId: null,
+  setProject: (project) => set({ project }),
   setSidebarSize: (width) => set({ sidebarSize: width }),
   setImage: (image) => set({ image }),
   addLabel: (label: Label) => set((state) => ({ labels: [...state.labels, label] })),

@@ -7,15 +7,15 @@ import LabelRect from './LabelRect';
 import { Vector2d } from 'konva/lib/types';
 import LabelPolygon from './LabelPolygon';
 import CanvasControlBar from '../CanvasControlBar';
-import useLabelJsonQuery from '@/queries/labelJson/useLabelJsonQuery';
 import { Label } from '@/types';
-import { useParams } from 'react-router-dom';
+import useLabelJson from '@/hooks/useLabelJson';
+import { saveImageLabels } from '@/api/lablingApi';
 
 export default function ImageCanvas() {
-  const { projectId } = useParams<{ projectId: string }>();
+  const project = useCanvasStore((state) => state.project)!;
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
-  const { data: labelData } = useLabelJsonQuery(dataPath);
-  const { shapes } = labelData;
+  const { data: labelData, refetch } = useLabelJson(dataPath, project);
+  const { shapes } = labelData || [];
   const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
   const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
   const sidebarSize = useCanvasStore((state) => state.sidebarSize);
@@ -45,6 +45,10 @@ export default function ImageCanvas() {
     );
   }, [setLabels, shapes]);
 
+  useEffect(() => {
+    setSelectedLabelId(null);
+  }, [image, setSelectedLabelId]);
+
   const setLabel = (index: number) => (coordinates: [number, number][]) => {
     const newLabels = [...labels];
     newLabels[index].coordinates = coordinates;
@@ -61,8 +65,13 @@ export default function ImageCanvas() {
       })),
     });
 
-    console.log(projectId, imageId, json);
-    // TOOD: api 연결
+    saveImageLabels(project.id, imageId, { data: json })
+      .catch(() => {
+        alert('레이블 데이터 저장 실패');
+      })
+      .then(() => {
+        refetch();
+      });
   };
   const startDrawRect = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
@@ -140,7 +149,7 @@ export default function ImageCanvas() {
     const color = Math.floor(Math.random() * 65535)
       .toString(16)
       .padStart(6, '0');
-    const id = labels.length + 1;
+    const id = labels.length;
     addLabel({
       id: id,
       name: 'label',

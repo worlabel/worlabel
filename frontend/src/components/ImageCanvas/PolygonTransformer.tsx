@@ -92,7 +92,6 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage,
       <Line
         points={coordinates.flat()}
         stroke="#00a1ff"
-        // strokeWidth={1 / stage.getAbsoluteScale().x}
         strokeWidth={1}
         strokeScaleEnabled={false}
         closed
