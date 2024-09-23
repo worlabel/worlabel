@@ -12,12 +12,12 @@ export default function WorkspaceLabelBar() {
   };
 
   return (
-    <div className="flex h-full w-[280px] flex-col justify-between border-l border-gray-300 bg-gray-50">
+    <div className="flex h-full w-[280px] flex-col justify-between gap-2 border-l border-gray-300 bg-gray-50 p-3">
       <div className="flex flex-col gap-2.5">
-        <header className="subheading flex w-full items-center gap-2 px-5 py-2.5">
+        <header className="subheading flex w-full items-center gap-2">
           <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">레이블 목록</h1>
         </header>
-        <div className="flex flex-col gap-1 px-2.5">
+        <div className="flex flex-col gap-1">
           {labels.map((label) => (
             <LabelButton
               key={label.id}
