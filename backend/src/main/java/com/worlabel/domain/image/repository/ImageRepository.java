@@ -23,6 +23,13 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     Optional<Image> findByIdAndFolderIdAndFolderProjectId(Long imageId, Integer folderId, Integer projectId);
 
+    @Query(value = "SELECT i.* FROM project_image i " +
+        "JOIN folder f ON i.folder_id = f.folder_id " +
+        "JOIN project p ON f.project_id = p.project_id " +
+        "WHERE p.project_id = :projectId " +
+        "LIMIT 1", nativeQuery = true)
+    Optional<Image> findFirstImageByProjectId(@Param("projectId") Integer projectId);
+
     @Query("SELECT i FROM Image i " +
             "JOIN FETCH i.folder f " +
             "JOIN FETCH f.project p " +
