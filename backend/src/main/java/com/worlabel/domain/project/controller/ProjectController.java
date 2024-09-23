@@ -5,7 +5,6 @@ import com.worlabel.domain.project.dto.AutoModelRequest;
 import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.domain.project.entity.dto.ProjectResponse;
-import com.worlabel.domain.project.entity.dto.ProjectResponses;
 import com.worlabel.domain.project.service.ProjectService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -53,13 +52,12 @@ public class ProjectController {
     @SwaggerApiSuccess(description = "전체 프로젝트를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.SERVER_ERROR})
     @GetMapping("/workspaces/{workspace_id}/projects")
-    public ProjectResponses getProjects(
+    public List<ProjectResponse> getProjects(
         @PathVariable("workspace_id") Integer workspaceId,
         @CurrentUser final Integer memberId,
         @Parameter(name = "마지막 프로젝트 id", description = "마지막 프로젝트 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastProjectId,
         @Parameter(name = "가져올 프로젝트 수", description = "가져올 프로젝트 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage) {
-        List<ProjectResponse> projects = projectService.getProjectsByWorkspaceId(workspaceId, memberId, lastProjectId, limitPage);
-        return ProjectResponses.from(projects);
+        return projectService.getProjectsByWorkspaceId(workspaceId, memberId, lastProjectId, limitPage);
     }
 
     @Operation(summary = "프로젝트 수정", description = "프로젝트를 수정합니다.")
