@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile
 from schemas.model_create_request import ModelCreateRequest
-from services.create_model import create_new_model, upload_tmp_model
+from services.create_model import create_new_model, save_model
 from services.load_model import load_model
 from utils.file_utils import get_model_keys, delete_file, join_path, save_file, get_file_name
 import re
@@ -63,7 +63,7 @@ def upload_model(project_id:int, file: UploadFile = File(...)):
     
     # YOLO 모델 변환 및 저장
     try:
-        model_path = upload_tmp_model(project_id, tmp_path)
+        model_path = save_model(project_id, tmp_path)
         return {"model_path": model_path}
     except Exception as e:
         raise HTTPException(status_code=500, detail="file save exception: "+str(e))
