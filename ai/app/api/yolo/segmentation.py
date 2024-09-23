@@ -9,7 +9,6 @@ router = APIRouter()
 
 @router.post("/predict", response_model=List[PredictResponse])
 def predict(request: PredictRequest):
-    version = "0.1.0"
     
     # 모델 로드
     try:
@@ -37,7 +36,7 @@ def predict(request: PredictRequest):
     try:
         for (image, result) in zip(request.image_list, results):
             label_data:LabelData = {
-                "version": version,
+                "version": "0.0.0",
                 "task_type": "seg",
                 "shapes": [
                     {

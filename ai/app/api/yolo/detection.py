@@ -15,8 +15,6 @@ router = APIRouter()
 
 @router.post("/predict")
 async def detection_predict(request: PredictRequest):
-    version = "0.1.0"
-
     # Spring 서버의 WebSocket URL
     # TODO: 배포 시 변경
     spring_server_ws_url = f"ws://localhost:8080/ws"
@@ -30,6 +28,12 @@ async def detection_predict(request: PredictRequest):
         model = load_detection_model(model_path=model_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail="load model exception: " + str(e))
+    
+    # 모델 레이블 카테고리 연결
+    classes = None
+    if request.label_map:
+        classes = list(request.label_map)
+
 
     # 웹소켓 연결
     try:
@@ -46,12 +50,12 @@ async def detection_predict(request: PredictRequest):
                     source=image.image_url,
                     iou=request.iou_threshold,
                     conf=request.conf_threshold,
-                    classes=request.classes
+                    classes=classes
                 )
                 # 예측 결과 처리
                 result = predict_results[0]
                 label_data = LabelData(
-                    version=version,
+                    version="0.0.0",
                     task_type="det",
                     shapes=[
                         {
@@ -61,7 +65,7 @@ async def detection_predict(request: PredictRequest):
                                 [summary['box']['x1'], summary['box']['y1']],
                                 [summary['box']['x2'], summary['box']['y2']]
                             ],
-                            "group_id": summary['class'],
+                            "group_id": request.label_map[summary['class']] if request.label_map else summary['class'],
                             "shape_type": "rectangle",
                             "flags": {}
                         }
@@ -105,13 +109,12 @@ async def detection_predict(request: PredictRequest):
                     source=image.image_url,
                     iou=request.iou_threshold,
                     conf=request.conf_threshold,
-                    classes=request.classes
+                    classes=classes
                 )
-
                 # 예측 결과 처리
                 result = predict_results[0]
                 label_data = LabelData(
-                    version=version,
+                    version="0.0.0",
                     task_type="det",
                     shapes=[
                         {
@@ -121,7 +124,7 @@ async def detection_predict(request: PredictRequest):
                                 [summary['box']['x1'], summary['box']['y1']],
                                 [summary['box']['x2'], summary['box']['y2']]
                             ],
-                            "group_id": summary['class'],
+                            "group_id": request.label_map[summary['class']] if request.label_map else summary['class'],
                             "shape_type": "rectangle",
                             "flags": {}
                         }
