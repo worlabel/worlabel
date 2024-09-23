@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Literal
 from schemas.predict_response import LabelData
 
 class TrainDataInfo(BaseModel):
@@ -11,7 +11,11 @@ class TrainRequest(BaseModel):
     m_key: Optional[str] = Field(None, alias="model_key")
     label_map: dict[int, int] = Field(None, description="모델 레이블 카테고리 idx: 프로젝트 레이블 카테고리 idx , None 일경우 레이블 데이터(프로젝트 레이블)의 idx로 학습")
     data: List[TrainDataInfo]
-    seed: Optional[int] = None # 랜덤 변수 시드
     ratio: float = 0.8 # 훈련/검증 분할 비율
+
+    # 학습 파라미터
     epochs: int = 50 # 훈련 반복 횟수
     batch: Union[float, int] = -1 # 훈련 batch 수[int] or GPU의 사용률 자동[float] default(-1): gpu의 60% 사용 유지
+    lr0: float = 0.01 # 초기 학습 가중치
+    lrf: float = 0.01 # lr0 기준으로 학습 가중치의 최종 수렴치 (ex lr0의 0.01배)
+    optimizer: Literal['auto', 'SGD', 'Adam', 'AdamW', 'NAdam', 'RAdam', 'RMSProp'] = 'auto'
