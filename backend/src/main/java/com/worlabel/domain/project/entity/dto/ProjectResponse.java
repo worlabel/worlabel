@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProjectResponse {
 
-    @Schema(description = "워크스페이스 ID", example = "1")
+    @Schema(description = "프로젝트 ID", example = "1")
     private Integer id;
 
     @Schema(description = "제목", example = "project")
