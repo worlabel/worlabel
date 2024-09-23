@@ -1,12 +1,14 @@
 package com.worlabel.domain.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 import com.worlabel.domain.image.entity.Image;
 import lombok.*;
 
+import java.util.HashMap;
 import java.util.List;
 
-public class AiRequestDto {
+public class AiDto {
 
     @Data
     public static class TrainDataInfo {
@@ -51,6 +53,9 @@ public class AiRequestDto {
         @JsonProperty("model_key")
         private String modelKey;
 
+        @JsonProperty("label_map")
+        private HashMap<Integer, Integer> labelMap;
+
         @JsonProperty("image_list")
         private List<AutoLabelingImageRequest> imageList;
 
@@ -60,8 +65,8 @@ public class AiRequestDto {
         @JsonProperty("iou_threshold")
         private Double iouThreshold;
 
-        public static AutoLabelingRequest of(final Integer projectId, final List<AutoLabelingImageRequest> imageList) {
-            return new AutoLabelingRequest(projectId, null, imageList, 0.25, 0.45);
+        public static AutoLabelingRequest of(final Integer projectId, final String modelKey, final HashMap<Integer, Integer> labelMap, final List<AutoLabelingImageRequest> imageList) {
+            return new AutoLabelingRequest(projectId, modelKey, labelMap, imageList, 0.25, 0.45);
         }
     }
 
@@ -76,8 +81,21 @@ public class AiRequestDto {
         @JsonProperty("image_url")
         private String imageUrl;
 
-        public static AutoLabelingImageRequest of(Image image){
+        public static AutoLabelingImageRequest of(Image image) {
             return new AutoLabelingImageRequest(image.getId(), image.getImagePath());
         }
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    @ToString
+    public static class AutoLabelingResult{
+
+        @SerializedName("image_id")
+        private Long imageId;
+
+        @SerializedName("data")
+        private String data;
     }
 }
