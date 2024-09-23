@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
-import { uploadImageZip } from '@/api/imageApi';
 import useAuthStore from '@/stores/useAuthStore';
 import { X } from 'lucide-react';
+import useUploadImageZipQuery from '@/queries/projects/useUploadImageZipQuery';
 
 export default function ImageUploadZipForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
   const profile = useAuthStore((state) => state.profile);
@@ -12,8 +12,10 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
   const [file, setFile] = useState<File>();
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
+  const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
+
+  const uploadImageZip = useUploadImageZipQuery();
 
   const handleClose = () => {
     onClose();
@@ -48,16 +50,22 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
   const handleUpload = async () => {
     if (file) {
       setIsUploading(true);
-      setProgress(0);
 
-      await uploadImageZip(memberId, projectId, file)
-        .then(() => {
-          setProgress(100);
-        })
-        .catch(() => {
-          setProgress(100);
-          setIsFailed(true);
-        });
+      uploadImageZip.mutate(
+        {
+          memberId,
+          projectId,
+          file,
+        },
+        {
+          onSuccess: () => {
+            setIsUploaded(true);
+          },
+          onError: () => {
+            setIsFailed(true);
+          },
+        }
+      );
     }
   };
 
@@ -116,9 +124,9 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
               ? 'border-red-500 text-red-500 hover:bg-red-500 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-500'
               : ''
           }
-          disabled={progress != 100}
+          disabled={!isUploaded && !isFailed}
         >
-          {progress === 100 ? (isFailed ? '업로드 실패 (닫기)' : '업로드 완료 (닫기)') : `업로드 중... ${progress}%`}
+          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : '업로드 중...'}
         </Button>
       ) : (
         <Button
