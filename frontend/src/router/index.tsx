@@ -17,6 +17,7 @@ import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
 import ReviewDetail from '@/pages/ReviewDetail';
 import ImageFolderUploadTest from '@/pages/ImageFolderUploadTest';
+import NotFound from '@/pages/NotFound';
 
 export const webPath = {
   home: () => '/',
@@ -36,13 +37,17 @@ const router = createBrowserRouter([
         index: true,
         element: <Home />,
       },
+      {
+        path: '*',
+        element: <NotFound />,
+      },
     ],
   },
   {
     // FIXME: index에서 오류나지 않게 수정
     path: webPath.browse(),
     element: (
-      <Suspense fallback={<div></div>}>
+      <Suspense fallback={<PageLayout />}>
         <WorkspaceBrowseLayout />
       </Suspense>
     ),
