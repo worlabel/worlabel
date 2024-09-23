@@ -1,8 +1,8 @@
 import useCanvasStore from '@/stores/useCanvasStore';
-import { LucideIcon, MousePointer2, PenTool, Square } from 'lucide-react';
+import { LucideIcon, MousePointer2, PenTool, Save, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function CanvasControlBar() {
+export default function CanvasControlBar({ saveJson }: { saveJson: () => void }) {
   const drawState = useCanvasStore((state) => state.drawState);
   const setDrawState = useCanvasStore((state) => state.setDrawState);
   const buttonBaseClassName = 'rounded-lg p-2 transition-colors ';
@@ -31,6 +31,16 @@ export default function CanvasControlBar() {
           </button>
         );
       })}
+
+      <button
+        className={cn(buttonClassName, buttonBaseClassName)}
+        onClick={saveJson}
+      >
+        <Save
+          size={20}
+          color="black"
+        />
+      </button>
     </div>
   );
 }

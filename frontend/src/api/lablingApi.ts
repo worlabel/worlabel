@@ -1,12 +1,13 @@
 import api from '@/api/axiosConfig';
-import { LabelingRequest } from '@/types';
 
-export async function saveImageLabels(projectId: number, imageId: number, memberId: number, data: LabelingRequest) {
-  return api
-    .post(`/projects/${projectId}/label/image/${imageId}`, data, {
-      params: { memberId },
-    })
-    .then(({ data }) => data);
+export async function saveImageLabels(
+  projectId: number,
+  imageId: number,
+  data: {
+    data: string;
+  }
+) {
+  return api.post(`/projects/${projectId}/label/image/${imageId}`, data).then(({ data }) => data);
 }
 
 export async function runAutoLabel(projectId: number, memberId: number) {

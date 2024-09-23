@@ -1,4 +1,5 @@
 import Konva from 'konva';
+import { Vector2d } from 'konva/lib/types';
 import { useEffect, useRef } from 'react';
 import { Circle, Group, Line } from 'react-konva';
 
@@ -24,6 +25,24 @@ const TRANSFORM_CHANGE_STR = [
 
 export default function PolygonTransformer({ coordinates, setCoordinates, stage, dragLayer }: PolygonTransformerProps) {
   const anchorsRef = useRef<Konva.Group>(null);
+  const scale: Vector2d = { x: 1 / stage.getAbsoluteScale().x, y: 1 / stage.getAbsoluteScale().y };
+  const handleClick = (index: number) => (e: Konva.KonvaEventObject<MouseEvent>) => {
+    if (e.evt.button === 0 && e.evt.detail === 2) {
+      const pos = stage.getRelativePointerPosition()!;
+      const newCoordinates: [number, number][] = [
+        ...coordinates.slice(0, index + 1),
+        [pos.x, pos.y],
+        ...coordinates.slice(index + 1),
+      ];
+      setCoordinates(newCoordinates);
+      return;
+    }
+
+    if (e.evt.button !== 2) return;
+
+    const newCoordinates = [...coordinates.slice(0, index), ...coordinates.slice(index + 1)];
+    setCoordinates(newCoordinates);
+  };
   const handleDragMove = (index: number) => (e: Konva.KonvaEventObject<DragEvent>) => {
     const circle = e.target as Konva.Circle;
     const pos = circle.position();
@@ -31,7 +50,7 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage,
 
     newCoordinates[index] = [pos.x, pos.y];
     setCoordinates(newCoordinates);
-    stage.batchDraw();
+    // stage.batchDraw();
   };
   const handleMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) => {
     const circle = e.target as Konva.Circle;
@@ -94,10 +113,11 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage,
               fill="white"
               draggable
               strokeScaleEnabled={false}
+              onClick={handleClick(index)}
               onDragMove={handleDragMove(index)}
               onMouseOver={handleMouseOver}
               onMouseOut={handleMouseOut}
-              scale={{ x: 1 / stage.getAbsoluteScale().x, y: 1 / stage.getAbsoluteScale().y }}
+              scale={scale}
               perfectDrawEnabled={false}
               shadowForStrokeEnabled={false}
             />

@@ -7,11 +7,13 @@ export default function LabelRect({
   isSelected,
   onSelect,
   info,
+  setLabel,
   dragLayer,
 }: {
   isSelected: boolean;
   onSelect: (evt: Konva.KonvaEventObject<TouchEvent | MouseEvent>) => void;
   info: Label;
+  setLabel: (coordinate: [number, number][]) => void;
   dragLayer: Konva.Layer;
 }) {
   const rectRef = useRef<Konva.Line>(null);
@@ -28,13 +30,19 @@ export default function LabelRect({
     trRef.current?.moveToTop();
   };
   const handleMoveEnd = () => {
-    const rectPoints = rectRef.current?.points();
-    const points = [
-      [rectPoints![0], rectPoints![1]],
-      [rectPoints![4], rectPoints![5]],
+    const rect = rectRef.current?.getPosition();
+    const scale = rectRef.current?.scale();
+
+    if (!rect || !scale) return;
+
+    const points: [number, number][] = [
+      [info.coordinates[0][0] * scale.x + rect.x, info.coordinates[0][1] * scale.y + rect.y],
+      [info.coordinates[1][0] * scale.x + rect.x, info.coordinates[1][1] * scale.y + rect.y],
     ];
 
-    console.log(points);
+    setLabel(points);
+    rectRef.current?.setAbsolutePosition({ x: 0, y: 0 });
+    rectRef.current?.scale({ x: 1, y: 1 });
   };
 
   useEffect(() => {

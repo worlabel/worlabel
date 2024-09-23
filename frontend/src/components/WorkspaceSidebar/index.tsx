@@ -14,9 +14,7 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
   const setSidebarSize = useCanvasStore((state) => state.setSidebarSize);
   const navigate = useNavigate();
   const { workspaceId } = useParams<{ workspaceId: string }>();
-  // const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>();
   const handleSelectProject = (projectId: string) => {
-    // setSelectedProjectId(projectId);
     navigate(`${webPath.workspace()}/${workspaceId}/${projectId}`);
   };
 
