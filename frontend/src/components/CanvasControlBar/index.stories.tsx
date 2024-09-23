@@ -6,4 +6,4 @@ export default {
   component: CanvasControlBar,
 };
 
-export const Default = () => <CanvasControlBar />;
+export const Default = () => <CanvasControlBar saveJson={() => {}} />;

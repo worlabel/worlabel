@@ -259,7 +259,7 @@ export interface Shape {
 
 export interface LabelJson {
   version: string;
-  task_type: 'det' | 'seg';
+  task_type: 'cls' | 'det' | 'seg';
   shapes: Shape[];
   split: string;
   imageHeight: number;
