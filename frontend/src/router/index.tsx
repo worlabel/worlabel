@@ -19,6 +19,7 @@ import ReviewDetail from '@/pages/ReviewDetail';
 import ImageFolderUploadTest from '@/pages/ImageFolderUploadTest';
 import NotFound from '@/pages/NotFound';
 import ModelManage from '@/pages/ModelManage';
+import ReviewRequest from '@/pages/ReviewRequest';
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
@@ -99,6 +100,10 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <WorkspaceReviewList />,
+          },
+          {
+            path: 'request',
+            element: <ReviewRequest />,
           },
           {
             path: ':projectId',
