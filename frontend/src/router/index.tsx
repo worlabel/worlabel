@@ -17,8 +17,10 @@ import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
 import ReviewDetail from '@/pages/ReviewDetail';
 import NotFound from '@/pages/NotFound';
-import ModelManage from '@/pages/ModelManage';
 import ReviewRequest from '@/pages/ReviewRequest';
+import ModelIndex from '@/pages/ModelIndex';
+import ModelDetail from '@/pages/ModelDetail';
+
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
@@ -131,7 +133,11 @@ const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <ModelManage />,
+            element: <ModelIndex />,
+          },
+          {
+            path: ':projectId',
+            element: <ModelDetail />,
           },
         ],
       },
