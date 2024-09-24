@@ -28,7 +28,7 @@ export default function WorkspaceReviewList() {
           to={`/admin/${workspaceId}/reviews/request`}
           className="ml-auto"
         >
-          <Button variant="default">리뷰 요청</Button>
+          <Button variant="outlinePrimary">리뷰 요청</Button>
         </Link>
       </header>
       <ReviewList
