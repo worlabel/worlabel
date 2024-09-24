@@ -19,7 +19,7 @@ import java.io.InputStream;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class FCMConfig {
+public class FcmConfig {
 
     // Firebase 설정 Json 파일의 경로
     @Value("${fcm.config.path}")

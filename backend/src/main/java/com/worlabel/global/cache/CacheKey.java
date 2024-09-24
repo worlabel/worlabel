@@ -10,4 +10,8 @@ public class CacheKey {
     public static String autoLabelingProgressKey() {
         return "autoLabelingProgress";
     }
+
+    public static String fcmTokenKey(){
+        return "fcmToken";
+    }
 }

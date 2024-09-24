@@ -1,5 +1,6 @@
 package com.worlabel.domain.auth.controller;
 
+import com.worlabel.domain.auth.entity.dto.FcmTokenRequest;
 import com.worlabel.domain.auth.entity.dto.JwtToken;
 import com.worlabel.domain.auth.entity.dto.AccessTokenResponse;
 import com.worlabel.domain.auth.service.AuthService;
@@ -19,10 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
@@ -37,9 +35,9 @@ public class AuthController {
     @Value("${auth.refreshTokenExpiry}")
     long refreshExpiry;
 
-    private final AuthService authService;
-    private final MemberService memberService;
     private final JwtTokenService jwtTokenService;
+    private final MemberService memberService;
+    private final AuthService authService;
 
     @Operation(summary = "JWT 토큰 재발급", description = "Refresh Token을 확인하여 JWT 토큰 재발급")
     @SwaggerApiSuccess(description = "Return Access Token")
@@ -69,6 +67,14 @@ public class AuthController {
     @GetMapping("/profile")
     public MemberResponse getMemberInfo(@CurrentUser Integer currentMember){
         return memberService.getMemberId(currentMember);
+    }
+
+    @Operation(summary = "현재 로그인중인 사용자의 FCM 토큰을 입력받음", description = "현재 사용자의 FCM토큰을 저장합니다..")
+    @SwaggerApiSuccess(description = "Redis에 FCM 토큰이 저장됨")
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
+    @PostMapping("/fcm")
+    public void saveFcmToken(@CurrentUser Integer currentMember, @RequestBody final FcmTokenRequest tokenRequest){
+
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {
