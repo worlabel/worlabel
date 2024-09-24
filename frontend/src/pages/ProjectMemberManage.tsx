@@ -9,6 +9,8 @@ import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuer
 import { useEffect, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import MemberAddModal from '@/components/MemberAddModal';
+import useIsAdminOrManager from '@/hooks/useIsAdminOrManager';
+
 type Role = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER' | 'NONE';
 const roles: Role[] = ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER', 'NONE'];
 const roleToStr: { [key in Role]: string } = {
@@ -25,11 +27,12 @@ export default function ProjectMemberManage() {
   const memberId = profile?.id || 0;
 
   const queryClient = useQueryClient();
-
   const previousProjectId = useRef(projectId);
 
   const { data: projectMembers = [] } = useProjectMembersQuery(Number(projectId), memberId);
   const { data: workspaceMembers = [] } = useWorkspaceMembersQuery(Number(workspaceId));
+
+  const isAdminOrManager = useIsAdminOrManager(Number(projectId));
 
   const updatePrivilege = useUpdateProjectMemberPrivilegeQuery();
   const removeMember = useRemoveProjectMemberQuery();
@@ -37,8 +40,8 @@ export default function ProjectMemberManage() {
 
   useEffect(() => {
     if (projectId && previousProjectId.current !== projectId) {
-      queryClient.invalidateQueries({ queryKey: ['projectMembers', Number(previousProjectId.current), memberId] }); // 이전 projectId의 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: ['workspaceMembers', Number(workspaceId)] }); // workspaceMembers 무효화
+      queryClient.invalidateQueries({ queryKey: ['projectMembers', Number(previousProjectId.current), memberId] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceMembers', Number(workspaceId)] });
       queryClient.invalidateQueries({ queryKey: ['projectMembers', Number(projectId), memberId] });
 
       previousProjectId.current = projectId;
@@ -85,43 +88,57 @@ export default function ProjectMemberManage() {
   };
 
   return (
-    <div
-      key={projectId}
-      className="flex w-full flex-col gap-6 border-b-[0.67px] border-[#dcdcde] bg-[#fbfafd] p-6"
-    >
-      <header className="flex w-full items-center gap-4">
-        <h1 className="flex-1 text-lg font-semibold text-[#333238]">프로젝트 멤버 관리</h1>
-        <MemberAddModal projectId={projectId ? Number(projectId) : 0} />
-      </header>
+    <div className="grid h-screen w-full">
+      <div className="flex flex-col">
+        <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-4 border-b px-4">
+          <h1 className="flex-1 text-xl font-semibold">프로젝트 멤버 관리</h1>
+          {isAdminOrManager && <MemberAddModal projectId={projectId ? Number(projectId) : 0} />}
+        </header>
 
-      {sortedMembers.map((member) => (
-        <div
-          key={`${member.memberId}-${member.nickname}`}
-          className="flex items-center gap-4"
-        >
-          <span className="flex-1">{member.nickname}</span>
-          <div className="flex-1">
-            <Select
-              onValueChange={(value) => handleRoleChange(member.memberId, value as Role)}
-              defaultValue={member.privilegeType}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="역할을 선택해주세요." />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map((role) => (
-                  <SelectItem
-                    key={role}
-                    value={role}
-                  >
-                    {roleToStr[role]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      ))}
+        <main className="grid flex-1 gap-4 overflow-auto p-4">
+          {sortedMembers.length === 0 ? (
+            <div className="py-4 text-center">프로젝트에 멤버가 없습니다.</div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {sortedMembers.map((member) => (
+                <div
+                  key={`${member.memberId}-${member.nickname}`}
+                  className="flex items-center gap-4 rounded-lg border p-4"
+                >
+                  <img
+                    src={member.profileImage}
+                    alt={member.nickname}
+                    className="h-12 w-12 rounded-full"
+                  />
+                  <span className="flex-1 text-lg font-medium">{member.nickname}</span>
+                  <div className="flex-1">
+                    <Select
+                      onValueChange={(value) => handleRoleChange(member.memberId, value as Role)}
+                      defaultValue={member.privilegeType}
+                      disabled={!isAdminOrManager || member.privilegeType === 'ADMIN'}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="역할을 선택하세요" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem
+                            key={role}
+                            value={role}
+                            disabled={role === 'ADMIN'}
+                          >
+                            {roleToStr[role]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

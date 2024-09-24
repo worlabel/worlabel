@@ -11,7 +11,7 @@ import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 export default function ProjectStructure({ project }: { project: Project }) {
   const setProject = useCanvasStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
-  const { data: folderData } = useFolderQuery(project.id.toString(), 0);
+  const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
 
   useEffect(() => {
     setProject(project);
@@ -27,6 +27,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
           <WorkspaceDropdownMenu
             projectId={project.id}
             folderId={0}
+            refetch={refetch}
           />
         </header>
         {folderData.children.length === 0 && folderData.images.length === 0 ? (

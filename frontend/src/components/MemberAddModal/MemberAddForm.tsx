@@ -9,12 +9,10 @@ import SearchInput from '../ui/search-input';
 import useSearchMembersByEmailQuery from '@/queries/members/useSearchMembersByEmailQuery';
 import debounce from 'lodash/debounce';
 
-type PrivilegeType = 'ADMIN' | 'MANAGER' | 'EDITOR' | 'VIEWER';
-
-const privilegeTypes: readonly ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER'] = ['ADMIN', 'MANAGER', 'EDITOR', 'VIEWER'];
+type PrivilegeType = 'MANAGER' | 'EDITOR' | 'VIEWER'; // ADMIN을 제외
+const privilegeTypes: readonly ['MANAGER', 'EDITOR', 'VIEWER'] = ['MANAGER', 'EDITOR', 'VIEWER']; // ADMIN을 제외
 
 const privilegeTypeToStr: { [key in PrivilegeType]: string } = {
-  ADMIN: '관리자',
   MANAGER: '매니저',
   EDITOR: '에디터',
   VIEWER: '뷰어',

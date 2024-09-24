@@ -1,55 +1,25 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import useCreateReviewQuery from '@/queries/reviews/useCreateReviewQuery';
-import type { ReviewRequest } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import useAuthStore from '@/stores/useAuthStore';
-import useProjectListQuery from '@/queries/projects/useProjectListQuery';
 import ImageSelection from '@/components/ImageSelection';
+import useReviewRequest from '@/hooks/useReviewRequest';
+import { useNavigate } from 'react-router-dom';
 
 export default function ReviewRequest(): JSX.Element {
-  const { workspaceId } = useParams<{ workspaceId: string }>();
-  const navigate = useNavigate();
-  const [selectedImages, setSelectedImages] = useState<number[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-
-  const profile = useAuthStore((state) => state.profile);
-  const memberId = profile?.id || 0;
-
-  const { data: projectList } = useProjectListQuery(Number(workspaceId), memberId);
-
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<ReviewRequest>();
-  const createReview = useCreateReviewQuery();
-
-  const onSubmit = (data: ReviewRequest) => {
-    if (!selectedProjectId) {
-      return;
-    }
-    createReview.mutate(
-      {
-        projectId: Number(selectedProjectId),
-        memberId,
-        reviewData: {
-          ...data,
-          imageIds: selectedImages,
-        },
-      },
-      {
-        onSuccess: () => {
-          navigate(`/admin/${workspaceId}/reviews`);
-        },
-      }
-    );
-  };
+    errors,
+    projects,
+    onSubmit,
+    selectedProjectId,
+    setSelectedProjectId,
+    selectedImages,
+    setSelectedImages,
+  } = useReviewRequest();
+  const navigate = useNavigate();
 
   return (
     <div className="review-request-container p-4">
@@ -63,8 +33,8 @@ export default function ReviewRequest(): JSX.Element {
               <SelectValue placeholder="프로젝트를 선택하세요" />
             </SelectTrigger>
             <SelectContent>
-              {projectList?.workspaceResponses.length ? (
-                projectList.workspaceResponses.map((project) => (
+              {projects.length ? (
+                projects.map((project) => (
                   <SelectItem
                     key={project.id}
                     value={project.id.toString()}

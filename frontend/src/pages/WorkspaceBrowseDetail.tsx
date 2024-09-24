@@ -16,7 +16,7 @@ export default function WorkspaceBrowseDetail() {
   const memberId = profile?.id ?? 0;
 
   const { data: workspaceData } = useWorkspaceQuery(workspaceId, memberId);
-  const { data: projectsResponse, isError } = useProjectListQuery(workspaceId, memberId);
+  const { data: projects, isError } = useProjectListQuery(workspaceId, memberId);
 
   const createProject = useCreateProjectQuery();
 
@@ -27,8 +27,6 @@ export default function WorkspaceBrowseDetail() {
       data,
     });
   };
-
-  const projects: ProjectResponse[] = projectsResponse?.workspaceResponses ?? [];
 
   return (
     <div className="flex h-full w-full flex-col gap-8 px-6 py-4">
@@ -105,6 +103,7 @@ function ProjectList({ projects, workspaceId }: { projects: ProjectResponse[]; w
           title={project.title}
           to={`${webPath.workspace()}/${workspaceId}/${project.id}`}
           description={project.projectType}
+          imageUrl={project.thumbnail}
         />
       ))}
     </div>

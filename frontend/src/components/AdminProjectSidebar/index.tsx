@@ -1,5 +1,5 @@
 import { ResizablePanel, ResizableHandle } from '../ui/resizable';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { SquarePen } from 'lucide-react';
 import useProjectListQuery from '@/queries/projects/useProjectListQuery';
 import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils';
 
 export default function AdminProjectSidebar(): JSX.Element {
   const location = useLocation();
-  const navigate = useNavigate();
   const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId?: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
@@ -19,8 +18,7 @@ export default function AdminProjectSidebar(): JSX.Element {
   const { data: workspaceData } = useWorkspaceQuery(Number(workspaceId), memberId);
   const workspaceTitle = workspaceData?.title || `Workspace-${workspaceId}`;
 
-  const { data: projectsResponse } = useProjectListQuery(Number(workspaceId), memberId);
-  const projects = projectsResponse?.workspaceResponses ?? [];
+  const { data: projects } = useProjectListQuery(Number(workspaceId), memberId);
 
   const createProject = useCreateProjectQuery();
 
@@ -29,13 +27,6 @@ export default function AdminProjectSidebar(): JSX.Element {
       workspaceId: Number(workspaceId),
       memberId,
       data,
-    });
-  };
-
-  const handleHeaderClick = () => {
-    navigate({
-      pathname: location.pathname,
-      search: '',
     });
   };
 
@@ -52,6 +43,9 @@ export default function AdminProjectSidebar(): JSX.Element {
     return location.pathname;
   };
 
+  const basePath = location.pathname.split('/')[3];
+  const basePathWithoutProjectId = `/admin/${workspaceId}/${basePath}`;
+
   return (
     <>
       <ResizablePanel
@@ -61,12 +55,12 @@ export default function AdminProjectSidebar(): JSX.Element {
         className="flex h-full flex-col border-r border-gray-200 bg-gray-100"
       >
         <header className="flex w-full items-center justify-between gap-2 border-b border-gray-200 p-4">
-          <h1
-            className="heading w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold text-gray-900"
-            onClick={handleHeaderClick}
+          <Link
+            to={basePathWithoutProjectId}
+            className="heading w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl font-bold text-gray-900"
           >
             {workspaceTitle}
-          </h1>
+          </Link>
           <button className="p-2">
             <SquarePen size={16} />
           </button>
