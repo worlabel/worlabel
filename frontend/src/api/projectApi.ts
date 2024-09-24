@@ -1,5 +1,5 @@
 import api from '@/api/axiosConfig';
-import { ProjectListResponse, ProjectResponse, ProjectMemberRequest, ProjectMemberResponse } from '@/types';
+import { ProjectResponse, ProjectMemberRequest, ProjectMemberResponse } from '@/types';
 
 export async function getProjectList(
   workspaceId: number,
@@ -8,7 +8,7 @@ export async function getProjectList(
   limit: number = 50
 ) {
   return api
-    .get<ProjectListResponse>(`/workspaces/${workspaceId}/projects`, {
+    .get<ProjectResponse[]>(`/workspaces/${workspaceId}/projects`, {
       params: {
         memberId,
         lastProjectId,
