@@ -280,6 +280,25 @@ export interface ImageFolderRequest {
   parentId: number;
   files: File[];
 }
+export interface LabelCategoryResponse {
+  id: number;
+  name: string;
+}
+// 카테고리 요청 DTO
+export interface LabelCategoryRequest {
+  labelCategoryList: number[];
+}
+
+// 카테고리 응답 DTO
+export interface LabelCategoryResponse {
+  id: number;
+  name: string;
+}
+// 모델 카테고리 응답 DTO
+export interface ModelCategoryResponse {
+  id: number;
+  name: string;
+}
 
 // 모델 요청 DTO (API로 전달할 데이터 타입)
 export interface ModelRequest {
@@ -292,22 +311,41 @@ export interface ModelResponse {
   name: string;
 }
 
-// 모델 카테고리 응답 DTO
-export interface ModelCategoryResponse {
-  id: number;
-  name: string;
-}
-
 // 프로젝트 모델 리스트 응답 DTO
 export interface ProjectModelsResponse extends Array<ModelResponse> {}
-
-// 카테고리 요청 DTO
-export interface LabelCategoryRequest {
-  labelCategoryList: number[];
+// 모델 훈련 요청 DTO
+export interface ModelTrainRequest {
+  modelId: number;
+  ratio: number;
+  epochs: number;
+  batch: number;
+  lr0: number;
+  lrf: number;
+  optimizer: 'AUTO' | 'SGD' | 'ADAM' | 'ADAMW' | 'NADAM' | 'RADAM' | 'RMSPROP';
+}
+export interface ResultResponse {
+  id: number;
+  precision: number;
+  recall: number;
+  fitness: number;
+  ratio: number;
+  epochs: number;
+  batch: number;
+  lr0: number;
+  lrf: number;
+  optimizer: 'AUTO' | 'SGD' | 'ADAM' | 'ADAMW' | 'NADAM' | 'RADAM' | 'RMSPROP';
+  map50: number;
+  map5095: number;
 }
 
-// 카테고리 응답 DTO
-export interface LabelCategoryResponse {
-  id: number;
-  name: string;
+export interface ReportResponse {
+  modelId: number;
+  totalEpochs: number;
+  epoch: number;
+  boxLoss: number;
+  clsLoss: number;
+  dflLoss: number;
+  fitness: number;
+  epochTime: number;
+  leftSecond: number;
 }
