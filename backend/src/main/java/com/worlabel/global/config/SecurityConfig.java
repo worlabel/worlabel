@@ -82,7 +82,6 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                 );
 
-
         // JWT 필터 추가
         http
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

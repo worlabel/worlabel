@@ -12,6 +12,7 @@ import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
+import com.worlabel.global.service.FcmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -65,7 +66,7 @@ public class AuthController {
     @SwaggerApiSuccess(description = "Return Member Info")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @GetMapping("/profile")
-    public MemberResponse getMemberInfo(@CurrentUser Integer currentMember){
+    public MemberResponse getMemberInfo(@CurrentUser final Integer currentMember){
         return memberService.getMemberId(currentMember);
     }
 
@@ -73,8 +74,8 @@ public class AuthController {
     @SwaggerApiSuccess(description = "Redis에 FCM 토큰이 저장됨")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @PostMapping("/fcm")
-    public void saveFcmToken(@CurrentUser Integer currentMember, @RequestBody final FcmTokenRequest tokenRequest){
-
+    public void saveFcmToken(@CurrentUser final Integer currentMember, @RequestBody final FcmTokenRequest tokenRequest){
+        authService.saveFcmToken(currentMember, tokenRequest.getToken());
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {
