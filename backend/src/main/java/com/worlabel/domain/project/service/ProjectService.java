@@ -179,7 +179,7 @@ public class ProjectService {
 
         // 응답없음
         log.debug("요청");
-        progressService.registerPredictProgress(projectId);
+//        progressService.registerPredictProgress(projectId);
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
         saveAutoLabelList(list);
     }

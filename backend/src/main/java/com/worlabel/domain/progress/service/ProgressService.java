@@ -16,7 +16,8 @@ public class ProgressService {
 
     public void predictCheck(final int projectId){
         if(progressCacheRepository.predictCheck(projectId)){
-            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+//            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+            progressCacheRepository.removePredictProgress(projectId);
         }
     }
 

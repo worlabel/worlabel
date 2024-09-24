@@ -29,4 +29,9 @@ public class ProgressCacheRepository {
         String key = CacheKey.autoLabelingProgressKey();
         redisTemplate.opsForSet().add(key, projectId);
     }
+
+    public void removePredictProgress(final int projectId) {
+        String key = CacheKey.autoLabelingProgressKey();
+        redisTemplate.opsForSet().remove(key, projectId);
+    }
 }
