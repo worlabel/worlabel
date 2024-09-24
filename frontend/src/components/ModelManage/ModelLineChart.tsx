@@ -1,54 +1,74 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
-import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 
 interface MetricData {
   epoch: string;
-  loss1: number;
-  loss2: number;
-  loss3: number;
-  fitness: number;
+  loss1?: number;
+  loss2?: number;
+  loss3?: number;
+  fitness?: number;
 }
 
 interface ModelLineChartProps {
   data: MetricData[];
+  currentEpoch?: number;
+  totalEpochs?: number;
+  remainingTime?: number;
 }
 
 const chartConfig = {
   loss1: {
     label: 'Loss 1',
-    color: '#FF6347', // 토마토색
+    color: '#FF6347',
   },
   loss2: {
     label: 'Loss 2',
-    color: '#1E90FF', // 다저블루색
+    color: '#1E90FF',
   },
   loss3: {
     label: 'Loss 3',
-    color: '#32CD32', // 라임색
+    color: '#32CD32',
   },
   fitness: {
     label: 'Fitness',
-    color: '#FFD700', // 골드색
+    color: '#FFD700',
   },
 } satisfies ChartConfig;
 
-export default function ModelLineChart({ data }: ModelLineChartProps) {
+export default function ModelLineChart({ data, currentEpoch, totalEpochs, remainingTime }: ModelLineChartProps) {
+  const emptyData = Array.from({ length: totalEpochs || 0 }, (_, i) => ({
+    epoch: (i + 1).toString(),
+    loss1: null,
+    loss2: null,
+    loss3: null,
+    fitness: null,
+  }));
+
+  const filledData = emptyData.map((item, index) => ({
+    ...item,
+    ...(data[index] || {}),
+  }));
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Model Training Metrics</CardTitle>
-        <CardDescription>Loss and Fitness over Epochs</CardDescription>
       </CardHeader>
       <CardContent>
+        {currentEpoch !== undefined && totalEpochs !== undefined && remainingTime !== undefined && (
+          <div className="mb-4 flex justify-between">
+            <p>현재 에포크: {currentEpoch}</p>
+            <p>총 에포크: {totalEpochs}</p>
+            <p>예상 남은시간: {remainingTime}</p>
+          </div>
+        )}
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={data}
+            data={filledData}
             margin={{
               left: 12,
               right: 12,
@@ -62,10 +82,9 @@ export default function ModelLineChart({ data }: ModelLineChartProps) {
               tickMargin={8}
               tickFormatter={(value) => `Epoch ${value}`}
             />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent />}
-            />
+            <YAxis />
+            <Tooltip />
+            <Legend />
             <Line
               dataKey="loss1"
               type="monotone"
@@ -97,18 +116,6 @@ export default function ModelLineChart({ data }: ModelLineChartProps) {
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-start gap-2 text-sm">
-          <div className="grid gap-2">
-            <div className="flex items-center gap-2 font-medium leading-none">
-              Trending up by 5.2% this epoch <TrendingUp className="h-4 w-4" />
-            </div>
-            <div className="text-muted-foreground flex items-center gap-2 leading-none">
-              Showing training loss and fitness for the current model
-            </div>
-          </div>
-        </div>
-      </CardFooter>
     </Card>
   );
 }
