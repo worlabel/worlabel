@@ -4,26 +4,33 @@ import com.worlabel.domain.report.entity.Report;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReportResponse {
-    private Integer id;
-    private Integer totalEpochs;
-    private Integer epoch;
+    private int modelId;
+    private int totalEpochs;
+    private int epoch;
     private double boxLoss;
     private double clsLoss;
     private double dflLoss;
     private double fitness;
+    private double epochTime;
+    private double leftSecond;
 
     public static ReportResponse from(final Report report) {
         return new ReportResponse(
-                report.getId(),
+                report.getAiModel().getId(),
                 report.getTotalEpochs(),
                 report.getEpoch(),
                 report.getBoxLoss(),
                 report.getClsLoss(),
                 report.getDflLoss(),
-                report.getFitness());
+                report.getFitness(),
+                report.getEpochTime(),
+                report.getLeftSecond()
+        );
     }
 }

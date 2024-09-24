@@ -153,7 +153,9 @@ public class AiModelService {
                 .map(TrainDataInfo::of)
                 .toList();
 
+//        progressService.registerTrainProgress(projectId);
         TrainRequest aiRequest = TrainRequest.of(project.getId(), model.getModelKey(), labelMap, data, trainRequest);
+//        progressService.removeTrainProgress(projectId);
 
         String endPoint = project.getProjectType().getValue() + "/train";
 

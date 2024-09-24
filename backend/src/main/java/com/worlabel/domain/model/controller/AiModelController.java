@@ -5,6 +5,7 @@ import com.worlabel.domain.model.entity.dto.AiModelRequest;
 import com.worlabel.domain.model.entity.dto.AiModelResponse;
 import com.worlabel.domain.model.entity.dto.ModelTrainRequest;
 import com.worlabel.domain.model.service.AiModelService;
+import com.worlabel.domain.progress.service.ProgressService;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -27,6 +28,7 @@ import java.util.List;
 public class AiModelController {
 
     private final AiModelService aiModelService;
+    private final ProgressService progressService;
 
     @Operation(summary = "프로젝트 모델 조회", description = "프로젝트에 있는 모델을 조회합니다.")
     @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 조회합니다.")

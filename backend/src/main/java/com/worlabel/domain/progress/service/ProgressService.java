@@ -1,11 +1,14 @@
 package com.worlabel.domain.progress.service;
 
 import com.worlabel.domain.progress.repository.ProgressCacheRepository;
+import com.worlabel.domain.report.entity.dto.ReportResponse;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -34,11 +37,19 @@ public class ProgressService {
         }
     }
 
+    public boolean isProgressTrain(final int projectId){
+        return progressCacheRepository.trainProgressCheck(projectId);
+    }
+
     public void registerTrainProgress(final int projectId){
         progressCacheRepository.registerTrainProgress(projectId);
     }
 
     public void removeTrainProgress(final int projectId){
         progressCacheRepository.removeTrainProgress(projectId);
+    }
+
+    public List<ReportResponse> getProgressResponse(final int modelId) {
+        return progressCacheRepository.getProgressModel(modelId);
     }
 }
