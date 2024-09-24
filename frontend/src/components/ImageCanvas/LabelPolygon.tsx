@@ -1,6 +1,5 @@
 import { Label } from '@/types';
 import Konva from 'konva';
-import { useState } from 'react';
 import { Line } from 'react-konva';
 import PolygonTransformer from './PolygonTransformer';
 
@@ -8,21 +7,25 @@ export default function LabelPolygon({
   isSelected,
   onSelect,
   info,
+  setLabel,
   stage,
   dragLayer,
 }: {
   isSelected: boolean;
   onSelect: () => void;
   info: Label;
+  setLabel: (coordinate: [number, number][]) => void;
   stage: Konva.Stage;
   dragLayer: Konva.Layer;
 }) {
-  const [coordinates, setCoordinates] = useState<Array<[number, number]>>(info.coordinates);
+  const handleChange = (coordinates: [number, number][]) => {
+    setLabel(coordinates);
+  };
 
   return (
     <>
       <Line
-        points={coordinates.flat()}
+        points={info.coordinates.flat()}
         stroke={info.color}
         strokeWidth={1}
         onMouseDown={onSelect}
@@ -33,8 +36,8 @@ export default function LabelPolygon({
       />
       {isSelected && (
         <PolygonTransformer
-          coordinates={coordinates}
-          setCoordinates={setCoordinates}
+          coordinates={info.coordinates}
+          setCoordinates={handleChange}
           stage={stage}
           dragLayer={dragLayer}
         />

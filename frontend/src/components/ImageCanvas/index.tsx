@@ -119,7 +119,7 @@ export default function ImageCanvas() {
     setPolygonPoints([]);
     if (polygonPoints.length < 4) return;
 
-    const color = Math.floor(Math.random() * 65535)
+    const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
       .padStart(6, '0');
     const id = labels.length + 1;
@@ -146,7 +146,7 @@ export default function ImageCanvas() {
       return;
     }
     setRectPoints([]);
-    const color = Math.floor(Math.random() * 65535)
+    const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
       .padStart(6, '0');
     const id = labels.length;
@@ -289,6 +289,7 @@ export default function ImageCanvas() {
                 isSelected={label.id === selectedLabelId}
                 onSelect={() => setSelectedLabelId(label.id)}
                 info={label}
+                setLabel={setLabel(label.id)}
                 stage={stageRef.current as Konva.Stage}
                 dragLayer={dragLayerRef.current as Konva.Layer}
               />

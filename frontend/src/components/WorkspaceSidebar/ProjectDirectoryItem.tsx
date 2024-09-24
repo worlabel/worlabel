@@ -36,20 +36,19 @@ export default function ProjectDirectoryItem({
         <button className="flex items-center">
           <ChevronRight
             size={16}
-            className={`stroke-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+            className={cn('stroke-gray-500 transition-transform', isExpanded ? 'rotate-90' : '')}
           />
         </button>
         <span className="overflow-hidden text-ellipsis whitespace-nowrap">{item.title}</span>
       </div>
-      {isExpanded && (
-        <div className="caption flex flex-col">
+      {
+        <div className={cn('caption flex flex-col', isExpanded ? '' : 'hidden')}>
           {folderData.children.map((item) => (
             <ProjectDirectoryItem
               key={`${projectId}-${item.title}`}
               projectId={projectId}
               item={item}
               depth={depth + 1}
-              initialExpanded={true}
             />
           ))}
           {folderData.images.map((item) => (
@@ -61,7 +60,7 @@ export default function ProjectDirectoryItem({
             />
           ))}
         </div>
-      )}
+      }
     </>
   );
 }
