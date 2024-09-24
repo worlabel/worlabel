@@ -16,7 +16,6 @@ import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
 import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
 import ReviewDetail from '@/pages/ReviewDetail';
-import ImageFolderUploadTest from '@/pages/ImageFolderUploadTest';
 import NotFound from '@/pages/NotFound';
 import ReviewRequest from '@/pages/ReviewRequest';
 import ModelIndex from '@/pages/ModelIndex';
@@ -28,7 +27,6 @@ export const webPath = {
   workspace: () => '/workspace',
   admin: () => `/admin`,
   oauthCallback: () => '/redirect/oauth2',
-  imageFolderUploadTest: () => '/imagefolderuploadtest',
 };
 
 const router = createBrowserRouter([
@@ -152,10 +150,6 @@ const router = createBrowserRouter([
         <OAuthCallback />
       </Suspense>
     ),
-  },
-  {
-    path: `${webPath.imageFolderUploadTest()}/:projectId`,
-    element: <ImageFolderUploadTest />,
   },
 ]);
 
