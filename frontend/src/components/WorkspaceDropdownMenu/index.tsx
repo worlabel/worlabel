@@ -57,7 +57,7 @@ export default function WorkspaceDropdownMenu({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleOpenUploadFile}>파일 업로드</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드 (임시)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadZip}>폴더 압축파일 업로드</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -83,7 +83,7 @@ export default function WorkspaceDropdownMenu({
       >
         <DialogTrigger asChild></DialogTrigger>
         <DialogContent className="max-w-2xl">
-          <DialogHeader title="폴더 업로드" />
+          <DialogHeader title="폴더 업로드 (임시)" />
           <ImageUploadFolderForm
             onClose={handleCloseUploadFolder}
             projectId={projectId}
