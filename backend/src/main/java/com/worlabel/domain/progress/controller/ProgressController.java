@@ -1,4 +1,4 @@
-package com.worlabel.domain.progress;
+package com.worlabel.domain.progress.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;

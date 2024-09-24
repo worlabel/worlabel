@@ -2,15 +2,12 @@ package com.worlabel.domain.auth.service;
 
 import com.worlabel.domain.auth.entity.dto.JwtToken;
 import com.worlabel.domain.auth.repository.AuthCacheRepository;
-import com.worlabel.domain.auth.repository.FcmRepository;
+import com.worlabel.domain.auth.repository.FcmCacheRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -19,7 +16,7 @@ public class AuthService {
 
     private final AuthCacheRepository authCacheRepository;
     private final JwtTokenService jwtTokenService;
-    private final FcmRepository fcmRepository;;
+    private final FcmCacheRepository fcmCacheRepository;;
 
     /**
      * JWT 토큰 재발급
@@ -45,10 +42,10 @@ public class AuthService {
     }
 
     public void saveFcmToken(int memberId, String fcmToken) {
-        fcmRepository.save(memberId, fcmToken);
+        fcmCacheRepository.save(memberId, fcmToken);
     }
 
     public void deleteFcmToken(int memberId) {
-        fcmRepository.delete(memberId);
+        fcmCacheRepository.delete(memberId);
     }
 }
