@@ -103,6 +103,7 @@ function ProjectList({ projects, workspaceId }: { projects: ProjectResponse[]; w
           title={project.title}
           to={`${webPath.workspace()}/${workspaceId}/${project.id}`}
           description={project.projectType}
+          imageUrl={project.thumbnail}
         />
       ))}
     </div>

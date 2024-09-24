@@ -33,7 +33,7 @@ export default function ModelManage() {
   };
 
   return (
-    <div className="grid h-screen w-full pl-[56px]">
+    <div className="grid h-screen w-full">
       <div className="flex flex-col">
         <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
           <h1 className="text-xl font-semibold">모델 관리</h1>

@@ -122,18 +122,15 @@ export interface ProjectRequest {
   projectType: 'classification' | 'detection' | 'segmentation';
 }
 
-export interface ProjectResponse {
+export type ProjectResponse = {
   id: number;
   title: string;
   workspaceId: number;
   projectType: 'classification' | 'detection' | 'segmentation';
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ProjectListResponse {
-  workspaceResponses: ProjectResponse[];
-}
+  thumbnail?: string; // Optional
+};
 
 // 댓글 관련 DTO
 export interface CommentRequest {
