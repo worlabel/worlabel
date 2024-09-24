@@ -7,7 +7,6 @@ import {
   MemberResponse,
   RefreshTokenResponse,
   AutoLabelingResponse,
-  ProjectListResponse,
   ErrorResponse,
 } from '@/types';
 
@@ -100,15 +99,15 @@ export const handlers = [
         | 'segmentation',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      thumbnail: `thumbnail_${lastProjectId + index + 1}.jpg`,
     }));
 
     // 응답 생성
-    const response: ProjectListResponse = {
-      workspaceResponses: projects,
-    };
+    const response: ProjectResponse[] = projects;
 
     return HttpResponse.json(response);
   }),
+
   http.get('/api/projects/:projectId', ({ params }) => {
     // 프로젝트 조회 핸들러
     const { projectId } = params;
