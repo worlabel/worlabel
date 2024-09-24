@@ -127,7 +127,7 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void train(final Integer projectId, Integer modelId) {
+    public void train(final Integer projectId, final Integer modelId) {
         trainProgressCheck(projectId);
 
         // FastAPI 서버로 학습 요청을 전송
