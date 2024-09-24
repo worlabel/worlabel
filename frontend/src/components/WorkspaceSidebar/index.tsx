@@ -5,6 +5,7 @@ import { Project } from '@/types';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
 import useCanvasStore from '@/stores/useCanvasStore';
 import { webPath } from '@/router';
+import { Suspense } from 'react';
 
 export default function WorkspaceSidebar({ workspaceName, projects }: { workspaceName: string; projects: Project[] }) {
   const { projectId: selectedProjectId } = useParams<{ projectId: string }>();
@@ -48,7 +49,7 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
             </SelectContent>
           </Select>
         </div>
-        {selectedProject && <ProjectStructure project={selectedProject} />}
+        <Suspense fallback={<div></div>}>{selectedProject && <ProjectStructure project={selectedProject} />}</Suspense>
       </ResizablePanel>
       <ResizableHandle className="bg-gray-300" />
     </>
