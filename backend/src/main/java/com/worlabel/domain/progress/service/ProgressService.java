@@ -14,14 +14,31 @@ public class ProgressService {
 
     private final ProgressCacheRepository progressCacheRepository;
 
-    public void predictCheck(final int projectId){
-        if(progressCacheRepository.predictCheck(projectId)){
-//            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
-            progressCacheRepository.removePredictProgress(projectId);
+    public void predictProgressCheck(final int projectId){
+        if(progressCacheRepository.predictProgressCheck(projectId)){
+            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
         }
     }
 
     public void registerPredictProgress(final int projectId){
         progressCacheRepository.registerPredictProgress(projectId);
+    }
+
+    public void removePredictProgress(final int projectId){
+        progressCacheRepository.removePredictProgress(projectId);
+    }
+
+    public void trainProgressCheck(final int projectId){
+        if(progressCacheRepository.trainProgressCheck(projectId)){
+            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+        }
+    }
+
+    public void registerTrainProgress(final int projectId){
+        progressCacheRepository.registerTrainProgress(projectId);
+    }
+
+    public void removeTrainProgress(final int projectId){
+        progressCacheRepository.removeTrainProgress(projectId);
     }
 }

@@ -6,19 +6,21 @@ import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.labelcategory.entity.LabelCategory;
+import com.worlabel.domain.labelcategory.entity.ProjectCategory;
 import com.worlabel.domain.labelcategory.entity.dto.DefaultLabelCategoryResponse;
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
 import com.worlabel.domain.labelcategory.repository.LabelCategoryRepository;
 import com.worlabel.domain.model.entity.AiModel;
-import com.worlabel.domain.model.entity.dto.AiModelRequest;
-import com.worlabel.domain.model.entity.dto.AiModelResponse;
-import com.worlabel.domain.model.entity.dto.DefaultAiModelResponse;
-import com.worlabel.domain.model.entity.dto.DefaultResponse;
+import com.worlabel.domain.model.entity.dto.*;
 import com.worlabel.domain.model.repository.AiModelRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
+import com.worlabel.domain.progress.service.ProgressService;
 import com.worlabel.domain.project.dto.AiDto;
+import com.worlabel.domain.project.dto.AiDto.TrainDataInfo;
+import com.worlabel.domain.project.dto.AiDto.TrainRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
+import com.worlabel.domain.project.service.ProjectService;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.cache.CacheKey;
 import com.worlabel.global.exception.CustomException;
@@ -34,7 +36,10 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,13 +47,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AiModelService {
 
+    private final LabelCategoryRepository labelCategoryRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
     private final AiModelRepository aiModelRepository;
     private final ProjectRepository projectRepository;
-    private final LabelCategoryRepository labelCategoryRepository;
-    private final ImageRepository imageRepository;
     private final AiRequestService aiRequestService;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final ImageRepository imageRepository;
+    private final ProjectService projectService;
     private final Gson gson;
+    private final ProgressService progressService;
 
     //    @PostConstruct
     public void loadDefaultModel() {
@@ -127,54 +134,39 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void train(final Integer projectId, final Integer modelId) {
-        trainProgressCheck(projectId);
+    public void train(final Integer projectId, final ModelTrainRequest trainRequest) {
+//        progressService.trainProgressCheck(projectId);
 
         // FastAPI 서버로 학습 요청을 전송
         Project project = getProject(projectId);
-        AiModel model = getModel(modelId);
-        List<LabelCategory> labelCategories = labelCategoryRepository.findAllByModelId(modelId);
-        List<Integer> categories = labelCategories.stream()
-                .map(LabelCategory::getAiCategoryId).toList();
+        AiModel model = getModel(trainRequest.getModelId());
+
+        Map<Integer, Integer> labelMap = project.getCategoryList().stream()
+                .collect(Collectors.toMap(
+                        category -> category.getLabelCategory().getId(),
+                        ProjectCategory::getId
+                ));
 
         List<Image> images = imageRepository.findImagesByProjectId(projectId);
-
-        List<AiDto.TrainDataInfo> data = images.stream().filter(image -> image.getStatus() == LabelStatus.COMPLETED)
-                .map(image -> new AiDto.TrainDataInfo(image.getImagePath(), image.getDataPath()))
+        List<TrainDataInfo> data = images.stream()
+                .filter(image -> image.getStatus() == LabelStatus.COMPLETED)
+                .map(TrainDataInfo::of)
                 .toList();
+
+        TrainRequest aiRequest = TrainRequest.of(project.getId(), model.getModelKey(), labelMap, data, trainRequest);
 
         String endPoint = project.getProjectType().getValue() + "/train";
 
-        AiDto.TrainRequest trainRequest = new AiDto.TrainRequest();
-        trainRequest.setProjectId(projectId);
-        trainRequest.setCategoryId(categories);
-        trainRequest.setData(data);
-        trainRequest.setModelKey(model.getModelKey());
-
         // FastAPI 서버로 POST 요청 전송
-        String modelKey = aiRequestService.postRequest(endPoint, trainRequest, String.class, response -> response);
+        String modelKey = aiRequestService.postRequest(endPoint, aiRequest, String.class, response -> response);
 
         // 가져온 modelKey -> version 업된 모델 다시 새롭게 저장
-        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
+        int newVersion = model.getVersion() + 1;
+        String newName = currentDateTime + String.format("%03d", newVersion);
 
-        AiModel newModel = AiModel.of(currentDateTime, modelKey, model.getVersion() + 1, project);
+        AiModel newModel = AiModel.of(newName, modelKey, newVersion, project);
         aiModelRepository.save(newModel);
-    }
-
-    /**
-     * Redis 중복 요청 체크
-     */
-    private void trainProgressCheck(Integer projectId) {
-        String trainProgressKey = CacheKey.trainProgressKey();
-
-        // 존재 확인
-        Boolean isProjectExist = redisTemplate.opsForSet().isMember(trainProgressKey, projectId);
-        if (Boolean.TRUE.equals(isProjectExist)) {
-            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
-        }
-
-        // 학습 진행 중으로 상태 등록
-        redisTemplate.opsForSet().add(trainProgressKey, projectId);
     }
 
     /**

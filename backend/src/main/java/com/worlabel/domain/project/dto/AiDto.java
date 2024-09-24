@@ -3,41 +3,76 @@ package com.worlabel.domain.project.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.model.entity.dto.ModelTrainRequest;
+import com.worlabel.domain.result.entity.Optimizer;
 import lombok.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AiDto {
 
-    @Data
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class TrainDataInfo {
+
+        @JsonProperty("image_url")
         private String imagePath;
+
+        @JsonProperty("data_url")
         private String dataPath;
 
-        public TrainDataInfo(String imagePath, String dataPath) {
-            this.imagePath = imagePath;
-            this.dataPath = dataPath;
+        public static TrainDataInfo of(Image image) {
+            return new TrainDataInfo(image.getImagePath(), image.getDataPath());
         }
     }
 
-    @Data
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class TrainRequest {
+
         @JsonProperty("project_id")
         private int projectId;
 
-        @JsonProperty("category_id")
-        private List<Integer> categoryId;
+        @JsonProperty("model_key")
+        private String modelKey;
+
+        @JsonProperty("label_map")
+        private Map<Integer,Integer> labelMap;
 
         @JsonProperty("data")
         private List<TrainDataInfo> data;
 
-        @JsonProperty("model_key")
-        private String modelKey;
-//        private int seed; // Optional
-//        private float ratio; // Default = 0.8
-//        private int epochs; // Default = 50
-//        private float batch; // Default = -1
+        private double ratio; // Default = 0.8
+
+        private int epochs; // Default = 50
+
+        private double batch; // Default = -1
+
+        private double lr0;
+
+        private double lrf;
+
+        private Optimizer optimizer;
+
+        public static TrainRequest of(final Integer projectId, final String modelKey, final Map<Integer, Integer> labelMap, final List<TrainDataInfo> data, final ModelTrainRequest trainRequest) {
+            TrainRequest request = new TrainRequest();
+            request.projectId = projectId;
+            request.modelKey = modelKey;
+            request.labelMap = labelMap;
+            request.data = data;
+            request.ratio = request.getRatio();
+            request.epochs = trainRequest.getEpochs();
+            request.batch = trainRequest.getBatch();
+            request.lr0 = trainRequest.getLr0();
+            request.lrf = trainRequest.getLrf();
+            request.optimizer = trainRequest.getOptimizer();
+
+            return request;
+        }
     }
 
     @Getter
@@ -89,7 +124,7 @@ public class AiDto {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
     @ToString
-    public static class AutoLabelingResult{
+    public static class AutoLabelingResult {
 
         @SerializedName("image_id")
         private Long imageId;
