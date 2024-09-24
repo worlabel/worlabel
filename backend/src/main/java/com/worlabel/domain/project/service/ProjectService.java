@@ -16,6 +16,7 @@ import com.worlabel.domain.participant.entity.WorkspaceParticipant;
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.participant.repository.ParticipantRepository;
 import com.worlabel.domain.participant.repository.WorkspaceParticipantRepository;
+import com.worlabel.domain.progress.service.ProgressService;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingImageRequest;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingRequest;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingResult;
@@ -57,11 +58,12 @@ public class ProjectService {
     private final AiModelRepository aiModelRepository;
     private final ProjectRepository projectRepository;
     private final MemberRepository memberRepository;
+    private final ProgressService progressService;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
     private final AiRequestService aiService;
 
-    private final RedisTemplate<String, Object> redisTemplate;
+
     private final Gson gson;
 
     @Transactional
@@ -160,44 +162,29 @@ public class ProjectService {
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void autoLabeling(final Integer projectId, final AutoModelRequest request) {
-        autoLabelingProgressCheck(projectId);
-        
-        log.debug("project {}", projectId);
+        progressService.predictCheck(projectId);
+
         Project project = getProject(projectId);
         String endPoint = project.getProjectType().getValue() + "/predict";
 
-        log.debug("이미지 조회");
         List<Image> imageList = imageRepository.findImagesByProjectIdAndPending(projectId);
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();
 
-        log.debug("카테고리 조회 ");
         HashMap<Integer, Integer> labelMap = getLabelMap(project);
 
-        log.debug("모델 조회");
         AiModel aiModel = getAiModel(request);
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
         // 응답없음
         log.debug("요청");
+        progressService.registerPredictProgress(projectId);
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
         saveAutoLabelList(list);
-
     }
 
-    private void autoLabelingProgressCheck(final int projectId) {
-        String key = CacheKey.autoLabelingProgressKey();
-
-        Boolean isProgress = redisTemplate.opsForSet().isMember(key, projectId);
-        if(Boolean.TRUE.equals(isProgress)) {
-            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
-        }
-
-        // 학습 진행중으로 등록
-        redisTemplate.opsForSet().add(key, projectId);
-    }
-
+    // TODO: 트랜잭션 설정
     @Transactional
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
         for(AutoLabelingResult result: resultList) {
@@ -216,7 +203,6 @@ public class ProjectService {
             // Gson에서 리스트 형태로 변환할 타입을 지정
             Type listType = new TypeToken<List<AutoLabelingResult>>() {
             }.getType();
-
             // JSON 배열을 List<AutoLabelingResult>로 변환
             return gson.fromJson(data, listType);
         } catch (JsonSyntaxException e) {

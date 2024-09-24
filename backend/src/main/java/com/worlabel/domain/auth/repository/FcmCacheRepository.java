@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class FcmRepository {
+public class FcmCacheRepository {
 
     private final RedisTemplate<String, Object> redisTemplate;
 

@@ -3,7 +3,7 @@ package com.worlabel.domain.auth.controller;
 import com.worlabel.domain.auth.entity.dto.FcmTokenRequest;
 import com.worlabel.domain.auth.entity.dto.JwtToken;
 import com.worlabel.domain.auth.entity.dto.AccessTokenResponse;
-import com.worlabel.domain.auth.repository.FcmRepository;
+import com.worlabel.domain.auth.repository.FcmCacheRepository;
 import com.worlabel.domain.auth.service.AuthService;
 import com.worlabel.domain.auth.service.JwtTokenService;
 import com.worlabel.domain.member.entity.dto.MemberResponse;
@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public class AuthController {
     @Value("${auth.refreshTokenExpiry}")
     long refreshExpiry;
 
-    private final FcmRepository fcmRepository;
+    private final FcmCacheRepository fcmCacheRepository;
     private final JwtTokenService jwtTokenService;
     private final MemberService memberService;
     private final AuthService authService;
@@ -110,7 +109,7 @@ public class AuthController {
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @PostMapping("/test")
     public void testSend(@CurrentUser final Integer memberId) {
-        String token = fcmRepository.getToken(memberId);
+        String token = fcmCacheRepository.getToken(memberId);
         fcmService.testSend(token, "test알림입니다.");
     }
 

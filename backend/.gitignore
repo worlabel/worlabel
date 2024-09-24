@@ -196,4 +196,4 @@ $RECYCLE.BIN/
 !/gradle/wrapper/gradle-wrapper.jar
 
 src/main/resources/application.properties
-src/main/resources/firebase/worlabel-firbase-key.json
+src/main/resources/firebase/worlabel-firebase-key.json
