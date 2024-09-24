@@ -40,12 +40,10 @@ public class FCMConfig {
             FirebaseApp firebaseApp = FirebaseApp.getApps().isEmpty() ?
                     FirebaseApp.initializeApp(options) :
                     FirebaseApp.getInstance();
-            log.debug("firebase 불러오기 성공");
             // 설정된 FirebaseApp 연결된 FirebaseMessaging 인스턴스를 반환
             return FirebaseMessaging.getInstance(firebaseApp);
         } catch (IOException e) {
             throw new CustomException(ErrorCode.SERVER_ERROR, "Firebase Key 불러오기 실패 ");
         }
     }
-
 }
