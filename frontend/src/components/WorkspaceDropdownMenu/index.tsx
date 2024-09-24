@@ -12,17 +12,34 @@ import React from 'react';
 import ImageUploadFolderForm from '../ImageUploadFolderModal/ImageUploadFolderForm';
 import ImageUploadZipForm from '../ImageUploadZipModal/ImageUploadZipForm';
 
-export default function WorkspaceDropdownMenu({ projectId, folderId }: { projectId: number; folderId: number }) {
+export default function WorkspaceDropdownMenu({
+  projectId,
+  folderId,
+  refetch,
+}: {
+  projectId: number;
+  folderId: number;
+  refetch: () => void;
+}) {
   const [isOpenUploadFile, setIsOpenUploadFile] = React.useState(false);
   const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState(false);
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState(false);
 
   const handleOpenUploadFile = () => setIsOpenUploadFile(true);
-  const handleCloseUploadFile = () => setIsOpenUploadFile(false);
+  const handleCloseUploadFile = () => {
+    refetch();
+    setIsOpenUploadFile(false);
+  };
   const handleOpenUploadFolder = () => setIsOpenUploadFolder(true);
-  const handleCloseUploadFolder = () => setIsOpenUploadFolder(false);
+  const handleCloseUploadFolder = () => {
+    refetch();
+    setIsOpenUploadFolder(false);
+  };
   const handleOpenUploadZip = () => setIsOpenUploadZip(true);
-  const handleCloseUploadZip = () => setIsOpenUploadZip(false);
+  const handleCloseUploadZip = () => {
+    refetch();
+    setIsOpenUploadZip(false);
+  };
 
   return (
     <>
