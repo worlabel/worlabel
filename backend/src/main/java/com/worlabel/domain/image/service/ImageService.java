@@ -147,7 +147,32 @@ public class ImageService {
             unzip(folderOrZip, tempDir.toString());
 
             // 압축 풀린 폴더를 재귀적으로 탐색하여 하위 폴더 및 이미지 파일을 저장
-            processFolderRecursively(tempDir.toFile(), parentFolder, project);
+            if (tempDir.toFile().exists()) {
+                File[] files = tempDir.toFile().listFiles();
+
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isDirectory()) {
+                            // 하위 폴더인 경우 재귀 호출
+                            processFolderRecursively(file, parentFolder, project);
+                        } else if (isImageFile(file)) {
+                            // 이미지 파일인 경우
+                            String fileName = file.getName();
+                            String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+                            try (InputStream inputStream = new FileInputStream(file)) {
+                                // InputStream으로 S3 업로드
+                                String imageKey = s3UploadService.uploadFromInputStream(inputStream, extension, project.getId(), file.getName());
+
+                                Image image = Image.of(file.getName(), imageKey, extension, parentFolder);
+                                imageRepository.save(image);
+                            } catch (IOException e) {
+                                throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+                            }
+                        }
+                    }
+                }
+            }
         } else {
             // 압축 파일이 아닌 경우 (단일 폴더 또는 파일)
             File tempFolder = new File(System.getProperty("java.io.tmpdir"), originalFilename);
@@ -163,8 +188,8 @@ public class ImageService {
         if (directory.exists() && directory.isDirectory()) {
             Folder currentFolder = Folder.of(directory.getName(), parentFolder, project);
             folderRepository.save(currentFolder);
-
             File[] files = directory.listFiles();
+
             if (files != null) {
                 for (File file : files) {
                     if (file.isDirectory()) {
