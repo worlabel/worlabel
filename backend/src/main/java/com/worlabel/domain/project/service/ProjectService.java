@@ -178,7 +178,7 @@ public class ProjectService {
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
         // 응답없음
-        log.debug("요청");
+        log.debug("요청 {}", autoLabelingRequest);
 //        progressService.registerPredictProgress(projectId);
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
         saveAutoLabelList(list);

@@ -41,6 +41,7 @@ public class AiDto {
     }
 
     @Getter
+    @ToString
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class AutoLabelingRequest {
