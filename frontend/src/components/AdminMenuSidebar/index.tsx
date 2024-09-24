@@ -1,21 +1,22 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+
 export default function AdminMenuSidebar() {
   const location = useLocation();
-  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId?: string }>();
 
   const menuItems = [
     {
       label: '리뷰',
-      path: `/admin/${workspaceId}/reviews`,
+      path: projectId ? `/admin/${workspaceId}/reviews/${projectId}` : `/admin/${workspaceId}/reviews`,
     },
     {
       label: '멤버 관리',
-      path: `/admin/${workspaceId}/members`,
+      path: projectId ? `/admin/${workspaceId}/members/${projectId}` : `/admin/${workspaceId}/members`,
     },
     {
       label: '모델 관리',
-      path: `/admin/${workspaceId}/models`,
+      path: projectId ? `/admin/${workspaceId}/models/${projectId}` : `/admin/${workspaceId}/models`,
     },
   ];
 
