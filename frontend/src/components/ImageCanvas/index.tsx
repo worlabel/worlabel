@@ -119,7 +119,7 @@ export default function ImageCanvas() {
     setPolygonPoints([]);
     if (polygonPoints.length < 4) return;
 
-    const color = Math.floor(Math.random() * 65535)
+    const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
       .padStart(6, '0');
     const id = labels.length + 1;
@@ -146,7 +146,7 @@ export default function ImageCanvas() {
       return;
     }
     setRectPoints([]);
-    const color = Math.floor(Math.random() * 65535)
+    const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
       .padStart(6, '0');
     const id = labels.length;
