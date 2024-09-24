@@ -122,7 +122,7 @@ export default function ImageCanvas() {
     const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
       .padStart(6, '0');
-    const id = labels.length + 1;
+    const id = labels.length;
     addLabel({
       id: id,
       name: 'label',
