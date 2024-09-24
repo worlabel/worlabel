@@ -1,10 +1,8 @@
 package com.worlabel.global.config;
 
+import com.worlabel.domain.auth.handler.*;
 import com.worlabel.domain.auth.service.CustomOAuth2UserService;
 import com.worlabel.global.filter.JwtAuthenticationFilter;
-import com.worlabel.domain.auth.handler.CustomAuthenticationDeniedHandler;
-import com.worlabel.domain.auth.handler.CustomAuthenticationEntryPoint;
-import com.worlabel.domain.auth.handler.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +22,7 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final CustomAuthenticationDeniedHandler authenticationDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -70,7 +69,6 @@ public class SecurityConfig {
                                 .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**", "/ws/**").permitAll()
                                 .requestMatchers("/api/auth/reissue").permitAll()
                                 .anyRequest().authenticated()
-//                        .anyRequest().permitAll()
                 );
 
         // OAuth2
@@ -81,7 +79,6 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                 );
-
 
         // JWT 필터 추가
         http

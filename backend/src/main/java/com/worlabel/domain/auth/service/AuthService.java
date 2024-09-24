@@ -2,6 +2,7 @@ package com.worlabel.domain.auth.service;
 
 import com.worlabel.domain.auth.entity.dto.JwtToken;
 import com.worlabel.domain.auth.repository.AuthCacheRepository;
+import com.worlabel.domain.auth.repository.FcmRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,10 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    
-    private final JwtTokenService jwtTokenService;
+
     private final AuthCacheRepository authCacheRepository;
+    private final JwtTokenService jwtTokenService;
+    private final FcmRepository fcmRepository;;
 
     /**
      * JWT 토큰 재발급
@@ -34,7 +36,19 @@ public class AuthService {
     /**
      * 레디에 리프레시 토큰 저장
      */
-    public void saveRefreshToken(int id, String refreshToken,Long expiredTime) {
-        authCacheRepository.save(id, refreshToken, expiredTime);
+    public void saveRefreshToken(int memberId, String refreshToken,Long expiredTime) {
+        authCacheRepository.save(memberId, refreshToken, expiredTime);
+    }
+
+    public void deleteRefreshToken(int memberId) {
+        authCacheRepository.delete(memberId);
+    }
+
+    public void saveFcmToken(int memberId, String fcmToken) {
+        fcmRepository.save(memberId, fcmToken);
+    }
+
+    public void deleteFcmToken(int memberId) {
+        fcmRepository.delete(memberId);
     }
 }

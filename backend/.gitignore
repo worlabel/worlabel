@@ -186,13 +186,14 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-src/main/resources/application.properties
+
 
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij+all,redis,macos,windows
-
-
 
 
 # Gradle wrapper files
 !/gradle/wrapper/gradle-wrapper.properties
 !/gradle/wrapper/gradle-wrapper.jar
+
+src/main/resources/application.properties
+src/main/resources/firebase/worlabel-firbase-key.json
