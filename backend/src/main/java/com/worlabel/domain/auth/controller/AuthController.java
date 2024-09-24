@@ -3,6 +3,7 @@ package com.worlabel.domain.auth.controller;
 import com.worlabel.domain.auth.entity.dto.FcmTokenRequest;
 import com.worlabel.domain.auth.entity.dto.JwtToken;
 import com.worlabel.domain.auth.entity.dto.AccessTokenResponse;
+import com.worlabel.domain.auth.repository.FcmRepository;
 import com.worlabel.domain.auth.service.AuthService;
 import com.worlabel.domain.auth.service.JwtTokenService;
 import com.worlabel.domain.member.entity.dto.MemberResponse;
@@ -12,6 +13,7 @@ import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
+import com.worlabel.global.service.FcmService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
@@ -20,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -32,9 +35,12 @@ import java.util.Arrays;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    private final FcmService fcmService;
+
     @Value("${auth.refreshTokenExpiry}")
     long refreshExpiry;
 
+    private final FcmRepository fcmRepository;
     private final JwtTokenService jwtTokenService;
     private final MemberService memberService;
     private final AuthService authService;
@@ -65,13 +71,21 @@ public class AuthController {
     @SwaggerApiSuccess(description = "Logout")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @PostMapping("/logout")
-    public void logout(@CurrentUser final Integer memberId, HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에서 리프레시 토큰 삭제
-        Cookie deleteCookie = createRefreshCookie(null, 0);
-        response.addCookie(deleteCookie);
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String refreshToken = parseRefreshCookie(request);
+            int memberId = jwtTokenService.parseId(refreshToken);
 
-        authService.deleteRefreshToken(memberId);
-        authService.deleteFcmToken(memberId);
+            // 쿠키에서 리프레시 토큰 삭제
+            Cookie deleteCookie = createRefreshCookie(null, 0);
+            response.addCookie(deleteCookie);
+
+            authService.deleteRefreshToken(memberId);
+            authService.deleteFcmToken(memberId);
+
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN, "이미 로그아웃한 사용자입니다.");
+        }
     }
 
 
@@ -87,8 +101,17 @@ public class AuthController {
     @SwaggerApiSuccess(description = "Redis에 FCM 토큰이 저장됨")
     @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
     @PostMapping("/fcm")
-    public void saveFcmToken(@CurrentUser final Integer currentMember, @RequestBody final FcmTokenRequest tokenRequest) {
-        authService.saveFcmToken(currentMember, tokenRequest.getToken());
+    public void saveFcmToken(@CurrentUser final Integer memberId, @RequestBody final FcmTokenRequest tokenRequest) {
+        authService.saveFcmToken(memberId, tokenRequest.getToken());
+    }
+
+    @Operation(summary = "테스트를 위한 알람 전송 API ", description = "알람전송")
+    @SwaggerApiSuccess(description = "Redis에 FCM 알람이 전송됨")
+    @SwaggerApiError({ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_REFRESH_TOKEN, ErrorCode.USER_NOT_FOUND})
+    @PostMapping("/test")
+    public void testSend(@CurrentUser final Integer memberId) {
+        String token = fcmRepository.getToken(memberId);
+        fcmService.testSend(token, "test알림입니다.");
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {

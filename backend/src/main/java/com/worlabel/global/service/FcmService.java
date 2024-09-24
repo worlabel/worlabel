@@ -13,6 +13,10 @@ public class FcmService {
 
     private final FirebaseMessaging firebaseMessaging;
 
+    public void testSend(String targetToken, String message){
+        sendNotification(targetToken, "testTitle", "testBody");
+    }
+
     private void sendNotification(String targetToken, String title, String body){
         Message message = Message.builder()
                 .setToken(targetToken)
