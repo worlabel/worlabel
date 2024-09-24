@@ -47,11 +47,11 @@ export async function uploadImageFile(memberId: number, projectId: number, folde
 export async function uploadImageFolder(memberId: number, projectId: number, files: File[]) {
   const formData = new FormData();
   files.forEach((file) => {
-    formData.append('folderZip', file);
+    formData.append('imageList', file);
   });
 
   return api
-    .post(`/projects/${projectId}/folders/${0}/images/zip`, formData, {
+    .post(`/projects/${projectId}/folders/${0}/images/file`, formData, {
       params: { memberId },
     })
     .then(({ data }) => data);
