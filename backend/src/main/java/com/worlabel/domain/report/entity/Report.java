@@ -26,16 +26,17 @@ public class Report extends BaseEntity {
     private AiModel aiModel;
 
     /**
+     * 현재 에포크
+     */
+    @Column(name = "epoch", nullable = false)
+    private Integer epoch;
+
+    /**
      * 전체 에포크
      */
     @Column(name = "total_epochs", nullable = false)
     private Integer totalEpochs;
 
-    /**
-     * 현재 에포크
-     */
-    @Column(name = "epoch", nullable = false)
-    private Integer epoch;
 
     @Column(name = "box_loss", nullable = false)
     private double boxLoss;
@@ -48,4 +49,10 @@ public class Report extends BaseEntity {
 
     @Column(name = "fitness", nullable = false)
     private double fitness;
+
+    @Column(name = "epoch_time", nullable = false)
+    private double epochTime;
+
+    @Column(name = "left_second", nullable = false)
+    private double leftSecond;
 }

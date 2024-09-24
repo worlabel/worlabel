@@ -162,7 +162,7 @@ public class ProjectService {
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void autoLabeling(final Integer projectId, final AutoModelRequest request) {
-        progressService.predictCheck(projectId);
+//        progressService.predictCheck(projectId);
 
         Project project = getProject(projectId);
         String endPoint = project.getProjectType().getValue() + "/predict";

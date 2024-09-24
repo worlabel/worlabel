@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/api/projects/{project_id}/reports")
 @RequiredArgsConstructor
 public class ReportController {
 
     private final ReportService reportService;
 
     @GetMapping("/model/{model_id}")
-    public List<ReportResponse> getReportsByModelId(@PathVariable("model_id") final Integer modelId) {
-        return reportService.getReportsByModelId(modelId);
+    public List<ReportResponse> getReportsByModelId(@PathVariable("model_id") final Integer modelId, @PathVariable("project_id") final Integer projectId) {
+        return reportService.getReportsByModelId(projectId,modelId);
     }
 }

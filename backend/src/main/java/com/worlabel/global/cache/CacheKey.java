@@ -14,4 +14,8 @@ public class CacheKey {
     public static String fcmTokenKey(){
         return "fcmToken";
     }
+
+    public static String progressStatusKey(int modelId) {
+        return "progress:" + modelId;
+    }
 }
