@@ -30,7 +30,7 @@ export default function WorkspaceLayout() {
 
   useEffect(() => {
     if (!projectListData) return;
-    const projects = projectListData.workspaceResponses.map(
+    const projects = projectListData.map(
       (project): Project => ({
         id: project.id,
         name: project.title,

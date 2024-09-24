@@ -21,7 +21,7 @@ export default function ReviewRequest(): JSX.Element {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const { data: projectList } = useProjectListQuery(Number(workspaceId), memberId);
+  const { data: projects } = useProjectListQuery(Number(workspaceId), memberId);
 
   const {
     register,
@@ -63,8 +63,8 @@ export default function ReviewRequest(): JSX.Element {
               <SelectValue placeholder="프로젝트를 선택하세요" />
             </SelectTrigger>
             <SelectContent>
-              {projectList?.workspaceResponses.length ? (
-                projectList.workspaceResponses.map((project) => (
+              {projects.length ? (
+                projects.map((project) => (
                   <SelectItem
                     key={project.id}
                     value={project.id.toString()}

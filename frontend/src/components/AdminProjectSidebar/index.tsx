@@ -19,8 +19,7 @@ export default function AdminProjectSidebar(): JSX.Element {
   const { data: workspaceData } = useWorkspaceQuery(Number(workspaceId), memberId);
   const workspaceTitle = workspaceData?.title || `Workspace-${workspaceId}`;
 
-  const { data: projectsResponse } = useProjectListQuery(Number(workspaceId), memberId);
-  const projects = projectsResponse?.workspaceResponses ?? [];
+  const { data: projects } = useProjectListQuery(Number(workspaceId), memberId);
 
   const createProject = useCreateProjectQuery();
 
