@@ -10,6 +10,7 @@ interface TrainingSettingsProps {
   selectedModel: number | null;
   setSelectedModel: (model: number | null) => void;
   handleTrainingStart: (trainData: ModelTrainRequest) => void;
+  handleTrainingStop: () => void;
   isTraining: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function TrainingSettings({
   selectedModel,
   setSelectedModel,
   handleTrainingStart,
+  handleTrainingStop,
   isTraining,
 }: TrainingSettingsProps) {
   const { data: models } = useProjectModelsQuery(projectId ?? 0);
@@ -30,7 +32,9 @@ export default function TrainingSettings({
   const [lrf, setLrf] = useState<number>(0.001);
 
   const handleSubmit = () => {
-    if (selectedModel !== null) {
+    if (isTraining) {
+      handleTrainingStop();
+    } else if (selectedModel !== null) {
       const trainData: ModelTrainRequest = {
         modelId: selectedModel,
         ratio,
@@ -127,7 +131,7 @@ export default function TrainingSettings({
         onClick={handleSubmit}
         disabled={!selectedModel || isTraining}
       >
-        학습 시작
+        {isTraining ? '학습 중단' : '학습 시작'}
       </Button>
     </fieldset>
   );

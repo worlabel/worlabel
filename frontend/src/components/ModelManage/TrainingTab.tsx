@@ -10,13 +10,13 @@ interface TrainingTabProps {
 
 export default function TrainingTab({ projectId }: TrainingTabProps) {
   const numericProjectId = projectId ? parseInt(projectId.toString(), 10) : null;
-  const { isTrainingByProject, setIsTraining, selectedModelByProject, setSelectedModel, trainingDataByProject } =
+  const { isTrainingByProject, setIsTraining, selectedModelByProject, setSelectedModel, resetTrainingData } =
     useModelStore((state) => ({
       isTrainingByProject: state.isTrainingByProject,
       setIsTraining: state.setIsTraining,
       selectedModelByProject: state.selectedModelByProject,
       setSelectedModel: state.setSelectedModel,
-      trainingDataByProject: state.trainingDataByProject,
+      resetTrainingData: state.resetTrainingData,
     }));
 
   const isTraining = isTrainingByProject[numericProjectId?.toString() || ''] || false;
@@ -31,7 +31,12 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
     }
   };
 
-  const trainingData = trainingDataByProject[numericProjectId?.toString() || ''];
+  const handleTrainingStop = () => {
+    if (isTraining) {
+      setIsTraining(numericProjectId?.toString() || '', false);
+      resetTrainingData(numericProjectId?.toString() || '');
+    }
+  };
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
@@ -40,6 +45,7 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         selectedModel={selectedModel}
         setSelectedModel={(modelId) => setSelectedModel(numericProjectId?.toString() || '', modelId)}
         handleTrainingStart={handleTrainingStart}
+        handleTrainingStop={handleTrainingStop}
         isTraining={isTraining}
       />
 
@@ -47,14 +53,6 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         projectId={numericProjectId}
         selectedModel={selectedModel}
       />
-
-      {trainingData && (
-        <div className="mt-4">
-          <p>현재 에포크: {trainingData[trainingData.length - 1]?.epoch}</p>
-          <p>총 에포크: {trainingData[trainingData.length - 1]?.totalEpochs}</p>
-          <p>예상 남은시간: {trainingData[trainingData.length - 1]?.leftSecond}</p>
-        </div>
-      )}
     </div>
   );
 }
