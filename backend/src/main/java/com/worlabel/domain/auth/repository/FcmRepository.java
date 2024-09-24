@@ -14,14 +14,14 @@ public class FcmRepository {
     private final RedisTemplate<String, Object> redisTemplate;
 
     public void save(int memberId, String token) {
-        redisTemplate.opsForHash().put(CacheKey.fcmTokenKey(), memberId, token);
+        redisTemplate.opsForHash().put(CacheKey.fcmTokenKey(), String.valueOf(memberId), token);
     }
 
     public void delete(int memberId) {
-        redisTemplate.opsForHash().delete(CacheKey.fcmTokenKey(), memberId);
+        redisTemplate.opsForHash().delete(CacheKey.fcmTokenKey(), String.valueOf(memberId));
     }
 
     public String getToken(int memberId) {
-        return (String) redisTemplate.opsForHash().get(CacheKey.fcmTokenKey(), memberId);
+        return (String) redisTemplate.opsForHash().get(CacheKey.fcmTokenKey(), String.valueOf(memberId));
     }
 }
