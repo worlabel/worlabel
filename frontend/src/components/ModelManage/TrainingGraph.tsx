@@ -29,6 +29,7 @@ export default function TrainingGraph({ projectId, selectedModel }: TrainingGrap
   const trainingDataList = useMemo(() => {
     return trainingDataByProject[projectId?.toString() || ''] || fetchedTrainingDataList || [];
   }, [projectId, trainingDataByProject, fetchedTrainingDataList]);
+
   useEffect(() => {
     if (fetchedTrainingDataList) {
       saveTrainingData(projectId?.toString() || '', fetchedTrainingDataList);
@@ -57,9 +58,9 @@ export default function TrainingGraph({ projectId, selectedModel }: TrainingGrap
       data={
         trainingDataList?.map((data) => ({
           epoch: data.epoch.toString(),
-          loss1: data.boxLoss,
-          loss2: data.clsLoss,
-          loss3: data.dflLoss,
+          boxLoss: data.boxLoss,
+          classLoss: data.clsLoss,
+          dflLoss: data.dflLoss,
           fitness: data.fitness,
         })) || []
       }
