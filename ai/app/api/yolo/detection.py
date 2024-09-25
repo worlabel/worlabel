@@ -10,7 +10,7 @@ from services.create_model import save_model
 from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from utils.slackMessage import send_slack_message
-import asyncio
+import asyncio, httpx
 
 
 router = APIRouter()
@@ -18,7 +18,7 @@ router = APIRouter()
 @router.post("/predict")
 async def detection_predict(request: PredictRequest):
 
-    # send_slack_message(f"predict 요청{request}", status="success")
+    send_slack_message(f"predict 요청{request}", status="success")
 
     # 모델 로드
     model = get_model(request)

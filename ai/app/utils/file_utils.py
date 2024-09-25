@@ -55,8 +55,8 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
     # 레이블 파일 경로
     label_path = os.path.join(dataset_root_path, child_path, f"{img_title}.txt")
 
-    # 레이블 역직렬화
-    label = json_to_object(data.label)
+    # 레이블 객체 불러오기
+    label = json.loads(urllib.request.urlopen(data.data_url).read())
 
     # 레이블 -> 학습용 레이블 데이터 파싱 후 생성
     create_detection_train_label(label, label_path, label_map)
@@ -104,13 +104,3 @@ def get_file_name(path):
     if not os.path.exists(path):
         raise FileNotFoundError()
     return os.path.basename(path)
-
-def json_to_object(json_string):
-    try:
-        # JSON 문자열을 Python 객체로 변환
-        python_object = json.loads(json_string)
-        return python_object
-    except json.JSONDecodeError as e:
-        raise json.JSONDecodeError("json_decode_error:"+str(e))
-    except Exception as e:
-        raise Exception("exception at json_to_object:"+str(e))

@@ -4,7 +4,7 @@ from schemas.predict_response import LabelData
 
 class TrainDataInfo(BaseModel):
     image_url: str
-    label: str
+    data_url: str
 
 class TrainRequest(BaseModel):
     project_id: int
