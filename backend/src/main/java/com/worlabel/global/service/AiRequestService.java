@@ -31,6 +31,7 @@ public class AiRequestService {
         String url = createApiUrl(endPoint);
         HttpEntity<T> request = new HttpEntity<>(requestData, createJsonHeaders());
 
+        log.debug("요청 {}",url);
         // Void 타입의 경우 별도 처리 (상태 코드만 확인)
         if (responseType.equals(Void.class)) {
             sendVoidRequest(url, request);

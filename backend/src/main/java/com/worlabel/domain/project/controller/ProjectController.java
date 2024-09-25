@@ -14,6 +14,7 @@ import com.worlabel.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +78,11 @@ public class ProjectController {
     @PostMapping("/projects/{project_id}/auto")
     public void autoLabeling(
             @PathVariable("project_id") final Integer projectId,
-            @RequestBody final AutoModelRequest request) {
+            @RequestBody final AutoModelRequest request,
+            HttpServletRequest httpServletRequest) {
+        String clientIp = httpServletRequest.getRemoteAddr();
+        int clientPort = httpServletRequest.getRemotePort();
+        log.debug("클라이언트 IP: {}, 포트 번호: {}", clientIp, clientPort);
         projectService.autoLabeling(projectId, request);
     }
 

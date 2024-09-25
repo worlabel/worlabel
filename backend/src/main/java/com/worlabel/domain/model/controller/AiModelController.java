@@ -3,7 +3,9 @@ package com.worlabel.domain.model.controller;
 import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
 import com.worlabel.domain.model.entity.dto.AiModelRequest;
 import com.worlabel.domain.model.entity.dto.AiModelResponse;
+import com.worlabel.domain.model.entity.dto.ModelTrainRequest;
 import com.worlabel.domain.model.service.AiModelService;
+import com.worlabel.domain.progress.service.ProgressService;
 import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -26,13 +28,14 @@ import java.util.List;
 public class AiModelController {
 
     private final AiModelService aiModelService;
+    private final ProgressService progressService;
 
     @Operation(summary = "프로젝트 모델 조회", description = "프로젝트에 있는 모델을 조회합니다.")
     @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/projects/{project_id}/models")
     public List<AiModelResponse> getModelList(
-        @PathVariable("project_id") final Integer projectId) {
+            @PathVariable("project_id") final Integer projectId) {
         return aiModelService.getModelList(projectId);
     }
 
@@ -41,7 +44,7 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/models/{model_id}/categories")
     public List<LabelCategoryResponse> getCategories(
-        @PathVariable("model_id") final Integer modelId) {
+            @PathVariable("model_id") final Integer modelId) {
         return aiModelService.getCategories(modelId);
     }
 
@@ -50,8 +53,8 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/models")
     public void addModel(
-        @PathVariable("project_id") final Integer projectId,
-        @Valid @RequestBody final AiModelRequest aiModelRequest) {
+            @PathVariable("project_id") final Integer projectId,
+            @Valid @RequestBody final AiModelRequest aiModelRequest) {
         aiModelService.addModel(projectId, aiModelRequest);
     }
 
@@ -60,9 +63,9 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PutMapping("/projects/{project_id}/models/{model_id}")
     public void renameModel(
-        @PathVariable("project_id") final Integer projectId,
-        @PathVariable("model_id") final Integer modelId,
-        @Valid @RequestBody final AiModelRequest aiModelRequest) {
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("model_id") final Integer modelId,
+            @Valid @RequestBody final AiModelRequest aiModelRequest) {
         aiModelService.renameModel(projectId, modelId, aiModelRequest);
     }
 
@@ -71,8 +74,9 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/train")
     public void trainModel(
-        @PathVariable("project_id") final Integer projectId,
-        @RequestBody final Integer modelId) {
-        aiModelService.train(projectId, modelId);
+            @PathVariable("project_id") final Integer projectId,
+            @RequestBody final ModelTrainRequest trainRequest) {
+        log.debug("모델 학습 요청 {}", trainRequest);
+        aiModelService.train(projectId, trainRequest);
     }
 }

@@ -162,7 +162,7 @@ public class ProjectService {
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void autoLabeling(final Integer projectId, final AutoModelRequest request) {
-        progressService.predictCheck(projectId);
+//        progressService.predictCheck(projectId);
 
         Project project = getProject(projectId);
         String endPoint = project.getProjectType().getValue() + "/predict";
@@ -178,8 +178,8 @@ public class ProjectService {
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
         // 응답없음
-        log.debug("요청");
-        progressService.registerPredictProgress(projectId);
+        log.debug("요청 {}", autoLabelingRequest);
+//        progressService.registerPredictProgress(projectId);
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
         saveAutoLabelList(list);
     }
