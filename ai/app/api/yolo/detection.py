@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
@@ -10,6 +10,8 @@ from services.create_model import save_model
 from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from utils.slackMessage import send_slack_message
+from utils.api_utils import report_data
+import random
 import asyncio, httpx
 
 
@@ -33,9 +35,8 @@ async def detection_predict(request: PredictRequest):
     # 추론
     try:
         results = run_predictions(model, url_list, request, classes)
-        print(len(results))
-        print(len(request.image_list))
         response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
+        send_slack_message(f"predict 성공{response}", status="success")
         return response
 
     except Exception as e:
@@ -48,6 +49,7 @@ def get_model(request: PredictRequest):
     try:
         return load_detection_model(request.project_id, request.m_key)
     except Exception as e:
+        send_slack_message(f"프로젝트 ID: {request.project_id} - 실패! 에러: {str(e)}",status="error")
         raise HTTPException(status_code=500, detail="load model exception: " + str(e))
 
 # 추론 실행 함수
@@ -60,18 +62,22 @@ def run_predictions(model, image, request, classes):
             classes=classes
         )
     except Exception as e:
+        send_slack_message(f"프로젝트 ID: {request.project_id} - 실패! 에러: {str(e)}",status="error")
         raise HTTPException(status_code=500, detail="model predict exception: " + str(e))
     
 
 # 추론 결과 처리 함수
 def process_prediction_result(result, image, label_map):
+    random_number = random.randint(0, 0xFFFFFF)
+    color = f"{random_number:06X}"
+
     label_data = LabelData(
         version="0.0.0",
         task_type="det",
         shapes=[
             {
                 "label": summary['name'],
-                "color": "#ff0000",
+                "color": color,
                 "points": [
                     [summary['box']['x1'], summary['box']['y1']],
                     [summary['box']['x2'], summary['box']['y2']]
@@ -96,7 +102,11 @@ def process_prediction_result(result, image, label_map):
 
 
 @router.post("/train")
-async def detection_train(request: TrainRequest):
+async def detection_train(request: TrainRequest, http_request: Request):
+    # Authorization 헤더에서 Bearer 토큰 추출
+    auth_header = http_request.headers.get("Authorization")
+    
+    token = auth_header.split(" ")[1] if auth_header and auth_header.startswith("Bearer ") else None
 
     send_slack_message(f"train 요청{request}", status="success")
 
@@ -148,6 +158,7 @@ async def detection_train(request: TrainRequest):
                 left_seconds= left_seconds        # 남은 시간(초)
             )
             # 데이터 전송
+            report_data(request.project_id, request.m_id, data, token)
 
         model.add_callback("on_train_epoch_start", send_data)
 
@@ -162,10 +173,10 @@ async def detection_train(request: TrainRequest):
         )
 
         model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
-
-        return {"model_key": model_key, "results": results.results_dict}
+        response = {"model_key": model_key, "results": results.results_dict}
+        send_slack_message(f"train 성공{response}", status="success")
+        return response
     except Exception as e:
 
         raise HTTPException(status_code=500, detail="model train exception: " + str(e))
-
 
