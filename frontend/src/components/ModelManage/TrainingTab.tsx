@@ -39,19 +39,20 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
   };
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
+    <div className="grid grid-rows-[auto_1fr] gap-8 md:grid-cols-2">
       <TrainingSettings
         projectId={numericProjectId}
         selectedModel={selectedModel}
         setSelectedModel={(modelId) => setSelectedModel(numericProjectId?.toString() || '', modelId)}
         handleTrainingStart={handleTrainingStart}
         handleTrainingStop={handleTrainingStop}
-        isTraining={isTraining}
+        className="h-full"
       />
 
       <TrainingGraph
         projectId={numericProjectId}
         selectedModel={selectedModel}
+        className="h-full"
       />
     </div>
   );

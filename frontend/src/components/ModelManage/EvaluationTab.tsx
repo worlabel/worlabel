@@ -1,11 +1,11 @@
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
 import useProjectModelsQuery from '@/queries/models/useProjectModelsQuery';
 import useModelReportsQuery from '@/queries/models/useModelReportsQuery';
 import useModelResultsQuery from '@/queries/models/useModelResultsQuery';
 import ModelBarChart from './ModelBarChart';
 import ModelLineChart from './ModelLineChart';
+import { useState } from 'react';
 
 interface EvaluationTabProps {
   projectId: number | null;
@@ -13,7 +13,6 @@ interface EvaluationTabProps {
 
 export default function EvaluationTab({ projectId }: EvaluationTabProps) {
   const [selectedModel, setSelectedModel] = useState<number | null>(null);
-
   const { data: models } = useProjectModelsQuery(projectId ?? 0);
 
   return (
@@ -70,47 +69,62 @@ function ModelEvaluation({ projectId, selectedModel }: ModelEvaluationProps) {
   const { data: reportData } = useModelReportsQuery(projectId, selectedModel);
   const { data: resultData } = useModelResultsQuery(selectedModel);
 
-  if (!reportData || !resultData) {
-    return null;
-  }
+  if (!reportData || !resultData) return null;
+
+  const trainingInfoRow = (
+    <div className="flex justify-between rounded-lg bg-gray-100 p-4">
+      <div className="flex-1 text-center">
+        <strong>Epochs</strong>
+        <p>{resultData[0]?.epochs}</p>
+      </div>
+      <div className="flex-1 text-center">
+        <strong>Batch Size</strong>
+        <p>{resultData[0]?.batch}</p>
+      </div>
+      <div className="flex-1 text-center">
+        <strong>Learning Rate (Start)</strong>
+        <p>{resultData[0]?.lr0}</p>
+      </div>
+      <div className="flex-1 text-center">
+        <strong>Learning Rate (End)</strong>
+        <p>{resultData[0]?.lrf}</p>
+      </div>
+      <div className="flex-1 text-center">
+        <strong>Optimizer</strong>
+        <p>{resultData[0]?.optimizer}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <div className="flex flex-col gap-6">
-        <ModelBarChart
-          data={[
-            { name: 'precision', value: resultData[0]?.precision, fill: 'var(--color-precision)' },
-            { name: 'recall', value: resultData[0]?.recall, fill: 'var(--color-recall)' },
-            { name: 'mAP50', value: resultData[0]?.map50, fill: 'var(--color-map50)' },
-            { name: 'mAP50_95', value: resultData[0]?.map5095, fill: 'var(--color-map50-95)' },
-            { name: 'fitness', value: resultData[0]?.fitness, fill: 'var(--color-fitness)' },
-          ]}
-        />
+    <div>
+      {trainingInfoRow} {/* 학습 정보 표시 */}
+      <div className="mt-4 grid h-[400px] gap-8 md:grid-cols-2">
+        {' '}
+        {/* grid와 높이 설정 */}
+        <div className="flex h-full flex-col gap-6">
+          {' '}
+          {/* 차트의 높이를 100%로 맞춤 */}
+          <ModelBarChart
+            data={[
+              { name: 'precision', value: resultData[0]?.precision, fill: 'var(--color-precision)' },
+              { name: 'recall', value: resultData[0]?.recall, fill: 'var(--color-recall)' },
+              { name: 'mAP50', value: resultData[0]?.map50, fill: 'var(--color-map50)' },
+              { name: 'mAP50_95', value: resultData[0]?.map5095, fill: 'var(--color-map50-95)' },
+              { name: 'fitness', value: resultData[0]?.fitness, fill: 'var(--color-fitness)' },
+            ]}
+            className="h-full"
+          />
+        </div>
+        <div className="flex h-full flex-col gap-6">
+          {' '}
+          {/* 차트의 높이를 100%로 맞춤 */}
+          <ModelLineChart
+            data={reportData}
+            className="h-full"
+          />
+        </div>
       </div>
-
-      <div className="flex flex-col gap-6">
-        <ModelLineChart
-          data={reportData.map((report) => ({
-            epoch: report.epoch.toString(),
-            boxLoss: report.boxLoss,
-            classLoss: report.clsLoss,
-            dflLoss: report.dflLoss,
-            fitness: report.fitness,
-          }))}
-        />
-      </div>
-
-      {/* <div className="flex flex-col justify-center">
-        <LabelingPreview />
-      </div> */}
     </div>
   );
 }
-
-// function LabelingPreview() {
-//   return (
-//     <div className="flex items-center justify-center rounded-lg border bg-white p-4">
-//       <p>레이블링 프리뷰</p>
-//     </div>
-//   );
-// }
