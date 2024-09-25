@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os, httpx
 
 
-def report_data(project_id:int, model_id:int, data:ReportData, token):
+def send_data_call_api(project_id:int, model_id:int, data:ReportData, token):
     try:
         load_dotenv() 
         # main.py와 같은 디렉토리에 .env 파일 생성해서 따옴표 없이 입력
