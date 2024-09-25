@@ -55,4 +55,36 @@ public class Report extends BaseEntity {
 
     @Column(name = "left_second", nullable = false)
     private double leftSecond;
+
+    private Report(final AiModel aiModel,
+                   final Integer epoch,
+                   final Integer totalEpochs,
+                   final double boxLoss,
+                   final double clsLoss,
+                   final double dflLoss,
+                   final double fitness,
+                   final double epochTime,
+                   final double leftSecond) {
+        this.aiModel = aiModel;
+        this.epoch = epoch;
+        this.totalEpochs = totalEpochs;
+        this.boxLoss = boxLoss;
+        this.clsLoss = clsLoss;
+        this.dflLoss = dflLoss;
+        this.fitness = fitness;
+        this.epochTime = epochTime;
+        this.leftSecond = leftSecond;
+    }
+
+    public static Report of(final AiModel aiModel,
+                            final Integer epoch,
+                            final Integer totalEpochs,
+                            final double boxLoss,
+                            final double clsLoss,
+                            final double dflLoss,
+                            final double fitness,
+                            final double epochTime,
+                            final double leftSecond) {
+        return new Report(aiModel, epoch, totalEpochs, boxLoss, clsLoss, dflLoss, fitness, epochTime, leftSecond);
+    }
 }

@@ -17,39 +17,43 @@ public class ProgressService {
 
     private final ProgressCacheRepository progressCacheRepository;
 
-    public void predictProgressCheck(final int projectId){
-        if(progressCacheRepository.predictProgressCheck(projectId)){
+    public void predictProgressCheck(final int projectId) {
+        if (progressCacheRepository.predictProgressCheck(projectId)) {
             throw new CustomException(ErrorCode.AI_IN_PROGRESS);
         }
     }
 
-    public void registerPredictProgress(final int projectId){
+    public void registerPredictProgress(final int projectId) {
         progressCacheRepository.registerPredictProgress(projectId);
     }
 
-    public void removePredictProgress(final int projectId){
+    public void removePredictProgress(final int projectId) {
         progressCacheRepository.removePredictProgress(projectId);
     }
 
-    public void trainProgressCheck(final int projectId){
-        if(progressCacheRepository.trainProgressCheck(projectId)){
+    public void trainProgressCheck(final int projectId, final int modelId) {
+        if (progressCacheRepository.trainProgressCheck(projectId, modelId)) {
             throw new CustomException(ErrorCode.AI_IN_PROGRESS);
         }
     }
 
-    public boolean isProgressTrain(final int projectId){
-        return progressCacheRepository.trainProgressCheck(projectId);
+    public void registerTrainProgress(final int projectId, final int modelId) {
+        progressCacheRepository.registerTrainProgress(projectId, modelId);
     }
 
-    public void registerTrainProgress(final int projectId){
-        progressCacheRepository.registerTrainProgress(projectId);
+    public boolean isProgressTrain(final int projectId, final int modelId) {
+        return progressCacheRepository.trainProgressCheck(projectId, modelId);
     }
 
-    public void removeTrainProgress(final int projectId){
-        progressCacheRepository.removeTrainProgress(projectId);
+    public void registerTrainProgress(final int projectId, final int modelId, final ReportResponse data) {
+        progressCacheRepository.addProgressModel(projectId, modelId, data);
     }
 
-    public List<ReportResponse> getProgressResponse(final int modelId) {
-        return progressCacheRepository.getProgressModel(modelId);
+    public void removeTrainProgress(final int projectId, final int modelId) {
+        progressCacheRepository.removeTrainProgress(projectId, modelId);
+    }
+
+    public List<ReportResponse> getProgressResponse(final int projectId, final int modelId) {
+        return progressCacheRepository.getProgressModel(projectId, modelId);
     }
 }

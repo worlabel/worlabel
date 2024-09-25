@@ -21,6 +21,9 @@ import com.worlabel.domain.project.dto.AiDto.TrainRequest;
 import com.worlabel.domain.project.entity.Project;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.domain.project.service.ProjectService;
+import com.worlabel.domain.report.service.ReportService;
+import com.worlabel.domain.result.entity.Result;
+import com.worlabel.domain.result.repository.ResultRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.cache.CacheKey;
 import com.worlabel.global.exception.CustomException;
@@ -53,9 +56,11 @@ public class AiModelService {
     private final ProjectRepository projectRepository;
     private final AiRequestService aiRequestService;
     private final ImageRepository imageRepository;
+    private final ResultRepository resultRepository;
     private final ProjectService projectService;
     private final Gson gson;
     private final ProgressService progressService;
+    private final ReportService reportService;
 
     //    @PostConstruct
     public void loadDefaultModel() {
@@ -154,21 +159,49 @@ public class AiModelService {
                 .toList();
 
 //        progressService.registerTrainProgress(projectId);
-        TrainRequest aiRequest = TrainRequest.of(project.getId(), model.getModelKey(), labelMap, data, trainRequest);
+        TrainRequest aiRequest = TrainRequest.of(project.getId(), model.getId(), model.getModelKey(), labelMap, data, trainRequest);
 //        progressService.removeTrainProgress(projectId);
 
         String endPoint = project.getProjectType().getValue() + "/train";
 
         // FastAPI 서버로 POST 요청 전송
-        String modelKey = aiRequestService.postRequest(endPoint, aiRequest, String.class, response -> response);
+        TrainResponse trainResponse = aiRequestService.postRequest(endPoint, aiRequest, TrainResponse.class, this::converterTrain);
 
         // 가져온 modelKey -> version 업된 모델 다시 새롭게 저장
         String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
         int newVersion = model.getVersion() + 1;
         String newName = currentDateTime + String.format("%03d", newVersion);
 
-        AiModel newModel = AiModel.of(newName, modelKey, newVersion, project);
+        AiModel newModel = AiModel.of(newName, trainResponse.getModelKey(), newVersion, project);
+
+        Result result = Result.of(newModel,
+                trainResponse.getPrecision(),
+                trainResponse.getRecall(),
+                trainResponse.getMAP50(),
+                trainResponse.getMAP5095(),
+                trainResponse.getFitness(),
+                trainRequest.getRatio(),
+                trainRequest.getEpochs(),
+                trainRequest.getBatch(),
+                trainRequest.getLr0(),
+                trainRequest.getLrf(),
+                trainRequest.getOptimizer());
+
+        resultRepository.save(result);
         aiModelRepository.save(newModel);
+
+        // 레디스 정보 DB에 저장
+        reportService.changeReport(project.getId(), model.getId(), newModel);
+    }
+
+    private TrainResponse converterTrain(String data) {
+        try {
+            Type type = new TypeToken<TrainResponse>() {
+            }.getType();
+            return gson.fromJson(data, type);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.BAD_REQUEST);
+        }
     }
 
     /**

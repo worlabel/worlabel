@@ -40,8 +40,11 @@ public class AiDto {
         @JsonProperty("model_key")
         private String modelKey;
 
+        @JsonProperty("model_id")
+        private Integer modelId;
+
         @JsonProperty("label_map")
-        private Map<Integer,Integer> labelMap;
+        private Map<Integer, Integer> labelMap;
 
         @JsonProperty("data")
         private List<TrainDataInfo> data;
@@ -58,9 +61,10 @@ public class AiDto {
 
         private Optimizer optimizer;
 
-        public static TrainRequest of(final Integer projectId, final String modelKey, final Map<Integer, Integer> labelMap, final List<TrainDataInfo> data, final ModelTrainRequest trainRequest) {
+        public static TrainRequest of(final Integer projectId, final Integer modelId, final String modelKey, final Map<Integer, Integer> labelMap, final List<TrainDataInfo> data, final ModelTrainRequest trainRequest) {
             TrainRequest request = new TrainRequest();
             request.projectId = projectId;
+            request.modelId = modelId;
             request.modelKey = modelKey;
             request.labelMap = labelMap;
             request.data = data;

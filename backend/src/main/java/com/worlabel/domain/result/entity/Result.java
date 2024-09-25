@@ -50,12 +50,53 @@ public class Result extends BaseEntity {
     private double batch;
 
     @Column(name = "ir0", nullable = false)
-    private double ir0;
+    private double lr0;
 
     @Column(name = "irf", nullable = false)
-    private double irf;
+    private double lrf;
 
     @Column(name = "optimizer", nullable = false)
     @Enumerated(EnumType.STRING)
     private Optimizer optimizer;
+
+    public Result(final AiModel aiModel,
+                  final double precision,
+                  final double recall,
+                  final double mAP50,
+                  final double mAP5095,
+                  final double fitness,
+                  final double ratio,
+                  final double epochs,
+                  final double batch,
+                  final double lr0,
+                  final double lrf,
+                  final Optimizer optimizer) {
+        this.aiModel = aiModel;
+        this.precision = precision;
+        this.recall = recall;
+        this.mAP50 = mAP50;
+        this.mAP5095 = mAP5095;
+        this.fitness = fitness;
+        this.ratio = ratio;
+        this.epochs = epochs;
+        this.batch = batch;
+        this.lr0 = lr0;
+        this.lrf = lrf;
+        this.optimizer = optimizer;
+    }
+
+    public static Result of(final AiModel aiModel,
+                            final double precision,
+                            final double recall,
+                            final double mAP50,
+                            final double mAP5095,
+                            final double fitness,
+                            final double ratio,
+                            final double epochs,
+                            final double batch,
+                            final double lr0,
+                            final double lrf,
+                            final Optimizer optimizer) {
+        return new Result(aiModel, precision, recall, mAP50, mAP5095, fitness, ratio, epochs, batch, lr0, lrf, optimizer);
+    }
 }
