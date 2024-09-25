@@ -42,38 +42,39 @@ public class ProgressCacheRepository {
     }
 
     /**
-     * 학습 진행 확인 메서드
+     * 현재 학습 진행 여부 확인 메서드 (단일 키 사용)
      */
-    public boolean trainProgressCheck(final int projectId) {
-        Boolean isProgress = redisTemplate.opsForSet().isMember(CacheKey.trainProgressKey(), String.valueOf(projectId));
-        return Boolean.TRUE.equals(isProgress);
+    public boolean trainProgressCheck(final int projectId, final int modelId) {
+        String key = CacheKey.trainKey(projectId, modelId);
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
     /**
-     * 학습 진행 등록 메서드
+     * 학습 진행 등록 메서드 (단일 키 사용)
      */
-    public void registerTrainProgress(final int projectId) {
-        redisTemplate.opsForSet().add(CacheKey.trainProgressKey(), String.valueOf(projectId));
+    public void registerTrainProgress(final int projectId, final int modelId) {
+        String key = CacheKey.trainKey(projectId, modelId);
+        redisTemplate.opsForValue().set(key, String.valueOf(modelId));
     }
 
     /**
-     * 학습 진행 제거 메서드
+     * 학습 진행 제거 메서드 (단일 키 사용)
      */
-    public void removeTrainProgress(final int projectId) {
-        redisTemplate.opsForSet().remove(CacheKey.trainProgressKey(), String.valueOf(projectId));
+    public void removeTrainProgress(final int projectId, final int modelId) {
+        String key = CacheKey.trainKey(projectId, modelId);
+        redisTemplate.delete(key);
     }
 
     /**
-     * 진행 상황을 Redis에 추가
+     * 진행 상황을 Redis에 추가 (리스트 형식 유지)
      */
-    public void addProgressModel(final int modelId,final String data){
-        ReportResponse reportResponse = convert(data);
-        redisTemplate.opsForList().rightPush(CacheKey.progressStatusKey(modelId), gson.toJson(reportResponse));
+    public void addProgressModel(final int projectId, final int modelId, final ReportResponse data) {
+        redisTemplate.opsForList().rightPush(CacheKey.trainKey(projectId, modelId), gson.toJson(data));
     }
 
-    public List<ReportResponse> getProgressModel(final int modelId) {
-        // 저장된 걸 주어진 응답에 맞추어 리턴
-        String key = CacheKey.progressStatusKey(modelId);
+    public List<ReportResponse> getProgressModel(final int projectId, final int modelId) {
+        // 저장된 진행 상황을 주어진 응답 형태로 변환하여 리턴
+        String key = CacheKey.trainKey(projectId, modelId);
         List<String> progressList = redisTemplate.opsForList().range(key, 0, -1);
 
         return progressList.stream()
@@ -85,7 +86,7 @@ public class ProgressCacheRepository {
         redisTemplate.delete(CacheKey.progressStatusKey(modelId));
     }
 
-    private ReportResponse convert(String data){
+    private ReportResponse convert(String data) {
         return gson.fromJson(data, ReportResponse.class);
     }
 }

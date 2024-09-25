@@ -20,4 +20,8 @@ public class CacheKey {
     public static String progressStatusKey(int modelId) {
         return "progress:" + modelId;
     }
+
+    public static String trainKey(int projectId, int modelId) {
+        return "train:" + projectId + ":" + modelId;
+    }
 }

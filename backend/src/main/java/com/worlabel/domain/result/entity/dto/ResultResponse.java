@@ -5,7 +5,6 @@ import com.worlabel.domain.result.entity.Result;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -19,8 +18,8 @@ public class ResultResponse {
     private double ratio;
     private double epochs;
     private double batch;
-    private double ir0;
-    private double irf;
+    private double lr0;
+    private double lrf;
     private Optimizer optimizer;
 
     public static ResultResponse fromResult(final Result result) {
@@ -34,8 +33,8 @@ public class ResultResponse {
                 result.getRatio(),
                 result.getEpochs(),
                 result.getBatch(),
-                result.getIr0(),
-                result.getIrf(),
+                result.getLr0(),
+                result.getLrf(),
                 result.getOptimizer());
     }
 }

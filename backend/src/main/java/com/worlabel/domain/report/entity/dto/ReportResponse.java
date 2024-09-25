@@ -1,7 +1,6 @@
 package com.worlabel.domain.report.entity.dto;
 
 import com.worlabel.domain.report.entity.Report;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +22,20 @@ public class ReportResponse {
     public static ReportResponse from(final Report report) {
         return new ReportResponse(
                 report.getAiModel().getId(),
+                report.getTotalEpochs(),
+                report.getEpoch(),
+                report.getBoxLoss(),
+                report.getClsLoss(),
+                report.getDflLoss(),
+                report.getFitness(),
+                report.getEpochTime(),
+                report.getLeftSecond()
+        );
+    }
+
+    public static ReportResponse of(final ReportRequest report, final Integer id) {
+        return new ReportResponse(
+                id,
                 report.getTotalEpochs(),
                 report.getEpoch(),
                 report.getBoxLoss(),
