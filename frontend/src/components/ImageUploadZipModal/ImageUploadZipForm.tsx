@@ -27,6 +27,8 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
     if (newFiles) {
       setFile(newFiles[0]);
     }
+
+    event.target.value = '';
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {

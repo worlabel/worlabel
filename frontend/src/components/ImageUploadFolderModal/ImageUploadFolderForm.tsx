@@ -27,6 +27,8 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
     if (newFiles) {
       setFiles((prevFiles) => [...prevFiles, ...Array.from(newFiles)]);
     }
+
+    event.target.value = '';
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {

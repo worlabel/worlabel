@@ -40,6 +40,8 @@ export default function ImageUploadFileForm({
 
       setFiles((prevFiles) => [...prevFiles, ...newImages]);
     }
+
+    event.target.value = '';
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
