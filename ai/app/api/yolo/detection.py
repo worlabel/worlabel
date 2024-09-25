@@ -18,7 +18,7 @@ router = APIRouter()
 @router.post("/predict")
 async def detection_predict(request: PredictRequest):
 
-    send_slack_message(f"predict 요청{request}", status="success")
+    # send_slack_message(f"predict 요청{request}", status="success")
 
     # 모델 로드
     model = get_model(request)
@@ -33,6 +33,8 @@ async def detection_predict(request: PredictRequest):
     # 추론
     try:
         results = run_predictions(model, url_list, request, classes)
+        print(len(results))
+        print(len(request.image_list))
         response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
         return response
 
@@ -51,13 +53,12 @@ def get_model(request: PredictRequest):
 # 추론 실행 함수
 def run_predictions(model, image, request, classes):
     try:
-        predict_results = model.predict(
-        source=image,
-        iou=request.iou_threshold,
-        conf=request.conf_threshold,
-        classes=classes
+        return model.predict(
+            source=image,
+            iou=request.iou_threshold,
+            conf=request.conf_threshold,
+            classes=classes
         )
-        return predict_results[0]
     except Exception as e:
         raise HTTPException(status_code=500, detail="model predict exception: " + str(e))
     

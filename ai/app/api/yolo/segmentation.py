@@ -11,7 +11,7 @@ def predict(request: PredictRequest):
     
     # 모델 로드
     try:
-        model = load_segmentation_model()
+        model = load_segmentation_model(request.project_id, request.m_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail="load model exception: "+str(e))
     

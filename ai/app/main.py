@@ -10,7 +10,7 @@ app.include_router(yolo_detection_router, prefix="/api/detection", tags=["Detect
 app.include_router(yolo_segmentation_router, prefix="/api/segmentation", tags=["Segmentation"])
 app.include_router(yolo_model_router, prefix="/api/model", tags=["Model"])
 
-# 애플리케이션 실행
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", reload=True)
+# # 애플리케이션 실행
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run("main:app", reload=True)

@@ -8,9 +8,9 @@ class TrainDataInfo(BaseModel):
 
 class TrainRequest(BaseModel):
     project_id: int
-    m_key: Optional[str] = Field(None, alias="model_key")
-    m_id: Optional[str] = Field(None, alias="model_id") # 학습 중 에포크 결과를 보낼때 model_id를 보냄
-    label_map: dict[int, int] = Field(None, description="모델 레이블 카테고리 idx: 프로젝트 레이블 카테고리 idx , None 일경우 레이블 데이터(프로젝트 레이블)의 idx로 학습")
+    m_key: str = Field("yolo8", alias="model_key")
+    m_id: int = Field(..., alias="model_id") # 학습 중 에포크 결과를 보낼때 model_id를 보냄
+    label_map: dict[int, int] = Field({}, description="모델 레이블 카테고리 idx: 프로젝트 레이블 카테고리 idx , None 일경우 레이블 데이터(프로젝트 레이블)의 idx로 학습")
     data: List[TrainDataInfo]
     ratio: float = 0.8 # 훈련/검증 분할 비율
 

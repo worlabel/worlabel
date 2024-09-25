@@ -1,8 +1,6 @@
 # ai_service.py
 
 from ultralytics import YOLO # Ultralytics YOLO 모델을 가져오기
-from ultralytics.models.yolo.model import YOLO as YOLO_Model
-from ultralytics.nn.tasks import DetectionModel, SegmentationModel
 import os
 import torch
 
@@ -12,7 +10,7 @@ def load_detection_model(project_id:int, model_key:str):
     if model_key in default_model_map:
         model = YOLO(default_model_map[model_key])
     else:
-        model = load_model(model_path=os.path.join("projects",str(project_id),"models",model_key))
+        model = load_model(model_path=os.path.join("projects",str(project_id),"models", model_key))
 
     # Detection 모델인지 검증
     if model.task != "detect":

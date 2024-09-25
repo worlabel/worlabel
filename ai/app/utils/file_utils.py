@@ -40,7 +40,6 @@ def process_directories(dataset_root_path:str, names:list[str]):
     make_yml(dataset_root_path, names)
 
 def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_path:str, label_map:dict[int, int]|None):
-    
     """이미지 저장 및 레이블 파일 생성"""
     # 이미지 url로부터 파일명 분리
     img_name = data.image_url.split('/')[-1]
@@ -64,17 +63,17 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
 
 def create_detection_train_label(label:LabelData, label_path:str, label_map:dict[int, int]|None):
     with open(label_path, "w") as train_label_txt:
-        for shape in label.shapes:
+        for shape in label["shapes"]:
             train_label = []
-            x1 = shape.points[0][0]
-            y1 = shape.points[0][1]
-            x2 = shape.points[1][0]
-            y2 = shape.points[1][1]
-            train_label.append(str(label_map[shape.group_id]) if label_map else str(shape.group_id)) # label Id
-            train_label.append(str((x1 + x2) / 2 / label.imageWidth))   # 중심 x 좌표
-            train_label.append(str((y1 + y2) / 2 / label.imageHeight))  # 중심 y 좌표
-            train_label.append(str((x2 - x1) / label.imageWidth))       # 너비
-            train_label.append(str((y2 - y1) / label.imageHeight ))     # 높이
+            x1 = shape["points"][0][0]
+            y1 = shape["points"][0][1]
+            x2 = shape["points"][1][0]
+            y2 = shape["points"][1][1]
+            train_label.append(str(label_map[shape["group_id"]]) if label_map else str(shape["group_id"])) # label Id
+            train_label.append(str((x1 + x2) / 2 / label["imageWidth"]))   # 중심 x 좌표
+            train_label.append(str((y1 + y2) / 2 / label["imageHeight"]))  # 중심 y 좌표
+            train_label.append(str((x2 - x1) / label["imageWidth"]))       # 너비
+            train_label.append(str((y2 - y1) / label["imageHeight"] ))     # 높이
             train_label_txt.write(" ".join(train_label)+"\n")
 
 def join_path(path, *paths):
