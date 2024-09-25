@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.predict_response import PredictResponse, LabelData
 from services.load_model import load_segmentation_model
-from utils.file_utils import get_model_path
 from typing import List
 
 router = APIRouter()
@@ -12,8 +11,7 @@ def predict(request: PredictRequest):
     
     # 모델 로드
     try:
-        model_path = request.m_key and get_model_path(request.project_id, request.m_key)
-        model = load_segmentation_model(model_path)
+        model = load_segmentation_model(request.project_id, request.m_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail="load model exception: "+str(e))
     

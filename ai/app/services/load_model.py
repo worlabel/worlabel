@@ -1,39 +1,29 @@
 # ai_service.py
 
 from ultralytics import YOLO # Ultralytics YOLO 모델을 가져오기
-from ultralytics.models.yolo.model import YOLO as YOLO_Model
-from ultralytics.nn.tasks import DetectionModel, SegmentationModel
 import os
 import torch
-import re
 
-def load_detection_model(model_path:str|None):
-    """
-    지정된 경로에서 YOLO 모델을 로드합니다.
-
-    Args:
-        model_path (str): 모델 파일 경로.
-        device (str): 모델을 로드할 장치. 기본값은 'cpu'.
-                      'cpu' 또는 'cuda'와 같은 장치를 지정할 수 있습니다.
-
-    Returns:
-        YOLO: 로드된 YOLO 모델 인스턴스
-    """
-
-    if model_path:
-        model = load_model(model_path)
+def load_detection_model(project_id:int, model_key:str):
+    default_model_map = {"yolo8": os.path.join("resources","models","yolov8n.pt")}
+    # 디폴트 모델 확인
+    if model_key in default_model_map:
+        model = YOLO(default_model_map[model_key])
     else:
-        model = YOLO(os.path.join("resources","models","yolov8n.pt"))
+        model = load_model(model_path=os.path.join("projects",str(project_id),"models", model_key))
+
     # Detection 모델인지 검증
     if model.task != "detect":
         raise TypeError(f"Invalid model type: {model.task}. Expected a DetectionModel.")
     return model
     
-def load_segmentation_model(model_path: str|None): 
-    if model_path:
-        model = YOLO(model_path)
+def load_segmentation_model(project_id:int, model_key:str): 
+    default_model_map = {"yolo8": os.path.join("resources","models","yolov8n-seg.pt")}
+    # 디폴트 모델 확인
+    if model_key in default_model_map:
+        model = YOLO(default_model_map[model_key])
     else:
-        model = YOLO(os.path.join("resources","models","yolov8n-seg.pt"))
+        model = load_model(model_path=os.path.join("projects",str(project_id),"models",model_key))
         
     # Segmentation 모델인지 검증
     if model.task != "segment":
