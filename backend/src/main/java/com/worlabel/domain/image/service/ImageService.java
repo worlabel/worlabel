@@ -255,7 +255,7 @@ public class ImageService {
 
         String dataPath = image.getDataPath();
         s3UploadService.uploadJson(data, dataPath);
-        image.updateStatus(LabelStatus.IN_PROGRESS);
+        image.updateStatus(LabelStatus.COMPLETED);
         imageRepository.save(image);
     }
 
