@@ -20,7 +20,7 @@ router = APIRouter()
 @router.post("/predict")
 async def detection_predict(request: PredictRequest):
 
-    send_slack_message(f"predict 요청{request}", status="success")
+    send_slack_message(f"predict 요청: {request}", status="success")
 
     # 모델 로드
     model = get_model(request)
@@ -31,25 +31,19 @@ async def detection_predict(request: PredictRequest):
     # 이미지 데이터 정리
     url_list = list(map(lambda x:x.image_url, request.image_list))
 
-
     # 추론
-    try:
-        results = run_predictions(model, url_list, request, classes)
-        response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
-        send_slack_message(f"predict 성공{response}", status="success")
-        return response
+    results = run_predictions(model, url_list, request, classes)
 
-    except Exception as e:
-        # 실패했을 때 Slack 알림
-        send_slack_message(f"프로젝트 ID: {request.project_id} - 실패! 에러: {str(e)}",status="error")
-        raise HTTPException(status_code=500, detail="Prediction process failed")
+    # 추론 결과 변환
+    response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
+    send_slack_message(f"predict 성공{response}", status="success")
+    return response
 
 # 모델 로드
 def get_model(request: PredictRequest):
     try:
         return load_detection_model(request.project_id, request.m_key)
     except Exception as e:
-        send_slack_message(f"프로젝트 ID: {request.project_id} - 실패! 에러: {str(e)}",status="error")
         raise HTTPException(status_code=500, detail="load model exception: " + str(e))
 
 # 추론 실행 함수
@@ -62,37 +56,39 @@ def run_predictions(model, image, request, classes):
             classes=classes
         )
     except Exception as e:
-        send_slack_message(f"프로젝트 ID: {request.project_id} - 실패! 에러: {str(e)}",status="error")
         raise HTTPException(status_code=500, detail="model predict exception: " + str(e))
     
 
 # 추론 결과 처리 함수
 def process_prediction_result(result, image, label_map):
-    random_number = random.randint(0, 0xFFFFFF)
-    color = f"{random_number:06X}"
+    try:
+        random_number = random.randint(0, 0xFFFFFF)
+        color = f"{random_number:06X}"
 
-    label_data = LabelData(
-        version="0.0.0",
-        task_type="det",
-        shapes=[
-            {
-                "label": summary['name'],
-                "color": color,
-                "points": [
-                    [summary['box']['x1'], summary['box']['y1']],
-                    [summary['box']['x2'], summary['box']['y2']]
-                ],
-                "group_id": label_map[summary['class']] if label_map else summary['class'],
-                "shape_type": "rectangle",
-                "flags": {}
-            }
-            for summary in result.summary()
-        ],
-        split="none",
-        imageHeight=result.orig_img.shape[0],
-        imageWidth=result.orig_img.shape[1],
-        imageDepth=result.orig_img.shape[2]
-    )
+        label_data = LabelData(
+            version="0.0.0",
+            task_type="det",
+            shapes=[
+                {
+                    "label": summary['name'],
+                    "color": color,
+                    "points": [
+                        [summary['box']['x1'], summary['box']['y1']],
+                        [summary['box']['x2'], summary['box']['y2']]
+                    ],
+                    "group_id": label_map[summary['class']] if label_map else summary['class'],
+                    "shape_type": "rectangle",
+                    "flags": {}
+                }
+                for summary in result.summary()
+            ],
+            split="none",
+            imageHeight=result.orig_img.shape[0],
+            imageWidth=result.orig_img.shape[1],
+            imageDepth=result.orig_img.shape[2]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="model predict exception: " + str(e))
 
     return PredictResponse(
         image_id=image.image_id,
@@ -103,12 +99,12 @@ def process_prediction_result(result, image, label_map):
 
 @router.post("/train")
 async def detection_train(request: TrainRequest, http_request: Request):
-    # Authorization 헤더에서 Bearer 토큰 추출
-    auth_header = http_request.headers.get("Authorization")
-    
-    token = auth_header.split(" ")[1] if auth_header and auth_header.startswith("Bearer ") else None
 
     send_slack_message(f"train 요청{request}", status="success")
+
+    # Authorization 헤더에서 Bearer 토큰 추출
+    auth_header = http_request.headers.get("Authorization")
+    token = auth_header.split(" ")[1] if auth_header and auth_header.startswith("Bearer ") else None
 
     # 데이터셋 루트 경로 얻기
     dataset_root_path = get_dataset_root_path(request.project_id)
