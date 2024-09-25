@@ -1,6 +1,6 @@
 # YOLO8 DEFAULT 모델 삽입
 INSERT INTO ai_model(model_id, version, name)
-VALUES (1, 0, "yolo8-detection");
+VALUES (1, 0, "yolo8");
 
 # 80개의 라벨 카테고리 삽입
 INSERT INTO label_category(model_id, label_category_name, ai_category_id)
