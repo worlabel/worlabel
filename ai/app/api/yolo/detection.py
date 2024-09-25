@@ -1,5 +1,3 @@
-import json
-
 from fastapi import APIRouter, HTTPException, Request
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
@@ -12,7 +10,6 @@ from utils.file_utils import get_dataset_root_path, process_directories, process
 from utils.slackMessage import send_slack_message
 from utils.api_utils import report_data
 import random
-import asyncio, httpx
 
 
 router = APIRouter()
@@ -63,7 +60,7 @@ def run_predictions(model, image, request, classes):
 def process_prediction_result(result, image, label_map):
     try:
         random_number = random.randint(0, 0xFFFFFF)
-        color = f"{random_number:06X}"
+        color = f"#{random_number:06X}"
 
         label_data = LabelData(
             version="0.0.0",
@@ -92,7 +89,7 @@ def process_prediction_result(result, image, label_map):
 
     return PredictResponse(
         image_id=image.image_id,
-        data=json.dumps(label_data.dict())
+        data=label_data.model_dump_json()
     )
 
 
