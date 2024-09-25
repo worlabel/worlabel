@@ -18,10 +18,10 @@ export default function ProjectStructure({ project }: { project: Project }) {
   }, [project, setProject]);
 
   return (
-    <div className="flex h-full flex-col justify-between">
-      <div className="flex flex-col overflow-y-auto px-1 pb-2">
+    <div className="flex h-full min-h-0 grow-0 flex-col">
+      <div className="flex h-full flex-col overflow-hidden px-1 pb-2">
         <header className="flex w-full items-center gap-2 rounded p-1">
-          <div className="flex w-full items-center gap-1 overflow-hidden pr-1">
+          <div className="flex w-full min-w-0 items-center gap-1 pr-1">
             <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap">{project.type}</h2>
           </div>
           <WorkspaceDropdownMenu
@@ -35,7 +35,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
             빈 프로젝트입니다.
           </div>
         ) : (
-          <div className="caption flex flex-col">
+          <div className="caption flex flex-col overflow-y-auto">
             {folderData.children.map((item) => (
               <ProjectDirectoryItem
                 key={`${project.id}-${item.title}`}
@@ -55,7 +55,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
         )}
       </div>
 
-      <div className="flex p-2.5">
+      <div className="flex">
         <Button
           variant="outlinePrimary"
           className="w-full"
