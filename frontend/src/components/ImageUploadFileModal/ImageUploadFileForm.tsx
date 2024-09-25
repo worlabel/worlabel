@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
-import { X } from 'lucide-react';
+import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery';
 
 export default function ImageUploadFileForm({
@@ -122,16 +122,40 @@ export default function ImageUploadFileForm({
               className={cn('flex items-center justify-between p-1')}
             >
               <span className="truncate">{file.webkitRelativePath || file.name}</span>
-              <button
-                className={'cursor-pointer p-2'}
-                onClick={() => handleRemoveFile(index)}
-              >
-                <X
-                  color="red"
-                  size={16}
-                  strokeWidth="2"
-                />
-              </button>
+              {isUploading ? (
+                <div className="p-2">
+                  {isUploaded ? (
+                    <CircleCheckBig
+                      className="stroke-green-500"
+                      size={20}
+                      strokeWidth="2"
+                    />
+                  ) : isFailed ? (
+                    <CircleX
+                      className="stroke-red-500"
+                      size={20}
+                      strokeWidth="2"
+                    />
+                  ) : (
+                    <CircleDashed
+                      className="stroke-gray-500"
+                      size={20}
+                      strokeWidth="2"
+                    />
+                  )}
+                </div>
+              ) : (
+                <button
+                  className={'cursor-pointer p-2'}
+                  onClick={() => handleRemoveFile(index)}
+                >
+                  <X
+                    color="red"
+                    size={16}
+                    strokeWidth="2"
+                  />
+                </button>
+              )}
             </li>
           ))}
         </ul>
