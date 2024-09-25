@@ -8,9 +8,10 @@ import { Button } from '../ui/button';
 import { useEffect } from 'react';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
+import useProjectStore from '@/stores/useProjectStore';
 
 export default function ProjectStructure({ project }: { project: Project }) {
-  const setProject = useCanvasStore((state) => state.setProject);
+  const setProject = useProjectStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
   const requestAutoLabel = useAutoLabelQuery();
@@ -24,7 +25,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
       <div className="flex h-full flex-col overflow-hidden px-1 pb-2">
         <header className="flex w-full items-center gap-2 rounded p-1">
           <div className="flex w-full min-w-0 items-center gap-1 pr-1">
-            <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap">{project.type}</h2>
+            <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap text-gray-500">{project.type}</h2>
           </div>
           <WorkspaceDropdownMenu
             projectId={project.id}

@@ -2,16 +2,22 @@ import useCanvasStore from '@/stores/useCanvasStore';
 import { LucideIcon, MousePointer2, PenTool, Save, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function CanvasControlBar({ saveJson }: { saveJson: () => void }) {
+export default function CanvasControlBar({
+  saveJson,
+  projectType,
+}: {
+  saveJson: () => void;
+  projectType: 'classification' | 'detection' | 'segmentation';
+}) {
   const drawState = useCanvasStore((state) => state.drawState);
   const setDrawState = useCanvasStore((state) => state.setDrawState);
   const buttonBaseClassName = 'rounded-lg p-2 transition-colors ';
   const buttonClassName = 'hover:bg-gray-100';
   const activeButtonClassName = 'bg-primary stroke-white';
+
   const controls: { [key: string]: LucideIcon } = {
     pointer: MousePointer2,
-    rect: Square,
-    pen: PenTool,
+    ...(projectType === 'segmentation' ? { pen: PenTool } : { rect: Square }),
   };
 
   return (
@@ -31,7 +37,7 @@ export default function CanvasControlBar({ saveJson }: { saveJson: () => void })
           </button>
         );
       })}
-
+      <div className="h-5 w-0.5 rounded bg-gray-400" />
       <button
         className={cn(buttonClassName, buttonBaseClassName)}
         onClick={saveJson}

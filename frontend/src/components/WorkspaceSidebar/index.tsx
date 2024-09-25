@@ -5,24 +5,31 @@ import { Project } from '@/types';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
 import useCanvasStore from '@/stores/useCanvasStore';
 import { webPath } from '@/router';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
 export default function WorkspaceSidebar({ workspaceName, projects }: { workspaceName: string; projects: Project[] }) {
-  const { projectId: selectedProjectId } = useParams<{ projectId: string }>();
+  const { setImage } = useCanvasStore();
+  const { projectId: selectedProjectId, workspaceId } = useParams<{ projectId: string; workspaceId: string }>();
   const selectedProject = projects.find((project) => project.id.toString() === selectedProjectId) || null;
   const setSidebarSize = useCanvasStore((state) => state.setSidebarSize);
   const navigate = useNavigate();
-  const { workspaceId } = useParams<{ workspaceId: string }>();
   const handleSelectProject = (projectId: string) => {
+    setImage(null);
     navigate(`${webPath.workspace()}/${workspaceId}/${projectId}`);
   };
+
+  useEffect(() => {
+    if (!selectedProject) {
+      setImage(null);
+    }
+  }, [selectedProject, setImage]);
 
   return (
     <>
       <ResizablePanel
         minSize={10}
         maxSize={35}
-        defaultSize={20}
+        defaultSize={15}
         className="flex h-full flex-col gap-2 bg-gray-50 p-3"
         onResize={(size) => setSidebarSize(size)}
       >

@@ -10,16 +10,17 @@ import CanvasControlBar from '../CanvasControlBar';
 import { Label } from '@/types';
 import useLabelJson from '@/hooks/useLabelJson';
 import { saveImageLabels } from '@/api/lablingApi';
+import useProjectStore from '@/stores/useProjectStore';
 
 export default function ImageCanvas() {
-  const project = useCanvasStore((state) => state.project)!;
+  const project = useProjectStore((state) => state.project)!;
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
   const { data: labelData, refetch } = useLabelJson(dataPath, project);
   const { shapes } = labelData || [];
   const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
   const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
   const sidebarSize = useCanvasStore((state) => state.sidebarSize);
-  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 280;
+  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 200;
   const stageHeight = window.innerHeight - 64;
   const stageRef = useRef<Konva.Stage>(null);
   const dragLayerRef = useRef<Konva.Layer>(null);
@@ -344,7 +345,10 @@ export default function ImageCanvas() {
 
         <Layer ref={dragLayerRef} />
       </Stage>
-      <CanvasControlBar saveJson={saveJson} />
+      <CanvasControlBar
+        saveJson={saveJson}
+        projectType={project.type}
+      />
     </div>
   ) : (
     <div></div>

@@ -68,12 +68,14 @@ export interface FolderResponse {
   children: ChildFolder[];
 }
 
+export type ImageStatus = 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+
 export interface ImageResponse {
   id: number;
   imageTitle: string;
   imagePath: string;
   dataPath: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+  status: ImageStatus;
 }
 
 // 이미지 이동 및 상태변경 요청 DTO
@@ -82,7 +84,7 @@ export interface ImageMoveRequest {
 }
 
 export interface ImageStatusChangeRequest {
-  labelStatus: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+  labelStatus: ImageStatus;
 }
 
 // 멤버 관련 DTO
