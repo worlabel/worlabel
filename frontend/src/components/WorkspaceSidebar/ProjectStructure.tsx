@@ -62,7 +62,15 @@ export default function ProjectStructure({ project }: { project: Project }) {
           variant="outlinePrimary"
           className="w-full"
           onClick={() => {
-            requestAutoLabel.mutate({ projectId: project.id }, { onSuccess: refetch });
+            requestAutoLabel.mutate(
+              { projectId: project.id },
+              {
+                onSuccess: refetch,
+                onError: () => {
+                  alert('자동 레이블링을 요청하는 중 오류가 발생했습니다.');
+                },
+              }
+            );
           }}
         >
           <Play
