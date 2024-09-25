@@ -92,9 +92,9 @@ function ModelEvaluation({ projectId, selectedModel }: ModelEvaluationProps) {
         <ModelLineChart
           data={reportData.map((report) => ({
             epoch: report.epoch.toString(),
-            loss1: report.boxLoss,
-            loss2: report.clsLoss,
-            loss3: report.dflLoss,
+            boxLoss: report.boxLoss,
+            classLoss: report.clsLoss,
+            dflLoss: report.dflLoss,
             fitness: report.fitness,
           }))}
         />

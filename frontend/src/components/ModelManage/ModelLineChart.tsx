@@ -6,9 +6,9 @@ import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 
 interface MetricData {
   epoch: string;
-  loss1?: number;
-  loss2?: number;
-  loss3?: number;
+  boxLoss?: number;
+  classLoss?: number;
+  dflLoss?: number;
   fitness?: number;
 }
 
@@ -20,16 +20,16 @@ interface ModelLineChartProps {
 }
 
 const chartConfig = {
-  loss1: {
-    label: 'Loss 1',
+  boxLoss: {
+    label: 'Box Loss',
     color: '#FF6347',
   },
-  loss2: {
-    label: 'Loss 2',
+  classLoss: {
+    label: 'Class Loss',
     color: '#1E90FF',
   },
-  loss3: {
-    label: 'Loss 3',
+  dflLoss: {
+    label: 'DFL Loss',
     color: '#32CD32',
   },
   fitness: {
@@ -41,9 +41,9 @@ const chartConfig = {
 export default function ModelLineChart({ data, currentEpoch, totalEpochs, remainingTime }: ModelLineChartProps) {
   const emptyData = Array.from({ length: totalEpochs || 0 }, (_, i) => ({
     epoch: (i + 1).toString(),
-    loss1: null,
-    loss2: null,
-    loss3: null,
+    boxLoss: null,
+    classLoss: null,
+    dflLoss: null,
     fitness: null,
   }));
 
@@ -86,23 +86,23 @@ export default function ModelLineChart({ data, currentEpoch, totalEpochs, remain
             <Tooltip />
             <Legend />
             <Line
-              dataKey="loss1"
+              dataKey="boxLoss"
               type="monotone"
-              stroke={chartConfig.loss1.color}
+              stroke={chartConfig.boxLoss.color}
               strokeWidth={2}
               dot={false}
             />
             <Line
-              dataKey="loss2"
+              dataKey="classLoss"
               type="monotone"
-              stroke={chartConfig.loss2.color}
+              stroke={chartConfig.classLoss.color}
               strokeWidth={2}
               dot={false}
             />
             <Line
-              dataKey="loss3"
+              dataKey="dflLoss"
               type="monotone"
-              stroke={chartConfig.loss3.color}
+              stroke={chartConfig.dflLoss.color}
               strokeWidth={2}
               dot={false}
             />

@@ -9,19 +9,32 @@ interface TrainingGraphProps {
 }
 
 export default function TrainingGraph({ projectId, selectedModel }: TrainingGraphProps) {
-  const { isTrainingByProject, setIsTraining, resetTrainingData } = useModelStore((state) => ({
-    isTrainingByProject: state.isTrainingByProject,
-    setIsTraining: state.setIsTraining,
-    resetTrainingData: state.resetTrainingData,
-  }));
+  const { isTrainingByProject, setIsTraining, saveTrainingData, resetTrainingData, trainingDataByProject } =
+    useModelStore((state) => ({
+      isTrainingByProject: state.isTrainingByProject,
+      setIsTraining: state.setIsTraining,
+      saveTrainingData: state.saveTrainingData,
+      resetTrainingData: state.resetTrainingData,
+      trainingDataByProject: state.trainingDataByProject,
+    }));
 
   const isTraining = isTrainingByProject[projectId?.toString() || ''] || false;
 
-  const { data: trainingDataList } = usePollingModelReportsQuery(
+  const { data: fetchedTrainingDataList } = usePollingModelReportsQuery(
     projectId as number,
     selectedModel ?? 0,
     isTraining && !!projectId && !!selectedModel
   );
+
+  const trainingDataList = useMemo(() => {
+    return trainingDataByProject[projectId?.toString() || ''] || fetchedTrainingDataList || [];
+  }, [projectId, trainingDataByProject, fetchedTrainingDataList]);
+
+  useEffect(() => {
+    if (fetchedTrainingDataList) {
+      saveTrainingData(projectId?.toString() || '', fetchedTrainingDataList);
+    }
+  }, [fetchedTrainingDataList, projectId, saveTrainingData]);
 
   const latestData = useMemo(() => {
     return (
@@ -45,9 +58,9 @@ export default function TrainingGraph({ projectId, selectedModel }: TrainingGrap
       data={
         trainingDataList?.map((data) => ({
           epoch: data.epoch.toString(),
-          loss1: data.boxLoss,
-          loss2: data.clsLoss,
-          loss3: data.dflLoss,
+          boxLoss: data.boxLoss,
+          classLoss: data.clsLoss,
+          dflLoss: data.dflLoss,
           fitness: data.fitness,
         })) || []
       }
