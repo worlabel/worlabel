@@ -8,15 +8,15 @@ import useWorkspaceListQuery from '@/queries/workspaces/useWorkspaceListQuery';
 import useCreateWorkspaceQuery from '@/queries/workspaces/useCreateWorkspaceQuery';
 
 export default function WorkspaceBrowseLayout() {
-  const { profile, isLoggedIn } = useAuthStore();
+  const { profile } = useAuthStore();
   const memberId = profile?.id ?? 0;
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoggedIn || memberId == 0) {
+    if (memberId == 0) {
       navigate('/');
     }
-  }, [isLoggedIn, memberId, navigate]);
+  }, [memberId, navigate]);
 
   const { data: workspacesResponse } = useWorkspaceListQuery(memberId ?? 0);
   const createWorkspace = useCreateWorkspaceQuery();

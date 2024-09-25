@@ -1,25 +1,12 @@
-import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
-import { getProfile } from '@/api/authApi';
+
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
-  const { isLoggedIn, accessToken, setLoggedIn, profile, setProfile } = useAuthStore();
-  const hasFetchedProfile = useRef(false);
-
-  if (!isLoggedIn && !profile && !hasFetchedProfile.current && accessToken) {
-    setLoggedIn(true, accessToken);
-    getProfile().then((data) => {
-      setProfile(data);
-      hasFetchedProfile.current = true;
-    });
-  }
-  const handleGoogleSignIn = () => {
-    window.location.href = `${BASE_URL}/login/oauth2/authorization/google`;
-  };
+  const { accessToken } = useAuthStore();
 
   return (
     <div className="flex h-full flex-col items-center justify-center bg-gray-50 p-8">
@@ -42,9 +29,10 @@ export default function Home() {
         </p>
       </div>
 
-      {!isLoggedIn ? (
-        <button
-          onClick={handleGoogleSignIn}
+      {!accessToken ? (
+        <Link
+          to={`${BASE_URL}/login/oauth2/authorization/google`}
+          replace
           className="mb-4 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-gray-300 active:opacity-80"
         >
           <img
@@ -52,7 +40,7 @@ export default function Home() {
             alt="Sign in with Google"
             className="h-auto w-full"
           />
-        </button> // 404 에러 방지
+        </Link> // 404 에러 방지
       ) : (
         <>
           <Button

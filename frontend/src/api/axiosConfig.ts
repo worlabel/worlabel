@@ -27,9 +27,8 @@ api.interceptors.response.use(
     return api
       .post<RefreshTokenResponse>(REFRESH_URL)
       .then(({ data }) => {
-        console.log(data);
         const { accessToken } = data;
-        useAuthStore.getState().setLoggedIn(true, accessToken);
+        useAuthStore.getState().setToken(accessToken);
         if (error.config) {
           return api(error.config);
         }
