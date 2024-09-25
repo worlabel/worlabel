@@ -125,19 +125,22 @@ export const reviewHandlers = [
     const projectId = Array.isArray(params.projectId)
       ? parseInt(params.projectId[0], 10)
       : parseInt(params.projectId as string, 10);
-    console.log(projectId);
 
     const reviewStatus = Array.isArray(params.reviewStatus) ? params.reviewStatus[0] : params.reviewStatus;
 
-    const lastReviewId = Array.isArray(params.lastReviewId) ? params.lastReviewId[0] : params.lastReviewId;
+    const lastReviewId = Array.isArray(params.lastReviewId)
+      ? parseInt(params.lastReviewId[0], 10)
+      : parseInt(params.lastReviewId as string, 10) || 0;
 
     const limitPage = Array.isArray(params.limitPage)
       ? parseInt(params.limitPage[0], 10)
       : parseInt(params.limitPage as string, 10) || 10;
 
-    const reviews: ReviewResponse[] = Array.from({ length: limitPage }, (_, index) => ({
+    // 총 100개의 리뷰를 생성
+    const totalReviews = 100;
+    const reviews: ReviewResponse[] = Array.from({ length: totalReviews }, (_, index) => ({
       projectId,
-      reviewId: lastReviewId ? parseInt(lastReviewId, 10) + index : index + 1,
+      reviewId: index + 1,
       title: `Review ${index + 1}`,
       content: `Review content ${index + 1}`,
       status: (reviewStatus || 'REQUESTED') as 'REQUESTED' | 'APPROVED' | 'REJECTED',
@@ -146,6 +149,10 @@ export const reviewHandlers = [
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
     }));
 
-    return HttpResponse.json(reviews);
+    // 마지막 리뷰 ID 기준으로 데이터를 잘라서 반환
+    const startIndex = lastReviewId > 0 ? lastReviewId : 0;
+    const slicedReviews = reviews.slice(startIndex, startIndex + limitPage);
+
+    return HttpResponse.json(slicedReviews);
   }),
 ];
