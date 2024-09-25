@@ -6,9 +6,9 @@ export async function reissueToken() {
 }
 
 export async function getProfile() {
-  return api
-    .get<MemberResponse>('/auth/profile', {
-      withCredentials: true,
-    })
-    .then(({ data }) => data);
+  return api.get<MemberResponse>('/auth/profile').then(({ data }) => data);
+}
+
+export async function logout() {
+  return api.post('/auth/logout').then(({ data }) => data);
 }
