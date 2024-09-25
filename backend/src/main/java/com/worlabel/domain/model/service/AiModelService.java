@@ -165,6 +165,7 @@ public class AiModelService {
         String endPoint = project.getProjectType().getValue() + "/train";
 
         // FastAPI 서버로 POST 요청 전송
+        log.debug("요청 DTO :{}",aiRequest);
         TrainResponse trainResponse = aiRequestService.postRequest(endPoint, aiRequest, TrainResponse.class, this::converterTrain);
 
         // 가져온 modelKey -> version 업된 모델 다시 새롭게 저장

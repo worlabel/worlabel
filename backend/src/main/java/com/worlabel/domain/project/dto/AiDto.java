@@ -30,6 +30,7 @@ public class AiDto {
     }
 
     @Getter
+    @ToString
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class TrainRequest {

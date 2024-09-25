@@ -35,6 +35,11 @@ public class SecurityConfig {
     @Value("${ai.server}")
     private String aiServer;
 
+    // AI 서버의 동적 경로 패턴을 미리 선언
+    private final String[] aiServerPaths = {
+            "/api/projects/*/reports/models/*" // 동적 경로 패턴
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // HTTP Basic 인증 방식 비활성화
@@ -66,9 +71,10 @@ public class SecurityConfig {
         // 경로별 인가 작업
         http
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**", "/ws/**").permitAll()
-                                .requestMatchers("/api/auth/reissue").permitAll()
-                                .anyRequest().authenticated()
+                        .requestMatchers(aiServerPaths).permitAll()
+                        .requestMatchers("/swagger", "/swagger-ui.html", "/swagger-ui/**", "/api-docs", "/api-docs/**", "/v3/api-docs/**", "/ws/**").permitAll()
+                        .requestMatchers("/api/auth/reissue").permitAll()
+                        .anyRequest().authenticated()
                 );
 
         // OAuth2
@@ -90,7 +96,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of(frontend, aiServer,"http://localhost:5173","http://localhost:8000"));  // 프론트엔드 URL 사용
+        configuration.setAllowedOrigins(List.of(frontend, aiServer, "http://localhost:5173", "http://localhost:8000"));  // 프론트엔드 URL 사용
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setMaxAge(3600L);

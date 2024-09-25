@@ -25,12 +25,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    public final String AUTHORIZATION_HEADER = "Authorization";
+    private final String AUTHORIZATION_HEADER = "Authorization";
     private final JwtTokenService jwtTokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.debug(request.getRequestURI());
+        log.debug("요청 주소 : {}",request.getRequestURI());
+
         String token = resolveToken(request);
 
         try {
