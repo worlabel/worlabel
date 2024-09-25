@@ -6,4 +6,9 @@ export default {
   component: CanvasControlBar,
 };
 
-export const Default = () => <CanvasControlBar saveJson={() => {}} />;
+export const Default = () => (
+  <CanvasControlBar
+    saveJson={() => {}}
+    projectType="segmentation"
+  />
+);

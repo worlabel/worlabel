@@ -4,12 +4,12 @@ import { reissueToken } from '@/api/authApi';
 
 export default function useReissueTokenQuery() {
   const queryClient = useQueryClient();
-  const { setLoggedIn } = useAuthStore();
+  const { setToken } = useAuthStore();
 
   return useMutation({
     mutationFn: reissueToken,
     onSuccess: (data) => {
-      setLoggedIn(true, data.accessToken);
+      setToken(data.accessToken);
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
