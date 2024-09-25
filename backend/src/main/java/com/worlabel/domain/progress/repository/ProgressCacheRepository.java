@@ -16,7 +16,7 @@ public class ProgressCacheRepository {
     /**
      * 현재 오토레이블링중인지 확인하는 메서드
      */
-    public boolean predictCheck(final int projectId) {
+    public boolean predictProgress(final int projectId) {
         String key = CacheKey.autoLabelingProgressKey();
         Boolean isProgress = redisTemplate.opsForSet().isMember(key, projectId);
         return Boolean.TRUE.equals(isProgress);
