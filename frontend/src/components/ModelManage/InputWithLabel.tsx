@@ -6,9 +6,10 @@ interface InputWithLabelProps {
   placeholder: string;
   value: number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
-export default function InputWithLabel({ label, id, placeholder, value, onChange }: InputWithLabelProps) {
+export default function InputWithLabel({ label, id, placeholder, value, disabled, onChange }: InputWithLabelProps) {
   return (
     <div className="grid gap-3">
       <Label htmlFor={id}>{label}</Label>
@@ -18,6 +19,7 @@ export default function InputWithLabel({ label, id, placeholder, value, onChange
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        disabled={disabled}
       />
     </div>
   );

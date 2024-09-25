@@ -2,8 +2,10 @@ import SelectWithLabel from './SelectWithLabel';
 import InputWithLabel from './InputWithLabel';
 import { Button } from '@/components/ui/button';
 import useProjectModelsQuery from '@/queries/models/useProjectModelsQuery';
+import useModelStore from '@/stores/useModelStore';
 import { ModelTrainRequest } from '@/types';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface TrainingSettingsProps {
   projectId: number | null;
@@ -11,7 +13,7 @@ interface TrainingSettingsProps {
   setSelectedModel: (model: number | null) => void;
   handleTrainingStart: (trainData: ModelTrainRequest) => void;
   handleTrainingStop: () => void;
-  isTraining: boolean;
+  className?: string;
 }
 
 export default function TrainingSettings({
@@ -20,9 +22,11 @@ export default function TrainingSettings({
   setSelectedModel,
   handleTrainingStart,
   handleTrainingStop,
-  isTraining,
+  className,
 }: TrainingSettingsProps) {
   const { data: models } = useProjectModelsQuery(projectId ?? 0);
+
+  const isTraining = useModelStore((state) => state.isTrainingByProject[projectId?.toString() || ''] || false);
 
   const [ratio, setRatio] = useState<number>(0.8);
   const [epochs, setEpochs] = useState<number>(50);
@@ -49,12 +53,9 @@ export default function TrainingSettings({
   };
 
   return (
-    <fieldset
-      className="grid gap-6 rounded-lg border p-4"
-      disabled={isTraining}
-    >
+    <fieldset className={cn('grid gap-6 rounded-lg border p-4', className)}>
+      {' '}
       <legend className="-ml-1 px-1 text-sm font-medium">모델 설정</legend>
-
       <div className="grid gap-3">
         <SelectWithLabel
           label="모델 선택"
@@ -68,9 +69,9 @@ export default function TrainingSettings({
           placeholder="모델을 선택하세요"
           value={selectedModel ? selectedModel.toString() : ''}
           onChange={(value) => setSelectedModel(parseInt(value, 10))}
+          disabled={isTraining}
         />
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <InputWithLabel
           label="훈련/검증 비율"
@@ -78,6 +79,7 @@ export default function TrainingSettings({
           id="ratio"
           value={ratio}
           onChange={(e) => setRatio(parseFloat(e.target.value))}
+          disabled={isTraining}
         />
         <InputWithLabel
           label="에포크 수"
@@ -85,6 +87,7 @@ export default function TrainingSettings({
           id="epochs"
           value={epochs}
           onChange={(e) => setEpochs(parseInt(e.target.value, 10))}
+          disabled={isTraining}
         />
         <InputWithLabel
           label="Batch 크기"
@@ -92,6 +95,7 @@ export default function TrainingSettings({
           id="batch"
           value={batchSize}
           onChange={(e) => setBatchSize(parseInt(e.target.value, 10))}
+          disabled={isTraining}
         />
         <SelectWithLabel
           label="옵티마이저"
@@ -108,6 +112,7 @@ export default function TrainingSettings({
           placeholder="옵티마이저 선택"
           value={optimizer}
           onChange={(value) => setOptimizer(value as 'AUTO' | 'SGD' | 'ADAM' | 'ADAMW' | 'NADAM' | 'RADAM' | 'RMSPROP')}
+          disabled={isTraining} // 학습 중일 때 옵티마이저 선택 비활성화
         />
         <InputWithLabel
           label="학습률(LR0)"
@@ -115,6 +120,7 @@ export default function TrainingSettings({
           id="lr0"
           value={lr0}
           onChange={(e) => setLr0(parseFloat(e.target.value))}
+          disabled={isTraining}
         />
         <InputWithLabel
           label="최종 학습률(LRF)"
@@ -122,14 +128,14 @@ export default function TrainingSettings({
           id="lrf"
           value={lrf}
           onChange={(e) => setLrf(parseFloat(e.target.value))}
+          disabled={isTraining}
         />
       </div>
-
       <Button
         variant="outlinePrimary"
         size="lg"
         onClick={handleSubmit}
-        disabled={!selectedModel || isTraining}
+        disabled={!selectedModel}
       >
         {isTraining ? '학습 중단' : '학습 시작'}
       </Button>

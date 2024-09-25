@@ -6,9 +6,10 @@ import useModelStore from '@/stores/useModelStore';
 interface TrainingGraphProps {
   projectId: number | null;
   selectedModel: number | null;
+  className?: string;
 }
 
-export default function TrainingGraph({ projectId, selectedModel }: TrainingGraphProps) {
+export default function TrainingGraph({ projectId, selectedModel, className }: TrainingGraphProps) {
   const { isTrainingByProject, setIsTraining, saveTrainingData, resetTrainingData, trainingDataByProject } =
     useModelStore((state) => ({
       isTrainingByProject: state.isTrainingByProject,
@@ -48,6 +49,7 @@ export default function TrainingGraph({ projectId, selectedModel }: TrainingGrap
 
   useEffect(() => {
     if (latestData.epoch === latestData.totalEpochs && latestData.totalEpochs > 0) {
+      alert('학습이 완료되었습니다!');
       setIsTraining(projectId?.toString() || '', false);
       resetTrainingData(projectId?.toString() || '');
     }
@@ -55,18 +57,8 @@ export default function TrainingGraph({ projectId, selectedModel }: TrainingGrap
 
   return (
     <ModelLineChart
-      data={
-        trainingDataList?.map((data) => ({
-          epoch: data.epoch.toString(),
-          boxLoss: data.boxLoss,
-          classLoss: data.clsLoss,
-          dflLoss: data.dflLoss,
-          fitness: data.fitness,
-        })) || []
-      }
-      currentEpoch={latestData.epoch}
-      totalEpochs={latestData.totalEpochs}
-      remainingTime={latestData.leftSecond}
+      data={trainingDataList}
+      className={className}
     />
   );
 }

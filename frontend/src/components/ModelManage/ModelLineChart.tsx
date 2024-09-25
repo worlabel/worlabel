@@ -3,20 +3,11 @@
 import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
-
-interface MetricData {
-  epoch: string;
-  boxLoss?: number;
-  classLoss?: number;
-  dflLoss?: number;
-  fitness?: number;
-}
+import { ReportResponse } from '@/types';
 
 interface ModelLineChartProps {
-  data: MetricData[];
-  currentEpoch?: number;
-  totalEpochs?: number;
-  remainingTime?: number;
+  data: ReportResponse[];
+  className?: string;
 }
 
 const chartConfig = {
@@ -38,8 +29,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function ModelLineChart({ data, currentEpoch, totalEpochs, remainingTime }: ModelLineChartProps) {
-  const emptyData = Array.from({ length: totalEpochs || 0 }, (_, i) => ({
+export default function ModelLineChart({ data, className }: ModelLineChartProps) {
+  const latestData = data.length > 0 ? data[data.length - 1] : undefined;
+
+  const totalEpochs = latestData?.totalEpochs || 0;
+  const emptyData = Array.from({ length: totalEpochs }, (_, i) => ({
     epoch: (i + 1).toString(),
     boxLoss: null,
     classLoss: null,
@@ -53,16 +47,16 @@ export default function ModelLineChart({ data, currentEpoch, totalEpochs, remain
   }));
 
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Model Training Metrics</CardTitle>
       </CardHeader>
       <CardContent>
-        {currentEpoch !== undefined && totalEpochs !== undefined && remainingTime !== undefined && (
+        {latestData && latestData.totalEpochs !== Number(latestData.epoch) && (
           <div className="mb-4 flex justify-between">
-            <p>현재 에포크: {currentEpoch}</p>
-            <p>총 에포크: {totalEpochs}</p>
-            <p>예상 남은시간: {remainingTime}</p>
+            <p>현재 에포크: {latestData.epoch}</p>
+            <p>총 에포크: {latestData.totalEpochs}</p>
+            <p>예상 남은시간: {latestData.leftSecond}초</p>
           </div>
         )}
         <ChartContainer config={chartConfig}>

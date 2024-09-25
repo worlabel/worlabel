@@ -12,16 +12,27 @@ interface SelectWithLabelProps {
   options: SelectWithLabelOption[];
   placeholder: string;
   value: string;
+  disabled?: boolean;
+
   onChange: (value: string) => void;
 }
 
-export default function SelectWithLabel({ label, id, options, placeholder, value, onChange }: SelectWithLabelProps) {
+export default function SelectWithLabel({
+  label,
+  id,
+  options,
+  placeholder,
+  value,
+  disabled,
+  onChange,
+}: SelectWithLabelProps) {
   return (
     <div className="grid gap-3">
       <Label htmlFor={id}>{label}</Label>
       <Select
         value={value}
         onValueChange={onChange}
+        disabled={disabled}
       >
         <SelectTrigger id={id}>
           <SelectValue placeholder={placeholder} />

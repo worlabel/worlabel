@@ -1,9 +1,8 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface MetricData {
@@ -14,9 +13,8 @@ interface MetricData {
 
 interface ModelBarChartProps {
   data: MetricData[];
+  className?: string;
 }
-
-export const description = 'A bar chart with an active bar';
 
 const chartConfig = {
   precision: {
@@ -41,9 +39,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function ModelBarChart({ data }: ModelBarChartProps) {
+export default function ModelBarChart({ data, className }: ModelBarChartProps) {
   return (
-    <Card>
+    <Card className={className}>
       <CardHeader>
         <CardTitle>Model Metrics</CardTitle>
         <CardDescription>Performance metrics of the model</CardDescription>
@@ -86,12 +84,6 @@ export default function ModelBarChart({ data }: ModelBarChartProps) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Model metrics are trending well <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="text-muted-foreground leading-none">Showing current performance metrics</div>
-      </CardFooter>
     </Card>
   );
 }
