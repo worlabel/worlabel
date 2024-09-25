@@ -45,7 +45,10 @@ export default function WorkspaceDropdownMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Menu size={20} />
+          <Menu
+            size={16}
+            className="stroke-gray-900"
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuItem
