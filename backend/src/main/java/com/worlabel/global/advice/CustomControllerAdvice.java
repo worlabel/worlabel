@@ -1,8 +1,7 @@
 package com.worlabel.global.advice;
 
-import com.amazonaws.Response;
 import com.worlabel.global.exception.CustomException;
-import com.worlabel.global.service.NotificationManager;
+import com.worlabel.global.service.MatterMostNotificationManager;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.lang.reflect.Executable;
 import java.util.Enumeration;
 
 @Slf4j
@@ -24,7 +22,7 @@ import java.util.Enumeration;
 @RequiredArgsConstructor
 public class CustomControllerAdvice {
 
-    private final NotificationManager notificationManager;
+    private final MatterMostNotificationManager notificationManager;
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

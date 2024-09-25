@@ -17,7 +17,10 @@ public class AiModelResponse {
     @Schema(description = "이름", example = "yolo8")
     private String name;
 
+    @Schema(description = "Default 모델 여부", example = "true")
+    private Boolean isDefault;
+
     public static AiModelResponse of(final AiModel aiModel) {
-        return new AiModelResponse(aiModel.getId(), aiModel.getName());
+        return new AiModelResponse(aiModel.getId(), aiModel.getName(), aiModel.getProject() == null);
     }
 }

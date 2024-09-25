@@ -1,6 +1,5 @@
 package com.worlabel.global.service;
 
-import com.worlabel.global.mattermost.MattermostProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NotificationManager {
+public class MatterMostNotificationManager {
 
     private final MatterMostSender matterMostSender;
 
