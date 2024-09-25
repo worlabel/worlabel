@@ -12,3 +12,11 @@ export async function getProfile() {
     })
     .then(({ data }) => data);
 }
+
+export async function saveFcmToken(token: string) {
+  return api.post('/auth/fcm', { token }).then(({ data }) => data);
+}
+
+export async function createTestNotification() {
+  return api.post('/auth/test').then(({ data }) => data);
+}
