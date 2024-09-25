@@ -4,7 +4,7 @@ import useWorkspaceReviewsQuery from '@/queries/workspaces/useWorkspaceReviewsQu
 import useAuthStore from '@/stores/useAuthStore';
 import ReviewList from '@/components/ReviewList';
 import { Button } from '@/components/ui/button';
-
+import { Suspense } from 'react';
 export default function WorkspaceReviewList() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
@@ -49,33 +49,35 @@ export default function WorkspaceReviewList() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <div>
-      <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
-        <h1 className="text-xl font-semibold">워크스페이스 리뷰</h1>
-        <Link
-          to={`/admin/${workspaceId}/reviews/request`}
-          className="ml-auto"
-        >
-          <Button variant="outlinePrimary">리뷰 요청</Button>
-        </Link>
-      </header>
+    <Suspense fallback={<div></div>}>
+      <div>
+        <header className="sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b bg-white px-4">
+          <h1 className="text-xl font-semibold">워크스페이스 리뷰</h1>
+          <Link
+            to={`/admin/${workspaceId}/reviews/request`}
+            className="ml-auto"
+          >
+            <Button variant="outlinePrimary">리뷰 요청</Button>
+          </Link>
+        </header>
 
-      <ReviewList
-        reviews={workspaceReviews}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        setSearchQuery={setSearchQuery}
-        sortValue={sortValue}
-        setSortValue={setSortValue}
-        workspaceId={Number(workspaceId)}
-      />
+        <ReviewList
+          reviews={workspaceReviews}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          setSearchQuery={setSearchQuery}
+          sortValue={sortValue}
+          setSortValue={setSortValue}
+          workspaceId={Number(workspaceId)}
+        />
 
-      {isFetchingNextPage && <div className="py-4 text-center">로딩 중...</div>}
+        {isFetchingNextPage}
 
-      <div
-        ref={loadMoreRef}
-        className="h-1"
-      />
-    </div>
+        <div
+          ref={loadMoreRef}
+          className="h-1"
+        />
+      </div>
+    </Suspense>
   );
 }
