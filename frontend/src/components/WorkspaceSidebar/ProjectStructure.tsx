@@ -7,12 +7,14 @@ import useCanvasStore from '@/stores/useCanvasStore';
 import { Button } from '../ui/button';
 import { useEffect } from 'react';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
+import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
 import useProjectStore from '@/stores/useProjectStore';
 
 export default function ProjectStructure({ project }: { project: Project }) {
   const setProject = useProjectStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
+  const requestAutoLabel = useAutoLabelQuery();
 
   useEffect(() => {
     setProject(project);
@@ -60,7 +62,17 @@ export default function ProjectStructure({ project }: { project: Project }) {
         <Button
           variant="outlinePrimary"
           className="w-full"
-          onClick={() => console.log('autolabel')}
+          onClick={() => {
+            requestAutoLabel.mutate(
+              { projectId: project.id },
+              {
+                onSuccess: refetch,
+                onError: () => {
+                  alert('자동 레이블링을 요청하는 중 오류가 발생했습니다.');
+                },
+              }
+            );
+          }}
         >
           <Play
             size={16}
