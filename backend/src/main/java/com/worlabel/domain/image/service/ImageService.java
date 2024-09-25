@@ -51,7 +51,6 @@ public class ImageService {
         imageList.forEach(file -> uploadAndSave(file, folder, projectId));
     }
 
-
     /**
      * 폴더 생성 또는 가져오기
      * 폴더 생성 작업이 있음으로 트랜잭션 보호
@@ -113,84 +112,6 @@ public class ImageService {
             }
         }
     }
-
-    /**
-     * 파일 업로드를 처리하는 메서드
-     */
-    private void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
-        try {
-            String key = uploadToS3(file, projectId);
-            saveImage(file, key, folder);
-        } catch (Exception e) {
-            log.error("파일 업로드 중 오류 발생", e);
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
-        }
-    }
-
-    /**
-     * 업로드 및 DB 저장 처리
-     */
-    private void uploadAndSave(File file, Folder folder, Project project) {
-        try {
-            String key = uploadToS3(file, project.getId());
-            saveImage(file, key, folder);
-        } catch (Exception e) {
-            log.error("파일 업로드 중 오류 발생", e);
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
-        }
-    }
-
-    /**
-     * DB에 이미지 정보 저장(트랜잭션 적용)
-     */
-    public void saveImage(final MultipartFile file, final String key, final Folder folder) {
-        try {
-            Image image = createImage(file, key, folder);
-            imageRepository.save(image);
-        } catch (Exception e) {
-            log.error("이미지 DB 저장 실패 원인: ", e);
-            s3UploadService.deleteImageFromS3(key); // DB 저장 실패시 S3에서 파일 삭제
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 DB 저장 중 실패");
-        }
-    }
-
-    private void saveImage(final File file, final String key, final Folder folder) {
-        try {
-            Image image = createImage(file, key, folder);
-            imageRepository.save(image);
-        } catch (Exception e) {
-            s3UploadService.deleteImageFromS3(key);
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "에러 발생");
-        }
-    }
-
-    /**
-     * S3 파일 업로드
-     */
-    public String uploadToS3(final MultipartFile file, final Integer projectId) {
-        String extension = getExtension(file.getOriginalFilename());
-        return s3UploadService.uploadMultipartFile(file, extension, projectId);
-    }
-
-    /**
-     * S3 파일 업로드
-     */
-    public String uploadToS3(final File file, final Integer projectId) {
-        String extension = getExtension(file.getName());
-        return s3UploadService.uploadFile(file, extension, projectId);
-    }
-
-
-    private Image createImage(MultipartFile file, String key, Folder folder) {
-        String extension = getExtension(file.getName());
-        return Image.of(file.getOriginalFilename(), key, extension, folder);
-    }
-
-    private Image createImage(File file, String key, Folder folder) {
-        String extension = getExtension(file.getName());
-        return Image.of(file.getName(), key, extension, folder);
-    }
-
 
     /**
      * 이미지 상태 변경
@@ -317,5 +238,89 @@ public class ImageService {
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    /*
+            공통 로직
+     */
+
+    /**
+     * MultipartFile 업로드 및 저장
+     */
+    private void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
+        try {
+            String key = uploadToS3(file, projectId);
+            saveImage(file, key, folder);
+        } catch (Exception e) {
+            log.error("파일 업로드 중 오류 발생", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
+        }
+    }
+
+    /**
+     * File 업로드 및 저장
+     */
+    private void uploadAndSave(File file, Folder folder, Project project) {
+        try {
+            String key = uploadToS3(file, project.getId());
+            saveImage(file, key, folder);
+        } catch (Exception e) {
+            log.error("파일 업로드 중 오류 발생", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
+        }
+    }
+
+    /**
+     * DB에 이미지 정보 저장(트랜잭션 적용)
+     */
+    public void saveImage(final MultipartFile file, final String key, final Folder folder) {
+        try {
+            Image image = createImage(file, key, folder);
+            imageRepository.save(image);
+        } catch (Exception e) {
+            log.error("이미지 DB 저장 실패 원인: ", e);
+            s3UploadService.deleteImageFromS3(key); // DB 저장 실패시 S3에서 파일 삭제
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 DB 저장 중 실패");
+        }
+    }
+
+    /**
+     * DB에 이미지 정보 저장(트랜잭션 적용)
+     */
+    public void saveImage(final File file, final String key, final Folder folder) {
+        try {
+            Image image = createImage(file, key, folder);
+            imageRepository.save(image);
+        } catch (Exception e) {
+            s3UploadService.deleteImageFromS3(key);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "에러 발생");
+        }
+    }
+
+    /**
+     * S3 파일 업로드
+     */
+    private String uploadToS3(final MultipartFile file, final Integer projectId) {
+        String extension = getExtension(file.getOriginalFilename());
+        return s3UploadService.uploadMultipartFile(file, extension, projectId);
+    }
+
+    /**
+     * S3 파일 업로드
+     */
+    private String uploadToS3(final File file, final Integer projectId) {
+        String extension = getExtension(file.getName());
+        return s3UploadService.uploadFile(file, extension, projectId);
+    }
+
+
+    public Image createImage(MultipartFile file, String key, Folder folder) {
+        String extension = getExtension(file.getName());
+        return Image.of(file.getOriginalFilename(), key, extension, folder);
+    }
+
+    public Image createImage(File file, String key, Folder folder) {
+        String extension = getExtension(file.getName());
+        return Image.of(file.getName(), key, extension, folder);
     }
 }
