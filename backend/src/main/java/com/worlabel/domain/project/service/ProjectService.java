@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.labelcategory.entity.ProjectCategory;
 import com.worlabel.domain.member.entity.Member;
@@ -185,12 +186,15 @@ public class ProjectService {
     }
 
     // TODO: 트랜잭션 설정
+    // TODO: 어떤 상황까지 덮어쓸껀지 물어보기
     @Transactional
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
         for(AutoLabelingResult result: resultList) {
             Image image = getImage(result.getImageId());
+            if(image.getStatus() == LabelStatus.SAVE) continue;
             String dataPath = image.getDataPath();
             s3UploadService.uploadJson(result.getData(), dataPath);
+            image.updateStatus(LabelStatus.IN_PROGRESS);
         }
     }
 
