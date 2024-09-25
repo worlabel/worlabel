@@ -8,7 +8,7 @@ from services.create_model import save_model
 from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from utils.slackMessage import send_slack_message
-from utils.api_utils import report_data
+from utils.api_utils import send_data_call_api
 import random
 
 
@@ -151,7 +151,7 @@ async def detection_train(request: TrainRequest, http_request: Request):
                 left_seconds= left_seconds        # 남은 시간(초)
             )
             # 데이터 전송
-            report_data(request.project_id, request.m_id, data, token)
+            send_data_call_api(request.project_id, request.m_id, data, token)
 
         model.add_callback("on_train_epoch_start", send_data)
 
@@ -164,6 +164,9 @@ async def detection_train(request: TrainRequest, http_request: Request):
             lrf=request.lrf,
             optimizer=request.optimizer
         )
+        # 마지막 에포크 전송
+        model.trainer.epoch += 1
+        send_data(model.trainer)
 
         model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
         response = {"model_key": model_key, "results": results.results_dict}
