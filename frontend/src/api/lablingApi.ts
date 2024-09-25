@@ -10,14 +10,6 @@ export async function saveImageLabels(
   return api.post(`/projects/${projectId}/images/${imageId}/label`, data).then(({ data }) => data);
 }
 
-export async function runAutoLabel(projectId: number, memberId: number) {
-  return api
-    .post(
-      `/projects/${projectId}/label/auto`,
-      {},
-      {
-        params: { memberId },
-      }
-    )
-    .then(({ data }) => data);
+export async function runAutoLabel(projectId: number, modelId = 1) {
+  return api.post(`/projects/${projectId}/auto`, { modelId }).then(({ data }) => data);
 }

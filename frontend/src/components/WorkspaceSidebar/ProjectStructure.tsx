@@ -7,11 +7,13 @@ import useCanvasStore from '@/stores/useCanvasStore';
 import { Button } from '../ui/button';
 import { useEffect } from 'react';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
+import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
 
 export default function ProjectStructure({ project }: { project: Project }) {
   const setProject = useCanvasStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
+  const requestAutoLabel = useAutoLabelQuery();
 
   useEffect(() => {
     setProject(project);
@@ -59,7 +61,9 @@ export default function ProjectStructure({ project }: { project: Project }) {
         <Button
           variant="outlinePrimary"
           className="w-full"
-          onClick={() => console.log('autolabel')}
+          onClick={() => {
+            requestAutoLabel.mutate({ projectId: project.id }, { onSuccess: refetch });
+          }}
         >
           <Play
             size={16}
