@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useWorkspaceReviewsQuery from '@/queries/workspaces/useWorkspaceReviewsQuery';
 import useAuthStore from '@/stores/useAuthStore';
@@ -14,11 +14,39 @@ export default function WorkspaceReviewList() {
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
-  const { data: workspaceReviews = [] } = useWorkspaceReviewsQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useWorkspaceReviewsQuery(
     Number(workspaceId),
     memberId,
     activeTab !== 'all' ? activeTab : undefined
   );
+
+  const workspaceReviews = data?.pages.flat() || [];
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    const currentLoadMoreRef = loadMoreRef.current;
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
+    }
+
+    return () => {
+      if (currentLoadMoreRef) {
+        observer.unobserve(currentLoadMoreRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div>
@@ -31,6 +59,7 @@ export default function WorkspaceReviewList() {
           <Button variant="outlinePrimary">리뷰 요청</Button>
         </Link>
       </header>
+
       <ReviewList
         reviews={workspaceReviews}
         activeTab={activeTab}
@@ -39,6 +68,13 @@ export default function WorkspaceReviewList() {
         sortValue={sortValue}
         setSortValue={setSortValue}
         workspaceId={Number(workspaceId)}
+      />
+
+      {isFetchingNextPage && <div className="py-4 text-center">로딩 중...</div>}
+
+      <div
+        ref={loadMoreRef}
+        className="h-1"
       />
     </div>
   );

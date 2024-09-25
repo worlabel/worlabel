@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useReviewByStatusQuery from '@/queries/reviews/useReviewByStatusQuery';
 import useAuthStore from '@/stores/useAuthStore';
@@ -14,11 +14,39 @@ export default function ProjectReviewList() {
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
-  const { data: projectReviews = [] } = useReviewByStatusQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useReviewByStatusQuery(
     Number(projectId),
     memberId,
     activeTab !== 'all' ? activeTab : undefined
   );
+
+  const projectReviews = data?.pages.flat() || [];
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    const currentLoadMoreRef = loadMoreRef.current;
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
+    }
+
+    return () => {
+      if (currentLoadMoreRef) {
+        observer.unobserve(currentLoadMoreRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <div>
@@ -40,6 +68,13 @@ export default function ProjectReviewList() {
         sortValue={sortValue}
         setSortValue={setSortValue}
         workspaceId={Number(workspaceId)}
+      />
+
+      {isFetchingNextPage && <div className="py-4 text-center">로딩 중...</div>}
+
+      <div
+        ref={loadMoreRef}
+        className="h-1"
       />
     </div>
   );
