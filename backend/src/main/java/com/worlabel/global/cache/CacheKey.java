@@ -24,4 +24,16 @@ public class CacheKey {
     public static String trainKey(int projectId, int modelId) {
         return "train:" + projectId + ":" + modelId;
     }
+
+    public static String alarmIdKey(){
+        return "alarm:id";
+    }
+
+    public static String alarmMemberKey(int memberId, long alarmId) {
+        return "member:" + memberId + ":alarm:" + alarmId;
+    }
+
+    public static String alarmMemberAllKey(int memberId) {
+        return "member:" + memberId + ":alarm:*";
+    }
 }
