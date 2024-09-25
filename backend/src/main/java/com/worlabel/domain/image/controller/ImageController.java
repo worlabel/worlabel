@@ -39,11 +39,11 @@ public class ImageController {
     }
 
     @PostMapping("/folders/{folder_id}/images/zip")
-    @SwaggerApiSuccess(description = "폴더와 이미지 파일을 성공적으로 업로드합니다.")
-    @Operation(summary = "폴더 업로드", description = "폴더와 이미지 파일을 업로드합니다.")
+    @SwaggerApiSuccess(description = "압축폴더를 성공적으로 업로드합니다.")
+    @Operation(summary = "압축 폴더 업로드", description = "압축 폴더 내 폴더와 이미지 파일을 업로드합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public void uploadFolder(
-            @Parameter(name = "폴더", description = "MultiPartFile을 폴더나 zip으로 추가해준다.", example = "") @RequestPart final MultipartFile folderZip,
+            @Parameter(name = "압축 폴더", description = "압축 폴더를 추가해준다.", example = "") @RequestPart final MultipartFile folderZip,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) throws IOException {
         imageService.uploadFolderWithImages(folderZip, projectId, folderId);

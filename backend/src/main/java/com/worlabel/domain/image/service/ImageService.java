@@ -19,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,31 +45,180 @@ public class ImageService {
      */
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
-        Folder folder;
+        Folder folder = getOrCreateFolder(folderId, projectId);
 
+        // 이미지 리스트를 순차적으로 처리 (향후 비동기/병렬 처리를 위해 분리된 메서드 호출)
+        imageList.forEach(file -> uploadAndSave(file, folder, projectId));
+    }
+
+
+    /**
+     * 폴더 생성 또는 가져오기
+     * 폴더 생성 작업이 있음으로 트랜잭션 보호
+     */
+    public Folder getOrCreateFolder(Integer folderId, Integer projectId) {
         if (folderId != 0) {
-            folder = getFolder(folderId);
+            return getFolder(folderId);
         } else {
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Project project = projectRepository.findById(projectId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
-            folder = Folder.of(currentDateTime, null, project);
+            Project project = getProject(projectId);
+            Folder folder = Folder.of(currentDateTime, null, project);
             folderRepository.save(folder);  // 새로운 폴더를 저장
-        }
-
-        for (MultipartFile file : imageList) {
-            String extension = getExtension(file);
-            String imageKey = s3UploadService.upload(file, extension, projectId);
-            Image image = Image.of(file.getOriginalFilename(), imageKey, extension, folder);
-            imageRepository.save(image);
+            return folder;
         }
     }
 
     /**
-     * 아이디 기반 이미지 조회
+     * Zip 파일 처리 메서드
+     */
+    @CheckPrivilege(PrivilegeType.EDITOR)
+    public void uploadFolderWithImages(final MultipartFile folderOrZip, final Integer projectId, final Integer folderId) throws IOException {
+        log.debug("파일 크기: {}, 기존 파일 이름: {} ", folderOrZip.getSize(), folderOrZip.getOriginalFilename());
+
+        // 프로젝트 정보 가져오기
+        Project project = getProject(projectId);
+        Folder parentFolder = getOrCreateFolder(folderId, projectId);
+
+        String originalFilename = folderOrZip.getOriginalFilename();
+        if (originalFilename != null && originalFilename.endsWith(".zip")) {
+            // Zip 파일 처리
+            Path tempDir = Files.createTempDirectory("uploadedFolder");
+            unzip(folderOrZip, tempDir.toString());
+            processFolderRecursively(tempDir.toFile(), parentFolder, project);
+        } else {
+            // 압축 파일이 아닌 경우 (단일 폴더 또는 파일)
+            File tempFolder = new File(System.getProperty("java.io.tmpdir"), originalFilename);
+            folderOrZip.transferTo(tempFolder); // 파일을 임시 디렉토리에 저장
+            // 폴더 또는 파일을 재귀적으로 탐색하여 저장
+            processFolderRecursively(tempFolder, parentFolder, project);
+        }
+    }
+
+    /**
+     * 폴더 및 파일을 재귀적으로 탐색하여 처리
+     */
+    private void processFolderRecursively(File directory, Folder parentFolder, Project project) {
+        if (directory.exists() && directory.isDirectory()) {
+            Folder currentFolder = createFolderAndSave(directory.getName(), parentFolder, project);
+
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        processFolderRecursively(file, currentFolder, project);
+                    } else if (isImageFile(file)) {
+                        uploadAndSave(file, currentFolder, project);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 파일 업로드를 처리하는 메서드
+     */
+    private void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
+        try {
+            String key = uploadToS3(file, projectId);
+            saveImage(file, key, folder);
+        } catch (Exception e) {
+            log.error("파일 업로드 중 오류 발생", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
+        }
+    }
+
+    /**
+     * 업로드 및 DB 저장 처리
+     */
+    private void uploadAndSave(File file, Folder folder, Project project) {
+        try {
+            String key = uploadToS3(file, project.getId());
+            saveImage(file, key, folder);
+        } catch (Exception e) {
+            log.error("파일 업로드 중 오류 발생", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
+        }
+    }
+
+    /**
+     * DB에 이미지 정보 저장(트랜잭션 적용)
+     */
+    public void saveImage(final MultipartFile file, final String key, final Folder folder) {
+        try {
+            Image image = createImage(file, key, folder);
+            imageRepository.save(image);
+        } catch (Exception e) {
+            log.error("이미지 DB 저장 실패 원인: ", e);
+            s3UploadService.deleteImageFromS3(key); // DB 저장 실패시 S3에서 파일 삭제
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 DB 저장 중 실패");
+        }
+    }
+
+    private void saveImage(final File file, final String key, final Folder folder) {
+        try {
+            Image image = createImage(file, key, folder);
+            imageRepository.save(image);
+        } catch (Exception e) {
+            s3UploadService.deleteImageFromS3(key);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "에러 발생");
+        }
+    }
+
+    /**
+     * S3 파일 업로드
+     */
+    public String uploadToS3(final MultipartFile file, final Integer projectId) {
+        String extension = getExtension(file.getOriginalFilename());
+        return s3UploadService.uploadMultipartFile(file, extension, projectId);
+    }
+
+    /**
+     * S3 파일 업로드
+     */
+    public String uploadToS3(final File file, final Integer projectId) {
+        String extension = getExtension(file.getName());
+        return s3UploadService.uploadFile(file, extension, projectId);
+    }
+
+
+    private Image createImage(MultipartFile file, String key, Folder folder) {
+        String extension = getExtension(file.getName());
+        return Image.of(file.getOriginalFilename(), key, extension, folder);
+    }
+
+    private Image createImage(File file, String key, Folder folder) {
+        String extension = getExtension(file.getName());
+        return Image.of(file.getName(), key, extension, folder);
+    }
+
+
+    /**
+     * 이미지 상태 변경
      */
     @CheckPrivilege(PrivilegeType.VIEWER)
+    public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final ImageStatusRequest imageStatusRequest) {
+        Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
+        image.updateStatus(imageStatusRequest.getLabelStatus()); // 이미지 상태 업데이트
+        return ImageResponse.from(image);
+    }
+
+    /**
+     * 사용자가 수정한 레이블링 설정
+     */
+    @CheckPrivilege(PrivilegeType.EDITOR)
+    public void saveUserLabel(final Integer projectId, final Long imageId, final ImageLabelRequest labelRequest) {
+        Image image = imageRepository.findById(imageId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+        String dataPath = image.getDataPath();
+        s3UploadService.uploadJson(labelRequest.getData(), dataPath);
+    }
+
+
+    /**
+     * 아이디 기반 이미지 조회
+     */
     @Transactional(readOnly = true)
+    @CheckPrivilege(PrivilegeType.VIEWER)
     public ImageResponse getImageById(final Integer projectId, final Integer folderId, final Long imageId) {
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId); // 이미지가 해당 프로젝트에 속하는지 확인
         return ImageResponse.from(image);
@@ -97,129 +244,19 @@ public class ImageService {
     public void deleteImage(final Integer projectId, final Integer folderId, final Long imageId) {
         // 이미지가 해당 프로젝트에 속하는지 확인
         Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
-
         imageRepository.delete(image);
         s3UploadService.deleteImageFromS3(image.getImageKey());
     }
 
     /**
-     * 이미지 상태 변경
+     * 폴더 저장
      */
-    @CheckPrivilege(PrivilegeType.VIEWER)
-    public ImageResponse changeImageStatus(final Integer projectId, final Integer folderId, final Long imageId, final ImageStatusRequest imageStatusRequest) {
-        // 이미지가 해당 프로젝트에 속하는지 확인
-        Image image = getImageByIdAndFolderIdAndFolderProjectId(folderId, imageId, projectId);
-
-        // 이미지 상태 변경 로직 추가 (생략)
-        image.updateStatus(imageStatusRequest.getLabelStatus());
-
-        return ImageResponse.from(image);
+    private Folder createFolderAndSave(String folderName, Folder parentFolder, Project project) {
+        Folder folder = Folder.of(folderName, parentFolder, project);
+        folderRepository.save(folder);
+        return folder;
     }
 
-    /**
-     * 사용자가 수정한 레이블링 설정
-     */
-    @CheckPrivilege(PrivilegeType.EDITOR)
-    public void saveUserLabel(final Integer projectId, final Long imageId, final ImageLabelRequest labelRequest) {
-        save(imageId, labelRequest.getData());
-    }
-
-    public void uploadFolderWithImages(MultipartFile folderOrZip, Integer projectId, Integer folderId) throws IOException {
-        // 프로젝트 정보 가져오기
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
-
-        Folder parentFolder;
-
-        if (folderId != 0) {
-            parentFolder = getFolder(folderId);
-        } else {
-            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            parentFolder = Folder.of(currentDateTime, null, project);
-            folderRepository.save(parentFolder);  // 새로운 폴더를 저장
-        }
-
-        // 파일이 zip 파일인지 확인
-        String originalFilename = folderOrZip.getOriginalFilename();
-        if (originalFilename != null && originalFilename.endsWith(".zip")) {
-            // 압축 파일인 경우
-            Path tempDir = Files.createTempDirectory("uploadedFolder");
-            unzip(folderOrZip, tempDir.toString());
-
-            // 압축 풀린 폴더를 재귀적으로 탐색하여 하위 폴더 및 이미지 파일을 저장
-            if (tempDir.toFile().exists()) {
-                File[] files = tempDir.toFile().listFiles();
-
-                if (files != null) {
-                    for (File file : files) {
-                        if (file.isDirectory()) {
-                            // 하위 폴더인 경우 재귀 호출
-                            processFolderRecursively(file, parentFolder, project);
-                        } else if (isImageFile(file)) {
-                            // 이미지 파일인 경우
-                            String fileName = file.getName();
-                            String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
-                            try (InputStream inputStream = new FileInputStream(file)) {
-                                // InputStream으로 S3 업로드
-                                String imageKey = s3UploadService.uploadFromInputStream(inputStream, extension, project.getId(), file.getName());
-
-                                Image image = Image.of(file.getName(), imageKey, extension, parentFolder);
-                                imageRepository.save(image);
-                            } catch (IOException e) {
-                                throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            // 압축 파일이 아닌 경우 (단일 폴더 또는 파일)
-            File tempFolder = new File(System.getProperty("java.io.tmpdir"), originalFilename);
-            folderOrZip.transferTo(tempFolder); // 파일을 임시 디렉토리에 저장
-
-            // 폴더 또는 파일을 재귀적으로 탐색하여 저장
-            processFolderRecursively(tempFolder, parentFolder, project);
-        }
-    }
-
-    // 폴더 내부 구조를 재귀적으로 탐색하여 저장
-    private void processFolderRecursively(File directory, Folder parentFolder, Project project) {
-        if (directory.exists() && directory.isDirectory()) {
-            Folder currentFolder = Folder.of(directory.getName(), parentFolder, project);
-            folderRepository.save(currentFolder);
-            File[] files = directory.listFiles();
-
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        // 하위 폴더인 경우 재귀 호출
-                        processFolderRecursively(file, currentFolder, project);
-                    } else if (isImageFile(file)) {
-                        // 이미지 파일인 경우
-                        String fileName = file.getName();
-                        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
-                        try (InputStream inputStream = new FileInputStream(file)) {
-                            // InputStream으로 S3 업로드
-                            String imageKey = s3UploadService.uploadFromInputStream(inputStream, extension, project.getId(), file.getName());
-
-                            Image image = Image.of(file.getName(), imageKey, extension, currentFolder);
-                            imageRepository.save(image);
-                        } catch (IOException e) {
-                            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // 이미지 파일인지 확인하는 메서드
-    private boolean isImageFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        return fileName.endsWith(".jpg") || fileName.endsWith(".png") || fileName.endsWith(".jpeg");
-    }
 
     // 압축 파일을 임시 폴더에 압축 해제하는 메서드
     private void unzip(MultipartFile zipFile, String destDir) throws IOException {
@@ -238,7 +275,7 @@ public class ImageService {
         }
     }
 
-    // 보안 보호를 위해 압축 파일 경로를 보호하는 메서드
+    // 보안을 위해 압축 파일 경로를 보호하는 메서드
     private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir) throws IOException {
         Path targetDirResolved = targetDir.resolve(zipEntry.getName());
         Path normalizePath = targetDirResolved.normalize();
@@ -248,26 +285,35 @@ public class ImageService {
         return normalizePath;
     }
 
-    private void save(final long imageId, final String data) {
-        Image image = imageRepository.findById(imageId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
-
-        String dataPath = image.getDataPath();
-        s3UploadService.uploadJson(data, dataPath);
+    // 이미지 파일인지 확인하는 메서드
+    private boolean isImageFile(File file) {
+        String fileName = file.getName().toLowerCase();
+        return fileName.endsWith(".jpg") || fileName.endsWith(".png") || fileName.endsWith(".jpeg");
     }
 
-    private String getExtension(final MultipartFile file) {
-        String fileName = file.getOriginalFilename();
+    private String getExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1); // 파일 확장자
     }
-    // 폴더 가져오기
 
-    private Folder getFolder(final Integer folderId) {
+    /**
+     * 프로젝트 조회( 읽기 조회 트랜잭션 적용 )
+     */
+    @Transactional(readOnly = true)
+    public Project getProject(Integer projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+    }
+
+    /**
+     * 폴더 조회 ( 읽기 조회 트랜잭션 적용 )
+     */
+    @Transactional(readOnly = true)
+    public Folder getFolder(final Integer folderId) {
         return folderRepository.findById(folderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
-    // 이미지 가져오면서 프로젝트 소속 여부를 확인
 
+    // 이미지 가져오면서 프로젝트 소속 여부를 확인
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
