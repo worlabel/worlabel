@@ -345,7 +345,10 @@ export default function ImageCanvas() {
 
         <Layer ref={dragLayerRef} />
       </Stage>
-      <CanvasControlBar saveJson={saveJson} />
+      <CanvasControlBar
+        saveJson={saveJson}
+        projectType={project.type}
+      />
     </div>
   ) : (
     <div></div>
