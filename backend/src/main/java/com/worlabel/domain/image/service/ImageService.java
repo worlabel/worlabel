@@ -3,6 +3,7 @@ package com.worlabel.domain.image.service;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.*;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
@@ -254,6 +255,8 @@ public class ImageService {
 
         String dataPath = image.getDataPath();
         s3UploadService.uploadJson(data, dataPath);
+        image.updateStatus(LabelStatus.IN_PROGRESS);
+        imageRepository.save(image);
     }
 
     private String getExtension(final MultipartFile file) {
