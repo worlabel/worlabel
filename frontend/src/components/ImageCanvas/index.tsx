@@ -10,9 +10,10 @@ import CanvasControlBar from '../CanvasControlBar';
 import { Label } from '@/types';
 import useLabelJson from '@/hooks/useLabelJson';
 import { saveImageLabels } from '@/api/lablingApi';
+import useProjectStore from '@/stores/useProjectStore';
 
 export default function ImageCanvas() {
-  const project = useCanvasStore((state) => state.project)!;
+  const project = useProjectStore((state) => state.project)!;
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
   const { data: labelData, refetch } = useLabelJson(dataPath, project);
   const { shapes } = labelData || [];
