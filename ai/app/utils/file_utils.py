@@ -20,24 +20,24 @@ def make_dir(path:str, init: bool):
         shutil.rmtree(path)
     os.makedirs(path, exist_ok=True)
 
-def make_yml(path:str, names):
+def make_yml(path:str, model_categories):
     data = {
         "train": f"{path}/train",
         "val": f"{path}/val",
         "nc": 80,
-        "names": names
+        "names": model_categories
     }
     with open(os.path.join(path, "dataset.yaml"), 'w') as f:
         yaml.dump(data, f)
 
-def process_directories(dataset_root_path:str, names:list[str]):
+def process_directories(dataset_root_path:str, model_categories:list[str]):
     """학습을 위한 디렉토리 생성"""
     make_dir(dataset_root_path, init=False)
     make_dir(os.path.join(dataset_root_path, "train"), init=True)
     make_dir(os.path.join(dataset_root_path, "val"), init=True)
     if os.path.exists(os.path.join(dataset_root_path, "result")):
         shutil.rmtree(os.path.join(dataset_root_path, "result"))
-    make_yml(dataset_root_path, names)
+    make_yml(dataset_root_path, model_categories)
 
 def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_path:str, label_map:dict[int, int]|None):
     """이미지 저장 및 레이블 파일 생성"""
@@ -59,9 +59,12 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
     label = json.loads(urllib.request.urlopen(data.data_url).read())
 
     # 레이블 -> 학습용 레이블 데이터 파싱 후 생성
-    create_detection_train_label(label, label_path, label_map)
+    if label['task_type'] == "det":
+        create_detection_train_label(label, label_path, label_map)
+    elif label["task_type"] == "seg":
+        create_segmentation_train_label(label, label_path, label_map)
 
-def create_detection_train_label(label:LabelData, label_path:str, label_map:dict[int, int]|None):
+def create_detection_train_label(label:dict, label_path:str, label_map:dict[int, int]|None):
     with open(label_path, "w") as train_label_txt:
         for shape in label["shapes"]:
             train_label = []
@@ -74,6 +77,16 @@ def create_detection_train_label(label:LabelData, label_path:str, label_map:dict
             train_label.append(str((y1 + y2) / 2 / label["imageHeight"]))  # 중심 y 좌표
             train_label.append(str((x2 - x1) / label["imageWidth"]))       # 너비
             train_label.append(str((y2 - y1) / label["imageHeight"] ))     # 높이
+            train_label_txt.write(" ".join(train_label)+"\n")
+
+def create_segmentation_train_label(label:dict, label_path:str, label_map:dict[int, int]|None):
+    with open(label_path, "w") as train_label_txt:
+        for shape in label["shapes"]:
+            train_label = []
+            train_label.append(str(label_map[shape["group_id"]]) if label_map else str(shape["group_id"])) # label Id
+            for x, y in shape["points"]:
+                train_label.append(str(x / label["imageWidth"]))
+                train_label.append(str(y / label["imageHeight"]))
             train_label_txt.write(" ".join(train_label)+"\n")
 
 def join_path(path, *paths):
