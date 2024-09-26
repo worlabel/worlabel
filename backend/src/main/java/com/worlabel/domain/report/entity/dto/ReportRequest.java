@@ -17,5 +17,5 @@ public class ReportRequest {
     private double dflLoss;
     private double fitness;
     private double epochTime;
-    private double leftSecond;
+    private double leftSeconds;
 }

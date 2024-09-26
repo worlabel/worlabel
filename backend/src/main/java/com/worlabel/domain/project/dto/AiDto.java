@@ -54,7 +54,7 @@ public class AiDto {
 
         private int epochs; // Default = 50
 
-        private double batch; // Default = -1
+        private int batch; // Default = -1
 
         private double lr0;
 

@@ -43,7 +43,7 @@ public class ReportResponse {
                 report.getDflLoss(),
                 report.getFitness(),
                 report.getEpochTime(),
-                report.getLeftSecond()
+                report.getLeftSeconds()
         );
     }
 }
