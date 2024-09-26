@@ -14,7 +14,7 @@ export default function LabelCanvas() {
           {image ? (
             <ImageCanvas />
           ) : (
-            <div className="body flex h-full w-full select-none items-center justify-center bg-gray-200 text-gray-400">
+            <div className="body flex h-full select-none items-center justify-center bg-gray-200 text-gray-400">
               이미지를 선택하세요.
             </div>
           )}
