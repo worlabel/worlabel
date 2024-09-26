@@ -101,7 +101,6 @@ async def detection_train(request: TrainRequest):
 
     send_slack_message(f"train 요청{request}", status="success")
     
-    # Authorization 헤더에서 Bearer 토큰 추출
     try:
         # 레이블 맵
         inverted_label_map = {value: key for key, value in request.label_map.items()} if request.label_map else None

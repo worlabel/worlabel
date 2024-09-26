@@ -24,7 +24,7 @@ def make_yml(path:str, model_categories):
     data = {
         "train": f"{path}/train",
         "val": f"{path}/val",
-        "nc": 80,
+        "nc": len(model_categories),
         "names": model_categories
     }
     with open(os.path.join(path, "dataset.yaml"), 'w') as f:
@@ -117,3 +117,28 @@ def get_file_name(path):
     if not os.path.exists(path):
         raise FileNotFoundError()
     return os.path.basename(path)
+
+def process_directories_in_cls(dataset_root_path:str, model_categories:dict[int,str]):
+    """classification 학습을 위한 디렉토리 생성"""
+    make_dir(dataset_root_path, init=False)
+    for category in model_categories.values():
+        make_dir(os.path.join(dataset_root_path, "train", category), init=True)
+        make_dir(os.path.join(dataset_root_path, "test", category), init=True)
+    if os.path.exists(os.path.join(dataset_root_path, "result")):
+        shutil.rmtree(os.path.join(dataset_root_path, "result"))
+
+def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, child_path:str):
+    """이미지 저장 및 레이블 파일 생성"""
+    # 이미지 url로부터 파일명 분리
+    img_name = data.image_url.split('/')[-1]
+
+    # 레이블 객체 불러오기
+    label = json.loads(urllib.request.urlopen(data.data_url).read())
+
+    label_name = label["shapes"][0]["label"]
+
+    label_path = os.path.join(dataset_root_path,child_path,label_name)
+
+    # url로부터 이미지 다운로드
+    urllib.request.urlretrieve(data.image_url, os.path.join(label_path, img_name))
+
