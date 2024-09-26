@@ -15,7 +15,7 @@ import useProjectStore from '@/stores/useProjectStore';
 export default function ImageCanvas() {
   const project = useProjectStore((state) => state.project)!;
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
-  const { data: labelData, refetch } = useLabelJson(dataPath, project);
+  const { data: labelData } = useLabelJson(dataPath, project);
   const { shapes } = labelData || [];
   const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
   const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
@@ -64,6 +64,8 @@ export default function ImageCanvas() {
         shape_type: type === 'polygon' ? 'polygon' : 'rectangle',
         points: coordinates,
       })),
+      imageWidth: image!.width,
+      imageHeight: image!.height,
     });
 
     saveImageLabels(project.id, imageId, { data: json })
@@ -71,7 +73,7 @@ export default function ImageCanvas() {
         alert('레이블 데이터 저장 실패');
       })
       .then(() => {
-        refetch();
+        alert('레이블링 성공!');
       });
   };
   const startDrawRect = () => {
