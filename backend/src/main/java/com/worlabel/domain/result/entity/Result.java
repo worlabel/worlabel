@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "result")
+@Table(name = "model_result")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Result extends BaseEntity {
 
@@ -25,7 +25,7 @@ public class Result extends BaseEntity {
     @JoinColumn(name = "model_id", nullable = false)
     private AiModel aiModel;
 
-    @Column(name = "precision", nullable = false)
+    @Column(name = "model_precision", nullable = false)
     private double precision;
 
     @Column(name = "recall", nullable = false)
