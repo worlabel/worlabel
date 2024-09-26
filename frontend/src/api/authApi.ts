@@ -17,6 +17,6 @@ export async function saveFcmToken(token: string) {
   return api.post('/auth/fcm', { token }).then(({ data }) => data);
 }
 
-export async function createTestNotification() {
+export async function createFcmNotification() {
   return api.post('/auth/test').then(({ data }) => data);
 }
