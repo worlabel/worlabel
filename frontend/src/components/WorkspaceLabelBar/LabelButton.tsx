@@ -1,3 +1,4 @@
+import { LABEL_CATEGORY } from '@/constants';
 import useCanvasStore from '@/stores/useCanvasStore';
 import { Label } from '@/types';
 import { Trash2 } from 'lucide-react';
@@ -5,7 +6,7 @@ import { MouseEventHandler } from 'react';
 
 export default function LabelButton({
   id,
-  name,
+  categoryId,
   color,
   selected,
   setSelectedLabelId,
@@ -23,10 +24,10 @@ export default function LabelButton({
 
   return (
     <div
-      className={`flex items-center gap-2.5 rounded-lg transition-colors ${selected ? 'bg-gray-200' : 'bg-gray-50 hover:bg-gray-100'}`}
+      className={`flex items-center rounded-lg transition-colors ${selected ? 'bg-gray-200' : 'bg-gray-50 hover:bg-gray-100'}`}
     >
-      <button
-        className="flex grow items-center gap-2.5 p-2.5 text-left"
+      <div
+        className="flex grow cursor-pointer items-center gap-2.5 p-2.5 text-left"
         onClick={handleClick}
       >
         <div
@@ -35,8 +36,24 @@ export default function LabelButton({
             backgroundColor: color,
           }}
         />
-        <span className="body grow text-gray-900">{name}</span>
-      </button>
+        <select
+          className="body-small w-[97.2px] cursor-pointer rounded bg-transparent"
+          value={categoryId.toString()}
+          onChange={(event) => {
+            const newCategoryId = Number(event.target.value);
+            setLabels(labels.map((label) => (label.id === id ? { ...label, categoryId: newCategoryId } : label)));
+          }}
+        >
+          {LABEL_CATEGORY.map((category, index) => (
+            <option
+              value={index.toString()}
+              key={index}
+            >
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
       <button
         className="p-2.5"
         onClick={handleDelete}
