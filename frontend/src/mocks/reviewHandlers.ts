@@ -95,7 +95,6 @@ export const reviewHandlers = [
     return HttpResponse.json({ message: `Review ${reviewId} from project ${projectId} deleted successfully.` });
   }),
 
-  // 리뷰 상태 변경 핸들러
   http.put('/api/projects/:projectId/reviews/:reviewId/status', async ({ params, request }) => {
     const projectId = Array.isArray(params.projectId)
       ? parseInt(params.projectId[0], 10)
@@ -136,7 +135,10 @@ export const reviewHandlers = [
       ? parseInt(params.limitPage[0], 10)
       : parseInt(params.limitPage as string, 10) || 10;
 
-    // 총 100개의 리뷰를 생성
+    const sortDirection = Array.isArray(params.sortDirection)
+      ? parseInt(params.sortDirection[0], 10)
+      : parseInt(params.sortDirection as string, 10) || 0;
+
     const totalReviews = 100;
     const reviews: ReviewResponse[] = Array.from({ length: totalReviews }, (_, index) => ({
       projectId,
@@ -149,9 +151,13 @@ export const reviewHandlers = [
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
     }));
 
-    // 마지막 리뷰 ID 기준으로 데이터를 잘라서 반환
+    const sortedReviews =
+      sortDirection === 0
+        ? reviews.sort((a, b) => b.reviewId - a.reviewId)
+        : reviews.sort((a, b) => a.reviewId - b.reviewId);
+
     const startIndex = lastReviewId > 0 ? lastReviewId : 0;
-    const slicedReviews = reviews.slice(startIndex, startIndex + limitPage);
+    const slicedReviews = sortedReviews.slice(startIndex, startIndex + limitPage);
 
     return HttpResponse.json(slicedReviews);
   }),
