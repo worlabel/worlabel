@@ -117,7 +117,8 @@ public class WorkspaceController {
             @PathVariable("workspace_id") final Integer workspaceId,
             @Parameter(name = "리뷰 상태", description = "리뷰 상태", example = "APPROVED") @RequestParam(value = "reviewStatus", required = false) final ReviewStatusRequest reviewStatusRequest,
             @Parameter(name = "마지막 리뷰 id", description = "마지막 리뷰 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastReviewId,
-            @Parameter(name = "가져올 리뷰 수", description = "가져올 리뷰 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage) {
-        return workspaceService.getReviewByWorkspace(memberId, workspaceId, reviewStatusRequest, lastReviewId, limitPage);
+            @Parameter(name = "가져올 리뷰 수", description = "가져올 리뷰 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage,
+            @Parameter(name = "정렬방향", description = "0이면 역순(최신순), 1이면 정순(오래된순)", example = "0") @RequestParam(defaultValue = "0") Integer sort) {
+        return workspaceService.getReviewByWorkspace(memberId, workspaceId, reviewStatusRequest, lastReviewId, limitPage, sort);
     }
 }

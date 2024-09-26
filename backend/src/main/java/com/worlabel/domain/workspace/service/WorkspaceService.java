@@ -119,16 +119,26 @@ public class WorkspaceService {
     /**
      * 워크스페이스 단위 리뷰 조회
      */
-    public List<ReviewResponse> getReviewByWorkspace(final Integer memberId, final Integer workspaceId, final ReviewStatusRequest reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
+    public List<ReviewResponse> getReviewByWorkspace(final Integer memberId, final Integer workspaceId, final ReviewStatusRequest reviewStatusRequest, final Integer lastReviewId, final Integer limitPage, final int sort) {
         checkWorkspaceAuthorized(memberId, workspaceId);
-
-        List<Review> reviews = reviewRepository.findAllReviewsByWorkspaceAndMember(
-                workspaceId,
-                memberId,
-                reviewStatusRequest == null ? null : reviewStatusRequest.getReviewStatus().toString(),
-                lastReviewId,
-                limitPage
-        );
+        List<Review> reviews;
+        if (sort == 0) {
+            reviews = reviewRepository.findAllReviewsByWorkspaceAndMember(
+                    workspaceId,
+                    memberId,
+                    reviewStatusRequest == null ? null : reviewStatusRequest.getReviewStatus().toString(),
+                    lastReviewId,
+                    limitPage
+            );
+        } else {
+            reviews = reviewRepository.findAllReviewsByWorkspaceAndMemberDesc(
+                    workspaceId,
+                    memberId,
+                    reviewStatusRequest == null ? null : reviewStatusRequest.getReviewStatus().toString(),
+                    lastReviewId,
+                    limitPage
+            );
+        }
 
         return reviews.stream()
                 .map(ReviewResponse::from)
