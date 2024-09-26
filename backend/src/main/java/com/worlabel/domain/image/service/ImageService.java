@@ -3,6 +3,7 @@ package com.worlabel.domain.image.service;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.*;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
@@ -19,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -131,6 +134,8 @@ public class ImageService {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
         String dataPath = image.getDataPath();
+        image.updateStatus(LabelStatus.COMPLETED);
+        imageRepository.save(image);
         s3UploadService.uploadJson(labelRequest.getData(), dataPath);
     }
 
