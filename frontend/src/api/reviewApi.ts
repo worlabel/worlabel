@@ -53,6 +53,7 @@ export async function updateReviewStatus(projectId: number, reviewId: number, me
 export async function getReviewByStatus(
   projectId: number,
   memberId: number,
+  sortDirection: number,
   reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
   lastReviewId?: number,
   limitPage: number = 10
@@ -62,6 +63,7 @@ export async function getReviewByStatus(
       params: {
         memberId,
         limitPage,
+        sortDirection, // 정렬방향 추가
         ...(reviewStatus ? { reviewStatus } : {}),
         ...(lastReviewId ? { lastReviewId } : {}),
       },

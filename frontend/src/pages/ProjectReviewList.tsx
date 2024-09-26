@@ -14,10 +14,13 @@ export default function ProjectReviewList() {
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
+  const sortDirection = sortValue === 'latest' ? 0 : 1;
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useReviewByStatusQuery(
     Number(projectId),
     memberId,
-    activeTab !== 'all' ? activeTab : undefined
+    activeTab !== 'all' ? activeTab : undefined,
+    sortDirection
   );
 
   const projectReviews = data?.pages.flat() || [];
@@ -60,10 +63,6 @@ export default function ProjectReviewList() {
             <Button variant="outlinePrimary">리뷰 요청</Button>
           </Link>
         </header>
-        <div
-          ref={loadMoreRef}
-          className="h-1"
-        />
         <ReviewList
           reviews={projectReviews}
           activeTab={activeTab}
@@ -73,8 +72,11 @@ export default function ProjectReviewList() {
           setSortValue={setSortValue}
           workspaceId={Number(workspaceId)}
         />
-
         {isFetchingNextPage}
+        <div
+          ref={loadMoreRef}
+          className="h-1"
+        />
       </div>
     </Suspense>
   );

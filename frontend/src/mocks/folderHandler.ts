@@ -21,7 +21,7 @@ export const folderHandlers = [
           imageTitle: 'image1.jpg',
           imagePath: 'https://example.com/image1.jpg',
           dataPath: 'https://example.com/data1.json',
-          status: 'PENDING',
+          status: 'SAVE',
         },
       ],
       children: [
