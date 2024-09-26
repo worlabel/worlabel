@@ -72,6 +72,9 @@ dependencies {
 
 	// FCM
 	implementation 'com.google.firebase:firebase-admin:7.1.1'
+
+	// Apache Commons Compress
+	implementation 'org.apache.commons:commons-compress:1.21'
 }
 
 tasks.named('test') {

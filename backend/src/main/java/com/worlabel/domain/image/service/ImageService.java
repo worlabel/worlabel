@@ -15,22 +15,24 @@ import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Slf4j
 @Service
@@ -38,10 +40,10 @@ import java.util.zip.ZipInputStream;
 @RequiredArgsConstructor
 public class ImageService {
 
+    private final ProjectRepository projectRepository;
+    private final FolderRepository folderRepository;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
-    private final FolderRepository folderRepository;
-    private final ProjectRepository projectRepository;
 
     /**
      * 이미지 리스트 업로드
@@ -183,26 +185,28 @@ public class ImageService {
         return folder;
     }
 
-
-    // 압축 파일을 임시 폴더에 압축 해제하는 메서드
+    // Apache Commons Compress 라이브러리를 사용하여 ZIP 파일을 처리
     private void unzip(MultipartFile zipFile, String destDir) throws IOException {
-        try (ZipInputStream zis = new ZipInputStream(zipFile.getInputStream())) {
-            ZipEntry zipEntry;
-            while ((zipEntry = zis.getNextEntry()) != null) {
+        try (ZipArchiveInputStream zis = new ZipArchiveInputStream(zipFile.getInputStream(), "MS949")) {
+            ArchiveEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                ZipArchiveEntry zipEntry = (ZipArchiveEntry) entry;
                 Path newPath = zipSlipProtect(zipEntry, Paths.get(destDir));
+
                 if (zipEntry.isDirectory()) {
                     Files.createDirectories(newPath);
                 } else {
                     Files.createDirectories(newPath.getParent());
-                    Files.copy(zis, newPath);
+                    try(OutputStream os = Files.newOutputStream(newPath)){
+                        IOUtils.copy(zis, os);
+                    }
                 }
-                zis.closeEntry();
             }
         }
     }
 
     // 보안을 위해 압축 파일 경로를 보호하는 메서드
-    private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir) throws IOException {
+    private Path zipSlipProtect(ZipArchiveEntry zipEntry, Path targetDir) throws IOException {
         Path targetDirResolved = targetDir.resolve(zipEntry.getName());
         Path normalizePath = targetDirResolved.normalize();
         if (!normalizePath.startsWith(targetDir)) {

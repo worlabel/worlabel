@@ -168,6 +168,7 @@ public class ProjectService {
         if(imageList.isEmpty()){
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
+
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();
@@ -177,7 +178,6 @@ public class ProjectService {
         AiModel aiModel = getAiModel(request);
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
-        // 응답없음
         log.debug("요청 {}", autoLabelingRequest);
 //        progressService.registerPredictProgress(projectId);
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
