@@ -11,34 +11,29 @@ import { Label } from '@/types';
 import useLabelJson from '@/hooks/useLabelJson';
 import { saveImageLabels } from '@/api/lablingApi';
 import useProjectStore from '@/stores/useProjectStore';
+import { LABEL_CATEGORY } from '@/constants';
 
 export default function ImageCanvas() {
   const project = useProjectStore((state) => state.project)!;
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
   const { data: labelData } = useLabelJson(dataPath, project);
+  const { labels, drawState, setDrawState, addLabel, setLabels, selectedLabelId, setSelectedLabelId, sidebarSize } =
+    useCanvasStore();
   const { shapes } = labelData || [];
-  const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
-  const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
-  const sidebarSize = useCanvasStore((state) => state.sidebarSize);
-  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 200;
+  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 201;
   const stageHeight = window.innerHeight - 64;
   const stageRef = useRef<Konva.Stage>(null);
   const dragLayerRef = useRef<Konva.Layer>(null);
   const scale = useRef<number>(0);
-  const labels = useCanvasStore((state) => state.labels) ?? [];
   const [image] = useImage(imagePath);
-  const drawState = useCanvasStore((state) => state.drawState);
-  const setDrawState = useCanvasStore((state) => state.setDrawState);
-  const addLabel = useCanvasStore((state) => state.addLabel);
-  const setLabels = useCanvasStore((state) => state.setLabels);
   const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
   const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
 
   useEffect(() => {
     setLabels(
-      shapes.map<Label>(({ label, color, points, shape_type }, index) => ({
+      shapes.map<Label>(({ group_id, color, points, shape_type }, index) => ({
         id: index,
-        name: label,
+        categoryId: group_id,
         color,
         type: shape_type === 'polygon' ? 'polygon' : 'rect',
         coordinates: points,
@@ -58,11 +53,13 @@ export default function ImageCanvas() {
   const saveJson = () => {
     const json = JSON.stringify({
       ...labelData,
-      shapes: labels.map(({ name, color, coordinates, type }) => ({
-        label: name,
+      shapes: labels.map(({ categoryId, color, coordinates, type }) => ({
+        label: LABEL_CATEGORY[categoryId],
         color,
-        shape_type: type === 'polygon' ? 'polygon' : 'rectangle',
         points: coordinates,
+        group_id: categoryId,
+        shape_type: type === 'polygon' ? 'polygon' : 'rectangle',
+        flags: {},
       })),
       imageWidth: image!.width,
       imageHeight: image!.height,
@@ -128,7 +125,7 @@ export default function ImageCanvas() {
     const id = labels.length;
     addLabel({
       id: id,
-      name: 'label',
+      categoryId: 0,
       type: 'polygon',
       color: `#${color}`,
       coordinates: polygonPoints.slice(0, -1),
@@ -155,7 +152,7 @@ export default function ImageCanvas() {
     const id = labels.length;
     addLabel({
       id: id,
-      name: 'label',
+      categoryId: 0,
       type: 'rect',
       color: `#${color}`,
       coordinates: rectPoints,

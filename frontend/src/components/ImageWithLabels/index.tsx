@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Image, Layer, Stage, Line, Rect } from 'react-konva';
 import useImage from 'use-image';
-import { Label } from '@/types';
-
-interface Shape {
-  label: string;
-  color: string;
-  points: [number, number][];
-  shape_type: 'polygon' | 'rectangle';
-}
+import { Label, Shape } from '@/types';
 
 interface ImageWithLabelsProps {
   imagePath: string;
@@ -27,7 +20,7 @@ export default function ImageWithLabels({ imagePath, labelData }: ImageWithLabel
         const json: { shapes: Shape[] } = await response.json();
         const shapes = json.shapes.map((shape, index) => ({
           id: index,
-          name: shape.label,
+          categoryId: shape.categoryId,
           color: shape.color,
           type: shape.shape_type === 'polygon' ? 'polygon' : 'rect',
           coordinates: shape.points,
