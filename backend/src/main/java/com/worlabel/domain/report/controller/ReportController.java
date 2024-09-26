@@ -9,10 +9,12 @@ import com.worlabel.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name = "리포트 관련 API")
 @RestController
 @RequestMapping("/api/projects/{project_id}/reports")
@@ -42,6 +44,7 @@ public class ReportController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/models/{model_id}")
     public void addReportByModelId(@PathVariable("project_id") final Integer projectId, @PathVariable("model_id") final Integer modelId, @RequestBody final ReportRequest reportRequest) {
+        log.debug("projectId: {}, modelId: {}, reportRequest: {}", projectId, modelId, reportRequest);
         reportService.addReportByModelId(projectId, modelId, reportRequest);
     }
 }
