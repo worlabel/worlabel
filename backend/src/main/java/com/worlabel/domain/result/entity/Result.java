@@ -1,9 +1,12 @@
 package com.worlabel.domain.result.entity;
 
 import com.worlabel.domain.model.entity.AiModel;
+import com.worlabel.domain.model.entity.dto.ModelTrainRequest;
+import com.worlabel.domain.model.entity.dto.TrainResponse;
 import com.worlabel.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "model_result")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Result extends BaseEntity {
 
     @Id
@@ -85,18 +89,19 @@ public class Result extends BaseEntity {
         this.optimizer = optimizer;
     }
 
-    public static Result of(final AiModel aiModel,
-                            final double precision,
-                            final double recall,
-                            final double mAP50,
-                            final double mAP5095,
-                            final double fitness,
-                            final double ratio,
-                            final double epochs,
-                            final double batch,
-                            final double lr0,
-                            final double lrf,
-                            final Optimizer optimizer) {
-        return new Result(aiModel, precision, recall, mAP50, mAP5095, fitness, ratio, epochs, batch, lr0, lrf, optimizer);
+    public static Result of(final AiModel aiModel,final  TrainResponse trainResponse,final ModelTrainRequest trainRequest) {
+        return new Result(aiModel,
+                trainResponse.getPrecision(),
+                trainResponse.getRecall(),
+                trainResponse.getMAP50(),
+                trainResponse.getMAP5095(),
+                trainResponse.getFitness(),
+                trainRequest.getRatio(),
+                trainRequest.getEpochs(),
+                trainRequest.getBatch(),
+                trainRequest.getLr0(),
+                trainRequest.getLrf(),
+                trainRequest.getOptimizer()
+            );
     }
 }

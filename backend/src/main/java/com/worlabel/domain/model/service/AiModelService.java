@@ -151,9 +151,9 @@ public class AiModelService {
                         ProjectCategory::getId
                 ));
 
-        List<Image> images = imageRepository.findImagesByProjectId(projectId);
+        List<Image> images = imageRepository.findImagesByProjectIdAndCompleted(projectId);
+
         List<TrainDataInfo> data = images.stream()
-                .filter(image -> image.getStatus() == LabelStatus.COMPLETED)
                 .map(TrainDataInfo::of)
                 .toList();
 
@@ -174,18 +174,7 @@ public class AiModelService {
 
         aiModelRepository.save(newModel);
 
-        Result result = Result.of(newModel,
-                trainResponse.getPrecision(),
-                trainResponse.getRecall(),
-                trainResponse.getMAP50(),
-                trainResponse.getMAP5095(),
-                trainResponse.getFitness(),
-                trainRequest.getRatio(),
-                trainRequest.getEpochs(),
-                trainRequest.getBatch(),
-                trainRequest.getLr0(),
-                trainRequest.getLrf(),
-                trainRequest.getOptimizer());
+        Result result = Result.of(newModel, trainResponse, trainRequest);
 
         resultRepository.save(result);
 
