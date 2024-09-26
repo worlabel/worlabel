@@ -68,7 +68,7 @@ export interface FolderResponse {
   children: ChildFolder[];
 }
 
-export type ImageStatus = 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+export type ImageStatus = 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'REVIEW_REJECTED' | 'COMPLETED';
 
 export interface ImageResponse {
   id: number;

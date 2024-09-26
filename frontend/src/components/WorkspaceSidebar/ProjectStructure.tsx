@@ -9,11 +9,13 @@ import { useEffect } from 'react';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
 import useProjectStore from '@/stores/useProjectStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function ProjectStructure({ project }: { project: Project }) {
   const setProject = useProjectStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
+  const queryClient = useQueryClient();
   const requestAutoLabel = useAutoLabelQuery();
 
   useEffect(() => {
@@ -61,14 +63,14 @@ export default function ProjectStructure({ project }: { project: Project }) {
       <div className="flex">
         <Button
           variant="outlinePrimary"
-          className="w-full"
+          className="w-full overflow-hidden"
           disabled={requestAutoLabel.isPending}
           onClick={() => {
             requestAutoLabel.mutate(
               { projectId: project.id },
               {
                 onSuccess: () => {
-                  refetch;
+                  queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString()] });
                   setTimeout(() => {
                     alert('레이블링 성공!');
                   }, 100);
