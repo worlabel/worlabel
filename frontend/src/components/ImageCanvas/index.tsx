@@ -9,14 +9,15 @@ import LabelPolygon from './LabelPolygon';
 import CanvasControlBar from '../CanvasControlBar';
 import { Label } from '@/types';
 import useLabelJson from '@/hooks/useLabelJson';
-import { saveImageLabels } from '@/api/lablingApi';
 import useProjectStore from '@/stores/useProjectStore';
 import { LABEL_CATEGORY } from '@/constants';
+import { useQueryClient } from '@tanstack/react-query';
+import useSaveImageLabelsQuery from '@/queries/projects/useSaveImageLabelsQuery';
 
 export default function ImageCanvas() {
-  const project = useProjectStore((state) => state.project)!;
+  const { project, folderId } = useProjectStore();
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
-  const { data: labelData } = useLabelJson(dataPath, project);
+  const { data: labelData } = useLabelJson(dataPath, project!);
   const { labels, drawState, setDrawState, addLabel, setLabels, selectedLabelId, setSelectedLabelId, sidebarSize } =
     useCanvasStore();
   const { shapes } = labelData || [];
@@ -28,6 +29,8 @@ export default function ImageCanvas() {
   const [image] = useImage(imagePath);
   const [rectPoints, setRectPoints] = useState<[number, number][]>([]);
   const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
+  const saveImageLabelsMutation = useSaveImageLabelsQuery();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setLabels(
@@ -65,13 +68,17 @@ export default function ImageCanvas() {
       imageHeight: image!.height,
     });
 
-    saveImageLabels(project.id, imageId, { data: json })
-      .catch(() => {
-        alert('레이블 데이터 저장 실패');
-      })
-      .then(() => {
-        alert('레이블링 성공!');
-      });
+    saveImageLabelsMutation.mutate(
+      { projectId: project!.id, imageId: imageId, data: { data: json } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString(), folderId] });
+        },
+        onError: () => {
+          alert('레이블 데이터 저장 실패');
+        },
+      }
+    );
   };
   const startDrawRect = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
@@ -346,7 +353,7 @@ export default function ImageCanvas() {
       </Stage>
       <CanvasControlBar
         saveJson={saveJson}
-        projectType={project.type}
+        projectType={project!.type}
       />
     </div>
   ) : (
