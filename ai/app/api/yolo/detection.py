@@ -122,7 +122,7 @@ async def detection_train(request: TrainRequest, http_request: Request):
     # 학습
     results = run_train(request,token,model,dataset_root_path)
 
-    # last 모델 저장
+    # best 모델 저장
     model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
 
     response = {"model_key": model_key, "results": results.results_dict}
