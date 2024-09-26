@@ -195,7 +195,7 @@ export interface ReviewStatusRequest {
 export interface ReviewImageResponse {
   id: number;
   imageTitle: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+  status: ImageStatus;
   imagePath: string;
   dataPath: string;
 }
@@ -239,7 +239,7 @@ export interface ImageDetailResponse {
   imageTitle: string;
   imageUrl: string;
   data: string | null;
-  status: 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'COMPLETED';
+  status: ImageStatus;
 }
 
 // 리프레시 토큰 응답 DTO
