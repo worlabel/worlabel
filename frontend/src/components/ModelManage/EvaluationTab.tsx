@@ -6,6 +6,7 @@ import useModelResultsQuery from '@/queries/models/useModelResultsQuery';
 import ModelBarChart from './ModelBarChart';
 import ModelLineChart from './ModelLineChart';
 import { useState } from 'react';
+import { ModelResponse } from '@/types';
 
 interface EvaluationTabProps {
   projectId: number | null;
@@ -33,7 +34,7 @@ export default function EvaluationTab({ projectId }: EvaluationTabProps) {
 }
 
 interface ModelSelectionProps {
-  models: Array<{ id: number; name: string }> | undefined;
+  models: ModelResponse[] | undefined;
   setSelectedModel: (modelId: number) => void;
 }
 
@@ -50,6 +51,7 @@ function ModelSelection({ models, setSelectedModel }: ModelSelectionProps) {
             <SelectItem
               key={model.id}
               value={model.id.toString()}
+              disabled={model.isDefault}
             >
               {model.name}
             </SelectItem>

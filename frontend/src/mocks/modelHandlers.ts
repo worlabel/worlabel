@@ -24,6 +24,7 @@ export const modelHandlers = [
     const updatedModel: ModelResponse = {
       id: modelId,
       name: modelData.name,
+      isDefault: false,
     };
 
     return HttpResponse.json(updatedModel);
@@ -51,8 +52,8 @@ export const modelHandlers = [
     console.log(projectId);
 
     const models: ProjectModelsResponse = [
-      { id: 1, name: 'Model 1' },
-      { id: 2, name: 'Model 2' },
+      { id: 1, name: 'Model 1', isDefault: true },
+      { id: 2, name: 'Model 2', isDefault: false },
     ];
 
     return HttpResponse.json(models);
@@ -70,6 +71,7 @@ export const modelHandlers = [
     const newModel: ModelResponse = {
       id: Math.floor(Math.random() * 1000), // 임의로 ID 생성
       name: modelData.name,
+      isDefault: false,
     };
 
     return HttpResponse.json(newModel);

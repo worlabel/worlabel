@@ -15,26 +15,27 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
       isTrainingByProject: state.isTrainingByProject,
       setIsTraining: state.setIsTraining,
       selectedModelByProject: state.selectedModelByProject,
-      setSelectedModel: state.setSelectedModel,
+      setSelectedModel: state.selectModel,
       resetTrainingData: state.resetTrainingData,
     }));
 
-  const isTraining = isTrainingByProject[numericProjectId?.toString() || ''] || false;
-  const selectedModel = selectedModelByProject[numericProjectId?.toString() || ''];
+  const projectKey = numericProjectId?.toString() || '';
+  const isTraining = isTrainingByProject[projectKey] || false;
+  const selectedModel = selectedModelByProject[projectKey];
 
   const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number);
 
   const handleTrainingStart = (trainData: ModelTrainRequest) => {
     if (!isTraining && selectedModel !== null) {
-      setIsTraining(numericProjectId?.toString() || '', true);
+      setIsTraining(projectKey, true);
       startTraining(trainData);
     }
   };
 
   const handleTrainingStop = () => {
     if (isTraining) {
-      setIsTraining(numericProjectId?.toString() || '', false);
-      resetTrainingData(numericProjectId?.toString() || '');
+      setIsTraining(projectKey, false);
+      resetTrainingData(projectKey);
     }
   };
 
@@ -43,7 +44,7 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
       <TrainingSettings
         projectId={numericProjectId}
         selectedModel={selectedModel}
-        setSelectedModel={(modelId) => setSelectedModel(numericProjectId?.toString() || '', modelId)}
+        setSelectedModel={(modelId) => setSelectedModel(projectKey, modelId)}
         handleTrainingStart={handleTrainingStart}
         handleTrainingStop={handleTrainingStop}
         className="h-full"

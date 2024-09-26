@@ -10,50 +10,75 @@ interface TrainingGraphProps {
 }
 
 export default function TrainingGraph({ projectId, selectedModel, className }: TrainingGraphProps) {
-  const { isTrainingByProject, setIsTraining, saveTrainingData, resetTrainingData, trainingDataByProject } =
-    useModelStore((state) => ({
-      isTrainingByProject: state.isTrainingByProject,
-      setIsTraining: state.setIsTraining,
-      saveTrainingData: state.saveTrainingData,
-      resetTrainingData: state.resetTrainingData,
-      trainingDataByProject: state.trainingDataByProject,
-    }));
+  const projectKey = projectId?.toString() || '';
 
-  const isTraining = isTrainingByProject[projectId?.toString() || ''] || false;
+  const {
+    isTrainingByProject,
+    isTrainingCompleteByProject,
+    setIsTraining,
+    setIsTrainingComplete,
+    saveTrainingData,
+    resetTrainingData,
+    trainingDataByProject,
+    selectModel,
+  } = useModelStore((state) => ({
+    isTrainingByProject: state.isTrainingByProject,
+    isTrainingCompleteByProject: state.isTrainingCompleteByProject,
+    setIsTraining: state.setIsTraining,
+    setIsTrainingComplete: state.setIsTrainingComplete,
+    saveTrainingData: state.saveTrainingData,
+    resetTrainingData: state.resetTrainingData,
+    trainingDataByProject: state.trainingDataByProject,
+    selectModel: state.selectModel,
+  }));
+
+  const isTraining = isTrainingByProject[projectKey] || false;
+  const isTrainingComplete = isTrainingCompleteByProject[projectKey] || false;
+
+  useEffect(() => {
+    if (projectId !== null) {
+      selectModel(projectKey, selectedModel);
+    }
+  }, [selectedModel, projectId, projectKey, selectModel]);
 
   const { data: fetchedTrainingDataList } = usePollingModelReportsQuery(
     projectId as number,
-    selectedModel ?? 0,
+    selectedModel as number,
     isTraining && !!projectId && !!selectedModel
   );
 
   const trainingDataList = useMemo(() => {
-    return trainingDataByProject[projectId?.toString() || ''] || fetchedTrainingDataList || [];
-  }, [projectId, trainingDataByProject, fetchedTrainingDataList]);
+    if (!isTraining) {
+      return [];
+    }
+    return trainingDataByProject[projectKey] || fetchedTrainingDataList || [];
+  }, [isTraining, projectKey, trainingDataByProject, fetchedTrainingDataList]);
 
   useEffect(() => {
     if (fetchedTrainingDataList) {
-      saveTrainingData(projectId?.toString() || '', fetchedTrainingDataList);
+      saveTrainingData(projectKey, fetchedTrainingDataList);
     }
-  }, [fetchedTrainingDataList, projectId, saveTrainingData]);
-
-  const latestData = useMemo(() => {
-    return (
-      trainingDataList?.[trainingDataList.length - 1] || {
-        epoch: 0,
-        totalEpochs: 0,
-        leftSecond: 0,
-      }
-    );
-  }, [trainingDataList]);
+  }, [fetchedTrainingDataList, projectKey, saveTrainingData]);
 
   useEffect(() => {
-    if (latestData.epoch === latestData.totalEpochs && latestData.totalEpochs > 0) {
-      alert('학습이 완료되었습니다!');
-      setIsTraining(projectId?.toString() || '', false);
-      resetTrainingData(projectId?.toString() || '');
+    if (isTraining && trainingDataList.length > 0) {
+      const latestData = trainingDataList[trainingDataList.length - 1];
+      if (latestData.epoch === latestData.totalEpochs && latestData.totalEpochs > 0) {
+        setIsTrainingComplete(projectKey, true);
+      } else {
+        setIsTrainingComplete(projectKey, false);
+      }
     }
-  }, [latestData.epoch, latestData.totalEpochs, setIsTraining, resetTrainingData, projectId]);
+  }, [trainingDataList, setIsTrainingComplete, projectKey, isTraining]);
+
+  useEffect(() => {
+    if (isTrainingComplete) {
+      alert('학습이 완료되었습니다!');
+      setIsTraining(projectKey, false);
+      resetTrainingData(projectKey);
+      setIsTrainingComplete(projectKey, false);
+    }
+  }, [isTrainingComplete, setIsTraining, resetTrainingData, setIsTrainingComplete, projectKey]);
 
   return (
     <ModelLineChart
