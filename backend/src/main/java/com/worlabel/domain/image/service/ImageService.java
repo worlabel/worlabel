@@ -320,7 +320,7 @@ public class ImageService {
 
 
     public Image createImage(MultipartFile file, String key, Folder folder) {
-        String extension = getExtension(file.getName());
+        String extension = getExtension(file.getOriginalFilename());
         return Image.of(file.getOriginalFilename(), key, extension, folder);
     }
 
