@@ -10,7 +10,7 @@ export default function useWorkspaceReviewsQuery(
   limitPage: number = 10
 ) {
   return useSuspenseInfiniteQuery<ReviewResponse[]>({
-    queryKey: ['workspaceReviews', workspaceId, reviewStatus, sortDirection],
+    queryKey: ['workspaceReviews', workspaceId, memberId, reviewStatus, sortDirection],
     queryFn: ({ pageParam = undefined }) =>
       getWorkspaceReviews(
         workspaceId,
@@ -28,23 +28,14 @@ export default function useWorkspaceReviewsQuery(
         const lastReview = lastPage[lastPage.length - 1];
         return lastReview.reviewId;
       } else {
-        const firstReview = lastPage[0];
-        return firstReview.reviewId;
-      }
-    },
+        const lastReview = lastPage[lastPage.length - 1];
 
-    getPreviousPageParam: (firstPage) => {
-      if (firstPage.length === 0) return undefined;
-
-      if (sortDirection === 0) {
-        const firstReview = firstPage[0];
-        return firstReview.reviewId;
-      } else {
-        const lastReview = firstPage[firstPage.length - 1];
         return lastReview.reviewId;
       }
     },
 
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     initialPageParam: undefined,
   });
 }

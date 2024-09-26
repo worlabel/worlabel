@@ -15,17 +15,22 @@ export default function WorkspaceReviewList() {
   const [sortValue, setSortValue] = useState('latest');
 
   const sortDirection = sortValue === 'latest' ? 0 : 1;
+  const reviewStatus = activeTab !== 'all' ? activeTab : undefined;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useWorkspaceReviewsQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = useWorkspaceReviewsQuery(
     Number(workspaceId),
     memberId,
     sortDirection,
-    activeTab !== 'all' ? activeTab : undefined
+    reviewStatus
   );
 
   const workspaceReviews = data?.pages.flat() || [];
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    refetch();
+  }, [sortDirection, reviewStatus, refetch]);
 
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -65,6 +70,7 @@ export default function WorkspaceReviewList() {
         </header>
 
         <ReviewList
+          key={`${sortValue}-${activeTab}`}
           reviews={workspaceReviews}
           activeTab={activeTab}
           setActiveTab={setActiveTab}

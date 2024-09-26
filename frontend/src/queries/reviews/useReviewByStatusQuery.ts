@@ -9,10 +9,9 @@ export default function useReviewByStatusQuery(
   sortDirection: number
 ) {
   return useSuspenseInfiniteQuery<ReviewResponse[]>({
-    queryKey: ['reviewByStatus', projectId, reviewStatus, sortDirection],
-    queryFn: ({ pageParam = undefined }) => {
-      return getReviewByStatus(projectId, memberId, sortDirection, reviewStatus, pageParam as number | undefined, 10);
-    },
+    queryKey: ['reviewByStatus', projectId, memberId, reviewStatus, sortDirection],
+    queryFn: ({ pageParam = undefined }) =>
+      getReviewByStatus(projectId, memberId, sortDirection, reviewStatus, pageParam as number | undefined, 10),
     getNextPageParam: (lastPage) => {
       if (lastPage.length === 0) return undefined;
 
@@ -20,21 +19,12 @@ export default function useReviewByStatusQuery(
         const lastReview = lastPage[lastPage.length - 1];
         return lastReview.reviewId;
       } else {
-        const firstReview = lastPage[0];
-        return firstReview.reviewId;
-      }
-    },
-    getPreviousPageParam: (firstPage) => {
-      if (firstPage.length === 0) return undefined;
-
-      if (sortDirection === 0) {
-        const firstReview = firstPage[0];
-        return firstReview.reviewId;
-      } else {
-        const lastReview = firstPage[firstPage.length - 1];
+        const lastReview = lastPage[lastPage.length - 1];
         return lastReview.reviewId;
       }
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     initialPageParam: undefined,
   });
 }

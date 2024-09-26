@@ -15,17 +15,22 @@ export default function ProjectReviewList() {
   const [sortValue, setSortValue] = useState('latest');
 
   const sortDirection = sortValue === 'latest' ? 0 : 1;
+  const reviewStatus = activeTab !== 'all' ? activeTab : undefined;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useReviewByStatusQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = useReviewByStatusQuery(
     Number(projectId),
     memberId,
-    activeTab !== 'all' ? activeTab : undefined,
+    reviewStatus,
     sortDirection
   );
 
   const projectReviews = data?.pages.flat() || [];
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    refetch();
+  }, [sortDirection, reviewStatus, refetch]);
 
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -64,6 +69,7 @@ export default function ProjectReviewList() {
           </Link>
         </header>
         <ReviewList
+          key={`${sortValue}-${activeTab}`}
           reviews={projectReviews}
           activeTab={activeTab}
           setActiveTab={setActiveTab}

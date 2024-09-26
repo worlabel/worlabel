@@ -49,7 +49,6 @@ export async function updateReviewStatus(projectId: number, reviewId: number, me
     )
     .then(({ data }) => data);
 }
-
 export async function getReviewByStatus(
   projectId: number,
   memberId: number,
@@ -63,7 +62,7 @@ export async function getReviewByStatus(
       params: {
         memberId,
         limitPage,
-        sortDirection, // 정렬방향 추가
+        sortDirection,
         ...(reviewStatus ? { reviewStatus } : {}),
         ...(lastReviewId ? { lastReviewId } : {}),
       },
