@@ -29,6 +29,17 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
             @Param("limit") Integer limit
     );
 
+    @Query("SELECT r " +
+            "FROM Review r " +
+            "WHERE r.project.id = :projectId AND (:reviewStatus IS NULL OR r.reviewStatus = :reviewStatus) AND (:lastReviewId IS NULL OR r.id > :lastReviewId) " +
+            "ORDER BY r.id LIMIT :limit")
+    List<Review> findReviewsNativeSortWithLimit(
+            @Param("projectId") Integer projectId,
+            @Param("reviewStatus") ReviewStatus reviewStatus,
+            @Param("lastReviewId") Integer lastReviewId,
+            @Param("limit") Integer limit
+    );
+
     // Fetch join을 사용하여 reviewId로 조회하면서 Member와 Reviewer 정보를 가져오는 쿼리
     @Query("SELECT r FROM Review r " +
             "JOIN FETCH r.member " +    // 작성자 정보
@@ -55,5 +66,4 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
             @Param("lastReviewId") Integer lastReviewId,
             @Param("limitPage") Integer limitPage
     );
-
 }

@@ -31,9 +31,9 @@ public class ReviewController {
     @Operation(summary = "리뷰 생성", description = "리뷰를 생성합니다..")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public ReviewResponse createReview(
-        @CurrentUser final Integer memberId,
-        @PathVariable("project_id") final Integer projectId,
-        @RequestBody @Validated final ReviewRequest reviewRequest) {
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @RequestBody @Validated final ReviewRequest reviewRequest) {
         return reviewService.createReview(memberId, projectId, reviewRequest);
     }
 
@@ -43,11 +43,12 @@ public class ReviewController {
     @Operation(summary = "리뷰를 상태별로 조회", description = "리뷰를 상태별로 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public List<ReviewResponse> getReviewByProject(
-        @PathVariable("project_id") final Integer projectId,
-        @Parameter(name = "리뷰 상태", description = "리뷰 상태", example = "APPROVED") @RequestParam(value = "reviewStatus", required = false) final String reviewStatusRequest,
-        @Parameter(name = "마지막 리뷰 id", description = "마지막 리뷰 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastReviewId,
-        @Parameter(name = "가져올 리뷰 수", description = "가져올 리뷰 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage) {
-        return reviewService.getReviewByProjectId(projectId, reviewStatusRequest, lastReviewId, limitPage);
+            @PathVariable("project_id") final Integer projectId,
+            @Parameter(name = "리뷰 상태", description = "리뷰 상태", example = "APPROVED") @RequestParam(value = "reviewStatus", required = false) final String reviewStatusRequest,
+            @Parameter(name = "마지막 리뷰 id", description = "마지막 리뷰 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastReviewId,
+            @Parameter(name = "가져올 리뷰 수", description = "가져올 리뷰 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage,
+            @Parameter(name = "정렬방향", description = "0이면 역순(최신순), 1이면 정순(오래된순)", example = "0") @RequestParam(defaultValue = "0") Integer sort) {
+        return reviewService.getReviewByProjectId(projectId, reviewStatusRequest, lastReviewId, limitPage, sort);
     }
 
     // 리뷰 단건 조회
@@ -56,8 +57,8 @@ public class ReviewController {
     @Operation(summary = "리뷰 단건 조회", description = "리뷰 단건 조회합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public ReviewDetailResponse getReviewById(
-        @PathVariable("project_id") final Integer projectId,
-        @PathVariable("review_id") final Integer reviewId) {
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId) {
         return reviewService.getReviewById(projectId, reviewId);
     }
 
@@ -67,10 +68,10 @@ public class ReviewController {
     @Operation(summary = "리뷰를 수정", description = "리뷰를 수정합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public ReviewResponse updateReview(
-        @CurrentUser final Integer memberId,
-        @PathVariable("project_id") final Integer projectId,
-        @PathVariable("review_id") final Integer reviewId,
-        @RequestBody ReviewRequest reviewUpdateRequest) {
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId,
+            @RequestBody ReviewRequest reviewUpdateRequest) {
         return reviewService.updateReview(memberId, reviewId, reviewUpdateRequest);
     }
 
@@ -80,10 +81,10 @@ public class ReviewController {
     @Operation(summary = "리뷰 상태를 수정", description = "리뷰 상태를 수정합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public ReviewResponse updateReviewStatus(
-        @CurrentUser final Integer memberId,
-        @PathVariable("project_id") final Integer projectId,
-        @PathVariable("review_id") final Integer reviewId,
-        @RequestBody ReviewStatusRequest reviewStatusRequest) {
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId,
+            @RequestBody ReviewStatusRequest reviewStatusRequest) {
         return reviewService.updateReviewStatus(memberId, projectId, reviewId, reviewStatusRequest);
     }
 
@@ -93,9 +94,9 @@ public class ReviewController {
     @Operation(summary = "리뷰를 삭제", description = "리뷰를 삭제합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
     public void deleteReview(
-        @CurrentUser final Integer memberId,
-        @PathVariable("project_id") final Integer projectId,
-        @PathVariable("review_id") final Integer reviewId) {
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId) {
         reviewService.deleteReview(memberId, reviewId);
     }
 }
