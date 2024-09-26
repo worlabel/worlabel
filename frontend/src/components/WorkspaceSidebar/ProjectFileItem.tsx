@@ -2,24 +2,28 @@ import { cn } from '@/lib/utils';
 import { ImageResponse } from '@/types';
 import { ArrowDownToLine, Check, Image, Loader, Minus, Send } from 'lucide-react';
 import useCanvasStore from '@/stores/useCanvasStore';
+import useProjectStore from '@/stores/useProjectStore';
 
 export default function ProjectFileItem({
   className = '',
   item,
+  folderId = 0,
   depth = 0,
   selected,
 }: {
   className?: string;
   item: ImageResponse;
+  folderId?: number;
   depth?: number;
   selected: boolean;
 }) {
   const paddingLeft = depth * 12;
-  // const changeImage = useCanvasStore((state) => state.changeImage);
   const setImage = useCanvasStore((state) => state.setImage);
+  const setFolderId = useProjectStore((state) => state.setFolderId);
 
   const handleClick = () => {
     setImage(item);
+    setFolderId(folderId);
   };
 
   return (
