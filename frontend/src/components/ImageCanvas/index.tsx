@@ -68,12 +68,13 @@ export default function ImageCanvas() {
       imageHeight: image!.height,
     });
 
-    saveImageLabels(project.id, imageId, { data: json }).catch(() => {
-      alert('레이블 데이터 저장 실패');
-    });
-    // .then(() => {
-    //   refetch();
-    // });
+    saveImageLabels(project.id, imageId, { data: json })
+      .catch(() => {
+        alert('레이블 데이터 저장 실패');
+      })
+      .then(() => {
+        alert('레이블링 성공!');
+      });
   };
   const startDrawRect = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
