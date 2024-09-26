@@ -97,15 +97,12 @@ def get_random_color():
 
 
 @router.post("/train")
-async def detection_train(request: TrainRequest, http_request: Request):
+async def detection_train(request: TrainRequest):
 
     send_slack_message(f"train 요청{request}", status="success")
     
     # Authorization 헤더에서 Bearer 토큰 추출
     try:
-        auth_header = http_request.headers.get("Authorization")
-        token = auth_header.split(" ")[1] if auth_header and auth_header.startswith("Bearer ") else None
-
         # 레이블 맵
         inverted_label_map = {value: key for key, value in request.label_map.items()} if request.label_map else None
 
@@ -122,12 +119,12 @@ async def detection_train(request: TrainRequest, http_request: Request):
         preprocess_dataset(dataset_root_path, model_categories, request.data, request.ratio, inverted_label_map)
 
         # 학습
-        results = run_train(request,token,model,dataset_root_path)
+        results = run_train(request, model,dataset_root_path)
 
         # best 모델 저장
         model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
         
-        result = results.result_dict
+        result = results.results_dict
 
         response = TrainResponse(
             modelKey=model_key,
@@ -137,14 +134,14 @@ async def detection_train(request: TrainRequest, http_request: Request):
             mAP5095= result["metrics/mAP50-95(B)"],
             fitness= result["fitness"]
         )
+        send_slack_message(f"train 성공{response}", status="success")
+            
+        return response
 
     except HTTPException as e:
         raise e
     except Exception as e:
-        HTTPException(status_code=500, detail=str(e))
-    send_slack_message(f"train 성공{response}", status="success")
-        
-    return response
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def preprocess_dataset(dataset_root_path, model_categories, data, ratio, label_map):
@@ -170,7 +167,7 @@ def preprocess_dataset(dataset_root_path, model_categories, data, ratio, label_m
     except Exception as e:
         raise HTTPException(status_code=500, detail="preprocess dataset exception: " + str(e))
     
-def run_train(request, token, model, dataset_root_path):
+def run_train(request, model, dataset_root_path):
     try:
         # 데이터 전송 콜백함수
         def send_data(trainer):
@@ -196,7 +193,7 @@ def run_train(request, token, model, dataset_root_path):
                     left_seconds=left_seconds        # 남은 시간(초)
                 )
                 # 데이터 전송
-                send_data_call_api(request.project_id, request.m_id, data, token)
+                send_data_call_api(request.project_id, request.m_id, data)
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"send_data exception: {e}")
 
@@ -204,24 +201,21 @@ def run_train(request, token, model, dataset_root_path):
         model.add_callback("on_train_epoch_start", send_data)
 
         # 학습 실행
-        try:
-            results = model.train(
-                data=join_path(dataset_root_path, "dataset.yaml"),
-                name=join_path(dataset_root_path, "result"),
-                epochs=request.epochs,
-                batch=request.batch,
-                lr0=request.lr0,
-                lrf=request.lrf,
-                optimizer=request.optimizer
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"model train exception: {e}")
-
+        results = model.train(
+            data=join_path(dataset_root_path, "dataset.yaml"),
+            name=join_path(dataset_root_path, "result"),
+            epochs=request.epochs,
+            batch=request.batch,
+            lr0=request.lr0,
+            lrf=request.lrf,
+            optimizer=request.optimizer
+        )
+        
         # 마지막 에포크 전송
         model.trainer.epoch += 1
         send_data(model.trainer)
-
         return results
+
 
     except HTTPException as e:
         raise e # HTTP 예외를 다시 발생
