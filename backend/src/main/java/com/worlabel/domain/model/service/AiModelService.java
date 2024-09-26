@@ -175,6 +175,8 @@ public class AiModelService {
 
         AiModel newModel = AiModel.of(newName, trainResponse.getModelKey(), newVersion, project);
 
+        aiModelRepository.save(newModel);
+
         Result result = Result.of(newModel,
                 trainResponse.getPrecision(),
                 trainResponse.getRecall(),
@@ -189,7 +191,6 @@ public class AiModelService {
                 trainRequest.getOptimizer());
 
         resultRepository.save(result);
-        aiModelRepository.save(newModel);
 
         // 레디스 정보 DB에 저장
         reportService.changeReport(project.getId(), model.getId(), newModel);
