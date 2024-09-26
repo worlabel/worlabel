@@ -20,7 +20,10 @@ public class AiModelResponse {
     @Schema(description = "Default 모델 여부", example = "true")
     private Boolean isDefault;
 
-    public static AiModelResponse of(final AiModel aiModel) {
-        return new AiModelResponse(aiModel.getId(), aiModel.getName(), aiModel.getProject() == null);
+    @Schema(description = "모델 학습 여부", example = "true")
+    private Boolean isTrain;
+
+    public static AiModelResponse of(final AiModel aiModel, final int progressModelId) {
+        return new AiModelResponse(aiModel.getId(), aiModel.getName(), aiModel.getProject() == null, aiModel.getId() == progressModelId);
     }
 }

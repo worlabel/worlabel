@@ -134,7 +134,7 @@ public class ImageService {
         Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
         String dataPath = image.getDataPath();
-        image.updateStatus(LabelStatus.COMPLETED);
+        image.updateStatus(LabelStatus.SAVE);
         imageRepository.save(image);
         s3UploadService.uploadJson(labelRequest.getData(), dataPath);
     }

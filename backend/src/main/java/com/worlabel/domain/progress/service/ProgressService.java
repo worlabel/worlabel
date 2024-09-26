@@ -45,8 +45,12 @@ public class ProgressService {
         return progressCacheRepository.trainProgressCheck(projectId, modelId);
     }
 
-    public void registerTrainProgress(final int projectId, final int modelId, final ReportResponse data) {
+    public void addProgressModel(final int projectId, final int modelId, final ReportResponse data) {
         progressCacheRepository.addProgressModel(projectId, modelId, data);
+    }
+
+    public int getProgressModelByProjectId(final int projectId) {
+        return progressCacheRepository.getProgressModelByProjectId(projectId);
     }
 
     public void removeTrainProgress(final int projectId, final int modelId) {

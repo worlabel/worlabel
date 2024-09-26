@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -69,7 +70,10 @@ public class ProgressCacheRepository {
      * 진행 상황을 Redis에 추가 (리스트 형식 유지)
      */
     public void addProgressModel(final int projectId, final int modelId, final ReportResponse data) {
-        redisTemplate.opsForList().rightPush(CacheKey.trainKey(projectId, modelId), gson.toJson(data));
+        String jsonData = gson.toJson(data);
+        String key = CacheKey.trainKey(projectId, modelId);
+        log.debug("key{} : data {}",key, jsonData);
+        redisTemplate.opsForList().rightPush(key, jsonData);
     }
 
     public List<ReportResponse> getProgressModel(final int projectId, final int modelId) {
@@ -82,6 +86,22 @@ public class ProgressCacheRepository {
                 .toList();
     }
 
+    public int getProgressModelByProjectId(final int projectId) {
+        String key = CacheKey.trainModelKey(projectId);
+        log.debug("key : {}", key);
+        // train:<projectId>:* 형태의 첫 번째 키를 가져옴
+        Set<String> keys = redisTemplate.keys(key);
+
+        // 모델 ID를 추출하여 반환
+        if (keys != null && !keys.isEmpty()) {
+            String firstKey = keys.iterator().next(); // 첫 번째 키 가져오기
+            String[] parts = firstKey.split(":");
+            return Integer.parseInt(parts[2]); // modelId가 세 번째 위치
+        }
+
+        return 0;
+    }
+
     public void clearProgressModel(final int modelId) {
         redisTemplate.delete(CacheKey.progressStatusKey(modelId));
     }
@@ -89,4 +109,6 @@ public class ProgressCacheRepository {
     private ReportResponse convert(String data) {
         return gson.fromJson(data, ReportResponse.class);
     }
+
+
 }
