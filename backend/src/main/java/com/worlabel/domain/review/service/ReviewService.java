@@ -67,14 +67,25 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     @CheckPrivilege(PrivilegeType.VIEWER)
-    public List<ReviewResponse> getReviewByProjectId(final Integer projectId, final String reviewStatusRequest, final Integer lastReviewId, final Integer limitPage) {
+    public List<ReviewResponse> getReviewByProjectId(final Integer projectId, final String reviewStatusRequest, final Integer lastReviewId, final Integer limitPage, final Integer sort) {
         // 리뷰 조회 쿼리 호출
-        List<Review> reviews = reviewRepository.findReviewsNativeWithLimit(
-                projectId,
-                reviewStatusRequest == null ? null : ReviewStatus.valueOf(reviewStatusRequest),
-                lastReviewId,
-                limitPage
-        );
+        List<Review> reviews;
+
+        if (sort == 0) {
+            reviews = reviewRepository.findReviewsNativeWithLimit(
+                    projectId,
+                    reviewStatusRequest == null ? null : ReviewStatus.valueOf(reviewStatusRequest),
+                    lastReviewId,
+                    limitPage
+            );
+        } else {
+            reviews = reviewRepository.findReviewsNativeSortWithLimit(
+                    projectId,
+                    reviewStatusRequest == null ? null : ReviewStatus.valueOf(reviewStatusRequest),
+                    lastReviewId,
+                    limitPage
+            );
+        }
 
         // ReviewResponse로 변환
         return reviews.stream()
