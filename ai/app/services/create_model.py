@@ -5,8 +5,9 @@ from services.load_model import load_model
 
 def create_new_model(project_id: int, type:str, pretrained:bool):
     suffix = ""
-    if type in ["seg", "cls"]:
-        suffix = "-"+type
+    type_list = {"segmentation": "seg", "classification": "cls"}
+    if type in type_list:
+        suffix = "-"+type_list[type]
     # 학습된 기본 모델 로드
     if pretrained:
         suffix += ".pt"
