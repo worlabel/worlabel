@@ -7,22 +7,25 @@ import useCanvasStore from '@/stores/useCanvasStore';
 import { Button } from '../ui/button';
 import { useEffect } from 'react';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
+import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
+import useProjectStore from '@/stores/useProjectStore';
 
 export default function ProjectStructure({ project }: { project: Project }) {
-  const setProject = useCanvasStore((state) => state.setProject);
+  const setProject = useProjectStore((state) => state.setProject);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
+  const requestAutoLabel = useAutoLabelQuery();
 
   useEffect(() => {
     setProject(project);
   }, [project, setProject]);
 
   return (
-    <div className="flex h-full flex-col justify-between">
-      <div className="flex flex-col overflow-y-auto px-1 pb-2">
+    <div className="flex h-full min-h-0 grow-0 flex-col">
+      <div className="flex h-full flex-col overflow-hidden px-1 pb-2">
         <header className="flex w-full items-center gap-2 rounded p-1">
-          <div className="flex w-full items-center gap-1 overflow-hidden pr-1">
-            <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap">{project.type}</h2>
+          <div className="flex w-full min-w-0 items-center gap-1 pr-1">
+            <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap text-gray-500">{project.type}</h2>
           </div>
           <WorkspaceDropdownMenu
             projectId={project.id}
@@ -35,7 +38,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
             빈 프로젝트입니다.
           </div>
         ) : (
-          <div className="caption flex flex-col">
+          <div className="caption flex flex-col overflow-y-auto">
             {folderData.children.map((item) => (
               <ProjectDirectoryItem
                 key={`${project.id}-${item.title}`}
@@ -55,11 +58,21 @@ export default function ProjectStructure({ project }: { project: Project }) {
         )}
       </div>
 
-      <div className="flex p-2.5">
+      <div className="flex">
         <Button
           variant="outlinePrimary"
           className="w-full"
-          onClick={() => console.log('autolabel')}
+          onClick={() => {
+            requestAutoLabel.mutate(
+              { projectId: project.id },
+              {
+                onSuccess: refetch,
+                onError: () => {
+                  alert('자동 레이블링을 요청하는 중 오류가 발생했습니다.');
+                },
+              }
+            );
+          }}
         >
           <Play
             size={16}

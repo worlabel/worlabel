@@ -47,7 +47,6 @@ const router = createBrowserRouter([
     ],
   },
   {
-    // FIXME: index에서 오류나지 않게 수정
     path: webPath.browse(),
     element: (
       <Suspense fallback={<PageLayout />}>
@@ -66,7 +65,6 @@ const router = createBrowserRouter([
     ],
   },
   {
-    // FIXME: index에서 오류나지 않게 수정
     path: `${webPath.workspace()}/:workspaceId`,
     element: (
       <Suspense fallback={<div></div>}>

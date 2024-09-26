@@ -13,7 +13,7 @@ export default function AdminLayout() {
           <AdminProjectSidebar />
 
           <ResizablePanel className="flex w-full items-center">
-            <main className="h-full grow">
+            <main className="h-full grow overflow-y-auto">
               <Outlet />
             </main>
           </ResizablePanel>

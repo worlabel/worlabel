@@ -1,28 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-
-import useTrainWebSocket from '@/hooks/useTrainPolling';
-import useTrainStore from '@/stores/useTrainStore';
 import TrainingTab from './TrainingTab';
 import EvaluationTab from './EvaluationTab';
 
 export default function ModelManage() {
   const { projectId } = useParams<{ projectId?: string }>();
-  const [training, setTraining] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
-
-  const numericProjectId = projectId ?? null;
-
-  useTrainWebSocket(training, numericProjectId);
-
-  const { trainingDataList } = useTrainStore((state) => ({
-    trainingDataList: numericProjectId ? state.trainingDataByProject[numericProjectId] || [] : [],
-  }));
-
-  const handleTrainingToggle = () => {
-    setTraining((prev) => !prev);
-  };
+  const numericProjectId = projectId ? parseInt(projectId, 10) : null;
 
   return (
     <div className="grid h-screen w-full">
@@ -41,22 +24,12 @@ export default function ModelManage() {
               <TabsTrigger value="results">모델 평가</TabsTrigger>
             </TabsList>
 
-            {/* 학습 탭 */}
             <TabsContent value="train">
-              <TrainingTab
-                training={training}
-                handleTrainingToggle={handleTrainingToggle}
-                trainingDataList={trainingDataList}
-                projectId={numericProjectId}
-              />
+              <TrainingTab projectId={numericProjectId} />
             </TabsContent>
 
-            {/* 평가 탭 */}
             <TabsContent value="results">
-              <EvaluationTab
-                selectedModel={selectedModel}
-                setSelectedModel={setSelectedModel}
-              />
+              <EvaluationTab projectId={numericProjectId} />
             </TabsContent>
           </Tabs>
         </main>

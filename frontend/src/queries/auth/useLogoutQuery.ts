@@ -1,15 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '@/stores/useAuthStore';
-import { reissueToken } from '@/api/authApi';
+import { logout } from '@/api/authApi';
 
-export default function useReissueTokenQuery() {
+export default function useLogoutQuery() {
   const queryClient = useQueryClient();
-  const { setToken } = useAuthStore();
+  const { clearAuth } = useAuthStore();
 
   return useMutation({
-    mutationFn: reissueToken,
-    onSuccess: (data) => {
-      setToken(data.accessToken);
+    mutationFn: logout,
+    onSuccess: () => {
+      clearAuth();
       queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
