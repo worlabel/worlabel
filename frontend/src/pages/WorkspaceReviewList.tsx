@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useWorkspaceReviewsQuery from '@/queries/workspaces/useWorkspaceReviewsQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import ReviewList from '@/components/ReviewList';
 import { Button } from '@/components/ui/button';
-
+import { Suspense } from 'react';
 export default function WorkspaceReviewList() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
@@ -14,32 +14,70 @@ export default function WorkspaceReviewList() {
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
-  const { data: workspaceReviews = [] } = useWorkspaceReviewsQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useWorkspaceReviewsQuery(
     Number(workspaceId),
     memberId,
     activeTab !== 'all' ? activeTab : undefined
   );
 
+  const workspaceReviews = data?.pages.flat() || [];
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    const currentLoadMoreRef = loadMoreRef.current;
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
+    }
+
+    return () => {
+      if (currentLoadMoreRef) {
+        observer.unobserve(currentLoadMoreRef);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   return (
-    <div>
-      <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
-        <h1 className="text-xl font-semibold">워크스페이스 리뷰</h1>
-        <Link
-          to={`/admin/${workspaceId}/reviews/request`}
-          className="ml-auto"
-        >
-          <Button variant="outlinePrimary">리뷰 요청</Button>
-        </Link>
-      </header>
-      <ReviewList
-        reviews={workspaceReviews}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        setSearchQuery={setSearchQuery}
-        sortValue={sortValue}
-        setSortValue={setSortValue}
-        workspaceId={Number(workspaceId)}
-      />
-    </div>
+    <Suspense fallback={<div></div>}>
+      <div>
+        <header className="sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b bg-white px-4">
+          <h1 className="text-xl font-semibold">워크스페이스 리뷰</h1>
+          <Link
+            to={`/admin/${workspaceId}/reviews/request`}
+            className="ml-auto"
+          >
+            <Button variant="outlinePrimary">리뷰 요청</Button>
+          </Link>
+        </header>
+
+        <ReviewList
+          reviews={workspaceReviews}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          setSearchQuery={setSearchQuery}
+          sortValue={sortValue}
+          setSortValue={setSortValue}
+          workspaceId={Number(workspaceId)}
+        />
+
+        {isFetchingNextPage}
+
+        <div
+          ref={loadMoreRef}
+          className="h-1"
+        />
+      </div>
+    </Suspense>
   );
 }
