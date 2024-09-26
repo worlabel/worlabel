@@ -1,5 +1,5 @@
 import { Project } from '@/types';
-import { Play } from 'lucide-react';
+import { LoaderCircle, Play } from 'lucide-react';
 import ProjectFileItem from './ProjectFileItem';
 import ProjectDirectoryItem from './ProjectDirectoryItem';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
@@ -62,11 +62,17 @@ export default function ProjectStructure({ project }: { project: Project }) {
         <Button
           variant="outlinePrimary"
           className="w-full"
+          disabled={requestAutoLabel.isPending}
           onClick={() => {
             requestAutoLabel.mutate(
               { projectId: project.id },
               {
-                onSuccess: refetch,
+                onSuccess: () => {
+                  refetch;
+                  setTimeout(() => {
+                    alert('레이블링 성공!');
+                  }, 100);
+                },
                 onError: () => {
                   alert('자동 레이블링을 요청하는 중 오류가 발생했습니다.');
                 },
@@ -74,11 +80,22 @@ export default function ProjectStructure({ project }: { project: Project }) {
             );
           }}
         >
-          <Play
-            size={16}
-            className="mr-1"
-          />
-          <span>자동 레이블링</span>
+          {requestAutoLabel.isPending ? (
+            <>
+              <LoaderCircle
+                size={16}
+                className="animate-spin"
+              />
+            </>
+          ) : (
+            <>
+              <Play
+                size={16}
+                className="mr-1"
+              />
+              <span>자동 레이블링</span>
+            </>
+          )}
         </Button>
       </div>
     </div>
