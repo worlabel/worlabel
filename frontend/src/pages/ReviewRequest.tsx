@@ -1,104 +1,81 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import ImageSelection from '@/components/ImageSelection';
-import useReviewRequest from '@/hooks/useReviewRequest';
 import { useNavigate } from 'react-router-dom';
-
+import useCreateReviewQuery from '@/queries/reviews/useCreateReviewQuery';
+import useAuthStore from '@/stores/useAuthStore';
+import { useParams } from 'react-router-dom';
+import ReviewForm from '@/components/ReviewForm';
+import useReviewRequest from '@/hooks/useReviewRequest';
+import { useState } from 'react';
 export default function ReviewRequest(): JSX.Element {
-  const {
-    register,
-    handleSubmit,
-    errors,
-    projects,
-    onSubmit,
-    selectedProjectId,
-    setSelectedProjectId,
-    selectedImages,
-    setSelectedImages,
-  } = useReviewRequest();
+  const { profile } = useAuthStore((state) => state);
+  const memberId = profile?.id ?? 0;
   const navigate = useNavigate();
+  const { workspaceId } = useParams<{ workspaceId?: string }>();
+
+  const { projects, selectedProjectId, setSelectedProjectId, selectedImages, setSelectedImages } = useReviewRequest();
+
+  const handleSuccess = () => {
+    navigate(`/admin/${workspaceId}/reviews`);
+  };
+
+  const createReview = useCreateReviewQuery();
+
+  const [formData, setFormData] = useState<{ title: string; content: string } | null>(null);
+
+  const handleReviewSubmit = (data: { title: string; content: string }) => {
+    setFormData(data);
+  };
+
+  const handleButtonClick = () => {
+    if (!formData) return;
+
+    const reviewData = {
+      title: formData.title,
+      content: formData.content,
+      imageIds: selectedImages,
+    };
+
+    createReview.mutate(
+      {
+        projectId: Number(selectedProjectId),
+        memberId,
+        reviewData,
+      },
+      {
+        onSuccess: handleSuccess,
+      }
+    );
+  };
 
   return (
     <div className="review-request-container p-4">
       <h1 className="mb-4 text-2xl font-bold">리뷰 요청</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-4">
-          <Label htmlFor="project">프로젝트 선택</Label>
-          <Select onValueChange={(value) => setSelectedProjectId(value)}>
-            <SelectTrigger id="project">
-              <SelectValue placeholder="프로젝트를 선택하세요" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.length ? (
-                projects.map((project) => (
-                  <SelectItem
-                    key={project.id}
-                    value={project.id.toString()}
-                  >
-                    {project.title}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem
-                  disabled
-                  value={'true'}
-                >
-                  프로젝트가 없습니다
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+      <ReviewForm
+        projects={projects.map((project) => ({ id: project.id.toString(), title: project.title }))}
+        selectedProjectId={selectedProjectId}
+        setSelectedProjectId={setSelectedProjectId}
+        selectedImages={selectedImages}
+        setSelectedImages={setSelectedImages}
+        onSubmit={handleReviewSubmit}
+      />
 
-        <div className="mb-4">
-          <Label htmlFor="title">제목</Label>
-          <Input
-            id="title"
-            placeholder="리뷰 제목을 입력하세요"
-            {...register('title', { required: '제목을 입력해주세요.' })}
-          />
-          {errors.title && <p className="text-red-500">{errors.title.message}</p>}
-        </div>
-
-        <div className="mb-4">
-          <Label htmlFor="content">내용</Label>
-          <Textarea
-            id="content"
-            placeholder="리뷰 내용을 입력하세요"
-            {...register('content', { required: '내용을 입력해주세요.' })}
-          />
-          {errors.content && <p className="text-red-500">{errors.content.message}</p>}
-        </div>
-
-        {selectedProjectId && (
-          <ImageSelection
-            projectId={selectedProjectId}
-            selectedImages={selectedImages}
-            setSelectedImages={setSelectedImages}
-          />
-        )}
-
-        <div className="actions mt-6 flex justify-end space-x-2">
-          <Button
-            variant="destructive"
-            type="button"
-            onClick={() => navigate(-1)}
-          >
-            취소
-          </Button>
-          <Button
-            variant="default"
-            type="submit"
-            disabled={!selectedProjectId}
-          >
-            리뷰 요청
-          </Button>
-        </div>
-      </form>
+      <div className="actions mt-6 flex justify-end space-x-2">
+        <Button
+          variant="destructive"
+          type="button"
+          onClick={() => navigate(-1)}
+        >
+          취소
+        </Button>
+        <Button
+          variant="default"
+          onClick={handleButtonClick} // 버튼 클릭 시에만 mutate 실행
+          disabled={!selectedProjectId || !formData}
+        >
+          리뷰 요청
+        </Button>
+      </div>
     </div>
   );
 }
