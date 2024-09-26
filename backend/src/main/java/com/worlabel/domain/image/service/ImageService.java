@@ -318,9 +318,9 @@ public class ImageService {
         return s3UploadService.uploadFile(file, extension, projectId);
     }
 
-
     public Image createImage(MultipartFile file, String key, Folder folder) {
         String extension = getExtension(file.getOriginalFilename());
+        log.debug("이미지 업로드 이름 :{}",file.getOriginalFilename());
         return Image.of(file.getOriginalFilename(), key, extension, folder);
     }
 
