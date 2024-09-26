@@ -78,11 +78,7 @@ public class ProjectController {
     @PostMapping("/projects/{project_id}/auto")
     public void autoLabeling(
             @PathVariable("project_id") final Integer projectId,
-            @RequestBody final AutoModelRequest request,
-            HttpServletRequest httpServletRequest) {
-        String clientIp = httpServletRequest.getRemoteAddr();
-        int clientPort = httpServletRequest.getRemotePort();
-        log.debug("클라이언트 IP: {}, 포트 번호: {}", clientIp, clientPort);
+            @RequestBody final AutoModelRequest request) {
         projectService.autoLabeling(projectId, request);
     }
 

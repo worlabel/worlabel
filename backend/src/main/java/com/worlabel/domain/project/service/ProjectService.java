@@ -31,14 +31,12 @@ import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
-import com.worlabel.global.cache.CacheKey;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
 import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -166,7 +164,10 @@ public class ProjectService {
         Project project = getProject(projectId);
         String endPoint = project.getProjectType().getValue() + "/predict";
 
-        List<Image> imageList = imageRepository.findImagesByProjectIdAndPending(projectId);
+        List<Image> imageList = imageRepository.findImagesByProjectIdAndPendingOrInProgress(projectId);
+        if(imageList.isEmpty()){
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+        }
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();

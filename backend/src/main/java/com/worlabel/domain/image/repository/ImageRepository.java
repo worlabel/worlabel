@@ -18,8 +18,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     @Query("select i from Image i " +
             "where i.folder.project.id = :projectId " +
-            "AND i.status = 'PENDING' ")
-    List<Image> findImagesByProjectIdAndPending(@Param("projectId") Integer projectId);
+            "AND i.status = 'PENDING' OR i.status = 'IN_PROGRESS' ")
+    List<Image> findImagesByProjectIdAndPendingOrInProgress(@Param("projectId") Integer projectId);
 
     Optional<Image> findByIdAndFolderIdAndFolderProjectId(Long imageId, Integer folderId, Integer projectId);
 
