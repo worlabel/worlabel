@@ -15,8 +15,9 @@ export default function useCreateReviewQuery() {
       memberId: number;
       reviewData: ReviewRequest;
     }) => createReview(projectId, memberId, reviewData),
+
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['reviewList', variables.projectId, variables.memberId] });
+      queryClient.invalidateQueries({ queryKey: ['reviewDetail', variables.projectId] });
     },
   });
 }

@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useWorkspaceReviewsQuery from '@/queries/workspaces/useWorkspaceReviewsQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import ReviewList from '@/components/ReviewList';
 import { Button } from '@/components/ui/button';
-import { Suspense } from 'react';
+
 export default function WorkspaceReviewList() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
@@ -14,15 +14,23 @@ export default function WorkspaceReviewList() {
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useWorkspaceReviewsQuery(
+  const sortDirection = sortValue === 'latest' ? 0 : 1;
+  const reviewStatus = activeTab !== 'all' ? activeTab : undefined;
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = useWorkspaceReviewsQuery(
     Number(workspaceId),
     memberId,
-    activeTab !== 'all' ? activeTab : undefined
+    sortDirection,
+    reviewStatus
   );
 
   const workspaceReviews = data?.pages.flat() || [];
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    refetch();
+  }, [sortDirection, reviewStatus, refetch]);
 
   useEffect(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -60,12 +68,9 @@ export default function WorkspaceReviewList() {
             <Button variant="outlinePrimary">리뷰 요청</Button>
           </Link>
         </header>
-        <div
-          ref={loadMoreRef}
-          className="h-1"
-        />
 
         <ReviewList
+          key={`${sortValue}-${activeTab}`}
           reviews={workspaceReviews}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -76,6 +81,11 @@ export default function WorkspaceReviewList() {
         />
 
         {isFetchingNextPage}
+
+        <div
+          ref={loadMoreRef}
+          className="h-1"
+        />
       </div>
     </Suspense>
   );

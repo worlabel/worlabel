@@ -5,18 +5,26 @@ import { ReviewResponse } from '@/types';
 export default function useReviewByStatusQuery(
   projectId: number,
   memberId: number,
-  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED' | undefined
+  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED' | undefined,
+  sortDirection: number
 ) {
   return useSuspenseInfiniteQuery<ReviewResponse[]>({
-    queryKey: ['reviewByStatus', projectId, reviewStatus],
-    queryFn: ({ pageParam = undefined }) => {
-      return getReviewByStatus(projectId, memberId, reviewStatus, pageParam as number | undefined);
-    },
+    queryKey: ['reviewByStatus', projectId, memberId, reviewStatus, sortDirection],
+    queryFn: ({ pageParam = undefined }) =>
+      getReviewByStatus(projectId, memberId, sortDirection, reviewStatus, pageParam as number | undefined, 10),
     getNextPageParam: (lastPage) => {
       if (lastPage.length === 0) return undefined;
-      const lastReview = lastPage[lastPage.length - 1];
-      return lastReview.reviewId;
+
+      if (sortDirection === 0) {
+        const lastReview = lastPage[lastPage.length - 1];
+        return lastReview.reviewId;
+      } else {
+        const lastReview = lastPage[lastPage.length - 1];
+        return lastReview.reviewId;
+      }
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     initialPageParam: undefined,
   });
 }

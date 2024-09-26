@@ -5,20 +5,37 @@ import { ReviewResponse } from '@/types';
 export default function useWorkspaceReviewsQuery(
   workspaceId: number,
   memberId: number,
+  sortDirection: number,
   reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
   limitPage: number = 10
 ) {
   return useSuspenseInfiniteQuery<ReviewResponse[]>({
-    queryKey: ['workspaceReviews', workspaceId, reviewStatus],
+    queryKey: ['workspaceReviews', workspaceId, memberId, reviewStatus, sortDirection],
     queryFn: ({ pageParam = undefined }) =>
-      getWorkspaceReviews(workspaceId, memberId, reviewStatus, pageParam as number | undefined, limitPage),
+      getWorkspaceReviews(
+        workspaceId,
+        memberId,
+        sortDirection,
+        reviewStatus,
+        pageParam as number | undefined,
+        limitPage
+      ),
 
     getNextPageParam: (lastPage) => {
       if (lastPage.length === 0) return undefined;
-      const lastReview = lastPage[lastPage.length - 1];
-      return lastReview.reviewId;
+
+      if (sortDirection === 0) {
+        const lastReview = lastPage[lastPage.length - 1];
+        return lastReview.reviewId;
+      } else {
+        const lastReview = lastPage[lastPage.length - 1];
+
+        return lastReview.reviewId;
+      }
     },
 
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     initialPageParam: undefined,
   });
 }

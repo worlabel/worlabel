@@ -58,21 +58,24 @@ export async function addWorkspaceMember(workspaceId: number, memberId: number, 
 export async function getWorkspaceReviews(
   workspaceId: number,
   memberId: number,
+  sortDirection: number,
   reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
   lastReviewId?: number,
-  limitPage: number = 50
+  limitPage: number = 10
 ) {
   return api
     .get<ReviewResponse[]>(`/workspaces/${workspaceId}/reviews`, {
       params: {
         memberId,
         limitPage,
+        sortDirection,
         ...(reviewStatus ? { reviewStatus } : {}),
         ...(lastReviewId ? { lastReviewId } : {}),
       },
     })
     .then(({ data }) => data);
 }
+
 export async function removeWorkspaceMember(workspaceId: number, memberId: number, targetMemberId: number) {
   return api
     .delete(`/workspaces/${workspaceId}/members/${targetMemberId}`, {
