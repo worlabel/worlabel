@@ -60,7 +60,10 @@ export default function ProjectReviewList() {
             <Button variant="outlinePrimary">리뷰 요청</Button>
           </Link>
         </header>
-
+        <div
+          ref={loadMoreRef}
+          className="h-1"
+        />
         <ReviewList
           reviews={projectReviews}
           activeTab={activeTab}
@@ -72,11 +75,6 @@ export default function ProjectReviewList() {
         />
 
         {isFetchingNextPage}
-
-        <div
-          ref={loadMoreRef}
-          className="h-1"
-        />
       </div>
     </Suspense>
   );

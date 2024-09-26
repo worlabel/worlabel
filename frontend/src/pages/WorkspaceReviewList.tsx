@@ -60,6 +60,10 @@ export default function WorkspaceReviewList() {
             <Button variant="outlinePrimary">리뷰 요청</Button>
           </Link>
         </header>
+        <div
+          ref={loadMoreRef}
+          className="h-1"
+        />
 
         <ReviewList
           reviews={workspaceReviews}
@@ -72,11 +76,6 @@ export default function WorkspaceReviewList() {
         />
 
         {isFetchingNextPage}
-
-        <div
-          ref={loadMoreRef}
-          className="h-1"
-        />
       </div>
     </Suspense>
   );
