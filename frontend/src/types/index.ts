@@ -32,7 +32,7 @@ export type Workspace = {
 // 레이블 관련 타입
 export type Label = {
   id: number;
-  name: string;
+  categoryId: number;
   color: string;
   type: 'polygon' | 'rect';
   coordinates: Array<[number, number]>;
@@ -248,7 +248,7 @@ export interface RefreshTokenResponse {
 }
 
 export interface Shape {
-  label: string;
+  categoryId: number;
   color: string;
   points: [number, number][];
   group_id: number;
