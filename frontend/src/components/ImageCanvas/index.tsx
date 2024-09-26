@@ -20,7 +20,7 @@ export default function ImageCanvas() {
   const selectedLabelId = useCanvasStore((state) => state.selectedLabelId);
   const setSelectedLabelId = useCanvasStore((state) => state.setSelectedLabelId);
   const sidebarSize = useCanvasStore((state) => state.sidebarSize);
-  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 200;
+  const stageWidth = window.innerWidth * ((100 - sidebarSize) / 100) - 201;
   const stageHeight = window.innerHeight - 64;
   const stageRef = useRef<Konva.Stage>(null);
   const dragLayerRef = useRef<Konva.Layer>(null);
