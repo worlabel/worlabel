@@ -66,4 +66,25 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
             @Param("lastReviewId") Integer lastReviewId,
             @Param("limitPage") Integer limitPage
     );
+
+    @Query(value = """
+            SELECT r.* 
+            FROM review r
+            JOIN project p ON r.project_id = p.project_id
+            JOIN participant part ON part.project_id = p.project_id
+            WHERE p.workspace_id = :workspaceId
+            AND part.member_id = :memberId
+            AND (:status IS NULL OR r.status = :status)
+            AND (:lastReviewId IS NULL OR r.review_id > :lastReviewId)
+            ORDER BY r.review_id 
+            LIMIT :limitPage
+            """, nativeQuery = true)
+    List<Review> findAllReviewsByWorkspaceAndMemberDesc(
+            @Param("workspaceId") Integer workspaceId,
+            @Param("memberId") Integer memberId,
+            @Param("status") String status,
+            @Param("lastReviewId") Integer lastReviewId,
+            @Param("limitPage") Integer limitPage
+    );
+
 }
