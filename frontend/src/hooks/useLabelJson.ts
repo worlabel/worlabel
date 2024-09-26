@@ -4,16 +4,12 @@ import createLabelJson from '@/utils/json/createLabelJson';
 import { useMemo } from 'react';
 
 export default function useLabelJson(dataPath: string, project: Project) {
-  const response = useLabelJsonQuery(dataPath);
-  const { data: labelJsonData } = response;
-  const createdJson = useMemo(
-    () => createLabelJson(project.type, labelJsonData.imageHeight, labelJsonData.imageWidth),
-    [project, labelJsonData]
-  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const createdJson = useMemo(() => createLabelJson(project.type), [dataPath]);
 
-  if (Object.keys(labelJsonData).includes('version')) {
+  const response = useLabelJsonQuery(dataPath);
+  if (Object.keys(response.data).includes('version')) {
     return response;
   }
-
   return { ...response, data: createdJson };
 }

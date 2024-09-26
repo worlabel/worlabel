@@ -8,5 +8,6 @@ export async function getLabelJson(jsonPath: string) {
         'Cache-Control': 'no-cache',
       },
     })
-    .then(({ data }) => data);
+    .then(({ data }) => data)
+    .catch(() => ({}) as LabelJson);
 }
