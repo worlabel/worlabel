@@ -3,8 +3,7 @@ from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
 from schemas.predict_response import PredictResponse, LabelData
 from schemas.train_report_data import ReportData
-from schemas.train_response import TrainResponse
-from services.load_model import load_detection_model
+from services.load_model import load_classification_model
 from services.create_model import save_model
 from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
@@ -16,7 +15,7 @@ import random
 router = APIRouter()
 
 @router.post("/predict")
-async def detection_predict(request: PredictRequest):
+async def classification_predict(request: PredictRequest):
 
     send_slack_message(f"predict 요청: {request}", status="success")
 
@@ -40,7 +39,7 @@ async def detection_predict(request: PredictRequest):
 # 모델 로드
 def get_model(request: PredictRequest):
     try:
-        return load_detection_model(request.project_id, request.m_key)
+        return load_classification_model(request.project_id, request.m_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail="load model exception: " + str(e))
 
@@ -97,53 +96,39 @@ def get_random_color():
 
 
 @router.post("/train")
-async def detection_train(request: TrainRequest, http_request: Request):
+async def classification_train(request: TrainRequest, http_request: Request):
 
     send_slack_message(f"train 요청{request}", status="success")
-    
+
     # Authorization 헤더에서 Bearer 토큰 추출
-    try:
-        auth_header = http_request.headers.get("Authorization")
-        token = auth_header.split(" ")[1] if auth_header and auth_header.startswith("Bearer ") else None
+    auth_header = http_request.headers.get("Authorization")
+    token = auth_header.split(" ")[1] if auth_header and auth_header.startswith("Bearer ") else None
 
-        # 레이블 맵
-        inverted_label_map = {value: key for key, value in request.label_map.items()} if request.label_map else None
+    # 레이블 맵
+    inverted_label_map = {value: key for key, value in request.label_map.items()} if request.label_map else None
 
-        # 데이터셋 루트 경로 얻기
-        dataset_root_path = get_dataset_root_path(request.project_id)
+    # 데이터셋 루트 경로 얻기
+    dataset_root_path = get_dataset_root_path(request.project_id)
 
-        # 모델 로드
-        model = get_model(request)
+    # 모델 로드
+    model = get_model(request)
 
-        # 학습할 모델 카테고리, 카테고리가 추가되는 경우 추가 작업 필요
-        model_categories = model.names
-        
-        # 데이터 전처리
-        preprocess_dataset(dataset_root_path, model_categories, request.data, request.ratio, inverted_label_map)
+    # 학습할 모델 카테고리, 카테고리가 추가되는 경우 추가 작업 필요
+    model_categories = model.names
+    
+    # 데이터 전처리
+    preprocess_dataset(dataset_root_path, model_categories, request.data, request.ratio, inverted_label_map)
 
-        # 학습
-        results = run_train(request,token,model,dataset_root_path)
+    # 학습
+    results = run_train(request,token,model,dataset_root_path)
 
-        # best 모델 저장
-        model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
-        
-        result = results.result_dict
+    # best 모델 저장
+    model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
 
-        response = TrainResponse(
-            modelKey=model_key,
-            precision= result["metrics/precision(B)"],
-            recall= result["metrics/recall(B)"],
-            mAP50= result["metrics/mAP50(B)"],
-            mAP5095= result["metrics/mAP50-95(B)"],
-            fitness= result["fitness"]
-        )
+    response = {"model_key": model_key, "results": results.results_dict}
 
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        HTTPException(status_code=500, detail=str(e))
     send_slack_message(f"train 성공{response}", status="success")
-        
+    
     return response
 
 
