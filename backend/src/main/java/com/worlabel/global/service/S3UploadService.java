@@ -19,9 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 // TODO: 추후 비동기로 변경해야합니다.
 @Slf4j
@@ -46,68 +44,42 @@ public class S3UploadService {
     @Value("${cloud.aws.url}")
     private String url;
 
+    /**
+     * Json 업로드
+     */
     public void uploadJson(final String json, final String dataUrl) {
         String key = getKeyFromImageAddress(dataUrl);
-        log.debug(key);
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType("application/json");
 
-        try {
-            byte[] jsonBytes = json.getBytes(StandardCharsets.UTF_8);
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType("application/json");
-            metadata.setContentLength(jsonBytes.length);
-
-            // JSON 데이터를 S3에 업로드
-            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(jsonBytes)) {
-                PutObjectRequest putRequest = new PutObjectRequest(bucket, key, inputStream, metadata);
-                amazonS3.putObject(putRequest); // S3에 파일 업로드
-            }
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
+            uploadToS3(inputStream, key, metadata);
         } catch (Exception e) {
             log.error("JSON 업로드 중 오류 발생: ", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
     }
 
-    public String getData(final String dataUrl) {
-        try {
-            // S3 URL에서 Key 추출
-            String key = getKeyFromImageAddress(dataUrl);
-
-            // S3에서 객체 가져오기
-            S3Object object = amazonS3.getObject(bucket, key);
-
-            // S3 객체의 내용을 스트림으로 읽어오기
-            String data = readS3ObjectContent(object.getObjectContent());
-            log.debug("object Content: {}", data);
-
-            return data;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String readS3ObjectContent(InputStream inputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        }
-    }
-
     /**
-     * 파일이 존재하는지 확인
+     * MultipartFile 업로드
      */
-    public String upload(final MultipartFile image, final String extension, final Integer projectId) {
-        if (image.isEmpty() || Objects.isNull(image.getOriginalFilename())) {
-            throw new CustomException(ErrorCode.BAD_REQUEST);
-        }
-        return url + "/" + uploadImage(image, extension, projectId);
-    }
-
-    /**
-     * 파일 업로드
-     */
-    private String uploadImage(final MultipartFile image, final String extension, final Integer projectId) {
+    public String uploadMultipartFile(final MultipartFile file, final String extension, final Integer projectId) {
         try {
-            return uploadImageToS3(image, extension, projectId);
+            return uploadImageToS3(file.getInputStream(), extension, projectId);
         } catch (IOException e) {
+            log.debug("MultipartFile 업로드 에러 발생 ", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
+
+    /**
+     * File 업로드
+     */
+    public String uploadFile(final File file, final String extension, final Integer projectId) {
+        try (InputStream inputStream = new FileInputStream(file)) {
+            return uploadImageToS3(inputStream, extension, projectId);
+        } catch (IOException e) {
+            log.debug("이미지 업로드에서 에러 발생 ", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
     }
@@ -115,38 +87,39 @@ public class S3UploadService {
     /**
      * AWS S3 이미지 업로드
      */
-    private String uploadImageToS3(final MultipartFile image, final String extension, final Integer projectId) throws IOException {
-        // UUID를 사용하여 고유한 파일 이름 생성
+    private String uploadImageToS3(final InputStream inputStream, final String extension, final Integer projectId) throws IOException {
         String s3Key = getS3FileName(projectId);
         String s3FileName = s3Key + "." + extension;
-        log.debug("{}", s3FileName);
-
-        // MultipartFile의 InputStream을 가져온 뒤, 바이트 배열로 변환
-        byte[] bytes = IOUtils.toByteArray(image.getInputStream());
 
         ObjectMetadata metadata = new ObjectMetadata(); // S3에 업로드할 파일의 메타데이터 설정
         metadata.setContentType("image/" + extension); // 콘텐츠 타입 설정
-        metadata.setContentLength(bytes.length); // 콘텐츠 길이 설정
 
-        // 바이트 배열을 사용하여 ByteArrayInputStream 생성
-        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
-            // S3에 파일 업로드 요청 생성
-            PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, byteArrayInputStream, metadata);
+        uploadToS3(inputStream, s3FileName, metadata);
 
-            amazonS3.putObject(putRequest); // S3 파일 업로드
-
-            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(bytes));
-            int imageWidth = bufferedImage.getWidth();
-            int imageHeight = bufferedImage.getHeight();
-
-            uploadJsonWithDimensions(s3Key, imageWidth, imageHeight);
-        } catch (Exception e) {
-            log.error("", e);
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
-        }
-        return s3Key;
+        return url + "/" + s3Key;
     }
 
+    /**
+     * InputStream 사용 파일을 S3 업로드
+     */
+    private void uploadToS3(InputStream inputStream, final String s3Key, final ObjectMetadata metadata) {
+        try {
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+
+            metadata.setContentLength(bytes.length); // 메타데이터 파일 크기 설정
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
+                PutObjectRequest putRequest = new PutObjectRequest(bucket, s3Key, byteArrayInputStream, metadata);
+                amazonS3.putObject(putRequest); // S3 파일 업로드
+            }
+        } catch (IOException e) {
+            log.error("S3 업로드 중 오류 발생", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
+
+    /**
+     * S3에서 이미지 삭제
+     */
     public void deleteImageFromS3(String imageAddress) {
         String key = getKeyFromImageAddress(imageAddress);
         try {
@@ -160,13 +133,6 @@ public class S3UploadService {
         return projectId + "/" + UUID.randomUUID().toString().substring(0, 13);
     }
 
-    private String removeExtension(String url) {
-        if (!StringUtils.hasText(url) || !url.contains(".")) {
-            return url;
-        }
-        return url.substring(0, url.lastIndexOf("."));
-    }
-
     private String getKeyFromImageAddress(String imageAddress) {
         if (!StringUtils.hasText(imageAddress)) {
             throw new CustomException(ErrorCode.INVALID_FILE_PATH);
@@ -178,62 +144,6 @@ public class S3UploadService {
             return decodingKey.substring(1);
         } catch (MalformedURLException e) {
             throw new CustomException(ErrorCode.INVALID_FILE_PATH);
-        }
-    }
-
-    public String uploadFromInputStream(InputStream inputStream, String extension, Integer projectId, String fileName) {
-        try {
-            // UUID로 S3 파일 이름 생성
-            String s3Key = getS3FileName(projectId);
-            String s3FileName = s3Key + "." + extension;
-
-            // 이미지 파일 업로드
-            byte[] bytes = IOUtils.toByteArray(inputStream);
-
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType("image/" + extension);
-            metadata.setContentLength(bytes.length);
-
-            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
-                PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, byteArrayInputStream, metadata);
-                amazonS3.putObject(putRequest);  // 이미지 업로드
-            }
-
-            // 이미지 높이와 너비 추출
-            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(bytes));
-            int imageWidth = bufferedImage.getWidth();
-            int imageHeight = bufferedImage.getHeight();
-
-            // 너비와 높이를 포함한 JSON 업로드
-            uploadJsonWithDimensions(s3Key, imageWidth, imageHeight);  // JSON 파일 업로드 메서드 호출
-
-            return url + "/" + s3Key;
-        } catch (IOException e) {
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
-        }
-    }
-
-    // 이미지의 너비와 높이를 포함하는 JSON 파일 업로드
-    private void uploadJsonWithDimensions(String s3Key, int width, int height) {
-        try {
-            // JSON 파일 이름 생성 (s3Key + ".json")
-            String jsonFileName = s3Key + ".json";
-
-            // 이미지의 너비와 높이를 포함한 JSON 데이터 생성
-            String jsonContent = "{\n\"imageHeight\": " + height + ",\n\"imageWidth\": " + width + "\n}";
-
-            byte[] jsonBytes = jsonContent.getBytes(StandardCharsets.UTF_8);
-
-            ObjectMetadata jsonMetadata = new ObjectMetadata();
-            jsonMetadata.setContentType("application/json");
-            jsonMetadata.setContentLength(jsonBytes.length);
-
-            try (ByteArrayInputStream jsonInputStream = new ByteArrayInputStream(jsonBytes)) {
-                PutObjectRequest jsonPutRequest = new PutObjectRequest(bucket, jsonFileName, jsonInputStream, jsonMetadata);
-                amazonS3.putObject(jsonPutRequest);  // JSON 파일 업로드
-            }
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
     }
 }

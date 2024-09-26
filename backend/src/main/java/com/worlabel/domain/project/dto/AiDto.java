@@ -69,7 +69,7 @@ public class AiDto {
             request.modelKey = modelKey;
             request.labelMap = labelMap;
             request.data = data;
-            request.ratio = request.getRatio();
+            request.ratio = trainRequest.getRatio();
             request.epochs = trainRequest.getEpochs();
             request.batch = trainRequest.getBatch();
             request.lr0 = trainRequest.getLr0();
