@@ -167,6 +167,9 @@ public class ProjectService {
         String endPoint = project.getProjectType().getValue() + "/predict";
 
         List<Image> imageList = imageRepository.findImagesByProjectIdAndPending(projectId);
+        if(imageList.isEmpty()){
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+        }
         List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
                 .map(AutoLabelingImageRequest::of)
                 .toList();

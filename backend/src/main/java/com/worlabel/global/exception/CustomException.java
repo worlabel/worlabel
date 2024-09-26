@@ -8,7 +8,7 @@ import java.util.Objects;
 @Getter
 public class CustomException extends RuntimeException{
     private final ErrorCode errorCode;
-    private Errors errors;
+    private final Errors errors;
 
     public CustomException(ErrorCode errorCode) {
         this(errorCode, errorCode.getMessage(), null);
