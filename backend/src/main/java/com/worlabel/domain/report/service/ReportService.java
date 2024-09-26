@@ -9,12 +9,14 @@ import com.worlabel.domain.report.entity.dto.ReportRequest;
 import com.worlabel.domain.report.entity.dto.ReportResponse;
 import com.worlabel.domain.report.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,36 +31,16 @@ public class ReportService {
                 .toList();
     }
 
-    private List<ReportResponse> getDummyList() {
-        List<ReportResponse> dummyList = new ArrayList<>();
-
-        // 더미 데이터 15개 생성
-        for (int i = 1; i <= 15; i++) {
-            ReportResponse dummy = new ReportResponse(
-                    i,                 // modelId
-                    100,               // totalEpochs
-                    i,                 // epoch
-                    Math.random(),     // boxLoss
-                    Math.random(),     // clsLoss
-                    Math.random(),     // dflLoss
-                    Math.random(),     // fitness
-                    Math.random() * 10,// epochTime
-                    Math.random() * 100 // leftSecond
-            );
-            dummyList.add(dummy);
-        }
-
-        return dummyList;
-    }
-
     public void addReportByModelId(final Integer projectId, final Integer modelId, final ReportRequest reportRequest) {
         ReportResponse reportResponse = ReportResponse.of(reportRequest, modelId);
 
-        if (progressService.isProgressTrain(projectId, modelId)) { // 이미 존재하면 뒤에 추가
-            progressService.registerTrainProgress(projectId, modelId, reportResponse);
-        } else {  // 새로추가
-            progressService.registerTrainProgress(projectId, modelId, reportResponse);
-        }
+        boolean result = progressService.isProgressTrain(projectId, modelId);
+//        log.debug("result {}" ,result);
+//        if (result) { // 이미 존재하면 뒤에 추가
+//        }
+        progressService.addProgressModel(projectId, modelId, reportResponse);
+//        progressService.registerTrainProgress(projectId, modelId);
+
     }
 
     public List<ReportResponse> getReportsProgressByModelId(final Integer projectId, final Integer modelId) {

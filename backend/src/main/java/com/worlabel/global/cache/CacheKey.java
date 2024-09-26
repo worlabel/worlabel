@@ -25,6 +25,10 @@ public class CacheKey {
         return "train:" + projectId + ":" + modelId;
     }
 
+    public static String trainModelKey(int projectId) {
+        return "train:" + projectId + ":*";
+    }
+
     public static String alarmIdKey(){
         return "alarm:id";
     }
@@ -36,4 +40,6 @@ public class CacheKey {
     public static String alarmMemberAllKey(int memberId) {
         return "member:" + memberId + ":alarm:*";
     }
+
+
 }

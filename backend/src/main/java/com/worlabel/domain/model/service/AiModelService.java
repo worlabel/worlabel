@@ -104,9 +104,10 @@ public class AiModelService {
 
     @Transactional(readOnly = true)
     public List<AiModelResponse> getModelList(final Integer projectId) {
+        int progressModelId = progressService.getProgressModelByProjectId(projectId);
         return aiModelRepository.findAllByProjectId(projectId)
                 .stream()
-                .map(AiModelResponse::of)
+                .map(o -> AiModelResponse.of(o, progressModelId))
                 .toList();
     }
 
@@ -140,8 +141,6 @@ public class AiModelService {
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer projectId, final ModelTrainRequest trainRequest) {
-//        progressService.trainProgressCheck(projectId);
-
         // FastAPI 서버로 학습 요청을 전송
         Project project = getProject(projectId);
         AiModel model = getModel(trainRequest.getModelId());
@@ -158,9 +157,7 @@ public class AiModelService {
                 .map(TrainDataInfo::of)
                 .toList();
 
-//        progressService.registerTrainProgress(projectId);
         TrainRequest aiRequest = TrainRequest.of(project.getId(), model.getId(), model.getModelKey(), labelMap, data, trainRequest);
-//        progressService.removeTrainProgress(projectId);
 
         String endPoint = project.getProjectType().getValue() + "/train";
 
