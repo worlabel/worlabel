@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Slider from 'react-slick';
 import useReviewDetailQuery from '@/queries/reviews/useReviewDetailQuery';
-import useUpdateReviewStatusQuery from '@/queries/reviews/useUpdateReviewStatusQuery';
+import useApproveReviewQuery from '@/queries/reviews/useApproveReviewQuery';
+import useRejectReviewQuery from '@/queries/reviews/useRejectReviewQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import 'slick-carousel/slick/slick.css';
@@ -20,38 +21,24 @@ export default function ReviewDetail(): JSX.Element {
 
   const { data: reviewDetail } = useReviewDetailQuery(Number(projectId), Number(reviewId), memberId);
 
-  const updateReviewStatus = useUpdateReviewStatusQuery();
+  const approveReviewMutation = useApproveReviewQuery({ projectId: Number(projectId), reviewId: Number(reviewId) });
+  const rejectReviewMutation = useRejectReviewQuery({ projectId: Number(projectId), reviewId: Number(reviewId) });
+
   const [activeTab, setActiveTab] = useState<'content' | 'images'>('content');
   const [isReviewed, setIsReviewed] = useState(
     reviewDetail?.reviewStatus === 'APPROVED' || reviewDetail?.reviewStatus === 'REJECTED'
   );
 
   const handleApprove = () => {
-    updateReviewStatus.mutate(
-      {
-        projectId: Number(projectId),
-        reviewId: Number(reviewId),
-        memberId,
-        reviewStatus: 'APPROVED',
-      },
-      {
-        onSuccess: () => setIsReviewed(true),
-      }
-    );
+    approveReviewMutation.mutate(undefined, {
+      onSuccess: () => setIsReviewed(true),
+    });
   };
 
   const handleReject = () => {
-    updateReviewStatus.mutate(
-      {
-        projectId: Number(projectId),
-        reviewId: Number(reviewId),
-        memberId,
-        reviewStatus: 'REJECTED',
-      },
-      {
-        onSuccess: () => setIsReviewed(true),
-      }
-    );
+    rejectReviewMutation.mutate(undefined, {
+      onSuccess: () => setIsReviewed(true),
+    });
   };
 
   const settings = {
@@ -144,7 +131,7 @@ export default function ReviewDetail(): JSX.Element {
               variant="default"
               onClick={handleApprove}
             >
-              승인
+              {'승인'}
             </Button>
           )}
           {reviewDetail.reviewStatus !== 'REJECTED' && (
@@ -152,7 +139,7 @@ export default function ReviewDetail(): JSX.Element {
               variant="destructive"
               onClick={handleReject}
             >
-              거부
+              {'거부'}
             </Button>
           )}
         </div>

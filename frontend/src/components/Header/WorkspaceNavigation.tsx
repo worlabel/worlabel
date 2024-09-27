@@ -13,6 +13,10 @@ export default function WorkspaceNavigation() {
 
   const activeWorkspaceId = workspaceId ?? workspaces[0]?.id;
 
+  if (workspaces.length === 0) {
+    return <div></div>;
+  }
+
   return (
     <nav className="hidden items-center gap-5 md:flex">
       <Link

@@ -1,10 +1,10 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { getModelReports } from '@/api/modelApi';
+import { getTrainingModelReport } from '@/api/reportApi';
 import { ReportResponse } from '@/types';
 
-export default function useModelReportsQuery(projectId: number, modelId: number) {
+export default function useTrainingModelReport(projectId: number, modelId: number) {
   return useSuspenseQuery<ReportResponse[]>({
     queryKey: ['modelReports', projectId, modelId],
-    queryFn: () => getModelReports(projectId, modelId),
+    queryFn: () => getTrainingModelReport(projectId, modelId),
   });
 }
