@@ -17,7 +17,6 @@ public interface ReviewImageRepository extends JpaRepository<ReviewImage, Intege
 
     void deleteAllByReview(Review review);
 
-
     @Query("SELECT ri.image from ReviewImage ri " +
             "WHERE ri.review.id = :reviewId ")
     List<Image> findImageAllByReviewId(@Param("reviewId") int reviewId);

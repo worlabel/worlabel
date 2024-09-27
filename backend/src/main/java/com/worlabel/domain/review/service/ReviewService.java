@@ -27,8 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -52,14 +50,15 @@ public class ReviewService {
         reviewRepository.save(review);
 
         // 이미지 리스트 조회
-        List<Image> imageList = imageRepository.findAllById(reviewRequest.getImageIds());
+        List<Image> imageList = imageRepository.findSaveImageByIds(reviewRequest.getImageIds());
+        log.debug("{}",imageList);
         if (imageList.size() != reviewRequest.getImageIds().size()) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
 
         // 리뷰 이미지 객체 생성 및 배치 저장
         List<ReviewImage> reviewImageList = new ArrayList<>();
-        for(Image image : imageList){
+        for (Image image : imageList) {
             image.updateStatus(LabelStatus.REVIEW_REQUEST);
             reviewImageList.add(ReviewImage.of(review, image));
         }
@@ -109,24 +108,36 @@ public class ReviewService {
     }
 
     public ReviewResponse updateReview(final Integer memberId, final Integer reviewId, final ReviewRequest reviewUpdateRequest) {
-        deleteReview(memberId,reviewId);
+        deleteReview(memberId, reviewId);
         return createReview(memberId, reviewId, reviewUpdateRequest);
     }
 
     // 상태 변경
     @CheckPrivilege(PrivilegeType.MANAGER)
-    public ReviewResponse approveReview(final Integer memberId, final Integer projectId, final Integer reviewId) {
+    public void approveReview(final Integer memberId, final Integer projectId, final Integer reviewId) {
         Member member = getMember(memberId);
-
         Review review = getRequestReview(reviewId);
 
-        review.updateReviewStatus(ReviewStatus.APPROVED);
-        review.assignReviewer(member);
-
-        return ReviewResponse.from(review);
+        updateReviewAndImages(member, review, LabelStatus.COMPLETED, ReviewStatus.APPROVED);
     }
 
+    @CheckPrivilege(PrivilegeType.MANAGER)
+    public void rejectReview(Integer memberId, Integer projectId, Integer reviewId) {
+        Member member = getMember(memberId);
+        Review review = getRequestReview(reviewId);
 
+        updateReviewAndImages(member, review, LabelStatus.REVIEW_REJECT, ReviewStatus.REJECTED);
+    }
+
+    public void updateReviewAndImages(final Member member,final Review review,final LabelStatus labelStatus,final ReviewStatus reviewStatus) {
+        // 이미지 상태 업데이트
+        List<Image> imageList = reviewImageRepository.findImageAllByReviewId(review.getId());
+        imageList.forEach(image -> image.updateStatus(labelStatus));
+
+        // 리뷰 상태 및 리뷰어 업데이트
+        review.updateReviewStatus(reviewStatus);
+        review.assignReviewer(member);
+    }
     // 리뷰 삭제
     public void deleteReview(final Integer memberId, final Integer reviewId) {
         Review review = getReviewWithMemberId(reviewId, memberId);
@@ -151,7 +162,7 @@ public class ReviewService {
 
     private Review getRequestReview(final Integer reviewId) {
         return reviewRepository.findByIdAndRequested(reviewId)
-                .orElseThrow(()->new CustomException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Review getReview(final Integer reviewId) {
@@ -168,4 +179,5 @@ public class ReviewService {
         return reviewRepository.findByIdAndMemberId(reviewId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
+
 }

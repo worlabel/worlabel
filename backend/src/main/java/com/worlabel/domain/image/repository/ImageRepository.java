@@ -47,4 +47,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             "AND p.id = :projectId")
     Optional<Image> findByIdAndProjectId(@Param("imageId") Long imageId, @Param("projectId") Integer projectId);
 
+    @Query("SELECT i FROM Image i " +
+            "WHERE i.status = 'SAVE' " +
+            "AND i.id IN (:imageIds)")
+    List<Image> findSaveImageByIds(@Param("imageIds") List<Long> imageIds);
 }
