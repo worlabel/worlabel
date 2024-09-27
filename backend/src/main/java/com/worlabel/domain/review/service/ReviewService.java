@@ -1,6 +1,7 @@
 package com.worlabel.domain.review.service;
 
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.ImageResponse;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.member.entity.Member;
@@ -14,20 +15,22 @@ import com.worlabel.domain.review.entity.ReviewStatus;
 import com.worlabel.domain.review.entity.dto.ReviewDetailResponse;
 import com.worlabel.domain.review.entity.dto.ReviewRequest;
 import com.worlabel.domain.review.entity.dto.ReviewResponse;
-import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
 import com.worlabel.domain.review.repository.ReviewImageRepository;
 import com.worlabel.domain.review.repository.ReviewRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -49,19 +52,19 @@ public class ReviewService {
         reviewRepository.save(review);
 
         // 이미지 리스트 조회
-        List<Image> images = imageRepository.findAllById(reviewRequest.getImageIds());
-
-        if (images.size() != reviewRequest.getImageIds().size()) {
+        List<Image> imageList = imageRepository.findAllById(reviewRequest.getImageIds());
+        if (imageList.size() != reviewRequest.getImageIds().size()) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
 
         // 리뷰 이미지 객체 생성 및 배치 저장
-        List<ReviewImage> reviewImages = images.stream()
-                .map(image -> ReviewImage.of(review, image))
-                .collect(Collectors.toList());
+        List<ReviewImage> reviewImageList = new ArrayList<>();
+        for(Image image : imageList){
+            image.updateStatus(LabelStatus.REVIEW_REQUEST);
+            reviewImageList.add(ReviewImage.of(review, image));
+        }
 
-        reviewImageRepository.saveAll(reviewImages);
-
+        reviewImageRepository.saveAll(reviewImageList);
         return ReviewResponse.from(review);
     }
 
@@ -106,44 +109,32 @@ public class ReviewService {
     }
 
     public ReviewResponse updateReview(final Integer memberId, final Integer reviewId, final ReviewRequest reviewUpdateRequest) {
-        Review review = getReviewWithMemberId(reviewId, memberId);
-
-        // 기존 리뷰 이미지 삭제 후 새로 등록
-        reviewImageRepository.deleteAllByReview(review);
-        List<Image> images = imageRepository.findAllById(reviewUpdateRequest.getImageIds());
-        List<ReviewImage> reviewImages = images.stream()
-                .map(image -> ReviewImage.of(review, image))
-                .collect(Collectors.toList());
-
-        reviewImageRepository.saveAll(reviewImages);
-
-        review.updateReview(reviewUpdateRequest.getTitle(), reviewUpdateRequest.getContent());
-
-        return ReviewResponse.from(review);
+        deleteReview(memberId,reviewId);
+        return createReview(memberId, reviewId, reviewUpdateRequest);
     }
 
     // 상태 변경
     @CheckPrivilege(PrivilegeType.MANAGER)
-    public ReviewResponse updateReviewStatus(final Integer memberId, final Integer projectId, final Integer reviewId, final ReviewStatusRequest reviewStatusRequest) {
-        Review review = getReview(reviewId);
+    public ReviewResponse approveReview(final Integer memberId, final Integer projectId, final Integer reviewId) {
         Member member = getMember(memberId);
-        review.updateReviewStatus(reviewStatusRequest.getReviewStatus());
 
-        if (!Objects.equals(review.getProject().getId(), projectId)) {
-            throw new CustomException(ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED);
-        }
+        Review review = getRequestReview(reviewId);
 
-        if (!reviewStatusRequest.getReviewStatus().isRequested()) {
-            review.assignReviewer(member);
-        }
+        review.updateReviewStatus(ReviewStatus.APPROVED);
+        review.assignReviewer(member);
 
         return ReviewResponse.from(review);
     }
+
 
     // 리뷰 삭제
     public void deleteReview(final Integer memberId, final Integer reviewId) {
         Review review = getReviewWithMemberId(reviewId, memberId);
 
+        List<Image> imageList = reviewImageRepository.findImageAllByReviewId(reviewId);
+        imageList.forEach(image -> image.updateStatus(LabelStatus.SAVE));
+
+        imageRepository.saveAll(imageList);
         reviewImageRepository.deleteAllByReview(review);
         reviewRepository.delete(review);
     }
@@ -156,6 +147,11 @@ public class ReviewService {
     private Project getProject(final Integer projectId) {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+    }
+
+    private Review getRequestReview(final Integer reviewId) {
+        return reviewRepository.findByIdAndRequested(reviewId)
+                .orElseThrow(()->new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Review getReview(final Integer reviewId) {

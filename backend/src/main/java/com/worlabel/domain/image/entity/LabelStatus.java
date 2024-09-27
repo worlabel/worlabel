@@ -8,6 +8,7 @@ public enum LabelStatus {
     IN_PROGRESS,
     SAVE,
     REVIEW_REQUEST,
+    REVIEW_REJECT,
     COMPLETED;
 
     // 입력 값을 enum 값과 일치시키기 위해 대소문자 구분 없이 변환

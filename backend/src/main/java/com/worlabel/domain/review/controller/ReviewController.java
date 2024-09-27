@@ -3,7 +3,6 @@ package com.worlabel.domain.review.controller;
 import com.worlabel.domain.review.entity.dto.ReviewDetailResponse;
 import com.worlabel.domain.review.entity.dto.ReviewRequest;
 import com.worlabel.domain.review.entity.dto.ReviewResponse;
-import com.worlabel.domain.review.entity.dto.ReviewStatusRequest;
 import com.worlabel.domain.review.service.ReviewService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -76,17 +75,17 @@ public class ReviewController {
     }
 
     // 리뷰 상태 수정
-    @PutMapping("/{review_id}/status")
-    @SwaggerApiSuccess(description = "리뷰상태를 성공적으로 수정합니다.")
-    @Operation(summary = "리뷰 상태를 수정", description = "리뷰 상태를 수정합니다.")
+    @PutMapping("/{review_id}/approve")
+    @SwaggerApiSuccess(description = "리뷰를 승낙합니다.")
+    @Operation(summary = "리뷰 요청 승낙", description = "리뷰 승낙합니다..")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
-    public ReviewResponse updateReviewStatus(
+    public ReviewResponse approveReview(
             @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
-            @PathVariable("review_id") final Integer reviewId,
-            @RequestBody ReviewStatusRequest reviewStatusRequest) {
-        return reviewService.updateReviewStatus(memberId, projectId, reviewId, reviewStatusRequest);
+            @PathVariable("review_id") final Integer reviewId) {
+        return reviewService.approveReview(memberId, projectId, reviewId);
     }
+
 
     // 리뷰 삭제
     @DeleteMapping("/{review_id}")

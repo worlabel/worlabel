@@ -20,8 +20,11 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query("SELECT r " +
             "FROM Review r " +
-            "WHERE r.project.id = :projectId AND (:reviewStatus IS NULL OR r.reviewStatus = :reviewStatus) AND (:lastReviewId IS NULL OR r.id < :lastReviewId) " +
-            "ORDER BY r.id DESC LIMIT :limit")
+            "WHERE r.project.id = :projectId " +
+            "AND (:reviewStatus IS NULL OR r.reviewStatus = :reviewStatus) " +
+            "AND (:lastReviewId IS NULL OR r.id < :lastReviewId) " +
+            "ORDER BY r.id DESC " +
+            "LIMIT :limit")
     List<Review> findReviewsNativeWithLimit(
             @Param("projectId") Integer projectId,
             @Param("reviewStatus") ReviewStatus reviewStatus,
@@ -31,8 +34,11 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query("SELECT r " +
             "FROM Review r " +
-            "WHERE r.project.id = :projectId AND (:reviewStatus IS NULL OR r.reviewStatus = :reviewStatus) AND (:lastReviewId IS NULL OR r.id > :lastReviewId) " +
-            "ORDER BY r.id LIMIT :limit")
+            "WHERE r.project.id = :projectId " +
+            "AND (:reviewStatus IS NULL OR r.reviewStatus = :reviewStatus) " +
+            "AND (:lastReviewId IS NULL OR r.id > :lastReviewId) " +
+            "ORDER BY r.id " +
+            "LIMIT :limit")
     List<Review> findReviewsNativeSortWithLimit(
             @Param("projectId") Integer projectId,
             @Param("reviewStatus") ReviewStatus reviewStatus,
@@ -87,4 +93,8 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
             @Param("limitPage") Integer limitPage
     );
 
+    @Query("SELECT r FROM Review r " +
+            "WHERE r.id = :reviewId " +
+            "AND r.reviewStatus = 'REQUESTED' ")
+    Optional<Review> findByIdAndRequested(@Param("reviewId") Integer reviewId);
 }
