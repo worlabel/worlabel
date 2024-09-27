@@ -309,6 +309,7 @@ export interface ModelResponse {
   id: number;
   name: string;
   isDefault: boolean;
+  isTrain: boolean;
 }
 
 // 프로젝트 모델 리스트 응답 DTO

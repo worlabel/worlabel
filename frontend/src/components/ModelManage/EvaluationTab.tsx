@@ -1,8 +1,8 @@
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useProjectModelsQuery from '@/queries/models/useProjectModelsQuery';
-import useModelReportsQuery from '@/queries/models/useModelReportsQuery';
-import useModelResultsQuery from '@/queries/models/useModelResultsQuery';
+import useCompletedModelReport from '@/queries/reports/useCompletedModelReport';
+import useModelResultsQuery from '@/queries/results/useModelResultQuery';
 import ModelBarChart from './ModelBarChart';
 import ModelLineChart from './ModelLineChart';
 import { useState } from 'react';
@@ -68,7 +68,7 @@ interface ModelEvaluationProps {
 }
 
 function ModelEvaluation({ projectId, selectedModel }: ModelEvaluationProps) {
-  const { data: reportData } = useModelReportsQuery(projectId, selectedModel);
+  const { data: reportData } = useCompletedModelReport(projectId, selectedModel);
   const { data: resultData } = useModelResultsQuery(selectedModel);
 
   if (!reportData || !resultData) return null;
