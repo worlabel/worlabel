@@ -144,6 +144,7 @@ async def detection_train(request: TrainRequest):
         recall= result["metrics/recall(B)"],
         mAP50= result["metrics/mAP50(B)"],
         mAP5095= result["metrics/mAP50-95(B)"],
+        accuracy=0,
         fitness= result["fitness"]
     )
     send_slack_message(f"train 성공{response}", status="success")

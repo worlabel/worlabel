@@ -6,4 +6,5 @@ class TrainResponse(BaseModel):
     recall: float
     mAP50: float
     mAP5095: float
+    accuracy: float
     fitness: float
