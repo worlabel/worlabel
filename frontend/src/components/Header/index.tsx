@@ -1,16 +1,14 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Bell } from 'lucide-react';
-import { useLocation, Link, useParams } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import UserProfileModal from './UserProfileModal';
+import WorkspaceNavigation from './WorkspaceNavigation';
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export default function Header({ className, ...props }: HeaderProps) {
   const location = useLocation();
-  const { workspaceId } = useParams<{ workspaceId: string }>();
-  const isWorkspaceIdNaN = isNaN(Number(workspaceId));
-
   const isHomePage = location.pathname === '/';
 
   return (
@@ -30,32 +28,7 @@ export default function Header({ className, ...props }: HeaderProps) {
           WorLabel
         </Link>
 
-        {!isHomePage && (
-          <nav className="hidden items-center gap-5 md:flex">
-            <Link
-              to={isWorkspaceIdNaN ? '/browse' : `/browse/${workspaceId}`}
-              className={cn('text-color-text-default-default', 'font-body-strong', 'text-sm sm:text-base md:text-lg')}
-            >
-              workspace
-            </Link>
-            {!isWorkspaceIdNaN && (
-              <>
-                <Link
-                  to={`/workspace/${workspaceId}`}
-                  className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
-                >
-                  labeling
-                </Link>
-                <Link
-                  to={`/admin/${workspaceId}`}
-                  className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
-                >
-                  admin
-                </Link>
-              </>
-            )}
-          </nav>
-        )}
+        {!isHomePage && <WorkspaceNavigation />}
       </div>
 
       {!isHomePage && (
