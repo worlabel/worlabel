@@ -5,12 +5,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { useRef, useState } from 'react';
+import { X } from 'lucide-react';
 
 const formSchema = z.object({
   projectName: z.string().max(50).min(1, {
     message: '이름을 입력해주세요.',
   }),
   labelType: z.enum(['Classification', 'Detection', 'Segmentation']),
+  categories: z.array(z.string()).min(1, {
+    message: '카테고리를 하나 이상 입력해주세요.',
+  }),
 });
 
 export type ProjectCreateFormValues = z.infer<typeof formSchema>;
@@ -21,16 +26,32 @@ const defaultValues: Partial<ProjectCreateFormValues> = {
 };
 
 export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: ProjectCreateFormValues) => void }) {
+  const [categories, setCategories] = useState<string[]>([]);
   const form = useForm<ProjectCreateFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: { ...defaultValues, categories },
   });
+  const categoryRef = useRef<HTMLInputElement>(null);
+  const handleAddCategory = (event: React.MouseEvent<HTMLButtonElement>, onChange: (value: string[]) => void) => {
+    event.preventDefault();
+
+    const category = categoryRef.current?.value;
+    if (!category) return;
+
+    const newCategories = [...categories, category];
+
+    if (!categories.includes(category)) {
+      onChange(newCategories);
+      setCategories(newCategories);
+    }
+    categoryRef.current!.value = '';
+  };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-5 overflow-x-auto"
       >
         <FormField
           name="projectName"
@@ -78,6 +99,50 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
               </RadioGroup>
               <FormMessage />
             </FormItem>
+          )}
+        />
+        <FormField
+          name="categories"
+          render={({ field }) => (
+            <>
+              <div className="body-strong">카테고리</div>
+              <div className="flex gap-2">
+                <FormControl>
+                  <Input
+                    ref={categoryRef}
+                    placeholder="카테고리를 추가해주세요."
+                  />
+                </FormControl>
+                <Button
+                  variant="outline"
+                  onClick={(event) => handleAddCategory(event, field.onChange)}
+                >
+                  추가
+                </Button>
+              </div>
+              {categories.length > 0 && (
+                <ul className="body-small box-border flex grow-0 gap-2 overflow-x-auto">
+                  {categories.map((category: string, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 rounded-full border border-gray-700 px-2 py-1 text-gray-900"
+                    >
+                      <span>{category}</span>
+                      <X
+                        size={16}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          const newCategories = categories.filter((_, i) => i !== index);
+                          field.onChange(newCategories);
+                          setCategories(newCategories);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </ul>
+              )}
+              <FormMessage />
+            </>
           )}
         />
         <Button

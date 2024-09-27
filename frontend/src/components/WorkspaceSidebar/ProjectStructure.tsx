@@ -10,13 +10,21 @@ import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
 import useProjectStore from '@/stores/useProjectStore';
 import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import useProjectCategoriesQuery from '@/queries/category/useProjectCategoriesQuery';
 
 export default function ProjectStructure({ project }: { project: Project }) {
-  const setProject = useProjectStore((state) => state.setProject);
+  const { setProject, setCategories } = useProjectStore();
+  const { data: categories } = useProjectCategoriesQuery(project.id);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
   const queryClient = useQueryClient();
   const requestAutoLabel = useAutoLabelQuery();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    setCategories(categories);
+  }, [categories, setCategories]);
 
   useEffect(() => {
     setProject(project);
@@ -71,12 +79,15 @@ export default function ProjectStructure({ project }: { project: Project }) {
               {
                 onSuccess: () => {
                   queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString()] });
-                  setTimeout(() => {
-                    alert('레이블링 성공!');
-                  }, 100);
+                  queryClient.invalidateQueries({ queryKey: ['labelJson'] });
+                  toast({
+                    title: '레이블링 성공',
+                  });
                 },
                 onError: () => {
-                  alert('자동 레이블링을 요청하는 중 오류가 발생했습니다.');
+                  toast({
+                    title: '레이블링 중 오류가 발생했습니다.',
+                  });
                 },
               }
             );
