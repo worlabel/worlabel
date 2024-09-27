@@ -56,6 +56,9 @@ public class Report extends BaseEntity {
     @Column(name = "left_second", nullable = false)
     private double leftSecond;
 
+    @Column(name = "seg_loss", nullable = false)
+    private double segLoss;
+
     private Report(final AiModel aiModel,
                    final Integer epoch,
                    final Integer totalEpochs,
@@ -64,7 +67,8 @@ public class Report extends BaseEntity {
                    final double dflLoss,
                    final double fitness,
                    final double epochTime,
-                   final double leftSecond) {
+                   final double leftSecond,
+                   final double segLoss) {
         this.aiModel = aiModel;
         this.epoch = epoch;
         this.totalEpochs = totalEpochs;
@@ -74,6 +78,7 @@ public class Report extends BaseEntity {
         this.fitness = fitness;
         this.epochTime = epochTime;
         this.leftSecond = leftSecond;
+        this.segLoss = segLoss;
     }
 
     public static Report of(final AiModel aiModel,
@@ -84,7 +89,8 @@ public class Report extends BaseEntity {
                             final double dflLoss,
                             final double fitness,
                             final double epochTime,
-                            final double leftSecond) {
-        return new Report(aiModel, epoch, totalEpochs, boxLoss, clsLoss, dflLoss, fitness, epochTime, leftSecond);
+                            final double leftSecond,
+                            final double segLoss) {
+        return new Report(aiModel, epoch, totalEpochs, boxLoss, clsLoss, dflLoss, fitness, epochTime, leftSecond, segLoss);
     }
 }

@@ -64,7 +64,8 @@ public class ReportService {
                     reportResponse.getDflLoss(),
                     reportResponse.getFitness(),
                     reportResponse.getEpochTime(),
-                    reportResponse.getLeftSecond());
+                    reportResponse.getLeftSecond(),
+                    reportResponse.getSegLoss());
 
             reports.add(report);
         }
