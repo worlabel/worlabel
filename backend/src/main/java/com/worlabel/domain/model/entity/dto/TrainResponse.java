@@ -19,4 +19,6 @@ public class TrainResponse {
     private double mAP5095;
 
     private double fitness;
+
+    private double accuracy;
 }

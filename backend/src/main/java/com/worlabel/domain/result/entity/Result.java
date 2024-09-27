@@ -63,6 +63,9 @@ public class Result extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Optimizer optimizer;
 
+    @Column(name = "accuracy", nullable = false)
+    private double accuracy;
+
     public Result(final AiModel aiModel,
                   final double precision,
                   final double recall,
@@ -74,7 +77,8 @@ public class Result extends BaseEntity {
                   final double batch,
                   final double lr0,
                   final double lrf,
-                  final Optimizer optimizer) {
+                  final Optimizer optimizer,
+                  final double accuracy) {
         this.aiModel = aiModel;
         this.precision = precision;
         this.recall = recall;
@@ -87,9 +91,10 @@ public class Result extends BaseEntity {
         this.lr0 = lr0;
         this.lrf = lrf;
         this.optimizer = optimizer;
+        this.accuracy = accuracy;
     }
 
-    public static Result of(final AiModel aiModel,final  TrainResponse trainResponse,final ModelTrainRequest trainRequest) {
+    public static Result of(final AiModel aiModel, final TrainResponse trainResponse, final ModelTrainRequest trainRequest) {
         return new Result(aiModel,
                 trainResponse.getPrecision(),
                 trainResponse.getRecall(),
@@ -101,7 +106,8 @@ public class Result extends BaseEntity {
                 trainRequest.getBatch(),
                 trainRequest.getLr0(),
                 trainRequest.getLrf(),
-                trainRequest.getOptimizer()
-            );
+                trainRequest.getOptimizer(),
+                trainResponse.getAccuracy()
+        );
     }
 }
