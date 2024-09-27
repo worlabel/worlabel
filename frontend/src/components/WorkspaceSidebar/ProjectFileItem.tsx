@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ImageResponse } from '@/types';
-import { ArrowDownToLine, Check, Image, Loader, Minus, Send } from 'lucide-react';
+import { ArrowDownToLine, Check, CircleSlash, Image, Loader, Minus, Send } from 'lucide-react';
 import useCanvasStore from '@/stores/useCanvasStore';
 import useProjectStore from '@/stores/useProjectStore';
 
@@ -52,7 +52,7 @@ export default function ProjectFileItem({
       ) : item.status === 'IN_PROGRESS' ? (
         <Loader
           size={12}
-          className="shrink-0 stroke-yellow-500"
+          className="shrink-0 stroke-yellow-400"
         />
       ) : item.status === 'SAVE' ? (
         <ArrowDownToLine
@@ -64,10 +64,15 @@ export default function ProjectFileItem({
           size={12}
           className="shrink-0 stroke-blue-400"
         />
+      ) : item.status === 'REVIEW_REJECTED' ? (
+        <CircleSlash
+          size={12}
+          className="shrink-0 stroke-red-400"
+        />
       ) : (
         <Check
           size={12}
-          className="shrink-0 stroke-green-500"
+          className="shrink-0 stroke-green-400"
         />
       )}
     </button>
