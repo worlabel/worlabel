@@ -7,7 +7,6 @@ export default function FirebaseTest() {
     const fcmToken = await getFcmToken();
 
     if (fcmToken) {
-      console.log(fcmToken);
       await saveFcmToken(fcmToken);
       return;
     }

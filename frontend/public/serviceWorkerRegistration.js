@@ -17,7 +17,7 @@ const messaging = getMessaging(firebaseApp);
 
 const registerServiceWorker = async () => {
   if (!('serviceWorker' in navigator)) {
-    console.warn('현재 브라우저에서 Service Worker를 지원하지 않습니다.');
+    console.warn('현재 브라우저에서 서비스 워커를 지원하지 않습니다.');
     return;
   }
 

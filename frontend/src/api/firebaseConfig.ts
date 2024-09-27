@@ -50,9 +50,6 @@ const getFcmToken = async () => {
 
 const handleForegroundMessages = () => {
   onMessage(messaging, (payload) => {
-    console.log('onMessage');
-    console.log(payload);
-
     if (!payload.data) return;
 
     console.log(payload.data);
