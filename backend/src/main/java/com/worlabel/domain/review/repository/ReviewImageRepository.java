@@ -1,5 +1,6 @@
 package com.worlabel.domain.review.repository;
 
+import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.review.entity.Review;
 import com.worlabel.domain.review.entity.ReviewImage;
 import io.lettuce.core.dynamic.annotation.Param;
@@ -15,4 +16,8 @@ public interface ReviewImageRepository extends JpaRepository<ReviewImage, Intege
     List<ReviewImage> findAllByReviewIdWithImage(@Param("reviewId") Integer reviewId);
 
     void deleteAllByReview(Review review);
+
+    @Query("SELECT ri.image from ReviewImage ri " +
+            "WHERE ri.review.id = :reviewId ")
+    List<Image> findImageAllByReviewId(@Param("reviewId") int reviewId);
 }

@@ -96,7 +96,6 @@ public class ImageController {
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId,
             @RequestBody final ImageStatusRequest imageStatusRequest) {
-        log.debug("project: {} , folder: {}, 수정하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId);
         return imageService.changeImageStatus(projectId, folderId, imageId, imageStatusRequest);
     }
 
