@@ -5,7 +5,7 @@ import { categoryHandlers } from './categoryHandlers';
 import { memberHandlers } from './memberHandlers';
 import { workspaceHandlers } from './workspaceHandlers';
 import { folderHandlers } from './folderHandler';
-import { modelHandlers } from './modelHandlers';
+// import { modelHandlers } from './modelHandlers';
 import { imageHandlers } from './imageHandlers';
 import { projectHandlers } from './projectHandlers';
 
@@ -18,7 +18,7 @@ export const handlers = [
   ...memberHandlers,
   ...workspaceHandlers,
   ...folderHandlers,
-  ...modelHandlers,
+  // ...modelHandlers,
   ...imageHandlers,
   ...projectHandlers,
 ];
