@@ -1,13 +1,12 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
-from schemas.train_request import TrainRequest
+from schemas.train_request import TrainRequest, TrainDataInfo
 from schemas.predict_response import PredictResponse, LabelData, Shape
 from schemas.train_report_data import ReportData
 from schemas.train_response import TrainResponse
 from services.load_model import load_detection_model
 from services.create_model import save_model
-from utils.dataset_utils import split_data
-from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
+from utils.file_utils import get_dataset_root_path, process_directories, join_path, process_image_and_label
 from utils.slackMessage import send_slack_message
 from utils.api_utils import send_data_call_api
 import random
@@ -107,71 +106,64 @@ def get_random_color():
 async def detection_train(request: TrainRequest):
 
     send_slack_message(f"train 요청{request}", status="success")
+
+    # 데이터셋 루트 경로 얻기 (프로젝트 id 기반)
+    dataset_root_path = get_dataset_root_path(request.project_id)
+
+    # 모델 로드
+    model = get_model(request)
+
+    # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
+    names = list(request.label_map)
     
+    # 데이터 전처리: 학습할 디렉토리 & 데이터셋 를 생성
+    process_directories(dataset_root_path, names)
+
+    # 데이터 전처리: 데이터를 학습데이터와 검증데이터로 분류
+    train_data, val_data = split_data(request.data, request.ratio)
+
+    # 데이터 전처리: 데이터 이미지 및 레이블 다운로드
+    download_data(train_data, val_data, dataset_root_path, request.label_map)
+
+    # 학습
+    results = run_train(request, model,dataset_root_path)
+
+    # best 모델 저장
+    model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
+    
+    result = results.results_dict
+
+    response = TrainResponse(
+        modelKey=model_key,
+        precision= result["metrics/precision(B)"],
+        recall= result["metrics/recall(B)"],
+        mAP50= result["metrics/mAP50(B)"],
+        mAP5095= result["metrics/mAP50-95(B)"],
+        fitness= result["fitness"]
+    )
+    send_slack_message(f"train 성공{response}", status="success")
+        
+    return response
+
+def split_data(data:list[TrainDataInfo], ratio:float):
     try:
-        # 레이블 맵
-        inverted_label_map = {value: key for key, value in request.label_map.items()} if request.label_map else None
-
-        # 데이터셋 루트 경로 얻기
-        dataset_root_path = get_dataset_root_path(request.project_id)
-
-        # 모델 로드
-        model = get_model(request)
-
-        # 학습할 모델 카테고리, 카테고리가 추가되는 경우 추가 작업 필요
-        model_categories = model.names
-        
-        # 데이터 전처리
-        preprocess_dataset(dataset_root_path, model_categories, request.data, request.ratio, inverted_label_map)
-
-        # 학습
-        results = run_train(request, model,dataset_root_path)
-
-        # best 모델 저장
-        model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
-        
-        result = results.results_dict
-
-        response = TrainResponse(
-            modelKey=model_key,
-            precision= result["metrics/precision(B)"],
-            recall= result["metrics/recall(B)"],
-            mAP50= result["metrics/mAP50(B)"],
-            mAP5095= result["metrics/mAP50-95(B)"],
-            fitness= result["fitness"]
-        )
-        send_slack_message(f"train 성공{response}", status="success")
-            
-        return response
-
-    except HTTPException as e:
-        raise e
+        train_size = int(ratio * len(data))
+        random.shuffle(data)
+        train_data = data[:train_size]
+        val_data = data[train_size:]
+        return train_data, val_data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="exception in split_data(): " + str(e))
 
-
-def preprocess_dataset(dataset_root_path, model_categories, data, ratio, label_map):
+def download_data(train_data:list[TrainDataInfo], val_data:list[TrainDataInfo], dataset_root_path:str):
     try:
-        # 디렉토리 생성 및 초기화
-        process_directories(dataset_root_path, model_categories)
-
-        # 학습 데이터 분류
-        train_data, val_data = split_data(data, ratio)
-        if not train_data or not val_data:
-            raise HTTPException(status_code=400, detail="data split exception: data size is too small or \"ratio\" has invalid value")
-
-        # 학습 데이터 처리
         for data in train_data:
-            process_image_and_label(data, dataset_root_path, "train", label_map)
+            process_image_and_label(data, dataset_root_path, "train")
 
-        # 검증 데이터 처리
         for data in val_data:
-            process_image_and_label(data, dataset_root_path, "val", label_map)
-
-    except HTTPException as e:
-        raise e  # HTTP 예외를 다시 발생
+            process_image_and_label(data, dataset_root_path, "val")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="preprocess dataset exception: " + str(e))
+        raise HTTPException(status_code=500, detail="exception in download_data(): " + str(e))
     
 def run_train(request, model, dataset_root_path):
     try:
@@ -201,7 +193,7 @@ def run_train(request, model, dataset_root_path):
                 # 데이터 전송
                 send_data_call_api(request.project_id, request.m_id, data)
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"send_data exception: {e}")
+                raise HTTPException(status_code=500, detail=f"exception in send_data(): {e}")
 
         # 콜백 등록
         model.add_callback("on_train_epoch_start", send_data)
@@ -226,6 +218,6 @@ def run_train(request, model, dataset_root_path):
     except HTTPException as e:
         raise e # HTTP 예외를 다시 발생
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"run_train exception: {e}")
+        raise HTTPException(status_code=500, detail=f"exception in run_train(): {e}")
 
 

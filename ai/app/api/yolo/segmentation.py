@@ -6,7 +6,6 @@ from schemas.train_report_data import ReportData
 from schemas.train_response import TrainResponse
 from services.load_model import load_segmentation_model
 from services.create_model import save_model
-from utils.dataset_utils import split_data
 from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
 from utils.slackMessage import send_slack_message
 from utils.api_utils import send_data_call_api
