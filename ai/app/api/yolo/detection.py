@@ -115,6 +115,11 @@ async def detection_train(request: TrainRequest):
 
     # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
     names = list(request.label_map)
+
+    # 레이블 변환기 (file_util.py/create_detection_train_label() 에 쓰임)
+    label_converter = {request.label_map[key]:idx for idx, key in enumerate(request.label_map)}
+    # key : 데이터에 저장된 프로젝트 카테고리 id
+    # value : 모델에 저장될 카테고리 id (모델에는 key의 idx 순서대로 저장될 것임)
     
     # 데이터 전처리: 학습할 디렉토리 & 데이터셋 설정 파일을 생성
     process_directories(dataset_root_path, names)
@@ -123,7 +128,7 @@ async def detection_train(request: TrainRequest):
     train_data, val_data = split_data(request.data, request.ratio)
 
     # 데이터 전처리: 데이터 이미지 및 레이블 다운로드
-    download_data(train_data, val_data, dataset_root_path)
+    download_data(train_data, val_data, dataset_root_path, label_converter)
 
     # 학습
     results = run_train(request, model,dataset_root_path)
@@ -155,13 +160,13 @@ def split_data(data:list[TrainDataInfo], ratio:float):
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in split_data(): " + str(e))
 
-def download_data(train_data:list[TrainDataInfo], val_data:list[TrainDataInfo], dataset_root_path:str):
+def download_data(train_data:list[TrainDataInfo], val_data:list[TrainDataInfo], dataset_root_path:str, label_converter:dict[int, int]):
     try:
         for data in train_data:
-            process_image_and_label(data, dataset_root_path, "train")
+            process_image_and_label(data, dataset_root_path, "train", label_converter)
 
         for data in val_data:
-            process_image_and_label(data, dataset_root_path, "val")
+            process_image_and_label(data, dataset_root_path, "val", label_converter)
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in download_data(): " + str(e))
     
