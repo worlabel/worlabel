@@ -346,3 +346,10 @@ export interface ReportResponse {
   epochTime: number;
   leftSecond: number;
 }
+
+export interface AlarmResponse {
+  id: number;
+  isRead: boolean;
+  createdAt: string;
+  type: string;
+}
