@@ -18,6 +18,7 @@ public class ReportResponse {
     private double fitness;
     private double epochTime;
     private double leftSecond;
+    private double segLoss;
 
     public static ReportResponse from(final Report report) {
         return new ReportResponse(
@@ -29,7 +30,8 @@ public class ReportResponse {
                 report.getDflLoss(),
                 report.getFitness(),
                 report.getEpochTime(),
-                report.getLeftSecond()
+                report.getLeftSecond(),
+                report.getSegLoss()
         );
     }
 
@@ -43,7 +45,8 @@ public class ReportResponse {
                 report.getDflLoss(),
                 report.getFitness(),
                 report.getEpochTime(),
-                report.getLeftSeconds()
+                report.getLeftSeconds(),
+                report.getSegLoss()
         );
     }
 }
