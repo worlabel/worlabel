@@ -13,6 +13,7 @@ import useProjectStore from '@/stores/useProjectStore';
 import { LABEL_CATEGORY } from '@/constants';
 import { useQueryClient } from '@tanstack/react-query';
 import useSaveImageLabelsQuery from '@/queries/projects/useSaveImageLabelsQuery';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ImageCanvas() {
   const { project, folderId } = useProjectStore();
@@ -31,6 +32,7 @@ export default function ImageCanvas() {
   const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
   const saveImageLabelsMutation = useSaveImageLabelsQuery();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     setLabels(
@@ -73,9 +75,14 @@ export default function ImageCanvas() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString(), folderId] });
+          toast({
+            title: '저장 성공',
+          });
         },
         onError: () => {
-          alert('레이블 데이터 저장 실패');
+          toast({
+            title: '저장 실패',
+          });
         },
       }
     );

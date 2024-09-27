@@ -49,7 +49,7 @@ const router = createBrowserRouter([
   {
     path: webPath.browse(),
     element: (
-      <Suspense fallback={<PageLayout />}>
+      <Suspense fallback={<div></div>}>
         <WorkspaceBrowseLayout />
       </Suspense>
     ),

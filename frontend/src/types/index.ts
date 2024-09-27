@@ -122,6 +122,7 @@ export interface WorkspaceListResponse {
 export interface ProjectRequest {
   title: string;
   projectType: 'classification' | 'detection' | 'segmentation';
+  categories: string[];
 }
 
 export type ProjectResponse = {
@@ -281,7 +282,7 @@ export interface ImageFolderRequest {
 }
 export interface LabelCategoryResponse {
   id: number;
-  name: string;
+  labelName: string;
 }
 // 카테고리 요청 DTO
 export interface LabelCategoryRequest {
