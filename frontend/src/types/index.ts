@@ -289,11 +289,6 @@ export interface LabelCategoryRequest {
   labelCategoryList: number[];
 }
 
-// 카테고리 응답 DTO
-export interface LabelCategoryResponse {
-  id: number;
-  name: string;
-}
 // 모델 카테고리 응답 DTO
 export interface ModelCategoryResponse {
   id: number;
