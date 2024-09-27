@@ -37,18 +37,14 @@ export async function deleteReview(projectId: number, reviewId: number, memberId
     .then(({ data }) => data);
 }
 
-// 리뷰 상태 변경
-export async function updateReviewStatus(projectId: number, reviewId: number, memberId: number, reviewStatus: string) {
-  return api
-    .put<ReviewResponse>(
-      `/projects/${projectId}/reviews/${reviewId}/status`,
-      { reviewStatus },
-      {
-        params: { memberId },
-      }
-    )
-    .then(({ data }) => data);
+export async function approveReview(projectId: number, reviewId: number) {
+  return api.put(`/projects/${projectId}/reviews/${reviewId}/approve`);
 }
+
+export async function rejectReview(projectId: number, reviewId: number) {
+  return api.put(`/projects/${projectId}/reviews/${reviewId}/reject`);
+}
+
 export async function getReviewByStatus(
   projectId: number,
   memberId: number,
