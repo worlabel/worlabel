@@ -6,9 +6,5 @@ class TrainResponse(BaseModel):
     recall: float
     mAP50: float
     mAP5095: float
-    fitness: float
-
-class ClassificationTrainResponse(BaseModel):
-    modelKey: str
     accuracy: float
     fitness: float

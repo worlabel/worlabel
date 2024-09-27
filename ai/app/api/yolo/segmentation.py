@@ -114,6 +114,7 @@ async def segmentation_train(request: TrainRequest):
         recall= result["metrics/recall(M)"],
         mAP50= result["metrics/mAP50(M)"],
         mAP5095= result["metrics/mAP50-95(M)"],
+        accuracy = 0,
         fitness= result["fitness"]
     )
     send_slack_message(f"train 성공{response}", status="success")

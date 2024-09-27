@@ -4,7 +4,7 @@ from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest, TrainDataInfo
 from schemas.predict_response import PredictResponse, LabelData
 from schemas.train_report_data import ReportData
-from schemas.train_response import ClassificationTrainResponse
+from schemas.train_response import TrainResponse
 from services.load_model import load_classification_model
 from services.create_model import save_model
 from utils.file_utils import get_dataset_root_path, process_directories_in_cls, process_image_and_label_in_cls, join_path
@@ -105,11 +105,16 @@ async def classification_train(request: TrainRequest):
     
     result = results.results_dict
 
-    response = ClassificationTrainResponse(
+    response = TrainResponse(
         modelKey=model_key,
-        precision= result["accuracy_top1"],
+        precision= 0,
+        recall= 0,
+        mAP50= 0,
+        mAP5095= 0,
+        accuracy=result["accuracy_top1"],
         fitness= result["fitness"]
     )
+    
     send_slack_message(f"train 성공{response}", status="success")
             
     return response
