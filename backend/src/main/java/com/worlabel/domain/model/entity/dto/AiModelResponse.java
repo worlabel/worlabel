@@ -1,6 +1,7 @@
 package com.worlabel.domain.model.entity.dto;
 
 import com.worlabel.domain.model.entity.AiModel;
+import com.worlabel.domain.project.entity.ProjectType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,10 @@ public class AiModelResponse {
     @Schema(description = "모델 학습 여부", example = "true")
     private Boolean isTrain;
 
-    public static AiModelResponse of(final AiModel aiModel, final int progressModelId) {
-        return new AiModelResponse(aiModel.getId(), aiModel.getName(), aiModel.getProject() == null, aiModel.getId() == progressModelId);
+    @Schema(description = "모델 종류", example = "classification")
+    private ProjectType projectType;
+
+    public static AiModelResponse of(final AiModel aiModel, final int progressModelId, final ProjectType projectType) {
+        return new AiModelResponse(aiModel.getId(), aiModel.getName(), aiModel.getProject() == null, aiModel.getId() == progressModelId, projectType);
     }
 }

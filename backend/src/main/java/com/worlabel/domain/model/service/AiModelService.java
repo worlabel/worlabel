@@ -54,10 +54,11 @@ public class AiModelService {
 
     @Transactional(readOnly = true)
     public List<AiModelResponse> getModelList(final Integer projectId) {
+        Project project = getProject(projectId);
         int progressModelId = progressService.getProgressModelByProjectId(projectId);
         return aiModelRepository.findAllByProjectId(projectId)
                 .stream()
-                .map(o -> AiModelResponse.of(o, progressModelId))
+                .map(o -> AiModelResponse.of(o, progressModelId, project.getProjectType()))
                 .toList();
     }
 
