@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.get("/info/projects/{project_id}/models/{model_key}", summary= "모델 관련 정보 반환")
 def get_model_info(project_id:int, model_key:str):
-    model_path = join_path("resources","projects",project_id, "models", model_key)
+    model_path = join_path("resources","projects", str(project_id), "models", model_key)
     try:
         model = load_model(model_path=model_path)
     except FileNotFoundError:
@@ -32,9 +32,9 @@ def get_model_list(project_id:int):
 
 @router.post("/projects/{project_id}", status_code=201)
 def create_model(project_id: int, request: ModelCreateRequest):
-    if request.project_type not in ["segmentation", "detection", "classfication"]:
+    if request.project_type not in ["segmentation", "detection", "classification"]:
         raise HTTPException(status_code=400,
-                             detail= f"Invalid type '{request.type}'. Must be one of \"segmentation\", \"detection\", \"classfication\".")
+                             detail= f"Invalid type '{request.type}'. Must be one of \"segmentation\", \"detection\", \"classification\".")
     model_key = create_new_model(project_id, request.project_type, request.pretrained)
     return {"model_key": model_key}
 

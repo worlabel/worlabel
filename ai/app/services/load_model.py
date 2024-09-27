@@ -10,7 +10,7 @@ def load_detection_model(project_id:int, model_key:str):
     if model_key in default_model_map:
         model = YOLO(default_model_map[model_key])
     else:
-        model = load_model(model_path=os.path.join("projects",str(project_id),"models", model_key))
+        model = load_model(model_path=os.path.join("resources", "projects",str(project_id),"models", model_key))
 
     # Detection 모델인지 검증
     if model.task != "detect":
@@ -23,11 +23,24 @@ def load_segmentation_model(project_id:int, model_key:str):
     if model_key in default_model_map:
         model = YOLO(default_model_map[model_key])
     else:
-        model = load_model(model_path=os.path.join("projects",str(project_id),"models",model_key))
+        model = load_model(model_path=os.path.join("resources", "projects",str(project_id),"models",model_key))
         
     # Segmentation 모델인지 검증
     if model.task != "segment":
         raise TypeError(f"Invalid model type: {model.task}. Expected a SegmentationModel.")
+    return model
+
+def load_classification_model(project_id:int, model_key:str):
+    default_model_map = {"yolo8": os.path.join("resources","models","yolov8n-cls.pt")}
+    # 디폴트 모델 확인
+    if model_key in default_model_map:
+        model = YOLO(default_model_map[model_key])
+    else:
+        model = load_model(model_path=os.path.join("resources", "projects",str(project_id),"models",model_key))
+        
+    # Segmentation 모델인지 검증
+    if model.task != "classify":
+        raise TypeError(f"Invalid model type: {model.task}. Expected a ClassificationModel.")
     return model
 
 def load_model(model_path: str):
