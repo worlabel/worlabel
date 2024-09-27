@@ -35,9 +35,9 @@ async def segmentation_predict(request: PredictRequest):
     return response 
 
 # 모델 로드
-def get_model(request: PredictRequest):
+def get_model(project_id:int, model_key:str):
     try:
-        return load_segmentation_model(request.project_id, request.m_key)
+        return load_segmentation_model(project_id, model_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail="load model exception: " + str(e))
 
