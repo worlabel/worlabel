@@ -116,7 +116,7 @@ async def detection_train(request: TrainRequest):
     # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
     names = list(request.label_map)
     
-    # 데이터 전처리: 학습할 디렉토리 & 데이터셋 를 생성
+    # 데이터 전처리: 학습할 디렉토리 & 데이터셋 설정 파일을 생성
     process_directories(dataset_root_path, names)
 
     # 데이터 전처리: 데이터를 학습데이터와 검증데이터로 분류
@@ -183,6 +183,7 @@ def run_train(request, model, dataset_root_path):
                 data = ReportData(
                     epoch=trainer.epoch,             # 현재 에포크
                     total_epochs=trainer.epochs,     # 전체 에포크
+                    seg_loss=0,                      # seg_loss
                     box_loss=loss["train/box_loss"], # box loss
                     cls_loss=loss["train/cls_loss"], # cls loss
                     dfl_loss=loss["train/dfl_loss"], # dfl loss

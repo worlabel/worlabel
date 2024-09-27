@@ -4,6 +4,7 @@ class ReportData(BaseModel):
     
     epoch: int          # 현재 에포크
     total_epochs: int   # 전체 에포크
+    seg_loss: float     # seg_loss
     box_loss: float     # box loss
     cls_loss: float     # cls loss
     dfl_loss: float     # dfl loss
