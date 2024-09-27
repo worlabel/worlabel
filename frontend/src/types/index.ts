@@ -34,7 +34,7 @@ export type Label = {
   id: number;
   categoryId: number;
   color: string;
-  type: 'polygon' | 'rect';
+  type: 'polygon' | 'rectangle' | 'point';
   coordinates: Array<[number, number]>;
 };
 
@@ -122,6 +122,7 @@ export interface WorkspaceListResponse {
 export interface ProjectRequest {
   title: string;
   projectType: 'classification' | 'detection' | 'segmentation';
+  categories: string[];
 }
 
 export type ProjectResponse = {
@@ -252,7 +253,7 @@ export interface Shape {
   color: string;
   points: [number, number][];
   group_id: number;
-  shape_type: 'polygon' | 'rectangle';
+  shape_type: 'polygon' | 'rectangle' | 'point';
   flags: Record<string, never>;
 }
 
@@ -281,18 +282,13 @@ export interface ImageFolderRequest {
 }
 export interface LabelCategoryResponse {
   id: number;
-  name: string;
+  labelName: string;
 }
 // 카테고리 요청 DTO
 export interface LabelCategoryRequest {
   labelCategoryList: number[];
 }
 
-// 카테고리 응답 DTO
-export interface LabelCategoryResponse {
-  id: number;
-  name: string;
-}
 // 모델 카테고리 응답 DTO
 export interface ModelCategoryResponse {
   id: number;

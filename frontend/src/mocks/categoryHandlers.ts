@@ -9,8 +9,8 @@ export const categoryHandlers = [
       : parseInt(params.projectId as string, 10);
     console.log(projectId);
     const categories: LabelCategoryResponse[] = [
-      { id: 1, name: 'Category 1' },
-      { id: 2, name: 'Category 2' },
+      { id: 1, labelName: 'Category 1' },
+      { id: 2, labelName: 'Category 2' },
     ];
 
     return HttpResponse.json(categories);
@@ -27,7 +27,7 @@ export const categoryHandlers = [
 
     const newCategory: LabelCategoryResponse = {
       id: Math.floor(Math.random() * 1000), // 임의로 ID 생성
-      name: `New Category for project ${projectId}`,
+      labelName: `New Category for project ${projectId}`,
     };
 
     return HttpResponse.json(newCategory);
@@ -44,7 +44,7 @@ export const categoryHandlers = [
     console.log(projectId);
     const category: LabelCategoryResponse = {
       id: categoryId,
-      name: `Category ${categoryId}`,
+      labelName: `Category ${categoryId}`,
     };
 
     return HttpResponse.json(category);

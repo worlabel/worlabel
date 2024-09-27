@@ -2,13 +2,11 @@ import { ImageResponse, Label } from '@/types';
 import { create } from 'zustand';
 
 interface CanvasState {
-  // project: Project | null;
   sidebarSize: number;
   image: ImageResponse | null;
   labels: Label[];
   drawState: 'pen' | 'rect' | 'pointer';
   selectedLabelId: number | null;
-  // setProject: (project: Project | null) => void;
   setSidebarSize: (width: number) => void;
   setImage: (image: ImageResponse | null) => void;
   setLabels: (labels: Label[]) => void;

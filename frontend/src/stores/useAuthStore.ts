@@ -11,7 +11,7 @@ interface AuthState {
 }
 
 const useAuthStore = create<AuthState>()(
-  persist(
+  persist<AuthState>(
     (set) => ({
       accessToken: '',
       profile: null,

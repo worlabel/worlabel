@@ -10,12 +10,12 @@ import CanvasControlBar from '../CanvasControlBar';
 import { Label } from '@/types';
 import useLabelJson from '@/hooks/useLabelJson';
 import useProjectStore from '@/stores/useProjectStore';
-import { LABEL_CATEGORY } from '@/constants';
 import { useQueryClient } from '@tanstack/react-query';
 import useSaveImageLabelsQuery from '@/queries/projects/useSaveImageLabelsQuery';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ImageCanvas() {
-  const { project, folderId } = useProjectStore();
+  const { project, folderId, categories } = useProjectStore();
   const { id: imageId, imagePath, dataPath } = useCanvasStore((state) => state.image)!;
   const { data: labelData } = useLabelJson(dataPath, project!);
   const { labels, drawState, setDrawState, addLabel, setLabels, selectedLabelId, setSelectedLabelId, sidebarSize } =
@@ -31,6 +31,7 @@ export default function ImageCanvas() {
   const [polygonPoints, setPolygonPoints] = useState<[number, number][]>([]);
   const saveImageLabelsMutation = useSaveImageLabelsQuery();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     setLabels(
@@ -38,7 +39,7 @@ export default function ImageCanvas() {
         id: index,
         categoryId: group_id,
         color,
-        type: shape_type === 'polygon' ? 'polygon' : 'rect',
+        type: shape_type,
         coordinates: points,
       }))
     );
@@ -57,7 +58,7 @@ export default function ImageCanvas() {
     const json = JSON.stringify({
       ...labelData,
       shapes: labels.map(({ categoryId, color, coordinates, type }) => ({
-        label: LABEL_CATEGORY[categoryId],
+        label: categories.find((category) => category.id === categoryId)!.labelName,
         color,
         points: coordinates,
         group_id: categoryId,
@@ -73,9 +74,14 @@ export default function ImageCanvas() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString(), folderId] });
+          toast({
+            title: '저장 성공',
+          });
         },
         onError: () => {
-          alert('레이블 데이터 저장 실패');
+          toast({
+            title: '저장 실패',
+          });
         },
       }
     );
@@ -160,7 +166,7 @@ export default function ImageCanvas() {
     addLabel({
       id: id,
       categoryId: 0,
-      type: 'rect',
+      type: 'rectangle',
       color: `#${color}`,
       coordinates: rectPoints,
     });
@@ -279,75 +285,77 @@ export default function ImageCanvas() {
         <Layer>
           <Image image={image} />
         </Layer>
-        <Layer listening={drawState === 'pointer'}>
-          {labels.map((label) =>
-            label.type === 'rect' ? (
-              <LabelRect
-                key={label.id}
-                isSelected={label.id === selectedLabelId}
-                onSelect={() => setSelectedLabelId(label.id)}
-                info={label}
-                setLabel={setLabel(label.id)}
-                dragLayer={dragLayerRef.current as Konva.Layer}
-              />
-            ) : (
-              <LabelPolygon
-                key={label.id}
-                isSelected={label.id === selectedLabelId}
-                onSelect={() => setSelectedLabelId(label.id)}
-                info={label}
-                setLabel={setLabel(label.id)}
-                stage={stageRef.current as Konva.Stage}
-                dragLayer={dragLayerRef.current as Konva.Layer}
-              />
-            )
-          )}
-          {rectPoints.length ? (
-            <Rect
-              x={rectPoints[0][0]}
-              y={rectPoints[0][1]}
-              width={rectPoints[1][0] - rectPoints[0][0]}
-              height={rectPoints[1][1] - rectPoints[0][1]}
-              stroke={'#00a1ff'}
-              strokeWidth={1}
-              strokeScaleEnabled={false}
-              fillAfterStrokeEnabled={false}
-              fill="#00a1ff33"
-              shadowForStrokeEnabled={false}
-              listening={false}
-            />
-          ) : null}
-          {polygonPoints.length ? (
-            <>
-              <Line
-                points={polygonPoints.flat()}
+        {project?.type !== 'classification' && (
+          <Layer listening={drawState === 'pointer'}>
+            {labels.map((label) =>
+              label.type === 'rectangle' ? (
+                <LabelRect
+                  key={label.id}
+                  isSelected={label.id === selectedLabelId}
+                  onSelect={() => setSelectedLabelId(label.id)}
+                  info={label}
+                  setLabel={setLabel(label.id)}
+                  dragLayer={dragLayerRef.current as Konva.Layer}
+                />
+              ) : (
+                <LabelPolygon
+                  key={label.id}
+                  isSelected={label.id === selectedLabelId}
+                  onSelect={() => setSelectedLabelId(label.id)}
+                  info={label}
+                  setLabel={setLabel(label.id)}
+                  stage={stageRef.current as Konva.Stage}
+                  dragLayer={dragLayerRef.current as Konva.Layer}
+                />
+              )
+            )}
+            {rectPoints.length ? (
+              <Rect
+                x={rectPoints[0][0]}
+                y={rectPoints[0][1]}
+                width={rectPoints[1][0] - rectPoints[0][0]}
+                height={rectPoints[1][1] - rectPoints[0][1]}
                 stroke={'#00a1ff'}
                 strokeWidth={1}
                 strokeScaleEnabled={false}
+                fillAfterStrokeEnabled={false}
+                fill="#00a1ff33"
+                shadowForStrokeEnabled={false}
                 listening={false}
               />
-              {polygonPoints.map((point, index) => (
-                <Circle
-                  key={index}
-                  x={point[0]}
-                  y={point[1]}
-                  radius={5}
-                  stroke="#00a1ff"
+            ) : null}
+            {polygonPoints.length ? (
+              <>
+                <Line
+                  points={polygonPoints.flat()}
+                  stroke={'#00a1ff'}
                   strokeWidth={1}
-                  fill="white"
                   strokeScaleEnabled={false}
                   listening={false}
-                  scale={{
-                    x: 1 / stageRef.current!.getAbsoluteScale().x,
-                    y: 1 / stageRef.current!.getAbsoluteScale().y,
-                  }}
-                  perfectDrawEnabled={false}
-                  shadowForStrokeEnabled={false}
                 />
-              ))}
-            </>
-          ) : null}
-        </Layer>
+                {polygonPoints.map((point, index) => (
+                  <Circle
+                    key={index}
+                    x={point[0]}
+                    y={point[1]}
+                    radius={5}
+                    stroke="#00a1ff"
+                    strokeWidth={1}
+                    fill="white"
+                    strokeScaleEnabled={false}
+                    listening={false}
+                    scale={{
+                      x: 1 / stageRef.current!.getAbsoluteScale().x,
+                      y: 1 / stageRef.current!.getAbsoluteScale().y,
+                    }}
+                    perfectDrawEnabled={false}
+                    shadowForStrokeEnabled={false}
+                  />
+                ))}
+              </>
+            ) : null}
+          </Layer>
+        )}
 
         <Layer ref={dragLayerRef} />
       </Stage>
