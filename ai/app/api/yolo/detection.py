@@ -161,6 +161,9 @@ def split_data(data:list[TrainDataInfo], ratio:float):
         random.shuffle(data)
         train_data = data[:train_size]
         val_data = data[train_size:]
+        
+        if not train_data or not val_data:
+            raise Exception("data size is too small")
         return train_data, val_data
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in split_data(): " + str(e))
