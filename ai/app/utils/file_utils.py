@@ -118,10 +118,10 @@ def get_file_name(path):
         raise FileNotFoundError()
     return os.path.basename(path)
 
-def process_directories_in_cls(dataset_root_path:str, model_categories:dict[int,str]):
+def process_directories_in_cls(dataset_root_path:str, model_categories:list[str]):
     """classification 학습을 위한 디렉토리 생성"""
     make_dir(dataset_root_path, init=False)
-    for category in model_categories.values():
+    for category in model_categories:
         make_dir(os.path.join(dataset_root_path, "train", category), init=True)
         make_dir(os.path.join(dataset_root_path, "test", category), init=True)
     if os.path.exists(os.path.join(dataset_root_path, "result")):
@@ -140,4 +140,11 @@ def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, ch
     label_path = os.path.join(dataset_root_path,child_path,label_name)
 
     # url로부터 이미지 다운로드
-    urllib.request.urlretrieve(data.image_url, os.path.join(label_path, img_name))
+    if os.path.exists(label_path):
+        urllib.request.urlretrieve(data.image_url, os.path.join(label_path, img_name))
+    else:
+        # raise FileNotFoundError("failed download")
+        print("Not Found Label Category. Failed Download")
+    # 레이블 데이터 중에서 프로젝트 카테고리에 해당되지않는 데이터가 있는 경우 처리 1. 에러 raise 2. 무시(+ warning)
+
+    
