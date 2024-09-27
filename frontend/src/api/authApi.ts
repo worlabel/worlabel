@@ -1,5 +1,6 @@
 import api from '@/api/axiosConfig';
 import { MemberResponse, RefreshTokenResponse } from '@/types';
+import { getFcmToken } from './firebaseConfig';
 
 export async function reissueToken() {
   return api.post<RefreshTokenResponse>('/auth/reissue', null, { withCredentials: true }).then(({ data }) => data);
@@ -13,8 +14,9 @@ export async function logout() {
   return api.post('/auth/logout').then(({ data }) => data);
 }
 
-export async function saveFcmToken(token: string) {
-  return api.post('/auth/fcm', { token }).then(({ data }) => data);
+export async function saveFcmToken() {
+  const fcmToken = await getFcmToken();
+  return api.post('/auth/fcm', { token: fcmToken }).then(({ data }) => ({ data, fcmToken }));
 }
 
 export async function createFcmNotification() {

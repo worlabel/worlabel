@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, onMessage } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: String(import.meta.env.VITE_FIREBASE_API_KEY),
@@ -22,30 +22,31 @@ const getFcmToken = async () => {
     return existingToken;
   }
 
-  try {
-    const permission = await Notification.requestPermission();
+  // try {
+  //   const permission = await Notification.requestPermission();
 
-    if (permission === 'granted') {
-      console.log('알림 권한이 허용되었습니다.');
+  //   if (permission === 'granted') {
+  //     console.log('알림 권한이 허용되었습니다.');
 
-      console.log('FCM 토큰 발급 중...');
-      const currentToken = await getToken(messaging, {
-        vapidKey: 'BApIruZrx83suCd09dnDCkFSP_Ts08q38trrIL6GHpChtbjQHTHk_38_JRyTiKLqciHxLQ8iXtie3lvgyb4Iphg',
-      });
-      console.log('FCM 토큰 발급 성공');
+  //     console.log('FCM 토큰 발급 중...');
+  //     const currentToken = await getToken(messaging, {
+  //       vapidKey: 'BApIruZrx83suCd09dnDCkFSP_Ts08q38trrIL6GHpChtbjQHTHk_x38_JRyTiKLqciHxLQ8iXtie3lvgyb4Iphg',
+  //     });
+  //     console.log('FCM 토큰 발급 성공');
 
-      if (currentToken) {
-        sessionStorage.setItem('fcmToken', currentToken);
-        return currentToken;
-      }
+  //     if (currentToken) {
+  //       sessionStorage.setItem('fcmToken', currentToken);
+  //       return currentToken;
+  //     }
 
-      console.warn('FCM 토큰을 가져올 수 없습니다.');
-    } else {
-      console.log('알림 권한이 거부되었습니다.');
-    }
-  } catch (error) {
-    console.error('FCM 토큰을 가져오는 중 오류가 발생했습니다. : ', error);
-  }
+  //     console.warn('FCM 토큰을 가져올 수 없습니다.');
+  //   } else {
+  //     console.log('알림 권한이 거부되었습니다.');
+  //   }
+  // } catch (error) {
+  //   console.error('FCM 토큰을 가져오는 중 오류가 발생했습니다. : ', error);
+  // }
+  return null;
 };
 
 const handleForegroundMessages = () => {
