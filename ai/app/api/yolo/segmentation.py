@@ -7,10 +7,9 @@ from schemas.train_report_data import ReportData
 from schemas.train_response import TrainResponse
 from services.load_model import load_segmentation_model
 from services.create_model import save_model
-from utils.file_utils import get_dataset_root_path, process_directories, process_image_and_label, join_path
+from utils.file_utils import get_dataset_root_path, process_directories, join_path
 from utils.slackMessage import send_slack_message
 from utils.api_utils import send_data_call_api
-import random
 
 router = APIRouter()
 
@@ -86,6 +85,11 @@ async def segmentation_train(request: TrainRequest):
 
     # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
     names = list(request.label_map)
+
+    # 레이블 변환기 (file_util.py/create_segmentation_train_label() 에 쓰임)
+    label_converter = {request.label_map[key]:idx for idx, key in enumerate(request.label_map)}
+    # key : 데이터에 저장된 프로젝트 카테고리 id
+    # value : 모델에 저장될 카테고리 id (모델에는 key의 idx 순서대로 저장될 것임)
     
     # 데이터 전처리: 학습할 디렉토리 & 데이터셋 설정 파일을 생성
     process_directories(dataset_root_path, names)
@@ -94,7 +98,7 @@ async def segmentation_train(request: TrainRequest):
     train_data, val_data = split_data(request.data, request.ratio)
 
     # 데이터 전처리: 데이터 이미지 및 레이블 다운로드
-    download_data(train_data, val_data, dataset_root_path)
+    download_data(train_data, val_data, dataset_root_path, label_converter)
 
     # 학습
     results = run_train(request, model,dataset_root_path)
