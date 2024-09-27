@@ -6,10 +6,14 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 
 const formSchema = z.object({
-  workspaceName: z.string().max(50).min(1, {
-    message: '이름을 입력해주세요.',
-  }),
-  workspaceDescription: z.string().max(200).optional(),
+  workspaceName: z
+    .string()
+    .min(1, { message: '이름을 입력해주세요.' })
+    .max(50, { message: '이름은 50자 이내여야 합니다.' }),
+  workspaceDescription: z
+    .string()
+    .min(1, { message: '설명을 입력해주세요.' })
+    .max(200, { message: '설명은 200자 이내여야 합니다.' }),
 });
 
 export type WorkSpaceCreateFormValues = z.infer<typeof formSchema>;
