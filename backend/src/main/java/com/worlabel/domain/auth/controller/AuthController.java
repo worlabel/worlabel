@@ -110,7 +110,7 @@ public class AuthController {
     @PostMapping("/test")
     public void testSend(@CurrentUser final Integer memberId) {
         String token = fcmCacheRepository.getToken(memberId);
-        fcmService.testSend(token, "test알림입니다.");
+        fcmService.testSend(token);
     }
 
     private static String parseRefreshCookie(HttpServletRequest request) {

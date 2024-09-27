@@ -18,4 +18,5 @@ public class ReportRequest {
     private double fitness;
     private double epochTime;
     private double leftSeconds;
+    private double segLoss;
 }
