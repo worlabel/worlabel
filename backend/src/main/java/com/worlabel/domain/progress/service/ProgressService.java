@@ -19,7 +19,7 @@ public class ProgressService {
 
     public void predictProgressCheck(final int projectId) {
         if (progressCacheRepository.predictProgressCheck(projectId)) {
-            throw new CustomException(ErrorCode.AI_IN_PROGRESS);
+            throw new CustomException(ErrorCode.AI_IN_PROGRESS, "해당 프로젝트 오토레이블링 진행 중");
         }
     }
 

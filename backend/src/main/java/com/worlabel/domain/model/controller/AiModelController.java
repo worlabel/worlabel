@@ -64,9 +64,10 @@ public class AiModelController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/train")
     public void trainModel(
+            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @RequestBody final ModelTrainRequest trainRequest) {
         log.debug("모델 학습 요청 {}", trainRequest);
-        aiModelService.train(projectId, trainRequest);
+        aiModelService.train(memberId, projectId, trainRequest);
     }
 }

@@ -74,9 +74,10 @@ public class ProjectController {
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @PostMapping("/projects/{project_id}/auto")
     public void autoLabeling(
+            @CurrentUser final Integer memberId,
             @PathVariable("project_id") final Integer projectId,
             @RequestBody final AutoModelRequest request) {
-        projectService.autoLabeling(projectId, request);
+        projectService.autoLabeling(memberId, projectId, request);
     }
 
     @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제합니다.")
