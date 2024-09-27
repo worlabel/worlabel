@@ -3,15 +3,23 @@
 importScripts('https://www.gstatic.com/firebasejs/8.7.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.7.1/firebase-messaging.js');
 
+const firebaseConfig = {
+  apiKey: 'AIzaSyBQx50AsrS3K687cGbFDh1908ClCLFmnhA',
+  authDomain: 'worlabel-6de69.firebaseapp.com',
+  projectId: 'worlabel-6de69',
+  storageBucket: 'worlabel-6de69.appspot.com',
+  messagingSenderId: '124097400880',
+  appId: '1:124097400880:web:022db3cdc0bdea750c5df5',
+  measurementId: 'G-KW02YRYF5H',
+};
+
 self.addEventListener('install', (_) => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (_) => {
-  console.log('FCM service worker가 실행되었습니다.');
+  console.log('FCM 서비스 워커가 실행되었습니다.');
 });
-
-const firebaseConfig = {};
 
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
