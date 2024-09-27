@@ -1,15 +1,18 @@
-import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Bell } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import UserProfileModal from './UserProfileModal';
 import WorkspaceNavigation from './WorkspaceNavigation';
+import useAuthStore from '@/stores/useAuthStore';
+import { Suspense } from 'react';
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export default function Header({ className, ...props }: HeaderProps) {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+
+  const profile = useAuthStore((state) => state.profile);
 
   return (
     <header
@@ -28,10 +31,14 @@ export default function Header({ className, ...props }: HeaderProps) {
           WorLabel
         </Link>
 
-        {!isHomePage && <WorkspaceNavigation />}
+        {!isHomePage && profile && (
+          <Suspense fallback={<div></div>}>
+            <WorkspaceNavigation />
+          </Suspense>
+        )}
       </div>
 
-      {!isHomePage && (
+      {!isHomePage && profile && (
         <div className="flex items-center gap-4 md:gap-5">
           <Bell className="h-4 w-4 text-black sm:h-5 sm:w-5" />
           <UserProfileModal />
