@@ -118,7 +118,7 @@ async def classification_train(request: TrainRequest):
         recall= 0,
         mAP50= 0,
         mAP5095= 0,
-        accuracy=result["accuracy_top1"],
+        accuracy=result["metrics/accuracy_top1"],
         fitness= result["fitness"]
     )
 
