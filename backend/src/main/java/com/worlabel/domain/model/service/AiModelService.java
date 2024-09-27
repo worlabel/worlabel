@@ -2,6 +2,8 @@ package com.worlabel.domain.model.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.worlabel.domain.alarm.entity.Alarm;
+import com.worlabel.domain.alarm.service.AlarmService;
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.labelcategory.entity.ProjectCategory;
@@ -41,16 +43,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AiModelService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
     private final AiModelRepository aiModelRepository;
     private final ProjectRepository projectRepository;
-    private final AiRequestService aiRequestService;
-    private final ImageRepository imageRepository;
     private final ResultRepository resultRepository;
-    private final ProjectService projectService;
-    private final Gson gson;
+    private final AiRequestService aiRequestService;
     private final ProgressService progressService;
+    private final ImageRepository imageRepository;
     private final ReportService reportService;
+    private final AlarmService alarmService;
+
+    private final Gson gson;
 
     @Transactional(readOnly = true)
     public List<AiModelResponse> getModelList(final Integer projectId) {
@@ -82,7 +84,7 @@ public class AiModelService {
     }
 
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void train(final Integer projectId, final ModelTrainRequest trainRequest) {
+    public void train(final Integer memberId, final Integer projectId, final ModelTrainRequest trainRequest) {
         // FastAPI 서버로 학습 요청을 전송
         Project project = getProject(projectId);
         AiModel model = getModel(trainRequest.getModelId());
@@ -122,6 +124,8 @@ public class AiModelService {
 
         // 레디스 정보 DB에 저장
         reportService.changeReport(project.getId(), model.getId(), newModel);
+
+        alarmService.save(memberId, Alarm.AlarmType.TRAIN);
     }
 
     private TrainResponse converterTrain(String data) {

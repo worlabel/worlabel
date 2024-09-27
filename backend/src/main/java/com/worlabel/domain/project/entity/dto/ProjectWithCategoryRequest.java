@@ -26,6 +26,6 @@ public class ProjectWithCategoryRequest {
     private List<String> categories;
 
     @Schema(description = "프로젝트 유형", example = "classification")
-    @NotNull(message = "카테고리를 입력하세요.")
+    @NotNull(message = "프로젝트 타입을 선택해주세요.")
     private ProjectType projectType;
 }

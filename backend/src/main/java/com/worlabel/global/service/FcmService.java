@@ -2,9 +2,15 @@ package com.worlabel.global.service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
+import com.worlabel.domain.alarm.entity.Alarm;
+import com.worlabel.domain.alarm.entity.Alarm.AlarmType;
+import com.worlabel.domain.alarm.service.AlarmService;
+import com.worlabel.domain.auth.repository.FcmCacheRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -12,15 +18,22 @@ import org.springframework.stereotype.Service;
 public class FcmService {
 
     private final FirebaseMessaging firebaseMessaging;
+    private final FcmCacheRepository fcmCacheRepository;
 
-    public void testSend(String targetToken, String message){
-        sendNotification(targetToken, "testTitle", "testBody");
+    public void testSend(String targetToken){
+        sendNotification(targetToken,  "testBody");
     }
 
-    private void sendNotification(String targetToken, String title, String body){
+    public void send(Integer memberId, String data) {
+        String token = fcmCacheRepository.getToken(memberId);
+        if(Objects.nonNull(token)){
+            sendNotification(token, data);
+        }
+    }
+
+    private void sendNotification(String targetToken, String body){
         Message message = Message.builder()
                 .setToken(targetToken)
-                .putData("title",title)
                 .putData("body",body)
                 .build();
         try {

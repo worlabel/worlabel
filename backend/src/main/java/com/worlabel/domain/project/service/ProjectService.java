@@ -3,6 +3,8 @@ package com.worlabel.domain.project.service;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.worlabel.domain.alarm.entity.Alarm;
+import com.worlabel.domain.alarm.service.AlarmService;
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.repository.ImageRepository;
@@ -32,6 +34,7 @@ import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
+import com.worlabel.global.service.FcmService;
 import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +65,8 @@ public class ProjectService {
     private final AiRequestService aiService;
 
     private final Gson gson;
+    private final FcmService fcmService;
+    private final AlarmService alarmService;
 
     @Transactional
     public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectWithCategoryRequest projectRequest) {
@@ -163,7 +168,9 @@ public class ProjectService {
      * 프로젝트별 오토 레이블링
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void autoLabeling(final Integer projectId, final AutoModelRequest request) {
+    public void autoLabeling(final Integer memberId, final Integer projectId, final AutoModelRequest request) {
+        progressService.predictProgressCheck(projectId);
+
         Project project = getProject(projectId);
         String endPoint = project.getProjectType().getValue() + "/predict";
 
@@ -182,8 +189,13 @@ public class ProjectService {
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
         log.debug("요청 {}", autoLabelingRequest);
-//        progressService.registerPredictProgress(projectId);
+        progressService.registerPredictProgress(projectId);
         List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
+        log.debug("완료 후 삭제:{}", list);
+
+        alarmService.save(memberId, Alarm.AlarmType.PREDICT);
+        progressService.removePredictProgress(projectId);
+
         saveAutoLabelList(list);
     }
 

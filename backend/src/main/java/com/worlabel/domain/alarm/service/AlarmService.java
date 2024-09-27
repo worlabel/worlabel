@@ -3,6 +3,7 @@ package com.worlabel.domain.alarm.service;
 import com.worlabel.domain.alarm.entity.Alarm;
 import com.worlabel.domain.alarm.entity.Alarm.AlarmType;
 import com.worlabel.domain.alarm.repository.AlarmCacheRepository;
+import com.worlabel.global.service.FcmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import java.util.List;
 public class AlarmService {
 
     private final AlarmCacheRepository alarmCacheRepository;
+    private final FcmService fcmService;
 
     public void save(int memberId, AlarmType type) {
         alarmCacheRepository.save(memberId, type);
+        fcmService.send(memberId, type.toString());
     }
 
     public List<Alarm> getAlarmList(int memberId){

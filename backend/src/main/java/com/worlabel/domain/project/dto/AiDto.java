@@ -125,10 +125,10 @@ public class AiDto {
         }
     }
 
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Getter
     @ToString
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class AutoLabelingResult {
 
         @SerializedName("image_id")
@@ -137,4 +137,5 @@ public class AiDto {
         @SerializedName("data")
         private String data;
     }
+
 }
