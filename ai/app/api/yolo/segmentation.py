@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from api.yolo.detection import get_classes, run_predictions, get_random_color, split_data, download_data
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
@@ -27,7 +28,7 @@ async def segmentation_predict(request: PredictRequest):
     classes = get_classes(request.label_map, model.names)
 
     # 추론
-    results = run_predictions(model, url_list, request, classes)
+    results = await run_predictions(model, url_list, request, classes)
 
     # 추론 결과 변환
     response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
@@ -101,7 +102,7 @@ async def segmentation_train(request: TrainRequest):
     download_data(train_data, val_data, dataset_root_path, label_converter)
 
     # 학습
-    results = run_train(request, model,dataset_root_path)
+    results = await run_train(request, model,dataset_root_path)
 
     # best 모델 저장
     model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
@@ -121,7 +122,7 @@ async def segmentation_train(request: TrainRequest):
             
     return response
     
-def run_train(request, model, dataset_root_path):
+async def run_train(request, model, dataset_root_path):
     try:
         # 데이터 전송 콜백함수
         def send_data(trainer):
@@ -155,8 +156,9 @@ def run_train(request, model, dataset_root_path):
         # 콜백 등록
         model.add_callback("on_train_epoch_start", send_data)
 
+
         # 학습 실행
-        results = model.train(
+        results = await run_in_threadpool(model.train,
             data=join_path(dataset_root_path, "dataset.yaml"),
             name=join_path(dataset_root_path, "result"),
             epochs=request.epochs,
