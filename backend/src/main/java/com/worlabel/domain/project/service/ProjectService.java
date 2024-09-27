@@ -7,6 +7,7 @@ import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.labelcategory.entity.ProjectCategory;
+import com.worlabel.domain.labelcategory.repository.ProjectLabelCategoryRepository;
 import com.worlabel.domain.member.entity.Member;
 import com.worlabel.domain.member.repository.MemberRepository;
 import com.worlabel.domain.model.entity.AiModel;
@@ -23,10 +24,7 @@ import com.worlabel.domain.project.dto.AiDto.AutoLabelingRequest;
 import com.worlabel.domain.project.dto.AiDto.AutoLabelingResult;
 import com.worlabel.domain.project.dto.AutoModelRequest;
 import com.worlabel.domain.project.entity.Project;
-import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
-import com.worlabel.domain.project.entity.dto.ProjectRequest;
-import com.worlabel.domain.project.entity.dto.ProjectResponse;
-import com.worlabel.domain.project.entity.dto.ProjectWithThumbnailResponse;
+import com.worlabel.domain.project.entity.dto.*;
 import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.domain.workspace.entity.Workspace;
 import com.worlabel.domain.workspace.repository.WorkspaceRepository;
@@ -58,15 +56,15 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final MemberRepository memberRepository;
     private final ProgressService progressService;
+    private final ProjectLabelCategoryRepository projectLabelCategoryRepository;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
     private final AiRequestService aiService;
 
-
     private final Gson gson;
 
     @Transactional
-    public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectRequest projectRequest) {
+    public ProjectResponse createProject(final Integer memberId, final Integer workspaceId, final ProjectWithCategoryRequest projectRequest) {
         Workspace workspace = getWorkspace(memberId, workspaceId);
         Member member = getMember(memberId);
 
@@ -74,6 +72,11 @@ public class ProjectService {
         Participant participant = Participant.of(project, member, PrivilegeType.ADMIN);
 
         projectRepository.save(project);
+
+        for (String labelName : projectRequest.getCategories()) {
+            projectLabelCategoryRepository.save(ProjectCategory.of(labelName, project));
+        }
+
         participantRepository.save(participant);
 
         return ProjectResponse.from(project);
@@ -88,8 +91,8 @@ public class ProjectService {
     @Transactional(readOnly = true)
     public List<ProjectWithThumbnailResponse> getProjectsByWorkspaceId(final Integer workspaceId, final Integer memberId, final Integer lastProjectId, final Integer pageSize) {
         return projectRepository.findProjectsByWorkspaceIdAndMemberIdWithPagination(workspaceId, memberId, lastProjectId, pageSize).stream()
-            .map(project -> ProjectWithThumbnailResponse.from(project, getFirstImageWithProject(project)))
-            .toList();
+                .map(project -> ProjectWithThumbnailResponse.from(project, getFirstImageWithProject(project)))
+                .toList();
     }
 
     @Transactional
@@ -165,7 +168,7 @@ public class ProjectService {
         String endPoint = project.getProjectType().getValue() + "/predict";
 
         List<Image> imageList = imageRepository.findImagesByProjectIdAndPendingOrInProgress(projectId);
-        if(imageList.isEmpty()){
+        if (imageList.isEmpty()) {
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
 
@@ -173,7 +176,7 @@ public class ProjectService {
                 .map(AutoLabelingImageRequest::of)
                 .toList();
 
-        HashMap<Integer, Integer> labelMap = getLabelMap(project);
+        HashMap<String, Integer> labelMap = getLabelMap(project);
 
         AiModel aiModel = getAiModel(request);
         AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
@@ -187,9 +190,9 @@ public class ProjectService {
     // TODO: 트랜잭션 설정
     @Transactional
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
-        for(AutoLabelingResult result: resultList) {
+        for (AutoLabelingResult result : resultList) {
             Image image = getImage(result.getImageId());
-            if(image.getStatus() == LabelStatus.SAVE || image.getStatus() == LabelStatus.IN_PROGRESS) continue;
+            if (image.getStatus() == LabelStatus.SAVE || image.getStatus() == LabelStatus.IN_PROGRESS) continue;
             String dataPath = image.getDataPath();
             s3UploadService.uploadJson(result.getData(), dataPath);
             image.updateStatus(LabelStatus.IN_PROGRESS);
@@ -219,21 +222,22 @@ public class ProjectService {
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
-    private HashMap<Integer, Integer> getLabelMap(Project project) {
-        HashMap<Integer, Integer> labelMap = new HashMap<>();
+    private HashMap<String, Integer> getLabelMap(Project project) {
+        HashMap<String, Integer> labelMap = new HashMap<>();
         List<ProjectCategory> category = project.getCategoryList();
         for (ProjectCategory projectCategory : category) {
-            int aiId = projectCategory.getLabelCategory().getAiCategoryId();
-            if (labelMap.containsKey(aiId)) continue;
-
-            labelMap.put(aiId, projectCategory.getId());
+            if (labelMap.containsKey(projectCategory.getLabelName())) {
+                continue;
+            }
+            labelMap.put(projectCategory.getLabelName(), projectCategory.getId());
         }
+
         return labelMap;
     }
 
-    private Image getImage(final Long imageId){
+    private Image getImage(final Long imageId) {
         return imageRepository.findById(imageId)
-                .orElseThrow(()-> new CustomException(ErrorCode.DATA_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private Project getProject(final Integer projectId) {

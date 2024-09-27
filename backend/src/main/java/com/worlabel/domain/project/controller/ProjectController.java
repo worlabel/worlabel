@@ -2,10 +2,7 @@ package com.worlabel.domain.project.controller;
 
 import com.worlabel.domain.participant.entity.dto.ParticipantRequest;
 import com.worlabel.domain.project.dto.AutoModelRequest;
-import com.worlabel.domain.project.entity.dto.ProjectMemberResponse;
-import com.worlabel.domain.project.entity.dto.ProjectRequest;
-import com.worlabel.domain.project.entity.dto.ProjectResponse;
-import com.worlabel.domain.project.entity.dto.ProjectWithThumbnailResponse;
+import com.worlabel.domain.project.entity.dto.*;
 import com.worlabel.domain.project.service.ProjectService;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
@@ -38,7 +35,7 @@ public class ProjectController {
     public ProjectResponse createProject(
         @CurrentUser final Integer memberId,
         @PathVariable("workspace_id") final Integer workspaceId,
-        @Valid @RequestBody final ProjectRequest projectRequest) {
+        @Valid @RequestBody final ProjectWithCategoryRequest projectRequest) {
         return projectService.createProject(memberId, workspaceId, projectRequest);
     }
 

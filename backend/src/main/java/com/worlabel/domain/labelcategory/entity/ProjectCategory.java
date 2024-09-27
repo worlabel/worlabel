@@ -22,11 +22,10 @@ public class ProjectCategory extends BaseEntity {
     private Integer id;
 
     /**
-     * 레이블 카테고리
+     * Model name
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "label_category_id", nullable = false)
-    private LabelCategory labelCategory;
+    @Column(name = "label_category_name", length = 50)
+    private String labelName;
 
     /**
      * 프로젝트
@@ -35,12 +34,12 @@ public class ProjectCategory extends BaseEntity {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    private ProjectCategory(LabelCategory labelCategory, Project project) {
-        this.labelCategory = labelCategory;
+    private ProjectCategory(String labelName, Project project) {
+        this.labelName = labelName;
         this.project = project;
     }
 
-    public static ProjectCategory of(LabelCategory labelCategory, Project project) {
-        return new ProjectCategory(labelCategory, project);
+    public static ProjectCategory of(String labelName, Project project) {
+        return new ProjectCategory(labelName, project);
     }
 }

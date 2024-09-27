@@ -45,7 +45,7 @@ public class AiDto {
         private Integer modelId;
 
         @JsonProperty("label_map")
-        private Map<Integer, Integer> labelMap;
+        private Map<String, Integer> labelMap;
 
         @JsonProperty("data")
         private List<TrainDataInfo> data;
@@ -62,7 +62,7 @@ public class AiDto {
 
         private Optimizer optimizer;
 
-        public static TrainRequest of(final Integer projectId, final Integer modelId, final String modelKey, final Map<Integer, Integer> labelMap, final List<TrainDataInfo> data, final ModelTrainRequest trainRequest) {
+        public static TrainRequest of(final Integer projectId, final Integer modelId, final String modelKey, final Map<String, Integer> labelMap, final List<TrainDataInfo> data, final ModelTrainRequest trainRequest) {
             TrainRequest request = new TrainRequest();
             request.projectId = projectId;
             request.modelId = modelId;
@@ -93,7 +93,7 @@ public class AiDto {
         private String modelKey;
 
         @JsonProperty("label_map")
-        private HashMap<Integer, Integer> labelMap;
+        private HashMap<String, Integer> labelMap;
 
         @JsonProperty("image_list")
         private List<AutoLabelingImageRequest> imageList;
@@ -104,7 +104,7 @@ public class AiDto {
         @JsonProperty("iou_threshold")
         private Double iouThreshold;
 
-        public static AutoLabelingRequest of(final Integer projectId, final String modelKey, final HashMap<Integer, Integer> labelMap, final List<AutoLabelingImageRequest> imageList) {
+        public static AutoLabelingRequest of(final Integer projectId, final String modelKey, final HashMap<String, Integer> labelMap, final List<AutoLabelingImageRequest> imageList) {
             return new AutoLabelingRequest(projectId, modelKey, labelMap, imageList, 0.25, 0.45);
         }
     }

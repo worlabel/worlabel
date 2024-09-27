@@ -1,6 +1,5 @@
 package com.worlabel.domain.model.controller;
 
-import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
 import com.worlabel.domain.model.entity.dto.AiModelRequest;
 import com.worlabel.domain.model.entity.dto.AiModelResponse;
 import com.worlabel.domain.model.entity.dto.ModelTrainRequest;
@@ -37,15 +36,6 @@ public class AiModelController {
     public List<AiModelResponse> getModelList(
             @PathVariable("project_id") final Integer projectId) {
         return aiModelService.getModelList(projectId);
-    }
-
-    @Operation(summary = "특정 모델 카테고리", description = "모델의 카테고리를 조회합니다.")
-    @SwaggerApiSuccess(description = "카테고리를 조회합니다.")
-    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
-    @GetMapping("/models/{model_id}/categories")
-    public List<LabelCategoryResponse> getCategories(
-            @PathVariable("model_id") final Integer modelId) {
-        return aiModelService.getCategories(modelId);
     }
 
     @Operation(summary = "프로젝트 모델 추가", description = "프로젝트에 있는 모델을 추가합니다.")
