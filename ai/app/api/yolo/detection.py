@@ -123,7 +123,7 @@ async def detection_train(request: TrainRequest):
     train_data, val_data = split_data(request.data, request.ratio)
 
     # 데이터 전처리: 데이터 이미지 및 레이블 다운로드
-    download_data(train_data, val_data, dataset_root_path, request.label_map)
+    download_data(train_data, val_data, dataset_root_path)
 
     # 학습
     results = run_train(request, model,dataset_root_path)
