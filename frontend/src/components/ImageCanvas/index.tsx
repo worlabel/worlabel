@@ -138,7 +138,7 @@ export default function ImageCanvas() {
     const id = labels.length;
     addLabel({
       id: id,
-      categoryId: 0,
+      categoryId: categories[0]!.id,
       type: 'polygon',
       color: `#${color}`,
       coordinates: polygonPoints.slice(0, -1),
@@ -165,7 +165,7 @@ export default function ImageCanvas() {
     const id = labels.length;
     addLabel({
       id: id,
-      categoryId: 0,
+      categoryId: categories[0]!.id,
       type: 'rectangle',
       color: `#${color}`,
       coordinates: rectPoints,
