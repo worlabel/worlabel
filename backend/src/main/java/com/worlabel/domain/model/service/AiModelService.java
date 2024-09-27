@@ -3,19 +3,13 @@ package com.worlabel.domain.model.service;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.worlabel.domain.image.entity.Image;
-import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.repository.ImageRepository;
-import com.worlabel.domain.labelcategory.entity.LabelCategory;
 import com.worlabel.domain.labelcategory.entity.ProjectCategory;
-import com.worlabel.domain.labelcategory.entity.dto.DefaultLabelCategoryResponse;
-import com.worlabel.domain.labelcategory.entity.dto.LabelCategoryResponse;
-import com.worlabel.domain.labelcategory.repository.LabelCategoryRepository;
 import com.worlabel.domain.model.entity.AiModel;
 import com.worlabel.domain.model.entity.dto.*;
 import com.worlabel.domain.model.repository.AiModelRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.progress.service.ProgressService;
-import com.worlabel.domain.project.dto.AiDto;
 import com.worlabel.domain.project.dto.AiDto.TrainDataInfo;
 import com.worlabel.domain.project.dto.AiDto.TrainRequest;
 import com.worlabel.domain.project.entity.Project;
@@ -25,7 +19,6 @@ import com.worlabel.domain.report.service.ReportService;
 import com.worlabel.domain.result.entity.Result;
 import com.worlabel.domain.result.repository.ResultRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
-import com.worlabel.global.cache.CacheKey;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
@@ -38,8 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -50,7 +41,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AiModelService {
 
-    private final LabelCategoryRepository labelCategoryRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final AiModelRepository aiModelRepository;
     private final ProjectRepository projectRepository;
@@ -61,46 +51,6 @@ public class AiModelService {
     private final Gson gson;
     private final ProgressService progressService;
     private final ReportService reportService;
-
-    //    @PostConstruct
-    public void loadDefaultModel() {
-        String url = "model/default";
-        List<DefaultResponse> defaultResponseList = aiRequestService.getRequest(url, this::converter);
-
-        // 1. DefaultResponse의 Key값만 모아서 리스트로 만든다.
-        List<String> allModelKeys = defaultResponseList.stream()
-                .map(response -> response.getDefaultAiModelResponse().getModelKey())
-                .toList();
-
-        // 2. 해당 Key값이 DB에 있는지 확인하기 (한 번의 쿼리로)
-        List<String> existingModelKeys = aiModelRepository.findAllByModelKeyIn(allModelKeys).stream()
-                .map(AiModel::getModelKey)
-                .toList();
-
-        // 3. DB에 없는 Key만 필터링해서 처리
-        List<DefaultResponse> newModel = defaultResponseList.stream()
-                .filter(model -> !existingModelKeys.contains(model.getDefaultAiModelResponse().getModelKey()))
-                .toList();
-
-
-        // 새롭게 추가된 값을 디비에 저장
-        List<AiModel> aiModels = new ArrayList<>();
-        List<LabelCategory> categories = new ArrayList<>();
-        for (DefaultResponse defaultResponse : newModel) {
-            DefaultAiModelResponse defaultAiModelResponse = defaultResponse.getDefaultAiModelResponse();
-            AiModel newAiModel = AiModel.of(defaultAiModelResponse.getName(), defaultAiModelResponse.getModelKey(), 0, null);
-            aiModels.add(newAiModel);
-
-            List<DefaultLabelCategoryResponse> defaultLabelCategoryResponseList = defaultResponse.getDefaultLabelCategoryResponseList();
-
-            for (DefaultLabelCategoryResponse categoryResponse : defaultLabelCategoryResponseList) {
-                categories.add(LabelCategory.of(newAiModel, categoryResponse.getName(), categoryResponse.getAiId()));
-            }
-        }
-
-        aiModelRepository.saveAll(aiModels);
-        labelCategoryRepository.saveAll(categories);
-    }
 
     @Transactional(readOnly = true)
     public List<AiModelResponse> getModelList(final Integer projectId) {
@@ -131,23 +81,15 @@ public class AiModelService {
         return aiModelRepository.findCustomModelById(modelId).orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
     }
 
-    @Transactional(readOnly = true)
-    public List<LabelCategoryResponse> getCategories(final Integer modelId) {
-        List<LabelCategory> categoryList = labelCategoryRepository.findAllByModelId(modelId);
-        return categoryList.stream()
-                .map(LabelCategoryResponse::from)
-                .toList();
-    }
-
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer projectId, final ModelTrainRequest trainRequest) {
         // FastAPI 서버로 학습 요청을 전송
         Project project = getProject(projectId);
         AiModel model = getModel(trainRequest.getModelId());
 
-        Map<Integer, Integer> labelMap = project.getCategoryList().stream()
+        Map<String, Integer> labelMap = project.getCategoryList().stream()
                 .collect(Collectors.toMap(
-                        category -> category.getLabelCategory().getId(),
+                        ProjectCategory::getLabelName,
                         ProjectCategory::getId
                 ));
 
