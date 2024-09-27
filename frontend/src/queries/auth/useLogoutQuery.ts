@@ -11,7 +11,6 @@ export default function useLogoutQuery() {
     onSuccess: () => {
       clearAuth();
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      queryClient.invalidateQueries({ queryKey: ['fcmToken'] });
     },
   });
 }
