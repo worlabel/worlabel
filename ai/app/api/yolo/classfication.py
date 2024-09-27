@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from api.yolo.detection import get_classes, run_predictions, get_random_color, split_data
+from api.yolo.detection import run_predictions, get_random_color, split_data
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest, TrainDataInfo
-from schemas.predict_response import PredictResponse, LabelData
+from schemas.predict_response import PredictResponse, LabelData, Shape
 from schemas.train_report_data import ReportData
 from schemas.train_response import TrainResponse
 from services.load_model import load_classification_model
@@ -24,11 +24,8 @@ async def classification_predict(request: PredictRequest):
     # 이미지 데이터 정리
     url_list = list(map(lambda x:x.image_url, request.image_list))
 
-    # 이 값을 모델에 입력하면 해당하는 클래스 id만 출력됨
-    classes = get_classes(request.label_map, model.names)
-
     # 추론
-    results = run_predictions(model, url_list, request, classes)
+    results = run_predictions(model, url_list, request, classes=[]) # classification은 classes를 무시함
 
     # 추론 결과 변환
     response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
@@ -36,43 +33,53 @@ async def classification_predict(request: PredictRequest):
     return response
 
 # 모델 로드
-def get_model(request: PredictRequest):
+def get_model(project_id:int, model_key:str):
     try:
-        return load_classification_model(request.project_id, request.m_key)
+        return load_classification_model(project_id, model_key)
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in get_model(): " + str(e)) 
 
 # 추론 결과 처리 함수
 def process_prediction_result(result, image, label_map):
     try:
+        label_name = None
+        # top 5에 해당하는 class id 순회
+        for class_id in result.probs.top5:
+            name = result.names[class_id]   # class id에 해당하는 label_name
+            if name in label_map:           # name이 사용자 레이블 카테고리에 있을 경우
+                label_name = name           # label_name 설정
+                break
+
         label_data = LabelData(
             version="0.0.0",
             task_type="cls",
-            shapes=[
-                {
-                    "label": summary['name'],
-                    "color": get_random_color(),
-                    "points": [
-                        [0, 0]
-                    ],
-                    "group_id": label_map[summary['name']],
-                    "shape_type": "point",
-                    "flags": {}
-                }
-                for summary in result.summary()
-            ],
+            shapes=[],
             split="none",
             imageHeight=result.orig_img.shape[0],
             imageWidth=result.orig_img.shape[1],
             imageDepth=result.orig_img.shape[2]
         )
+
+        if label_name:   # label_name을 설정한게 있다면 추가
+            shape = Shape(
+                label= label_name,
+                color= get_random_color(),
+                points= [[0.0, 0.0]],
+                group_id= label_map[label_name],
+                shape_type= 'point',
+                flags= {}
+            )
+            LabelData.shapes.append(shape)
+    
+        return PredictResponse(
+            image_id=image.image_id,
+            data=label_data.model_dump_json()
+        )
+    except KeyError as e:
+        raise HTTPException(status_code=500, detail="KeyError: " + str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in process_prediction_result(): " + str(e))
 
-    return PredictResponse(
-        image_id=image.image_id,
-        data=label_data.model_dump_json()
-    )
 
 @router.post("/train")
 async def classification_train(request: TrainRequest):
@@ -114,7 +121,7 @@ async def classification_train(request: TrainRequest):
         accuracy=result["accuracy_top1"],
         fitness= result["fitness"]
     )
-    
+
     send_slack_message(f"train 성공{response}", status="success")
             
     return response
