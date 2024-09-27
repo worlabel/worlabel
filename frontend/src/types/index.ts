@@ -34,7 +34,7 @@ export type Label = {
   id: number;
   categoryId: number;
   color: string;
-  type: 'polygon' | 'rect';
+  type: 'polygon' | 'rectangle' | 'point';
   coordinates: Array<[number, number]>;
 };
 
@@ -253,7 +253,7 @@ export interface Shape {
   color: string;
   points: [number, number][];
   group_id: number;
-  shape_type: 'polygon' | 'rectangle';
+  shape_type: 'polygon' | 'rectangle' | 'point';
   flags: Record<string, never>;
 }
 

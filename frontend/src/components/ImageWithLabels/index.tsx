@@ -22,7 +22,7 @@ export default function ImageWithLabels({ imagePath, labelData }: ImageWithLabel
           id: index,
           categoryId: shape.categoryId,
           color: shape.color,
-          type: shape.shape_type === 'polygon' ? 'polygon' : 'rect',
+          type: shape.shape_type,
           coordinates: shape.points,
         })) as Label[];
         setLabels(shapes);
@@ -65,7 +65,7 @@ export default function ImageWithLabels({ imagePath, labelData }: ImageWithLabel
       <Layer>{image && <Image image={image} />}</Layer>
       <Layer>
         {labels.map((label) =>
-          label.type === 'rect' ? (
+          label.type === 'rectangle' ? (
             <Rect
               key={label.id}
               x={label.coordinates[0][0]}
