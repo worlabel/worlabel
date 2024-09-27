@@ -111,7 +111,7 @@ async def detection_train(request: TrainRequest):
     dataset_root_path = get_dataset_root_path(request.project_id)
 
     # 모델 로드
-    model = get_model(request)
+    model = get_model(request.project_id, request.m_key)
 
     # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
     names = list(request.label_map)
