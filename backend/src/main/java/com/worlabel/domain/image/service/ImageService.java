@@ -26,13 +26,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -41,6 +42,7 @@ import java.util.List;
 public class ImageService {
 
     private final ProjectRepository projectRepository;
+    private final ImageAsyncService imageAsyncService;
     private final FolderRepository folderRepository;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
@@ -51,25 +53,34 @@ public class ImageService {
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
         Folder folder = getOrCreateFolder(folderId, projectId);
+        long prev = System.currentTimeMillis();
 
-        // 이미지 리스트를 순차적으로 처리 (향후 비동기/병렬 처리를 위해 분리된 메서드 호출)
-        imageList.forEach(file -> uploadAndSave(file, folder, projectId));
-    }
+        // 동적 배치 크기 계산
+        int totalImages = imageList.size();
+        int batchSize;
 
-    /**
-     * 폴더 생성 또는 가져오기
-     * 폴더 생성 작업이 있음으로 트랜잭션 보호
-     */
-    public Folder getOrCreateFolder(Integer folderId, Integer projectId) {
-        if (folderId != 0) {
-            return getFolder(folderId);
+        if (totalImages <= 100) {
+            batchSize = 25;  // 작은 이미지 수는 작은 배치 크기
+        } else if (totalImages <= 3000) {
+            batchSize = 50;  // 중간 이미지 수는 중간 배치 크기
         } else {
-            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Project project = getProject(projectId);
-            Folder folder = Folder.of(currentDateTime, null, project);
-            folderRepository.save(folder);  // 새로운 폴더를 저장
-            return folder;
+            batchSize = 100; // 큰 이미지 수는 큰 배치 크기
         }
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (int i = 0; i < imageList.size(); i += batchSize) {
+            List<MultipartFile> batch = imageList.subList(i, Math.min(i + batchSize, imageList.size()));
+
+            CompletableFuture<Void> future = imageAsyncService.asyncImageUpload(batch, folder, projectId);
+            // 모든 비동기 작업이 완료될 때까지 기다림
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 기다림
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long after = System.currentTimeMillis();
+        log.debug("업로드 완료 - 경과시간 {}", ((double) after - prev) / 1000);
     }
 
     /**
@@ -197,7 +208,7 @@ public class ImageService {
                     Files.createDirectories(newPath);
                 } else {
                     Files.createDirectories(newPath.getParent());
-                    try(OutputStream os = Files.newOutputStream(newPath)){
+                    try (OutputStream os = Files.newOutputStream(newPath)) {
                         IOUtils.copy(zis, os);
                     }
                 }
@@ -243,6 +254,22 @@ public class ImageService {
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
+    /**
+     * 폴더 생성 또는 가져오기
+     * 폴더 생성 작업이 있음으로 트랜잭션 보호
+     */
+    public Folder getOrCreateFolder(Integer folderId, Integer projectId) {
+        if (folderId != 0) {
+            return getFolder(folderId);
+        } else {
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            Project project = getProject(projectId);
+            Folder folder = Folder.of(currentDateTime, null, project);
+            folderRepository.save(folder);  // 새로운 폴더를 저장
+            return folder;
+        }
+    }
+
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
@@ -250,13 +277,13 @@ public class ImageService {
     }
 
     /*
-            공통 로직
+        공통 로직
      */
 
     /**
      * MultipartFile 업로드 및 저장
      */
-    private void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
+    public void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
         try {
             String key = uploadToS3(file, projectId);
             saveImage(file, key, folder);
@@ -274,7 +301,6 @@ public class ImageService {
             String key = uploadToS3(file, project.getId());
             saveImage(file, key, folder);
         } catch (Exception e) {
-            log.error("파일 업로드 중 오류 발생", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
         }
     }
@@ -284,7 +310,7 @@ public class ImageService {
      */
     public void saveImage(final MultipartFile file, final String key, final Folder folder) {
         try {
-            Image image = createImage(file, key, folder);
+            Image image = createImage(file.getOriginalFilename(), key, folder);
             imageRepository.save(image);
         } catch (Exception e) {
             log.error("이미지 DB 저장 실패 원인: ", e);
@@ -298,7 +324,7 @@ public class ImageService {
      */
     public void saveImage(final File file, final String key, final Folder folder) {
         try {
-            Image image = createImage(file, key, folder);
+            Image image = createImage(file.getName(), key, folder);
             imageRepository.save(image);
         } catch (Exception e) {
             s3UploadService.deleteImageFromS3(key);
@@ -309,9 +335,10 @@ public class ImageService {
     /**
      * S3 파일 업로드
      */
-    private String uploadToS3(final MultipartFile file, final Integer projectId) {
+    public String uploadToS3(final MultipartFile file, final Integer projectId) {
         String extension = getExtension(file.getOriginalFilename());
-        return s3UploadService.uploadMultipartFile(file, extension, projectId);
+//        return s3UploadService.uploadImageFile(file, extension, projectId);
+        return "";
     }
 
     /**
@@ -319,17 +346,12 @@ public class ImageService {
      */
     private String uploadToS3(final File file, final Integer projectId) {
         String extension = getExtension(file.getName());
-        return s3UploadService.uploadFile(file, extension, projectId);
+        return s3UploadService.uploadImageFile(file, extension, projectId);
     }
 
-    public Image createImage(MultipartFile file, String key, Folder folder) {
-        String extension = getExtension(file.getOriginalFilename());
-        log.debug("이미지 업로드 이름 :{}",file.getOriginalFilename());
-        return Image.of(file.getOriginalFilename(), key, extension, folder);
-    }
-
-    public Image createImage(File file, String key, Folder folder) {
-        String extension = getExtension(file.getName());
-        return Image.of(file.getName(), key, extension, folder);
+    public Image createImage(String fileName, String key, Folder folder) {
+        String extension = getExtension(fileName);
+        log.debug("이미지 업로드 이름 :{}", fileName);
+        return Image.of(fileName, key, extension, folder);
     }
 }
