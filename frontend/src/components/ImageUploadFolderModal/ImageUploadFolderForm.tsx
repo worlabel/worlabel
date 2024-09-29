@@ -113,11 +113,11 @@ export default function ImageUploadFolderForm({
         </div>
       )}
       {files.length > 0 && (
-        <ul className="m-0 max-h-[200px] list-none overflow-y-auto p-0">
+        <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
           {files.map((file, index) => (
             <li
               key={index}
-              className={cn('flex items-center justify-between p-1')}
+              className="flex items-center justify-between p-1"
             >
               <span className="truncate">{file.webkitRelativePath || file.name}</span>
               {isUploading ? (
@@ -125,19 +125,19 @@ export default function ImageUploadFolderForm({
                   {isUploaded ? (
                     <CircleCheckBig
                       className="stroke-green-500"
-                      size={20}
+                      size={16}
                       strokeWidth="2"
                     />
                   ) : isFailed ? (
                     <CircleX
                       className="stroke-red-500"
-                      size={20}
+                      size={16}
                       strokeWidth="2"
                     />
                   ) : (
                     <CircleDashed
                       className="stroke-gray-500"
-                      size={20}
+                      size={16}
                       strokeWidth="2"
                     />
                   )}

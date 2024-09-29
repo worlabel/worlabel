@@ -123,19 +123,19 @@ export default function ImageUploadZipForm({
               {isUploaded ? (
                 <CircleCheckBig
                   className="stroke-green-500"
-                  size={20}
+                  size={16}
                   strokeWidth="2"
                 />
               ) : isFailed ? (
                 <CircleX
                   className="stroke-red-500"
-                  size={20}
+                  size={16}
                   strokeWidth="2"
                 />
               ) : (
                 <CircleDashed
                   className="stroke-gray-500"
-                  size={20}
+                  size={16}
                   strokeWidth="2"
                 />
               )}
