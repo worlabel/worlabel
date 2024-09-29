@@ -8,20 +8,20 @@ import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-// TODO: 추후 비동기로 변경해야합니다.
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -60,26 +60,15 @@ public class S3UploadService {
         }
     }
 
+
     /**
      * MultipartFile 업로드
      */
-    public String uploadMultipartFile(final MultipartFile file, final String extension, final Integer projectId) {
-        try {
-            return uploadImageToS3(file.getInputStream(), extension, projectId);
-        } catch (IOException e) {
-            log.debug("MultipartFile 업로드 에러 발생 ", e);
-            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
-        }
-    }
-
-    /**
-     * File 업로드
-     */
-    public String uploadFile(final File file, final String extension, final Integer projectId) {
-        try (InputStream inputStream = new FileInputStream(file)) {
+    public String uploadImageFile(final MultipartFile file, final String extension, final Integer projectId) {
+        try (InputStream inputStream = file.getInputStream()) {
             return uploadImageToS3(inputStream, extension, projectId);
         } catch (IOException e) {
-            log.debug("이미지 업로드에서 에러 발생 ", e);
+            log.debug("MultipartFile 업로드 에러 발생 {}",file.getOriginalFilename(), e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
     }
@@ -87,22 +76,39 @@ public class S3UploadService {
     /**
      * AWS S3 이미지 업로드
      */
-    private String uploadImageToS3(final InputStream inputStream, final String extension, final Integer projectId) throws IOException {
+
+    public String uploadImageToS3(final InputStream inputStream, final String extension, final Integer projectId) throws IOException {
         String s3Key = getS3FileName(projectId);
         String s3FileName = s3Key + "." + extension;
 
         ObjectMetadata metadata = new ObjectMetadata(); // S3에 업로드할 파일의 메타데이터 설정
         metadata.setContentType("image/" + extension); // 콘텐츠 타입 설정
+        metadata.setContentLength(inputStream.available());
 
-        uploadToS3(inputStream, s3FileName, metadata);
+        PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, inputStream, metadata);
+        amazonS3.putObject(putRequest);
 
         return url + "/" + s3Key;
     }
 
     /**
-     * InputStream 사용 파일을 S3 업로드
+     * File 업로드
      */
-    private void uploadToS3(InputStream inputStream, final String s3Key, final ObjectMetadata metadata) {
+    public String uploadImageFile(final File file, final String extension, final Integer projectId) {
+        try (InputStream inputStream = new FileInputStream(file)) {
+//            return uploadImageToS3(inputStream, extension, projectId);
+            return "";
+        } catch (IOException e) {
+            log.debug("이미지 업로드에서 에러 발생 ", e);
+            throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
+        }
+    }
+
+
+    /**
+     * InputStream 사용해서 파일을 S3 업로드
+     */
+    public void uploadToS3(InputStream inputStream, final String s3Key, final ObjectMetadata metadata) {
         try {
             byte[] bytes = IOUtils.toByteArray(inputStream);
 

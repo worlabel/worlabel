@@ -26,13 +26,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -41,6 +44,7 @@ import java.util.List;
 public class ImageService {
 
     private final ProjectRepository projectRepository;
+    private final ImageAsyncService imageAsyncService;
     private final FolderRepository folderRepository;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
@@ -51,50 +55,79 @@ public class ImageService {
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
         Folder folder = getOrCreateFolder(folderId, projectId);
+        long prev = System.currentTimeMillis();
 
-        // 이미지 리스트를 순차적으로 처리 (향후 비동기/병렬 처리를 위해 분리된 메서드 호출)
-        imageList.forEach(file -> uploadAndSave(file, folder, projectId));
-    }
+        // 동적 배치 크기 계산
+        int totalImages = imageList.size();
+        int batchSize;
 
-    /**
-     * 폴더 생성 또는 가져오기
-     * 폴더 생성 작업이 있음으로 트랜잭션 보호
-     */
-    public Folder getOrCreateFolder(Integer folderId, Integer projectId) {
-        if (folderId != 0) {
-            return getFolder(folderId);
+        if (totalImages <= 100) {
+            batchSize = 25;  // 작은 이미지 수는 작은 배치 크기
+        } else if (totalImages <= 3000) {
+            batchSize = 50;  // 중간 이미지 수는 중간 배치 크기
         } else {
-            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            Project project = getProject(projectId);
-            Folder folder = Folder.of(currentDateTime, null, project);
-            folderRepository.save(folder);  // 새로운 폴더를 저장
-            return folder;
+            batchSize = 100; // 큰 이미지 수는 큰 배치 크기
         }
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (int i = 0; i < imageList.size(); i += batchSize) {
+            List<MultipartFile> batch = imageList.subList(i, Math.min(i + batchSize, imageList.size()));
+
+            CompletableFuture<Void> future = imageAsyncService.asyncImageUpload(batch, folder, projectId);
+            // 모든 비동기 작업이 완료될 때까지 기다림
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 기다림
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        long after = System.currentTimeMillis();
+        log.debug("업로드 완료 - 경과시간 {}", ((double) after - prev) / 1000);
     }
 
     /**
      * Zip 파일 처리 메서드
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void uploadFolderWithImages(final MultipartFile folderOrZip, final Integer projectId, final Integer folderId) throws IOException {
-        log.debug("파일 크기: {}, 기존 파일 이름: {} ", folderOrZip.getSize(), folderOrZip.getOriginalFilename());
+    public void uploadFolderWithImages(final MultipartFile zipFile, final Integer projectId, final Integer folderId) throws IOException {
+        log.debug("파일 크기: {}, 기존 파일 이름: {} ", zipFile.getSize(), zipFile.getOriginalFilename());
 
-        // 프로젝트 정보 가져오기
-        Project project = getProject(projectId);
-        Folder parentFolder = getOrCreateFolder(folderId, projectId);
+        Project project = getProject(projectId); // 현재 프로젝트
+        Folder rootFolder = folderRepository.findById(folderId).orElse(null); // 부모 프로젝트
 
-        String originalFilename = folderOrZip.getOriginalFilename();
-        if (originalFilename != null && originalFilename.endsWith(".zip")) {
-            // Zip 파일 처리
-            Path tempDir = Files.createTempDirectory("uploadedFolder");
-            unzip(folderOrZip, tempDir.toString());
-            processFolderRecursively(tempDir.toFile(), parentFolder, project);
-        } else {
-            // 압축 파일이 아닌 경우 (단일 폴더 또는 파일)
-            File tempFolder = new File(System.getProperty("java.io.tmpdir"), originalFilename);
-            folderOrZip.transferTo(tempFolder); // 파일을 임시 디렉토리에 저장
-            // 폴더 또는 파일을 재귀적으로 탐색하여 저장
-            processFolderRecursively(tempFolder, parentFolder, project);
+        Path tmpDir = null;
+        try {
+            String originalFilename = zipFile.getOriginalFilename();
+            if (originalFilename == null || !originalFilename.endsWith(".zip")) {
+                throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "ZIP 파일만 업로드 가능");
+            }
+
+            // ZIP 파일 처리
+            String zipFolderName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+            tmpDir = Files.createTempDirectory(zipFolderName);
+
+            unzip(zipFile, tmpDir.toString());
+            processFolderRecursively(tmpDir.toFile(), rootFolder, project);
+        } finally {
+            if (tmpDir != null) {
+                deleteDirectoryRecursively(tmpDir);
+                log.debug("임시 디렉토리 삭제 완료: {}", tmpDir);
+            }
+        }
+    }
+
+    private void deleteDirectoryRecursively(Path directory) throws IOException {
+        if (Files.exists(directory)) {
+            try (Stream<Path> paths = Files.walk(directory)) {
+                paths.sorted(Comparator.reverseOrder()) // 하위 파일부터 삭제
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                log.error("Failed to delete file: {}", path, e);
+                            }
+                        });
+            }
         }
     }
 
@@ -102,16 +135,23 @@ public class ImageService {
      * 폴더 및 파일을 재귀적으로 탐색하여 처리
      */
     private void processFolderRecursively(File directory, Folder parentFolder, Project project) {
-        if (directory.exists() && directory.isDirectory()) {
-            Folder currentFolder = createFolderAndSave(directory.getName(), parentFolder, project);
+        log.debug("폴더 이름 {}, 부모 폴더 이름 {}", directory.getName(), parentFolder == null ? "root" : parentFolder.getTitle());
 
+        if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
             if (files != null) {
                 for (File file : files) {
+                    // 숨겨진 파일이나 __MACOSX 폴더를 제외
+                    if (file.getName().startsWith("._") || file.getName().contains("__MACOSX")) {
+                        log.debug("숨겨진 파일이나 __MACOSX 폴더 제외: {}", file.getName());
+                        continue;
+                    }
+
                     if (file.isDirectory()) {
+                        Folder currentFolder = createFolderAndSave(file.getName(), parentFolder, project);
                         processFolderRecursively(file, currentFolder, project);
                     } else if (isImageFile(file)) {
-                        uploadAndSave(file, currentFolder, project);
+                        uploadAndSave(file, parentFolder, project);
                     }
                 }
             }
@@ -187,17 +227,25 @@ public class ImageService {
 
     // Apache Commons Compress 라이브러리를 사용하여 ZIP 파일을 처리
     private void unzip(MultipartFile zipFile, String destDir) throws IOException {
+        log.debug("Unzip 시작 {} ", zipFile.getOriginalFilename());
+        log.debug(System.getProperty("java.io.tmpdir"));
+
         try (ZipArchiveInputStream zis = new ZipArchiveInputStream(zipFile.getInputStream(), "MS949")) {
             ArchiveEntry entry;
+
             while ((entry = zis.getNextEntry()) != null) {
                 ZipArchiveEntry zipEntry = (ZipArchiveEntry) entry;
+                // 파일인지 확인한다.
                 Path newPath = zipSlipProtect(zipEntry, Paths.get(destDir));
 
+                // 디렉토리면 해당 디렉토리 이름으로 생성
                 if (zipEntry.isDirectory()) {
                     Files.createDirectories(newPath);
-                } else {
+                }
+                // 파일이면 이름을 기반으로 부모 폴더를 찾고 저장한다.
+                else {
                     Files.createDirectories(newPath.getParent());
-                    try(OutputStream os = Files.newOutputStream(newPath)){
+                    try (OutputStream os = Files.newOutputStream(newPath)) {
                         IOUtils.copy(zis, os);
                     }
                 }
@@ -243,6 +291,22 @@ public class ImageService {
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
+    /**
+     * 폴더 생성 또는 가져오기
+     * 폴더 생성 작업이 있음으로 트랜잭션 보호
+     */
+    public Folder getOrCreateFolder(Integer folderId, Integer projectId) {
+        if (folderId != 0) {
+            return getFolder(folderId);
+        } else {
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            Project project = getProject(projectId);
+            Folder folder = Folder.of(currentDateTime, null, project);
+            folderRepository.save(folder);  // 새로운 폴더를 저장
+            return folder;
+        }
+    }
+
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
@@ -250,13 +314,13 @@ public class ImageService {
     }
 
     /*
-            공통 로직
+        공통 로직
      */
 
     /**
      * MultipartFile 업로드 및 저장
      */
-    private void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
+    public void uploadAndSave(MultipartFile file, Folder folder, int projectId) {
         try {
             String key = uploadToS3(file, projectId);
             saveImage(file, key, folder);
@@ -274,7 +338,6 @@ public class ImageService {
             String key = uploadToS3(file, project.getId());
             saveImage(file, key, folder);
         } catch (Exception e) {
-            log.error("파일 업로드 중 오류 발생", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
         }
     }
@@ -284,7 +347,7 @@ public class ImageService {
      */
     public void saveImage(final MultipartFile file, final String key, final Folder folder) {
         try {
-            Image image = createImage(file, key, folder);
+            Image image = createImage(file.getOriginalFilename(), key, folder);
             imageRepository.save(image);
         } catch (Exception e) {
             log.error("이미지 DB 저장 실패 원인: ", e);
@@ -298,7 +361,7 @@ public class ImageService {
      */
     public void saveImage(final File file, final String key, final Folder folder) {
         try {
-            Image image = createImage(file, key, folder);
+            Image image = createImage(file.getName(), key, folder);
             imageRepository.save(image);
         } catch (Exception e) {
             s3UploadService.deleteImageFromS3(key);
@@ -309,9 +372,10 @@ public class ImageService {
     /**
      * S3 파일 업로드
      */
-    private String uploadToS3(final MultipartFile file, final Integer projectId) {
+    public String uploadToS3(final MultipartFile file, final Integer projectId) {
         String extension = getExtension(file.getOriginalFilename());
-        return s3UploadService.uploadMultipartFile(file, extension, projectId);
+//        return s3UploadService.uploadImageFile(file, extension, projectId);
+        return "";
     }
 
     /**
@@ -319,17 +383,11 @@ public class ImageService {
      */
     private String uploadToS3(final File file, final Integer projectId) {
         String extension = getExtension(file.getName());
-        return s3UploadService.uploadFile(file, extension, projectId);
+        return s3UploadService.uploadImageFile(file, extension, projectId);
     }
 
-    public Image createImage(MultipartFile file, String key, Folder folder) {
-        String extension = getExtension(file.getOriginalFilename());
-        log.debug("이미지 업로드 이름 :{}",file.getOriginalFilename());
-        return Image.of(file.getOriginalFilename(), key, extension, folder);
-    }
-
-    public Image createImage(File file, String key, Folder folder) {
-        String extension = getExtension(file.getName());
-        return Image.of(file.getName(), key, extension, folder);
+    public Image createImage(String fileName, String key, Folder folder) {
+        String extension = getExtension(fileName);
+        return Image.of(fileName, key, extension, folder);
     }
 }

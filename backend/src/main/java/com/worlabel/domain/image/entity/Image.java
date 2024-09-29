@@ -19,7 +19,7 @@ public class Image extends BaseEntity {
      */
     @Id
     @Column(name = "project_image_id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     /**
