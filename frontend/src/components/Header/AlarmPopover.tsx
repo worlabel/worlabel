@@ -5,7 +5,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { onMessage } from 'firebase/messaging';
 import { messaging } from '@/api/firebaseConfig';
 import AlarmItem from './AlarmItem';
-import useFcmTokenQuery from '@/queries/auth/useFcmTokenQuery';
+import useGetAndSaveFcmTokenQuery from '@/queries/auth/useGetAndSaveFcmTokenQuery';
+import useResetFcmTokenQuery from '@/queries/auth/useResetFcmTokenQuery';
 import useGetAlarmListQuery from '@/queries/alarms/useGetAlarmListQuery';
 import useResetAlarmListQuery from '@/queries/alarms/useResetAlarmListQuery';
 import useCreateAlarmTestQuery from '@/queries/alarms/useCreateAlarmTestQuery';
@@ -16,15 +17,12 @@ import useDeleteAllAlarmQuery from '@/queries/alarms/useDeleteAllAlarmQuery';
 export default function AlarmPopover() {
   const [unread, setUnread] = useState<boolean>(false);
 
+  const resetFcmToken = useResetFcmTokenQuery();
   const resetAlarmList = useResetAlarmListQuery();
   const createAlarmTest = useCreateAlarmTestQuery();
   const readAlarm = useReadAlarmQuery();
   const deleteAlarm = useDeleteAlarmQuery();
   const deleteAllAlarm = useDeleteAllAlarmQuery();
-
-  const handleResetAlarmList = () => {
-    resetAlarmList.mutate();
-  };
 
   const handleCreateAlarmTest = () => {
     createAlarmTest.mutate();
@@ -42,14 +40,14 @@ export default function AlarmPopover() {
     deleteAllAlarm.mutate();
   };
 
-  useFcmTokenQuery();
+  useGetAndSaveFcmTokenQuery();
   const { data: alarms } = useGetAlarmListQuery();
 
   onMessage(messaging, (payload) => {
     if (!payload.data) return;
 
     console.log('new message arrived');
-    handleResetAlarmList();
+    resetAlarmList.mutate();
   });
 
   useEffect(() => {
@@ -62,13 +60,31 @@ export default function AlarmPopover() {
     }
   }, [alarms]);
 
+  useEffect(() => {
+    // 현재 창에 포커스 시 실행할 메서드
+    const handleFocus = () => {
+      resetFcmToken.mutate();
+      resetAlarmList.mutate();
+    };
+
+    // 현재 창에 포커스 해제 시 실행할 메서드
+    // const handleBlur = () => {};
+
+    // window에 focus와 blur 이벤트 리스너 등록
+    window.addEventListener('focus', handleFocus);
+    // window.addEventListener('blur', handleBlur);
+
+    // 컴포넌트가 언마운트될 때 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      // window.removeEventListener('blur', handleBlur);
+    };
+  }, [resetAlarmList, resetFcmToken]);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
-          className="flex items-center justify-center p-2"
-          onClick={() => {}}
-        >
+        <button className="flex items-center justify-center p-2">
           <Bell className="h-4 w-4 cursor-pointer text-black sm:h-5 sm:w-5" />
           <div className={cn('mt-[14px] h-1.5 w-1.5 rounded-full', unread ? 'bg-blue-500' : 'bg-transparent')}></div>
         </button>
