@@ -20,6 +20,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,6 +56,9 @@ public class ImageService {
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
         Folder folder = getOrCreateFolder(folderId, projectId);
+        folderRepository.flush();
+
+        log.debug("folder Id {}, Project Id {}",folder.getId(), folder.getProject().getId());
         long prev = System.currentTimeMillis();
 
         // 동적 배치 크기 계산
@@ -92,9 +96,6 @@ public class ImageService {
     public void uploadFolderWithImages(final MultipartFile zipFile, final Integer projectId, final Integer folderId) throws IOException {
         log.debug("파일 크기: {}, 기존 파일 이름: {} ", zipFile.getSize(), zipFile.getOriginalFilename());
 
-        Project project = getProject(projectId); // 현재 프로젝트
-        Folder rootFolder = folderRepository.findById(folderId).orElse(null); // 부모 프로젝트
-
         Path tmpDir = null;
         try {
             String originalFilename = zipFile.getOriginalFilename();
@@ -105,6 +106,9 @@ public class ImageService {
             // ZIP 파일 처리
             String zipFolderName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
             tmpDir = Files.createTempDirectory(zipFolderName);
+
+            Project project = getProject(projectId);
+            Folder rootFolder = getOrCreateFolder(folderId, projectId);
 
             unzip(zipFile, tmpDir.toString());
             processFolderRecursively(tmpDir.toFile(), rootFolder, project);
@@ -151,6 +155,7 @@ public class ImageService {
                         Folder currentFolder = createFolderAndSave(file.getName(), parentFolder, project);
                         processFolderRecursively(file, currentFolder, project);
                     } else if (isImageFile(file)) {
+                        log.debug("파일 {}", file.getName());
                         uploadAndSave(file, parentFolder, project);
                     }
                 }
@@ -295,6 +300,7 @@ public class ImageService {
      * 폴더 생성 또는 가져오기
      * 폴더 생성 작업이 있음으로 트랜잭션 보호
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Folder getOrCreateFolder(Integer folderId, Integer projectId) {
         if (folderId != 0) {
             return getFolder(folderId);
@@ -333,11 +339,13 @@ public class ImageService {
     /**
      * File 업로드 및 저장
      */
-    private void uploadAndSave(File file, Folder folder, Project project) {
+    public void uploadAndSave(File file, Folder folder, Project project) {
         try {
             String key = uploadToS3(file, project.getId());
+            log.debug("업로드 {}", key);
             saveImage(file, key, folder);
         } catch (Exception e) {
+            log.error("", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "이미지 업로드 중 오류 발생");
         }
     }
@@ -361,9 +369,11 @@ public class ImageService {
      */
     public void saveImage(final File file, final String key, final Folder folder) {
         try {
+            log.debug("파일 생성 완료 : {} {}", file.getName(), key);
             Image image = createImage(file.getName(), key, folder);
             imageRepository.save(image);
         } catch (Exception e) {
+            log.error("error ", e);
             s3UploadService.deleteImageFromS3(key);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "에러 발생");
         }
@@ -374,8 +384,7 @@ public class ImageService {
      */
     public String uploadToS3(final MultipartFile file, final Integer projectId) {
         String extension = getExtension(file.getOriginalFilename());
-//        return s3UploadService.uploadImageFile(file, extension, projectId);
-        return "";
+        return s3UploadService.uploadImageFile(file, extension, projectId);
     }
 
     /**
@@ -383,6 +392,7 @@ public class ImageService {
      */
     private String uploadToS3(final File file, final Integer projectId) {
         String extension = getExtension(file.getName());
+        log.debug("S3에서 업로드 현황 {}, {}, {}", file.getName(), extension, file.getTotalSpace());
         return s3UploadService.uploadImageFile(file, extension, projectId);
     }
 
