@@ -91,7 +91,7 @@ export default function AlarmPopover() {
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-80 overflow-hidden rounded-lg p-0"
+        className="w-[360px] overflow-hidden rounded-lg p-0"
         align="end"
         sideOffset={14}
         alignOffset={0}
