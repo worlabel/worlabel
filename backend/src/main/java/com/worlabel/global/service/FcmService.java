@@ -26,6 +26,8 @@ public class FcmService {
 
     public void send(Integer memberId, String data) {
         String token = fcmCacheRepository.getToken(memberId);
+        log.debug("토큰 {}", token);
+        
         if(Objects.nonNull(token)){
             sendNotification(token, data);
         }

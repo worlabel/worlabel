@@ -19,6 +19,7 @@ public class AlarmService {
     private final FcmService fcmService;
 
     public void save(int memberId, AlarmType type) {
+        log.debug("알람 전송 memberId {}, type {}", memberId, type);
         alarmCacheRepository.save(memberId, type);
         fcmService.send(memberId, type.toString());
     }

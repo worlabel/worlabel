@@ -133,7 +133,7 @@ public class AiModelService {
         String endPoint = "/models/download";
         endPoint += "?modelKey=" + modelKey;
 
-        ResponseEntity<Resource> fileRequest = aiRequestService.getFileRequest(endPoint);
+        return aiRequestService.getFileRequest(endPoint);
     }
 
     public TrainRequest getTrainRequest(final ModelTrainRequest trainRequest, final Project project, final AiModel model) {
