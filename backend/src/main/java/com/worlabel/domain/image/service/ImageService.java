@@ -40,7 +40,6 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ImageService {
 
@@ -56,9 +55,8 @@ public class ImageService {
     @CheckPrivilege(value = PrivilegeType.EDITOR)
     public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
         Folder folder = getOrCreateFolder(folderId, projectId);
-        folderRepository.flush();
 
-        log.debug("folder Id {}, Project Id {}",folder.getId(), folder.getProject().getId());
+        log.debug("folder Id {}, Project Id {}", folder.getId(), folder.getProject().getId());
         long prev = System.currentTimeMillis();
 
         // 동적 배치 크기 계산
@@ -78,7 +76,6 @@ public class ImageService {
             List<MultipartFile> batch = imageList.subList(i, Math.min(i + batchSize, imageList.size()));
 
             CompletableFuture<Void> future = imageAsyncService.asyncImageUpload(batch, folder, projectId);
-            // 모든 비동기 작업이 완료될 때까지 기다림
             futures.add(future);
         }
 
@@ -308,7 +305,8 @@ public class ImageService {
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             Project project = getProject(projectId);
             Folder folder = Folder.of(currentDateTime, null, project);
-            folderRepository.save(folder);  // 새로운 폴더를 저장
+            folderRepository.saveAndFlush(folder);  // 새로운 폴더를 저장
+
             return folder;
         }
     }

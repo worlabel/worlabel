@@ -1,6 +1,7 @@
 package com.worlabel.domain.project.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.labelcategory.entity.ProjectCategory;
 import com.worlabel.domain.model.entity.AiModel;
 import com.worlabel.domain.workspace.entity.Workspace;
@@ -55,6 +56,12 @@ public class Project extends BaseEntity {
     private List<ProjectCategory> categoryList = new ArrayList<>();
 
     /**
+     * 프로젝트에 속한 폴더
+     */
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Folder> folderList = new ArrayList<>();
+
+    /**
      * 프로젝트에 속한 모델
      */
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -73,5 +80,9 @@ public class Project extends BaseEntity {
     public void updateProject(final String title, final ProjectType projectType) {
         this.title = title;
         this.projectType = projectType;
+    }
+
+    public void createFolder(final Folder folder) {
+        folderList.add(folder);
     }
 }
