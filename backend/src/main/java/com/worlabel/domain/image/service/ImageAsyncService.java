@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,19 +29,18 @@ public class ImageAsyncService {
 
     @Async("imageUploadExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public CompletableFuture<Void>  asyncImageUpload(final List<MultipartFile> imageFileList, final Folder folder, final Integer projectId) {
+    public CompletableFuture<Void> asyncImageUpload(final List<MultipartFile> imageFileList, final Folder folder, final Integer projectId) {
         log.debug("현재 스레드 - {} 업로드 파일 개수 - {}, 현재 작업 큐 용량 - {}",
                 Thread.currentThread().getName(),
                 imageFileList.size(),
-                imageUploadExecutor.getThreadPoolExecutor().getQueue().size()); // 큐에 쌓인 작업 수 출력);
+                imageUploadExecutor.getThreadPoolExecutor().getQueue().size()
+        ); // 큐에 쌓인 작업 수 출력);
 
         imageFileList.forEach(file -> {
-            try{
-                String extension = getExtension(file.getOriginalFilename());
-                String imageKey = s3UploadService.uploadImageFile(file, extension, projectId);
-
+            try {
+                String imageKey = imageUpload(projectId, file);
                 createImage(file, imageKey, folder);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("이미지 업로드 실패: {}", file.getOriginalFilename(), e);
                 throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
             }
@@ -52,15 +50,19 @@ public class ImageAsyncService {
         return CompletableFuture.completedFuture(null);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW,isolation = Isolation.READ_COMMITTED)
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public String imageUpload(Integer projectId, MultipartFile file) {
+        String extension = getExtension(file.getOriginalFilename());
+        return s3UploadService.uploadImageFile(file, extension, projectId);
+    }
+
     public void createImage(MultipartFile file, String imageKey, Folder folder) {
         try {
             String name = file.getOriginalFilename();
             String extension = getExtension(name);
-            log.debug("image 파일 {} {} {} {}", name, extension, imageKey, folder.getId());
             Image image = Image.of(name, imageKey, extension, folder);
             imageRepository.save(image);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.debug("이미지 DB 저장 실패: ", e);
             s3UploadService.deleteImageFromS3(imageKey);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
