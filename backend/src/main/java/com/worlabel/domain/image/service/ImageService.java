@@ -32,8 +32,10 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -87,25 +89,45 @@ public class ImageService {
      * Zip 파일 처리 메서드
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void uploadFolderWithImages(final MultipartFile folderOrZip, final Integer projectId, final Integer folderId) throws IOException {
-        log.debug("파일 크기: {}, 기존 파일 이름: {} ", folderOrZip.getSize(), folderOrZip.getOriginalFilename());
+    public void uploadFolderWithImages(final MultipartFile zipFile, final Integer projectId, final Integer folderId) throws IOException {
+        log.debug("파일 크기: {}, 기존 파일 이름: {} ", zipFile.getSize(), zipFile.getOriginalFilename());
 
-        // 프로젝트 정보 가져오기
-        Project project = getProject(projectId);
-        Folder parentFolder = getOrCreateFolder(folderId, projectId);
+        Project project = getProject(projectId); // 현재 프로젝트
+        Folder rootFolder = folderRepository.findById(folderId).orElse(null); // 부모 프로젝트
 
-        String originalFilename = folderOrZip.getOriginalFilename();
-        if (originalFilename != null && originalFilename.endsWith(".zip")) {
-            // Zip 파일 처리
-            Path tempDir = Files.createTempDirectory("uploadedFolder");
-            unzip(folderOrZip, tempDir.toString());
-            processFolderRecursively(tempDir.toFile(), parentFolder, project);
-        } else {
-            // 압축 파일이 아닌 경우 (단일 폴더 또는 파일)
-            File tempFolder = new File(System.getProperty("java.io.tmpdir"), originalFilename);
-            folderOrZip.transferTo(tempFolder); // 파일을 임시 디렉토리에 저장
-            // 폴더 또는 파일을 재귀적으로 탐색하여 저장
-            processFolderRecursively(tempFolder, parentFolder, project);
+        Path tmpDir = null;
+        try {
+            String originalFilename = zipFile.getOriginalFilename();
+            if (originalFilename == null || !originalFilename.endsWith(".zip")) {
+                throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE, "ZIP 파일만 업로드 가능");
+            }
+
+            // ZIP 파일 처리
+            String zipFolderName = originalFilename.substring(0, originalFilename.lastIndexOf("."));
+            tmpDir = Files.createTempDirectory(zipFolderName);
+
+            unzip(zipFile, tmpDir.toString());
+            processFolderRecursively(tmpDir.toFile(), rootFolder, project);
+        } finally {
+            if (tmpDir != null) {
+                deleteDirectoryRecursively(tmpDir);
+                log.debug("임시 디렉토리 삭제 완료: {}", tmpDir);
+            }
+        }
+    }
+
+    private void deleteDirectoryRecursively(Path directory) throws IOException {
+        if (Files.exists(directory)) {
+            try (Stream<Path> paths = Files.walk(directory)) {
+                paths.sorted(Comparator.reverseOrder()) // 하위 파일부터 삭제
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                log.error("Failed to delete file: {}", path, e);
+                            }
+                        });
+            }
         }
     }
 
@@ -113,16 +135,23 @@ public class ImageService {
      * 폴더 및 파일을 재귀적으로 탐색하여 처리
      */
     private void processFolderRecursively(File directory, Folder parentFolder, Project project) {
-        if (directory.exists() && directory.isDirectory()) {
-            Folder currentFolder = createFolderAndSave(directory.getName(), parentFolder, project);
+        log.debug("폴더 이름 {}, 부모 폴더 이름 {}", directory.getName(), parentFolder == null ? "root" : parentFolder.getTitle());
 
+        if (directory.exists() && directory.isDirectory()) {
             File[] files = directory.listFiles();
             if (files != null) {
                 for (File file : files) {
+                    // 숨겨진 파일이나 __MACOSX 폴더를 제외
+                    if (file.getName().startsWith("._") || file.getName().contains("__MACOSX")) {
+                        log.debug("숨겨진 파일이나 __MACOSX 폴더 제외: {}", file.getName());
+                        continue;
+                    }
+
                     if (file.isDirectory()) {
+                        Folder currentFolder = createFolderAndSave(file.getName(), parentFolder, project);
                         processFolderRecursively(file, currentFolder, project);
                     } else if (isImageFile(file)) {
-                        uploadAndSave(file, currentFolder, project);
+                        uploadAndSave(file, parentFolder, project);
                     }
                 }
             }
@@ -198,15 +227,23 @@ public class ImageService {
 
     // Apache Commons Compress 라이브러리를 사용하여 ZIP 파일을 처리
     private void unzip(MultipartFile zipFile, String destDir) throws IOException {
+        log.debug("Unzip 시작 {} ", zipFile.getOriginalFilename());
+        log.debug(System.getProperty("java.io.tmpdir"));
+
         try (ZipArchiveInputStream zis = new ZipArchiveInputStream(zipFile.getInputStream(), "MS949")) {
             ArchiveEntry entry;
+
             while ((entry = zis.getNextEntry()) != null) {
                 ZipArchiveEntry zipEntry = (ZipArchiveEntry) entry;
+                // 파일인지 확인한다.
                 Path newPath = zipSlipProtect(zipEntry, Paths.get(destDir));
 
+                // 디렉토리면 해당 디렉토리 이름으로 생성
                 if (zipEntry.isDirectory()) {
                     Files.createDirectories(newPath);
-                } else {
+                }
+                // 파일이면 이름을 기반으로 부모 폴더를 찾고 저장한다.
+                else {
                     Files.createDirectories(newPath.getParent());
                     try (OutputStream os = Files.newOutputStream(newPath)) {
                         IOUtils.copy(zis, os);
@@ -351,7 +388,6 @@ public class ImageService {
 
     public Image createImage(String fileName, String key, Folder folder) {
         String extension = getExtension(fileName);
-        log.debug("이미지 업로드 이름 :{}", fileName);
         return Image.of(fileName, key, extension, folder);
     }
 }
