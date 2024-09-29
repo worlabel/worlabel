@@ -1,10 +1,11 @@
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
 import SelectWithLabel from './SelectWithLabel';
 import InputWithLabel from './InputWithLabel';
-import { Button } from '@/components/ui/button';
 import useProjectModelsQuery from '@/queries/models/useProjectModelsQuery';
 import { ModelTrainRequest, ModelResponse } from '@/types';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TrainingSettingsProps {
   projectId: number | null;
@@ -30,6 +31,9 @@ export default function TrainingSettings({
   const [optimizer, setOptimizer] = useState<'SGD' | 'AUTO' | 'ADAM' | 'ADAMW' | 'NADAM' | 'RADAM' | 'RMSPROP'>('AUTO');
   const [lr0, setLr0] = useState<number>(0.01);
   const [lrf, setLrf] = useState<number>(0.001);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSubmit = () => {
     if (selectedModel?.isTrain) {
@@ -44,9 +48,33 @@ export default function TrainingSettings({
         lr0,
         lrf,
       };
+      setIsSubmitting(true);
       handleTrainingStart(trainData);
     }
   };
+
+  useEffect(() => {
+    if (isSubmitting) {
+      intervalRef.current = setInterval(() => {
+        queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
+      }, 1000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isSubmitting, queryClient, projectId]);
+
+  useEffect(() => {
+    if (selectedModel?.isTrain) {
+      setIsSubmitting(false);
+    }
+  }, [selectedModel]);
 
   return (
     <fieldset className={cn('grid gap-6 rounded-lg border p-4', className)}>
@@ -130,9 +158,9 @@ export default function TrainingSettings({
             variant="outlinePrimary"
             size="lg"
             onClick={handleSubmit}
-            disabled={!selectedModel}
+            disabled={!selectedModel || isSubmitting}
           >
-            {selectedModel?.isTrain ? '학습 중단' : '학습 시작'}
+            {isSubmitting ? '기다리는 중...' : '학습 시작'}
           </Button>
         </>
       )}

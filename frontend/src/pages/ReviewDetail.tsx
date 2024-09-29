@@ -21,23 +21,28 @@ export default function ReviewDetail(): JSX.Element {
 
   const { data: reviewDetail } = useReviewDetailQuery(Number(projectId), Number(reviewId), memberId);
 
-  const approveReviewMutation = useApproveReviewQuery({ projectId: Number(projectId), reviewId: Number(reviewId) });
-  const rejectReviewMutation = useRejectReviewQuery({ projectId: Number(projectId), reviewId: Number(reviewId) });
+  const approveReviewMutation = useApproveReviewQuery({
+    projectId: Number(projectId),
+    reviewId: Number(reviewId),
+    memberId: memberId,
+  });
+  const rejectReviewMutation = useRejectReviewQuery({
+    projectId: Number(projectId),
+    reviewId: Number(reviewId),
+    memberId: memberId,
+  });
 
   const [activeTab, setActiveTab] = useState<'content' | 'images'>('content');
-  const [isReviewed, setIsReviewed] = useState(
-    reviewDetail?.reviewStatus === 'APPROVED' || reviewDetail?.reviewStatus === 'REJECTED'
-  );
 
   const handleApprove = () => {
     approveReviewMutation.mutate(undefined, {
-      onSuccess: () => setIsReviewed(true),
+      onSuccess: () => {},
     });
   };
 
   const handleReject = () => {
     rejectReviewMutation.mutate(undefined, {
-      onSuccess: () => setIsReviewed(true),
+      onSuccess: () => {},
     });
   };
 
@@ -124,24 +129,20 @@ export default function ReviewDetail(): JSX.Element {
         </div>
       )}
 
-      {!isReviewed && (
+      {reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (
         <div className="actions mt-6 flex justify-end space-x-2">
-          {reviewDetail.reviewStatus !== 'APPROVED' && (
-            <Button
-              variant="default"
-              onClick={handleApprove}
-            >
-              {'승인'}
-            </Button>
-          )}
-          {reviewDetail.reviewStatus !== 'REJECTED' && (
-            <Button
-              variant="destructive"
-              onClick={handleReject}
-            >
-              {'거부'}
-            </Button>
-          )}
+          <Button
+            variant="destructive"
+            onClick={handleReject}
+          >
+            {'거부'}
+          </Button>
+          <Button
+            variant="default"
+            onClick={handleApprove}
+          >
+            {'승인'}
+          </Button>
         </div>
       )}
 

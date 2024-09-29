@@ -100,7 +100,7 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
         </div>
       )}
       {files.length > 0 && (
-        <ul className="m-0 list-none p-0">
+        <ul className="m-0 max-h-[200px] list-none overflow-y-auto p-0">
           {files.map((file, index) => (
             <li
               key={index}

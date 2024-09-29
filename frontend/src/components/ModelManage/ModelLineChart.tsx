@@ -27,6 +27,10 @@ const chartConfig = {
     label: 'Fitness',
     color: '#FFD700',
   },
+  segLoss: {
+    label: 'Segmentation Loss',
+    color: '#FF1493',
+  },
 } satisfies ChartConfig;
 
 export default function ModelLineChart({ data, className }: ModelLineChartProps) {
@@ -36,9 +40,10 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
   const emptyData = Array.from({ length: totalEpochs }, (_, i) => ({
     epoch: (i + 1).toString(),
     boxLoss: null,
-    classLoss: null,
+    clsLoss: null,
     dflLoss: null,
     fitness: null,
+    segLoss: null,
   }));
 
   const filledData = emptyData.map((item, index) => ({
@@ -46,6 +51,18 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
     ...(data[index] || {}),
   }));
 
+  const renderLine = (dataKey: keyof ReportResponse, color: string) => {
+    const hasNonZeroData = filledData.some((d) => d[dataKey] !== 0);
+    return hasNonZeroData ? (
+      <Line
+        dataKey={dataKey}
+        type="monotone"
+        stroke={color}
+        strokeWidth={2}
+        dot={false}
+      />
+    ) : null;
+  };
   return (
     <Card className={className}>
       <CardHeader>
@@ -79,34 +96,11 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line
-              dataKey="boxLoss"
-              type="monotone"
-              stroke={chartConfig.boxLoss.color}
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="classLoss"
-              type="monotone"
-              stroke={chartConfig.classLoss.color}
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="dflLoss"
-              type="monotone"
-              stroke={chartConfig.dflLoss.color}
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="fitness"
-              type="monotone"
-              stroke={chartConfig.fitness.color}
-              strokeWidth={2}
-              dot={false}
-            />
+            {renderLine('boxLoss', chartConfig.boxLoss.color)}
+            {renderLine('clsLoss', chartConfig.classLoss.color)}
+            {renderLine('dflLoss', chartConfig.dflLoss.color)}
+            {renderLine('fitness', chartConfig.fitness.color)}
+            {renderLine('segLoss', chartConfig.segLoss.color)}
           </LineChart>
         </ChartContainer>
       </CardContent>

@@ -4,15 +4,16 @@ import { rejectReview } from '@/api/reviewApi';
 interface ReviewStatusChangeProps {
   projectId: number;
   reviewId: number;
+  memberId: number;
 }
 
-export default function useRejectReviewQuery({ projectId, reviewId }: ReviewStatusChangeProps) {
+export default function useRejectReviewQuery({ projectId, reviewId, memberId }: ReviewStatusChangeProps) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: () => rejectReview(projectId, reviewId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviewDetail', reviewId] });
+      queryClient.invalidateQueries({ queryKey: ['reviewDetail', projectId, reviewId, memberId] });
     },
   });
 }
