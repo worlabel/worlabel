@@ -96,8 +96,8 @@ public class S3UploadService {
      */
     public String uploadImageFile(final File file, final String extension, final Integer projectId) {
         try (InputStream inputStream = new FileInputStream(file)) {
-//            return uploadImageToS3(inputStream, extension, projectId);
-            return "";
+            return uploadImageToS3(inputStream, extension, projectId);
+//            return "";
         } catch (IOException e) {
             log.debug("이미지 업로드에서 에러 발생 ", e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
