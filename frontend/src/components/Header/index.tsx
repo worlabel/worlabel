@@ -39,7 +39,7 @@ export default function Header({ className, ...props }: HeaderProps) {
       </div>
 
       {!isHomePage && profile && (
-        <div className="flex items-center gap-4 md:gap-5">
+        <div className="flex items-center gap-2">
           <AlarmPopover />
           <UserProfileModal />
         </div>

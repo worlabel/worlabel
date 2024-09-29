@@ -1,11 +1,10 @@
-import { createTestAlarm } from '@/api/alarmApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export default function useCreateTestAlarmQuery() {
+export default function useUpdateAlarmQuery() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createTestAlarm,
+    mutationFn: async () => {},
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alarmList'] });
     },

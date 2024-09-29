@@ -5,7 +5,7 @@ export async function getAlarmList() {
   return api.get<AlarmResponse[]>('/alarm').then(({ data }) => data);
 }
 
-export async function createTestAlarm() {
+export async function createAlarmTest() {
   return api.post('/alarm/test').then(({ data }) => data);
 }
 
