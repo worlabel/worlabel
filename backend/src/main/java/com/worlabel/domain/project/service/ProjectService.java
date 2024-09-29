@@ -171,35 +171,37 @@ public class ProjectService {
     public void autoLabeling(final Integer memberId, final Integer projectId, final AutoModelRequest request) {
         progressService.predictProgressCheck(projectId);
 
-        Project project = getProject(projectId);
-        String endPoint = project.getProjectType().getValue() + "/predict";
+        try {
+            progressService.registerPredictProgress(projectId);
+            Project project = getProject(projectId);
+            String endPoint = project.getProjectType().getValue() + "/predict";
 
-        List<Image> imageList = imageRepository.findImagesByProjectIdAndPendingOrInProgress(projectId);
-        if (imageList.isEmpty()) {
-            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+            List<Image> imageList = imageRepository.findImagesByProjectIdAndPendingOrInProgress(projectId);
+            if (imageList.isEmpty()) {
+                throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+            }
+
+            List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
+                    .map(AutoLabelingImageRequest::of)
+                    .toList();
+
+            HashMap<String, Integer> labelMap = getLabelMap(project);
+
+            AiModel aiModel = getAiModel(request);
+            AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
+
+            log.debug("요청 {}", autoLabelingRequest);
+
+            List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
+            saveAutoLabelList(list);
+
+            alarmService.save(memberId, Alarm.AlarmType.PREDICT);
+        } finally {
+            progressService.removePredictProgress(projectId);
         }
 
-        List<AutoLabelingImageRequest> imageRequestList = imageList.stream()
-                .map(AutoLabelingImageRequest::of)
-                .toList();
-
-        HashMap<String, Integer> labelMap = getLabelMap(project);
-
-        AiModel aiModel = getAiModel(request);
-        AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
-
-        log.debug("요청 {}", autoLabelingRequest);
-        progressService.registerPredictProgress(projectId);
-        List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
-        log.debug("완료 후 삭제:{}", list);
-
-        alarmService.save(memberId, Alarm.AlarmType.PREDICT);
-        progressService.removePredictProgress(projectId);
-
-        saveAutoLabelList(list);
     }
 
-    // TODO: 트랜잭션 설정
     @Transactional
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
         for (AutoLabelingResult result : resultList) {

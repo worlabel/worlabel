@@ -26,7 +26,9 @@ import com.worlabel.global.exception.ErrorCode;
 import com.worlabel.global.service.AiRequestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,47 +88,85 @@ public class AiModelService {
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer memberId, final Integer projectId, final ModelTrainRequest trainRequest) {
-        // FastAPI 서버로 학습 요청을 전송
-        Project project = getProject(projectId);
-        AiModel model = getModel(trainRequest.getModelId());
+        progressService.trainProgressCheck(projectId, trainRequest.getModelId());
 
-        Map<String, Integer> labelMap = project.getCategoryList().stream()
+        try {
+            progressService.registerTrainProgress(projectId, trainRequest.getModelId());
+
+            Project project = getProject(projectId);
+            AiModel model = getModel(trainRequest.getModelId());
+            TrainRequest aiRequest = getTrainRequest(trainRequest, project, model);
+
+            // FastAPI 서버로 POST 요청 전송
+            log.debug("요청 DTO :{}", aiRequest);
+            String endPoint = project.getProjectType().getValue() + "/train";
+            TrainResponse trainResponse = aiRequestService.postRequest(endPoint, aiRequest, TrainResponse.class, this::converterTrain);
+
+            // 가져온 modelKey -> version 업된 모델 다시 새롭게 저장
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
+            int newVersion = model.getVersion() + 1;
+            String newName = currentDateTime + String.format("%03d", newVersion);
+
+            // 새로운 모델 저장
+            AiModel newModel = AiModel.of(newName, trainResponse.getModelKey(), newVersion, project);
+            aiModelRepository.save(newModel);
+
+            // 결과 저장
+            Result result = Result.of(newModel, trainResponse, trainRequest);
+            resultRepository.save(result);
+
+            // 레디스 정보 DB에 저장
+            reportService.changeReport(project.getId(), model.getId(), newModel);
+
+            // 알람 전송
+            alarmService.save(memberId, Alarm.AlarmType.TRAIN);
+        } finally {
+            progressService.removeTrainProgress(projectId, trainRequest.getModelId());
+        }
+    }
+
+    @CheckPrivilege(PrivilegeType.EDITOR)
+    public ResponseEntity<Resource> modelDownload(final Integer projectId,final Integer modelId) {
+        AiModel model = getModel(modelId);
+        String modelKey = model.getModelKey();
+
+        String endPoint = "/models/download";
+        endPoint += "?modelKey=" + modelKey;
+
+        ResponseEntity<Resource> fileRequest = aiRequestService.getFileRequest(endPoint);
+    }
+
+    public TrainRequest getTrainRequest(final ModelTrainRequest trainRequest, final Project project, final AiModel model) {
+        Map<String, Integer> labelMap = getLabelMap(project);
+        List<TrainDataInfo> data = getTrainDataInfoList(project.getId());
+        return TrainRequest.of(project.getId(), model.getId(), model.getModelKey(), labelMap, data, trainRequest);
+    }
+
+    // 레이블 맵 만들기
+    private Map<String, Integer> getLabelMap(final Project project) {
+        return project.getCategoryList().stream()
                 .collect(Collectors.toMap(
                         ProjectCategory::getLabelName,
                         ProjectCategory::getId
                 ));
+    }
 
-        List<Image> images = imageRepository.findImagesByProjectIdAndCompleted(projectId);
-
-        List<TrainDataInfo> data = images.stream()
+    @Transactional(readOnly = true)
+    public List<TrainDataInfo> getTrainDataInfoList(final Integer projectId) {
+        return imageRepository.findImagesByProjectIdAndCompleted(projectId)
+                .stream()
                 .map(TrainDataInfo::of)
                 .toList();
+    }
 
-        TrainRequest aiRequest = TrainRequest.of(project.getId(), model.getId(), model.getModelKey(), labelMap, data, trainRequest);
+    private Project getProject(Integer projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+    }
 
-        String endPoint = project.getProjectType().getValue() + "/train";
-
-        // FastAPI 서버로 POST 요청 전송
-        log.debug("요청 DTO :{}",aiRequest);
-        TrainResponse trainResponse = aiRequestService.postRequest(endPoint, aiRequest, TrainResponse.class, this::converterTrain);
-
-        // 가져온 modelKey -> version 업된 모델 다시 새롭게 저장
-        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
-        int newVersion = model.getVersion() + 1;
-        String newName = currentDateTime + String.format("%03d", newVersion);
-
-        AiModel newModel = AiModel.of(newName, trainResponse.getModelKey(), newVersion, project);
-
-        aiModelRepository.save(newModel);
-
-        Result result = Result.of(newModel, trainResponse, trainRequest);
-
-        resultRepository.save(result);
-
-        // 레디스 정보 DB에 저장
-        reportService.changeReport(project.getId(), model.getId(), newModel);
-
-        alarmService.save(memberId, Alarm.AlarmType.TRAIN);
+    private AiModel getModel(Integer modelId) {
+        return aiModelRepository.findById(modelId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
     }
 
     private TrainResponse converterTrain(String data) {
@@ -139,27 +179,4 @@ public class AiModelService {
         }
     }
 
-    /**
-     * Json -> List<DefaultResponse>
-     */
-    // TODO: 추후 리팩토링 해야함 이건 예시
-    private List<DefaultResponse> converter(String data) {
-        try {
-            Type listType = new TypeToken<List<DefaultResponse>>() {
-            }.getType();
-            return gson.fromJson(data, listType);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.BAD_REQUEST);
-        }
-    }
-
-    private Project getProject(Integer projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
-    }
-
-    private AiModel getModel(Integer modelId) {
-        return aiModelRepository.findById(modelId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
-    }
 }

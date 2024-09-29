@@ -5,6 +5,7 @@ import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -50,6 +51,14 @@ public class AiRequestService {
         // 공통 메서드 사용
         String data = sendRequest(url, HttpMethod.GET, request);
         return converter.apply(data);
+    }
+
+    public ResponseEntity<Resource> getFileRequest(String endPoint) {
+        String url = createApiUrl(endPoint);
+        HttpEntity<Void> request = new HttpEntity<>(createJsonHeaders());
+
+        ResponseEntity<Resource> exchange = restTemplate.exchange(url, HttpMethod.GET, request, Resource.class);
+        return exchange;
     }
 
     // 응답이 없는 요청인 경우 예 : 오토 레이블링 요청

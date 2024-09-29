@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,5 +71,16 @@ public class AiModelController {
             @RequestBody final ModelTrainRequest trainRequest) {
         log.debug("모델 학습 요청 {}", trainRequest);
         aiModelService.train(memberId, projectId, trainRequest);
+    }
+
+    @Operation(summary = "프로젝트 모델 다운로드", description = "프로젝트 모델을 다운로드합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 다운로드됩니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @PostMapping("/projects/{project_id}/models/{model_id}/download")
+    public ResponseEntity<Resource> modelDownload(
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("model_id") final Integer modelId) {
+        log.debug("다운로드 요청 projectId : {} modelId : {}", projectId, modelId);
+        return aiModelService.modelDownload(projectId, modelId);
     }
 }
