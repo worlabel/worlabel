@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import SelectWithLabel from './SelectWithLabel';
 import InputWithLabel from './InputWithLabel';
@@ -33,6 +33,7 @@ export default function TrainingSettings({
   const [lrf, setLrf] = useState<number>(0.001);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleSubmit = () => {
     if (selectedModel?.isTrain) {
@@ -47,16 +48,33 @@ export default function TrainingSettings({
         lr0,
         lrf,
       };
-      queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
       setIsSubmitting(true);
       handleTrainingStart(trainData);
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
-        setIsSubmitting(false);
-        console.log(selectedModel);
-      }, 1000);
     }
   };
+
+  useEffect(() => {
+    if (isSubmitting) {
+      intervalRef.current = setInterval(() => {
+        queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
+      }, 1000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isSubmitting, queryClient, projectId]);
+
+  useEffect(() => {
+    if (selectedModel?.isTrain) {
+      setIsSubmitting(false);
+    }
+  }, [selectedModel]);
 
   return (
     <fieldset className={cn('grid gap-6 rounded-lg border p-4', className)}>
