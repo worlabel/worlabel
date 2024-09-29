@@ -5,7 +5,7 @@ interface CanvasState {
   sidebarSize: number;
   image: ImageResponse | null;
   labels: Label[];
-  drawState: 'pen' | 'rect' | 'pointer';
+  drawState: 'pen' | 'rect' | 'pointer' | 'comment';
   selectedLabelId: number | null;
   setSidebarSize: (width: number) => void;
   setImage: (image: ImageResponse | null) => void;
@@ -13,7 +13,7 @@ interface CanvasState {
   addLabel: (label: Label) => void;
   removeLabel: (labelId: number) => void;
   updateLabel: (label: Label) => void;
-  setDrawState: (state: 'pen' | 'rect' | 'pointer') => void;
+  setDrawState: (state: 'pen' | 'rect' | 'pointer' | 'comment') => void;
   setSelectedLabelId: (labelId: number | null) => void;
 }
 

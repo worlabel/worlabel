@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import ModelLineChart from './ModelLineChart';
-import usePollingTrainingModelReport from '@/queries/reports/usePollingModelReportsQuery';
+import usePollingModelReportsQuery from '@/queries/reports/usePollingModelReportsQuery';
 import { ModelResponse } from '@/types';
 
 interface TrainingGraphProps {
@@ -10,24 +10,24 @@ interface TrainingGraphProps {
 }
 
 export default function TrainingGraph({ projectId, selectedModel, className }: TrainingGraphProps) {
-  const isTraining = selectedModel?.isTrain || false;
-
-  const { data: fetchedTrainingDataList } = usePollingTrainingModelReport(
+  const [isPolling, setIsPolling] = useState(false);
+  const { data: trainingDataList } = usePollingModelReportsQuery(
     projectId as number,
     selectedModel?.id as number,
-    isTraining
+    isPolling
   );
 
-  const trainingDataList = useMemo(() => {
-    if (!isTraining) {
-      return [];
+  useEffect(() => {
+    if (selectedModel) {
+      setIsPolling(true);
+    } else {
+      setIsPolling(false);
     }
-    return fetchedTrainingDataList || [];
-  }, [isTraining, fetchedTrainingDataList]);
+  }, [selectedModel]);
 
   return (
     <ModelLineChart
-      data={trainingDataList}
+      data={trainingDataList || []}
       className={className}
     />
   );
