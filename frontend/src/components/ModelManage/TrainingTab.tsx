@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TrainingSettings from './TrainingSettings';
 import TrainingGraph from './TrainingGraph';
 import useTrainModelQuery from '@/queries/models/useTrainModelQuery';
 import { ModelTrainRequest, ModelResponse } from '@/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TrainingTabProps {
   projectId: number | null;
@@ -11,15 +12,43 @@ interface TrainingTabProps {
 export default function TrainingTab({ projectId }: TrainingTabProps) {
   const numericProjectId = projectId !== null ? Number(projectId) : null;
   const [selectedModel, setSelectedModel] = useState<ModelResponse | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const queryClient = useQueryClient();
 
-  const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number);
+  const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number, {
+    onSuccess: () => {
+      setIsPolling(true);
+    },
+    onError: () => {
+      alert('학습 요청 실패');
+      setIsPolling(false);
+    },
+  });
 
   const handleTrainingStart = (trainData: ModelTrainRequest) => {
     startTraining(trainData);
   };
 
+  useEffect(() => {
+    if (!selectedModel || !numericProjectId || !isPolling) return;
+
+    const intervalId = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['projectModels', numericProjectId] });
+    }, 2000);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(intervalId);
+      setIsPolling(false);
+    }, 30000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [selectedModel, numericProjectId, queryClient, isPolling]);
+
   const handleTrainingStop = () => {
-    // Todo: 학습 중단 로직
+    setIsPolling(false);
   };
 
   return (
@@ -30,9 +59,9 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         setSelectedModel={setSelectedModel}
         handleTrainingStart={handleTrainingStart}
         handleTrainingStop={handleTrainingStop}
+        isPolling={isPolling}
         className="h-full"
       />
-
       <TrainingGraph
         projectId={numericProjectId}
         selectedModel={selectedModel}

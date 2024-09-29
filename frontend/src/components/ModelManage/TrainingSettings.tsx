@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import SelectWithLabel from './SelectWithLabel';
 import InputWithLabel from './InputWithLabel';
 import useProjectModelsQuery from '@/queries/models/useProjectModelsQuery';
 import { ModelTrainRequest, ModelResponse } from '@/types';
 import { cn } from '@/lib/utils';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface TrainingSettingsProps {
   projectId: number | null;
@@ -13,6 +12,7 @@ interface TrainingSettingsProps {
   setSelectedModel: (model: ModelResponse | null) => void;
   handleTrainingStart: (trainData: ModelTrainRequest) => void;
   handleTrainingStop: () => void;
+  isPolling: boolean;
   className?: string;
 }
 
@@ -22,6 +22,7 @@ export default function TrainingSettings({
   setSelectedModel,
   handleTrainingStart,
   handleTrainingStop,
+  isPolling,
   className,
 }: TrainingSettingsProps) {
   const { data: models } = useProjectModelsQuery(projectId ?? 0);
@@ -31,13 +32,6 @@ export default function TrainingSettings({
   const [optimizer, setOptimizer] = useState<'SGD' | 'AUTO' | 'ADAM' | 'ADAMW' | 'NADAM' | 'RADAM' | 'RMSPROP'>('AUTO');
   const [lr0, setLr0] = useState<number>(0.01);
   const [lrf, setLrf] = useState<number>(0.001);
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (selectedModel?.isTrain) {
-      queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
-    }
-  }, [selectedModel?.isTrain, queryClient, projectId]);
 
   const handleSubmit = () => {
     if (selectedModel) {
@@ -136,9 +130,9 @@ export default function TrainingSettings({
             variant="outlinePrimary"
             size="lg"
             onClick={handleSubmit}
-            disabled={!selectedModel}
+            disabled={!selectedModel || isPolling}
           >
-            학습 시작
+            {isPolling ? '대기 중...' : '학습 시작'}
           </Button>
         </>
       )}
