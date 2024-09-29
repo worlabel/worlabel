@@ -1,5 +1,7 @@
 package com.worlabel.domain.image.service;
 
+import com.worlabel.domain.alarm.entity.Alarm;
+import com.worlabel.domain.alarm.service.AlarmService;
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
@@ -12,6 +14,7 @@ import com.worlabel.domain.project.repository.ProjectRepository;
 import com.worlabel.global.annotation.CheckPrivilege;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
+import com.worlabel.global.service.FcmService;
 import com.worlabel.global.service.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,12 +52,13 @@ public class ImageService {
     private final FolderRepository folderRepository;
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
+    private final AlarmService alarmService;
 
     /**
      * 이미지 리스트 업로드
      */
     @CheckPrivilege(value = PrivilegeType.EDITOR)
-    public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId) {
+    public void uploadImageList(final List<MultipartFile> imageList, final Integer folderId, final Integer projectId, final Integer memberId) {
         Folder folder = getOrCreateFolder(folderId, projectId);
         folderRepository.flush();
 
@@ -86,6 +90,7 @@ public class ImageService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
         long after = System.currentTimeMillis();
+        alarmService.save(memberId, Alarm.AlarmType.IMAGE);
         log.debug("업로드 완료 - 경과시간 {}", ((double) after - prev) / 1000);
     }
 
@@ -93,7 +98,7 @@ public class ImageService {
      * Zip 파일 처리 메서드
      */
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public void uploadFolderWithImages(final MultipartFile zipFile, final Integer projectId, final Integer folderId) throws IOException {
+    public void uploadFolderWithImages(final MultipartFile zipFile, final Integer projectId, final Integer folderId, final Integer memberId) throws IOException {
         log.debug("파일 크기: {}, 기존 파일 이름: {} ", zipFile.getSize(), zipFile.getOriginalFilename());
 
         Path tmpDir = null;
@@ -112,6 +117,8 @@ public class ImageService {
 
             unzip(zipFile, tmpDir.toString());
             processFolderRecursively(tmpDir.toFile(), rootFolder, project);
+
+            alarmService.save(memberId, Alarm.AlarmType.IMAGE);
         } finally {
             if (tmpDir != null) {
                 deleteDirectoryRecursively(tmpDir);
