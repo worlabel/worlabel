@@ -359,30 +359,7 @@ export default function ImageCanvas() {
         <Layer>
           <Image image={image} />
         </Layer>
-        <Layer>
-          {comments.map((comment) => (
-            <CommentLabel
-              key={comment.id}
-              comment={comment}
-              updateComment={(updatedComment) => {
-                updateCommentMutation.mutate({
-                  commentId: comment.id,
-                  commentData: {
-                    content: updatedComment.content,
-                    positionX: updatedComment.positionX,
-                    positionY: updatedComment.positionY,
-                  },
-                });
-              }}
-              deleteComment={(commentId) => {
-                deleteCommentMutation.mutate(commentId);
-              }}
-              toggleComment={(commentId) => {
-                useCommentStore.getState().toggleComment(commentId);
-              }}
-            />
-          ))}
-        </Layer>
+
         {project?.type !== 'classification' && (
           <Layer listening={drawState === 'pointer'}>
             {labels.map((label) =>
@@ -455,6 +432,30 @@ export default function ImageCanvas() {
           </Layer>
         )}
 
+        <Layer>
+          {comments.map((comment) => (
+            <CommentLabel
+              key={comment.id}
+              comment={comment}
+              updateComment={(updatedComment) => {
+                updateCommentMutation.mutate({
+                  commentId: comment.id,
+                  commentData: {
+                    content: updatedComment.content,
+                    positionX: updatedComment.positionX,
+                    positionY: updatedComment.positionY,
+                  },
+                });
+              }}
+              deleteComment={(commentId) => {
+                deleteCommentMutation.mutate(commentId);
+              }}
+              toggleComment={(commentId) => {
+                useCommentStore.getState().toggleComment(commentId);
+              }}
+            />
+          ))}
+        </Layer>
         <Layer ref={dragLayerRef} />
       </Stage>
       <CanvasControlBar
