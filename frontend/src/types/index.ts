@@ -306,6 +306,7 @@ export interface ModelResponse {
   name: string;
   isDefault: boolean;
   isTrain: boolean;
+  projectType: 'classification' | 'detection' | 'segmentation';
 }
 
 // 프로젝트 모델 리스트 응답 DTO
@@ -345,4 +346,5 @@ export interface ReportResponse {
   fitness: number;
   epochTime: number;
   leftSecond: number;
+  segLoss: number;
 }

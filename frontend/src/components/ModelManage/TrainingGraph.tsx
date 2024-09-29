@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import ModelLineChart from './ModelLineChart';
 import usePollingTrainingModelReport from '@/queries/reports/usePollingModelReportsQuery';
 import { ModelResponse } from '@/types';
+import { Spinner } from '@/components/ui/spinner';
 
 interface TrainingGraphProps {
   projectId: number | null;
@@ -10,24 +11,33 @@ interface TrainingGraphProps {
 }
 
 export default function TrainingGraph({ projectId, selectedModel, className }: TrainingGraphProps) {
-  const isTraining = selectedModel?.isTrain || false;
-
-  const { data: fetchedTrainingDataList } = usePollingTrainingModelReport(
+  const [isPolling, setIsPolling] = useState(false);
+  const { data: trainingDataList, isLoading } = usePollingTrainingModelReport(
     projectId as number,
     selectedModel?.id as number,
-    isTraining
+    isPolling
   );
 
-  const trainingDataList = useMemo(() => {
-    if (!isTraining) {
-      return [];
+  useEffect(() => {
+    if (selectedModel) {
+      setIsPolling(true);
+    } else {
+      setIsPolling(false);
     }
-    return fetchedTrainingDataList || [];
-  }, [isTraining, fetchedTrainingDataList]);
+  }, [selectedModel]);
+
+  if (isLoading) {
+    return (
+      <div className={`flex items-center justify-center ${className}`}>
+        <Spinner />
+        데이터 로딩 중...
+      </div>
+    );
+  }
 
   return (
     <ModelLineChart
-      data={trainingDataList}
+      data={trainingDataList || []}
       className={className}
     />
   );

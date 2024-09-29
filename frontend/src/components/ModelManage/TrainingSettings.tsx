@@ -1,10 +1,11 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import SelectWithLabel from './SelectWithLabel';
 import InputWithLabel from './InputWithLabel';
-import { Button } from '@/components/ui/button';
 import useProjectModelsQuery from '@/queries/models/useProjectModelsQuery';
 import { ModelTrainRequest, ModelResponse } from '@/types';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TrainingSettingsProps {
   projectId: number | null;
@@ -30,6 +31,8 @@ export default function TrainingSettings({
   const [optimizer, setOptimizer] = useState<'SGD' | 'AUTO' | 'ADAM' | 'ADAMW' | 'NADAM' | 'RADAM' | 'RMSPROP'>('AUTO');
   const [lr0, setLr0] = useState<number>(0.01);
   const [lrf, setLrf] = useState<number>(0.001);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleSubmit = () => {
     if (selectedModel?.isTrain) {
@@ -44,7 +47,14 @@ export default function TrainingSettings({
         lr0,
         lrf,
       };
+      queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
+      setIsSubmitting(true);
       handleTrainingStart(trainData);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['projectModels', projectId] });
+        setIsSubmitting(false);
+        console.log(selectedModel);
+      }, 1000);
     }
   };
 
@@ -130,9 +140,9 @@ export default function TrainingSettings({
             variant="outlinePrimary"
             size="lg"
             onClick={handleSubmit}
-            disabled={!selectedModel}
+            disabled={!selectedModel || isSubmitting}
           >
-            {selectedModel?.isTrain ? '학습 중단' : '학습 시작'}
+            {isSubmitting ? '기다리는 중...' : '학습 시작'}
           </Button>
         </>
       )}
