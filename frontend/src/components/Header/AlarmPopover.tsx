@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { Bell } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { onMessage } from 'firebase/messaging';
 import { messaging } from '@/api/firebaseConfig';
+import AlarmItem from './AlarmItem';
 import useFcmTokenQuery from '@/queries/auth/useFcmTokenQuery';
 import useGetAlarmListQuery from '@/queries/alarms/useGetAlarmListQuery';
 import useResetAlarmListQuery from '@/queries/alarms/useResetAlarmListQuery';
@@ -9,25 +12,9 @@ import useCreateAlarmTestQuery from '@/queries/alarms/useCreateAlarmTestQuery';
 import useReadAlarmQuery from '@/queries/alarms/useReadAlarmQuery';
 import useDeleteAlarmQuery from '@/queries/alarms/useDeleteAlarmQuery';
 import useDeleteAllAlarmQuery from '@/queries/alarms/useDeleteAllAlarmQuery';
-import { Bell, Mail, MailOpen, Trash2 } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 export default function AlarmPopover() {
   const [unread, setUnread] = useState<boolean>(false);
-
-  const timeAgo = (date: string | Date) => {
-    const now = new Date();
-    const past = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${Math.max(diffInSeconds, 0)}초 전`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}시간 전`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}일 전`;
-  };
 
   const resetAlarmList = useResetAlarmListQuery();
   const createAlarmTest = useCreateAlarmTestQuery();
@@ -101,7 +88,7 @@ export default function AlarmPopover() {
           >
             테스트
           </button>
-          {unread ? (
+          {/* {unread ? (
             <button
               className="body-small p-1"
               onClick={() => {}}
@@ -115,7 +102,7 @@ export default function AlarmPopover() {
             >
               모두 읽지 않음
             </button>
-          )}
+          )} */}
           <button
             className="body-small p-1 text-red-500"
             onClick={handleDeleteAllAlarm}
@@ -125,62 +112,25 @@ export default function AlarmPopover() {
         </div>
         <hr />
 
-        {alarms.length == 0 && (
+        {alarms.length === 0 ? (
           <div className="flex w-full items-center px-[18px] py-3 duration-150">
             <p className="body-small text-gray-500">알림이 없습니다.</p>
           </div>
-        )}
-
-        {alarms
-          .slice()
-          .reverse()
-          .map((alarm) => (
-            <div
-              key={alarm.id}
-              className="flex w-full items-center bg-white py-2 pr-[18px] duration-150 hover:bg-gray-200"
-            >
-              <div
-                className={cn('mx-1.5 h-1.5 w-1.5 rounded-full', alarm.isRead ? 'bg-transparent' : 'bg-blue-500')}
-              ></div>
-              <div className="flex flex-1 flex-col">
-                <p className="body-small">
-                  [{alarm.id}] {alarm.type} 알림입니다.
-                </p>
-                <p className="caption text-gray-500">{timeAgo(alarm.createdAt)}</p>
-              </div>
-              {alarm.isRead ? (
-                <button
-                  className="p-1"
-                  onClick={() => {}}
-                >
-                  <MailOpen
-                    size={16}
-                    className="stroke-gray-400"
-                  />
-                </button>
-              ) : (
-                <button
-                  className="p-1"
-                  onClick={() => {
-                    handleReadAlarm(alarm.id);
-                  }}
-                >
-                  <Mail size={16} />
-                </button>
-              )}
-              <button
-                className="p-1"
-                onClick={() => {
-                  handleDeleteAlarm(alarm.id);
-                }}
-              >
-                <Trash2
-                  size={16}
-                  className="stroke-red-500"
+        ) : (
+          <div className="flex max-h-[500px] w-full flex-col items-center overflow-y-auto">
+            {alarms
+              .slice()
+              .reverse()
+              .map((alarm) => (
+                <AlarmItem
+                  key={alarm.id}
+                  alarm={alarm}
+                  onRead={handleReadAlarm}
+                  onDelete={handleDeleteAlarm}
                 />
-              </button>
-            </div>
-          ))}
+              ))}
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
