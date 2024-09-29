@@ -90,6 +90,7 @@ export default function WorkspaceDropdownMenu({
           <ImageUploadFolderForm
             onClose={handleCloseUploadFolder}
             projectId={projectId}
+            folderId={folderId}
           />
         </DialogContent>
       </Dialog>
@@ -104,6 +105,7 @@ export default function WorkspaceDropdownMenu({
           <ImageUploadZipForm
             onClose={handleCloseUploadZip}
             projectId={projectId}
+            folderId={folderId}
           />
         </DialogContent>
       </Dialog>

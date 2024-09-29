@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog
 import { Plus } from 'lucide-react';
 import ImageUploadZipForm from './ImageUploadZipForm';
 
-export default function ImageUploadZipModal({ projectId }: { projectId: number }) {
+export default function ImageUploadZipModal({ projectId, folderId }: { projectId: number; folderId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -27,6 +27,7 @@ export default function ImageUploadZipModal({ projectId }: { projectId: number }
         <ImageUploadZipForm
           onClose={handleClose}
           projectId={projectId}
+          folderId={folderId}
         />
       </DialogContent>
     </Dialog>

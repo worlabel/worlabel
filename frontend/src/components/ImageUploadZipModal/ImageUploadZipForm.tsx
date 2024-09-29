@@ -5,7 +5,15 @@ import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import useUploadImageZipQuery from '@/queries/projects/useUploadImageZipQuery';
 
-export default function ImageUploadZipForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
+export default function ImageUploadZipForm({
+  onClose,
+  projectId,
+  folderId,
+}: {
+  onClose: () => void;
+  projectId: number;
+  folderId: number;
+}) {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
@@ -14,6 +22,7 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
   const uploadImageZip = useUploadImageZipQuery();
 
@@ -57,7 +66,11 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
         {
           memberId,
           projectId,
+          folderId,
           file,
+          progressCallback: (progress: number) => {
+            setProgress(progress);
+          },
         },
         {
           onSuccess: () => {
@@ -152,7 +165,7 @@ export default function ImageUploadZipForm({ onClose, projectId }: { onClose: ()
           }
           disabled={!isUploaded && !isFailed}
         >
-          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : '업로드 중...'}
+          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : `업로드 중... ${progress}%`}
         </Button>
       ) : (
         <Button
