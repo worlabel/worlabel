@@ -348,3 +348,10 @@ export interface ReportResponse {
   leftSecond: number;
   segLoss: number;
 }
+
+export interface AlarmResponse {
+  id: number;
+  isRead: boolean;
+  createdAt: string;
+  type: string;
+}

@@ -20,7 +20,6 @@ import NotFound from '@/pages/NotFound';
 import ReviewRequest from '@/pages/ReviewRequest';
 import ModelIndex from '@/pages/ModelIndex';
 import ModelDetail from '@/pages/ModelDetail';
-import FirebaseTest from '@/pages/FirebaseTest';
 
 export const webPath = {
   home: () => '/',
@@ -28,7 +27,6 @@ export const webPath = {
   workspace: () => '/workspace',
   admin: () => `/admin`,
   oauthCallback: () => '/redirect/oauth2',
-  firebaseTest: () => '/firebaseTest',
 };
 
 const router = createBrowserRouter([
@@ -148,14 +146,6 @@ const router = createBrowserRouter([
     element: (
       <Suspense fallback={<div></div>}>
         <OAuthCallback />
-      </Suspense>
-    ),
-  },
-  {
-    path: webPath.firebaseTest(),
-    element: (
-      <Suspense fallback={<div></div>}>
-        <FirebaseTest />
       </Suspense>
     ),
   },
