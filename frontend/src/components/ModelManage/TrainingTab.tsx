@@ -26,7 +26,9 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
   });
 
   const handleTrainingStart = (trainData: ModelTrainRequest) => {
-    startTraining(trainData);
+    if (numericProjectId !== null) {
+      startTraining(trainData);
+    }
   };
 
   useEffect(() => {
