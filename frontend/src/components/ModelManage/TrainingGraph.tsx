@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import ModelLineChart from './ModelLineChart';
-import usePollingModelReportsQuery from '@/queries/reports/usePollingModelReportsQuery';
+import usePollingTrainingModelReport from '@/queries/reports/usePollingModelReportsQuery';
+import { useQueryClient } from '@tanstack/react-query';
 import { ModelResponse } from '@/types';
 
 interface TrainingGraphProps {
@@ -10,20 +11,22 @@ interface TrainingGraphProps {
 }
 
 export default function TrainingGraph({ projectId, selectedModel, className }: TrainingGraphProps) {
-  const [isPolling, setIsPolling] = useState(false);
-  const { data: trainingDataList } = usePollingModelReportsQuery(
+  const queryClient = useQueryClient();
+
+  const { data: trainingDataList } = usePollingTrainingModelReport(
     projectId as number,
     selectedModel?.id as number,
-    isPolling
+    selectedModel?.isTrain || false
   );
 
   useEffect(() => {
-    if (selectedModel) {
-      setIsPolling(true);
-    } else {
-      setIsPolling(false);
+    if (!selectedModel || !selectedModel.isTrain) {
+      queryClient.resetQueries({
+        queryKey: [{ type: 'modelReports', projectId, modelId: selectedModel?.id }],
+        exact: true,
+      });
     }
-  }, [selectedModel]);
+  }, [selectedModel, queryClient, projectId]);
 
   return (
     <ModelLineChart

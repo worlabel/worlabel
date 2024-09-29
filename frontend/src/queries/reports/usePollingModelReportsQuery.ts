@@ -6,7 +6,7 @@ export default function usePollingTrainingModelReport(projectId: number, modelId
   return useQuery<ReportResponse[]>({
     queryKey: ['modelReports', projectId, modelId],
     queryFn: () => getTrainingModelReport(projectId, modelId),
-    refetchInterval: 5000,
+    refetchInterval: enabled ? 5000 : false,
     enabled,
   });
 }
