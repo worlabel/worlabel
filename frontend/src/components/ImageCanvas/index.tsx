@@ -1,4 +1,9 @@
 import useCanvasStore from '@/stores/useCanvasStore';
+import useCommentStore from '@/stores/useCommentStore';
+import useCommentListQuery from '@/queries/comments/useCommentListQuery';
+import useCreateCommentQuery from '@/queries/comments/useCreateCommentQuery';
+import useUpdateCommentQuery from '@/queries/comments/useUpdateCommentQuery';
+import useDeleteCommentQuery from '@/queries/comments/useDeleteCommentQuery';
 import Konva from 'konva';
 import { useEffect, useRef, useState } from 'react';
 import { Circle, Image, Layer, Line, Rect, Stage } from 'react-konva';
@@ -13,6 +18,8 @@ import useProjectStore from '@/stores/useProjectStore';
 import { useQueryClient } from '@tanstack/react-query';
 import useSaveImageLabelsQuery from '@/queries/projects/useSaveImageLabelsQuery';
 import { useToast } from '@/hooks/use-toast';
+import CommentLabel from './CommentLabel';
+import useAuthStore from '@/stores/useAuthStore';
 
 export default function ImageCanvas() {
   const { project, folderId, categories } = useProjectStore();
@@ -33,6 +40,13 @@ export default function ImageCanvas() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const { profile } = useAuthStore();
+  const { comments, setComments } = useCommentStore();
+  const { data: commentList } = useCommentListQuery(project!.id, imageId);
+  const createCommentMutation = useCreateCommentQuery(project!.id, imageId);
+  const updateCommentMutation = useUpdateCommentQuery(project!.id);
+  const deleteCommentMutation = useDeleteCommentQuery(project!.id);
+
   useEffect(() => {
     setLabels(
       shapes.map<Label>(({ group_id, color, points, shape_type }, index) => ({
@@ -49,11 +63,23 @@ export default function ImageCanvas() {
     setSelectedLabelId(null);
   }, [image, setSelectedLabelId]);
 
+  useEffect(() => {
+    if (commentList) {
+      setComments(
+        commentList.map((comment) => ({
+          ...comment,
+          isOpen: false,
+        }))
+      );
+    }
+  }, [commentList, setComments]);
+
   const setLabel = (index: number) => (coordinates: [number, number][]) => {
     const newLabels = [...labels];
     newLabels[index].coordinates = coordinates;
     setLabels(newLabels);
   };
+
   const saveJson = () => {
     const json = JSON.stringify({
       ...labelData,
@@ -86,6 +112,7 @@ export default function ImageCanvas() {
       }
     );
   };
+
   const startDrawRect = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
     setRectPoints([
@@ -93,6 +120,7 @@ export default function ImageCanvas() {
       [x, y],
     ]);
   };
+
   const addPointToPolygon = () => {
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
     if (polygonPoints.length === 0) {
@@ -116,20 +144,24 @@ export default function ImageCanvas() {
     }
     setPolygonPoints([...polygonPoints, [x, y]]);
   };
+
   const removeLastPointOfPolygon = (e: MouseEvent) => {
     e.preventDefault();
     if (polygonPoints.length === 0) return;
     setPolygonPoints(polygonPoints.slice(0, -1));
   };
+
   const moveLastPointOfPolygon = () => {
     if (polygonPoints.length < 2) return;
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
     setPolygonPoints([...polygonPoints.slice(0, -1), [x, y]]);
   };
+
   const endDrawPolygon = () => {
     if (drawState !== 'pen' || polygonPoints.length === 0) return;
     setDrawState('pointer');
     setPolygonPoints([]);
+
     if (polygonPoints.length < 4) return;
 
     const color = Math.floor(Math.random() * 0xffffff)
@@ -146,12 +178,14 @@ export default function ImageCanvas() {
     setDrawState('pointer');
     setSelectedLabelId(id);
   };
+
   const updateDrawingRect = () => {
     if (rectPoints.length === 0) return;
 
     const { x, y } = stageRef.current!.getRelativePointerPosition()!;
     setRectPoints([rectPoints[0], [x, y]]);
   };
+
   const endDrawRect = () => {
     if (drawState !== 'rect' || rectPoints.length === 0) return;
     if (rectPoints[0][0] === rectPoints[1][0] && rectPoints[0][1] === rectPoints[1][1]) {
@@ -159,6 +193,7 @@ export default function ImageCanvas() {
       return;
     }
     setRectPoints([]);
+
     const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
       .padStart(6, '0');
@@ -173,11 +208,46 @@ export default function ImageCanvas() {
     setDrawState('pointer');
     setSelectedLabelId(id);
   };
+
   const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     e.evt.preventDefault();
     e.evt.stopPropagation();
     const isLeftClicked = e.evt.type === 'mousedown' && (e.evt as MouseEvent).button === 0;
     const isRightClicked = e.evt.type === 'mousedown' && (e.evt as MouseEvent).button === 2;
+
+    if (drawState === 'comment' && isLeftClicked) {
+      const stage = stageRef.current;
+      if (!stage) return;
+
+      const pointerPosition = stage.getRelativePointerPosition();
+      if (!pointerPosition) return;
+
+      if (!profile) {
+        console.error('User profile is not available');
+        return;
+      }
+
+      const x = pointerPosition.x;
+      const y = pointerPosition.y;
+
+      createCommentMutation.mutate({
+        id: 0,
+        content: '',
+        positionX: x,
+        positionY: y,
+        memberId: profile.id,
+        memberNickname: profile.nickname,
+        memberProfileImage: profile.profileImage,
+        createTime: new Date().toISOString(),
+        author: {
+          id: profile.id,
+          nickname: profile.nickname,
+          profileImage: profile.profileImage,
+          email: profile.email,
+        },
+      });
+      return;
+    }
 
     if (drawState !== 'pointer' && (isLeftClicked || isRightClicked)) {
       stageRef.current?.stopDrag();
@@ -193,6 +263,7 @@ export default function ImageCanvas() {
       setSelectedLabelId(null);
     }
   };
+
   const handleMouseMove = () => {
     if (drawState === 'rect' && rectPoints.length) {
       updateDrawingRect();
@@ -201,6 +272,7 @@ export default function ImageCanvas() {
       moveLastPointOfPolygon();
     }
   };
+
   const handleZoom = (e: Konva.KonvaEventObject<WheelEvent>) => {
     const scaleBy = 1.05;
     const oldScale = scale.current;
@@ -219,6 +291,7 @@ export default function ImageCanvas() {
     stageRef.current?.position(newPos);
     stageRef.current?.batchDraw();
   };
+
   const handleScroll = (e: Konva.KonvaEventObject<WheelEvent>) => {
     const delta = -e.evt.deltaY;
     const x = stageRef.current?.x();
@@ -235,6 +308,7 @@ export default function ImageCanvas() {
 
     e.evt.ctrlKey ? handleZoom(e) : handleScroll(e);
   };
+
   const getScale = (): Vector2d => {
     if (scale.current) return { x: scale.current, y: scale.current };
     const widthRatio = stageWidth / image!.width;
@@ -271,7 +345,7 @@ export default function ImageCanvas() {
         width={stageWidth}
         height={stageHeight}
         className="overflow-hidden bg-gray-200"
-        draggable
+        draggable={drawState !== 'comment'}
         onWheel={handleWheel}
         onMouseDown={handleClick}
         onTouchStart={handleClick}
@@ -284,6 +358,30 @@ export default function ImageCanvas() {
       >
         <Layer>
           <Image image={image} />
+        </Layer>
+        <Layer>
+          {comments.map((comment) => (
+            <CommentLabel
+              key={comment.id}
+              comment={comment}
+              updateComment={(updatedComment) => {
+                updateCommentMutation.mutate({
+                  commentId: comment.id,
+                  commentData: {
+                    content: updatedComment.content,
+                    positionX: updatedComment.positionX,
+                    positionY: updatedComment.positionY,
+                  },
+                });
+              }}
+              deleteComment={(commentId) => {
+                deleteCommentMutation.mutate(commentId);
+              }}
+              toggleComment={(commentId) => {
+                useCommentStore.getState().toggleComment(commentId);
+              }}
+            />
+          ))}
         </Layer>
         {project?.type !== 'classification' && (
           <Layer listening={drawState === 'pointer'}>
