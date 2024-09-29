@@ -41,7 +41,7 @@ export default function AlarmPopover() {
   };
 
   useGetAndSaveFcmTokenQuery();
-  const { data: alarms } = useGetAlarmListQuery();
+  const { data: alarmList } = useGetAlarmListQuery();
 
   onMessage(messaging, (payload) => {
     if (!payload.data) return;
@@ -51,14 +51,14 @@ export default function AlarmPopover() {
   });
 
   useEffect(() => {
-    const unreadCnt = alarms.filter((alarm) => !alarm.isRead).length;
+    const unreadCnt = alarmList.filter((alarm) => !alarm.isRead).length;
 
     if (unreadCnt > 0) {
       setUnread(true);
     } else {
       setUnread(false);
     }
-  }, [alarms]);
+  }, [alarmList]);
 
   useEffect(() => {
     // 현재 창에 포커스 시 실행할 메서드
@@ -86,7 +86,7 @@ export default function AlarmPopover() {
       <PopoverTrigger asChild>
         <button className="flex items-center justify-center p-2">
           <Bell className="h-4 w-4 cursor-pointer text-black sm:h-5 sm:w-5" />
-          <div className={cn('mt-[14px] h-1.5 w-1.5 rounded-full', unread ? 'bg-blue-500' : 'bg-transparent')}></div>
+          <div className={cn('mt-[14px] h-1.5 w-1.5 rounded-full', unread ? 'bg-orange-500' : 'bg-transparent')}></div>
         </button>
       </PopoverTrigger>
 
@@ -96,10 +96,10 @@ export default function AlarmPopover() {
         sideOffset={14}
         alignOffset={0}
       >
-        <div className="flex w-full items-center px-[18px] py-3">
+        <div className="flex w-full items-center p-3">
           <h2 className="body-strong flex-1">알림</h2>
           <button
-            className="body-small p-1 text-blue-500"
+            className="body-small p-1 text-gray-400"
             onClick={handleCreateAlarmTest}
           >
             테스트
@@ -128,13 +128,13 @@ export default function AlarmPopover() {
         </div>
         <hr />
 
-        {alarms.length === 0 ? (
-          <div className="flex w-full items-center px-[18px] py-3 duration-150">
+        {alarmList.length === 0 ? (
+          <div className="flex w-full items-center p-3 duration-150">
             <p className="body-small text-gray-500">알림이 없습니다.</p>
           </div>
         ) : (
           <div className="flex max-h-[500px] w-full flex-col items-center overflow-y-auto">
-            {alarms
+            {alarmList
               .slice()
               .reverse()
               .map((alarm) => (
