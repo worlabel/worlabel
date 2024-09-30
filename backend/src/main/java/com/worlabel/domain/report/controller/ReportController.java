@@ -27,7 +27,7 @@ public class ReportController {
     @SwaggerApiSuccess(description = "완성된 모델 리포트를 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/models/{model_id}")
-    public ReportResponse getReportsByModelId(@PathVariable("model_id") final Integer modelId) {
+    public List<ReportResponse> getReportsByModelId(@PathVariable("model_id") final Integer modelId) {
         return reportService.getReportsByModelId(modelId);
     }
 

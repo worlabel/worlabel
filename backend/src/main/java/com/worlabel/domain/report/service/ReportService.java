@@ -27,10 +27,10 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ProgressService progressService;
 
-    public ReportResponse getReportsByModelId(final Integer modelId) {
-        Report report = reportRepository.findByAiModelId(modelId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
-        return ReportResponse.from(report);
+    public List<ReportResponse> getReportsByModelId(final Integer modelId) {
+        return reportRepository.findByAiModelId(modelId).stream()
+                .map(ReportResponse::from)
+                .toList();
     }
 
     public void addReportByModelId(final Integer projectId, final Integer modelId, final ReportRequest reportRequest) {

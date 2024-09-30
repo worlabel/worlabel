@@ -76,10 +76,13 @@ public class ProgressCacheRepository {
      * 현재 학습 진행 여부 확인 메서드 (단일 키 사용)
      */
     public boolean trainModelProgressCheck(final int projectId, final int modelId) {
-        String key = CacheKey.trainKey(projectId, modelId);
-        Long listSize = redisTemplate.opsForList().size(key);
-
-        return listSize != null && listSize > 0;
+        String key = CacheKey.trainProgressKey();
+        Object result = redisTemplate.opsForHash().get(key, String.valueOf(projectId));
+        if(result == null){
+            return false;
+        }
+        int progressModelId = Integer.parseInt((String) result);
+        return modelId == progressModelId;
     }
 
     /**

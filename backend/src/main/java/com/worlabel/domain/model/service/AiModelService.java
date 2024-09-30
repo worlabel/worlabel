@@ -148,7 +148,11 @@ public class AiModelService {
 
     // 레이블 맵 만들기
     private Map<String, Integer> getLabelMap(final Project project) {
-        return project.getCategoryList().stream()
+        List<ProjectCategory> categoryList = project.getCategoryList();
+        if(categoryList.isEmpty()){
+            throw new CustomException(ErrorCode.BAD_REQUEST, "카테고리가 존재하지 않습니다. 학습이 불가합니다.");
+        }
+        return categoryList.stream()
                 .collect(Collectors.toMap(
                         ProjectCategory::getLabelName,
                         ProjectCategory::getId
@@ -157,7 +161,11 @@ public class AiModelService {
 
     @Transactional(readOnly = true)
     public List<TrainDataInfo> getTrainDataInfoList(final Integer projectId) {
-        return imageRepository.findImagesByProjectIdAndCompleted(projectId)
+        List<Image> completedImageList = imageRepository.findImagesByProjectIdAndCompleted(projectId);
+        if(completedImageList.size() < 2){
+            throw new CustomException(ErrorCode.BAD_REQUEST, "Completed Image가 2개 이상부터 학습 가능합니다.");
+        }
+        return completedImageList
                 .stream()
                 .map(TrainDataInfo::of)
                 .toList();
