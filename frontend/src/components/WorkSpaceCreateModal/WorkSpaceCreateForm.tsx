@@ -75,7 +75,7 @@ export default function WorkSpaceCreateForm({ onSubmit }: WorkSpaceCreateFormPro
         />
         <Button
           type="submit"
-          variant="outlinePrimary"
+          variant="blue"
           disabled={!form.formState.isValid}
         >
           워크스페이스 만들기

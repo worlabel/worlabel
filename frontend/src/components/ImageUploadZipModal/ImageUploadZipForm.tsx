@@ -166,12 +166,7 @@ export default function ImageUploadZipForm({
       {isUploading ? (
         <Button
           onClick={handleClose}
-          variant="outlinePrimary"
-          className={
-            isFailed
-              ? 'border-red-500 text-red-500 hover:bg-red-500 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-500'
-              : ''
-          }
+          variant={isFailed ? 'red' : 'blue'}
           disabled={!isUploaded && !isFailed}
         >
           {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : `업로드 중... ${progress}%`}
@@ -179,7 +174,7 @@ export default function ImageUploadZipForm({
       ) : (
         <Button
           onClick={handleUpload}
-          variant="outlinePrimary"
+          variant="blue"
           disabled={!file}
         >
           업로드

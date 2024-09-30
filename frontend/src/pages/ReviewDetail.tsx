@@ -134,13 +134,13 @@ export default function ReviewDetail(): JSX.Element {
       {reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (
         <div className="actions mt-6 flex justify-end space-x-2">
           <Button
-            variant="destructive"
+            variant="red"
             onClick={handleReject}
           >
             {'거부'}
           </Button>
           <Button
-            variant="default"
+            variant="black"
             onClick={handleApprove}
           >
             {'승인'}
@@ -150,7 +150,7 @@ export default function ReviewDetail(): JSX.Element {
 
       <div className="mt-6">
         <Link to={`/admin/${workspaceId}/reviews`}>
-          <Button variant="outlinePrimary">목록으로 돌아가기</Button>
+          <Button variant="blue">목록으로 돌아가기</Button>
         </Link>
       </div>
     </div>

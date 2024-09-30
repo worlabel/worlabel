@@ -51,7 +51,7 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5 overflow-x-auto"
+        className="flex w-full flex-col gap-5 overflow-x-auto p-1"
       >
         <FormField
           name="projectName"
@@ -104,7 +104,7 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
         <FormField
           name="categories"
           render={({ field }) => (
-            <>
+            <div className="mb-1 flex w-full flex-col gap-2">
               <div className="body-strong">카테고리</div>
               <div className="flex gap-2">
                 <FormControl>
@@ -114,40 +114,42 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
                   />
                 </FormControl>
                 <Button
-                  variant="outline"
+                  variant="blue"
                   onClick={(event) => handleAddCategory(event, field.onChange)}
                 >
                   추가
                 </Button>
               </div>
               {categories.length > 0 && (
-                <ul className="body-small box-border flex grow-0 gap-2 overflow-x-auto">
-                  {categories.map((category: string, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-1 rounded-full border border-gray-700 px-2 py-1 text-gray-900"
-                    >
-                      <span>{category}</span>
-                      <X
-                        size={16}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          const newCategories = categories.filter((_, i) => i !== index);
-                          field.onChange(newCategories);
-                          setCategories(newCategories);
-                        }}
-                      />
-                    </div>
-                  ))}
-                </ul>
+                <div className="flex w-full flex-col overflow-x-auto">
+                  <div className="flex gap-2 py-1">
+                    {categories.map((category: string, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1 rounded-full border-2 border-gray-700 px-2 py-1 text-gray-700"
+                      >
+                        <span>{category}</span>
+                        <X
+                          size={16}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            const newCategories = categories.filter((_, i) => i !== index);
+                            field.onChange(newCategories);
+                            setCategories(newCategories);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
               <FormMessage />
-            </>
+            </div>
           )}
         />
         <Button
           type="submit"
-          variant="outlinePrimary"
+          variant="blue"
           disabled={!form.formState.isValid}
         >
           프로젝트 만들기

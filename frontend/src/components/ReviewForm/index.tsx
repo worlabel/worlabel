@@ -115,14 +115,14 @@ export default function ReviewForm({ projects, onSubmit }: ReviewFormProps): JSX
 
       <div className="actions mt-6 flex justify-end space-x-2">
         <Button
-          variant="destructive"
+          variant="red"
           type="button"
           onClick={() => navigate(-1)}
         >
           취소
         </Button>
         <Button
-          variant="default"
+          variant="black"
           type="submit"
         >
           리뷰 요청

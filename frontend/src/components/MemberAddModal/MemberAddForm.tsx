@@ -132,7 +132,7 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
 
         <Button
           type="submit"
-          variant="outlinePrimary"
+          variant="blue"
           disabled={!form.formState.isValid || !form.getValues('memberId')}
         >
           멤버 초대하기

@@ -9,18 +9,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'bg-gray-900 text-gray-50 hover:bg-gray-900/90 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90',
-        destructive:
-          'bg-red-500 text-gray-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-gray-50 dark:hover:bg-red-900/90',
-        outline:
-          'border border-gray-200 bg-white hover:bg-gray-100 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50',
-        outlinePrimary:
-          'border border-primary text-primary hover:bg-primary hover:text-white dark:border-primary dark:text-primary dark:hover:bg-primary dark:hover:text-white disabled:border-gray-200 disabled:bg-white disabled:text-gray-500 disabled:hover:bg-gray-100 disabled:hover:text-gray-300',
-        secondary:
-          'bg-gray-100 text-gray-900 hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80',
-        ghost: 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-50',
-        link: 'text-gray-900 underline-offset-4 hover:underline dark:text-gray-50',
+        // default:
+        //   'bg-gray-900 text-gray-50 hover:bg-gray-900/90 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90',
+        // destructive:
+        //   'bg-red-500 text-gray-50 hover:bg-red-500/90 dark:bg-red-900 dark:text-gray-50 dark:hover:bg-red-900/90',
+        // outline:
+        //   'border border-gray-200 bg-white hover:bg-gray-100 hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50',
+        // outlinePrimary:
+        //   'border border-primary text-primary hover:bg-primary hover:text-white dark:border-primary dark:text-primary dark:hover:bg-primary dark:hover:text-white disabled:border-gray-200 disabled:bg-white disabled:text-gray-500 disabled:hover:bg-gray-100 disabled:hover:text-gray-300',
+        // secondary:
+        //   'bg-gray-100 text-gray-900 hover:bg-gray-100/80 dark:bg-gray-800 dark:text-gray-50 dark:hover:bg-gray-800/80',
+        // ghost: 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-50',
+        // link: 'text-gray-900 underline-offset-4 hover:underline dark:text-gray-50',
+        black:
+          'bg-gray-900 text-white hover:bg-gray-900/90 disabled:border disabled:border-gray-200 disabled:bg-white disabled:text-gray-500',
+        red: 'bg-red-500 text-white hover:bg-red-500/90 disabled:border disabled:border-gray-200 disabled:bg-white disabled:text-gray-500',
+        blue: 'bg-blue-500 text-white hover:bg-blue-500/90 disabled:border disabled:border-gray-200 disabled:bg-white disabled:text-gray-500',
       },
       size: {
         default: 'h-10 px-4 py-2',
@@ -31,7 +35,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: 'blue',
       size: 'default',
     },
   }

@@ -128,7 +128,7 @@ export default function MemberManageForm({ members, onSubmit }: MemberManageForm
         </div>
         <Button
           type="submit"
-          variant="outlinePrimary"
+          variant="blue"
           disabled={!form.formState.isValid}
         >
           역할 설정
