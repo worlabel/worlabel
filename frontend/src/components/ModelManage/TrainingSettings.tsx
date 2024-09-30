@@ -48,9 +48,13 @@ export default function TrainingSettings({
     }
   };
 
+  const isTraining = selectedModel?.isTrain;
+  const isWaiting = isPolling && !isTraining;
+
   return (
     <fieldset className={cn('grid gap-6 rounded-lg border p-4', className)}>
       <legend className="-ml-1 px-1 text-sm font-medium">모델 설정</legend>
+
       <div className="grid gap-3">
         <SelectWithLabel
           label="모델 선택"
@@ -69,7 +73,7 @@ export default function TrainingSettings({
           }}
         />
       </div>
-      {!selectedModel?.isTrain && (
+      {!isPolling && !isTraining && (
         <>
           <div className="grid grid-cols-2 gap-4">
             <InputWithLabel
@@ -130,19 +134,30 @@ export default function TrainingSettings({
             variant="outlinePrimary"
             size="lg"
             onClick={handleSubmit}
-            disabled={!selectedModel || isPolling}
+            disabled={!selectedModel}
           >
-            {isPolling ? '대기 중...' : '학습 시작'}
+            학습 시작
           </Button>
         </>
       )}
-      {selectedModel?.isTrain && (
+
+      {isWaiting && (
         <Button
           variant="secondary"
           size="lg"
           onClick={handleTrainingStop}
         >
-          학습 중단
+          대기 중
+        </Button>
+      )}
+
+      {isTraining && (
+        <Button
+          variant="secondary"
+          size="lg"
+          onClick={handleTrainingStop}
+        >
+          학습 중
         </Button>
       )}
     </fieldset>
