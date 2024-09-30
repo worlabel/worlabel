@@ -1,4 +1,3 @@
-// ImageSelection.tsx
 import { Label } from '@/components/ui/label';
 import useRecursiveSavedImages from '@/hooks/useRecursiveSavedImages';
 import { Button } from '@/components/ui/button';
@@ -7,27 +6,44 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface ImageSelectionProps {
   projectId: string;
   selectedImages: number[];
-  setSelectedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  setSelectedImages: (images: number[]) => void;
 }
 
 export default function ImageSelection({ projectId, selectedImages, setSelectedImages }: ImageSelectionProps) {
   const { allSavedImages } = useRecursiveSavedImages(projectId, 0);
 
   const handleImageSelect = (imageId: number) => {
-    // 상태 업데이트 안전하게 관리
-    setSelectedImages((prevSelectedImages) => {
-      // 이미 선택된 이미지가 있는 경우 필터링하여 제거
-      if (prevSelectedImages.includes(imageId)) {
-        return prevSelectedImages.filter((id) => id !== imageId);
+    const updatedImages = selectedImages.includes(imageId)
+      ? selectedImages.filter((id) => id !== imageId)
+      : [...selectedImages, imageId];
+
+    setSelectedImages(updatedImages);
+  };
+
+  const handleSelectAll = () => {
+    if (allSavedImages) {
+      if (selectedImages.length === allSavedImages.length) {
+        setSelectedImages([]);
+      } else {
+        setSelectedImages(allSavedImages.map((image) => image.id));
       }
-      // 선택되지 않은 이미지를 배열에 추가
-      return [...prevSelectedImages, imageId];
-    });
+    }
   };
 
   return (
     <div className="mb-4">
-      <Label>이미지 선택 (파일 목록)</Label>
+      <div className="mb-2 flex items-center justify-between">
+        <Label>이미지 선택 (파일 목록)</Label>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSelectAll}
+          type="button"
+          className="px-4 py-2"
+        >
+          {allSavedImages && selectedImages.length === allSavedImages.length ? '전체 선택 해제' : '전체 선택'}
+        </Button>
+      </div>
       <ScrollArea className="max-h-64 overflow-auto border p-2">
         <ul className="space-y-2">
           {allSavedImages && allSavedImages.length > 0 ? (
@@ -42,11 +58,12 @@ export default function ImageSelection({ projectId, selectedImages, setSelectedI
                 <div className="flex items-center space-x-2">
                   <Button
                     variant={selectedImages.includes(image.id) ? 'destructive' : 'outline'}
-                    size="xs"
+                    size="sm"
                     onClick={() => handleImageSelect(image.id)}
-                    className="p-0"
+                    className="px-3 py-1"
+                    type="button"
                   >
-                    {selectedImages.includes(image.id) ? '선택 해제' : '선택'}
+                    {selectedImages.includes(image.id) ? '해제' : '선택'}
                   </Button>
                 </div>
               </li>
