@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog
 import { Plus } from 'lucide-react';
 import ImageUploadFolderForm from './ImageUploadFolderForm';
 
-export default function ImageUploadFolderModal({ projectId }: { projectId: number }) {
+export default function ImageUploadFolderModal({ projectId, folderId }: { projectId: number; folderId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -27,6 +27,7 @@ export default function ImageUploadFolderModal({ projectId }: { projectId: numbe
         <ImageUploadFolderForm
           onClose={handleClose}
           projectId={projectId}
+          folderId={folderId}
         />
       </DialogContent>
     </Dialog>

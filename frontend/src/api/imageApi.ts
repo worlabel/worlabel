@@ -31,7 +31,13 @@ export async function changeImageStatus(
     .then(({ data }) => data);
 }
 
-export async function uploadImageFile(memberId: number, projectId: number, folderId: number, files: File[]) {
+export async function uploadImageFile(
+  memberId: number,
+  projectId: number,
+  folderId: number,
+  files: File[],
+  processCallback: (progress: number) => void
+) {
   const formData = new FormData();
   files.forEach((file) => {
     formData.append('imageList', file);
@@ -40,30 +46,60 @@ export async function uploadImageFile(memberId: number, projectId: number, folde
   return api
     .post(`/projects/${projectId}/folders/${folderId}/images/file`, formData, {
       params: { memberId },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          processCallback(progress);
+        }
+      },
     })
     .then(({ data }) => data);
 }
 
-export async function uploadImageFolder(memberId: number, projectId: number, files: File[]) {
+export async function uploadImageFolder(
+  memberId: number,
+  projectId: number,
+  folderId: number,
+  files: File[],
+  processCallback: (progress: number) => void
+) {
   const formData = new FormData();
   files.forEach((file) => {
     formData.append('imageList', file);
   });
 
   return api
-    .post(`/projects/${projectId}/folders/${0}/images/file`, formData, {
+    .post(`/projects/${projectId}/folders/${folderId}/images/file`, formData, {
       params: { memberId },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          processCallback(progress);
+        }
+      },
     })
     .then(({ data }) => data);
 }
 
-export async function uploadImageZip(memberId: number, projectId: number, file: File) {
+export async function uploadImageZip(
+  memberId: number,
+  projectId: number,
+  folderId: number,
+  file: File,
+  processCallback: (progress: number) => void
+) {
   const formData = new FormData();
   formData.append('folderZip', file);
 
   return api
-    .post(`/projects/${projectId}/folders/${0}/images/zip`, formData, {
+    .post(`/projects/${projectId}/folders/${folderId}/images/zip`, formData, {
       params: { memberId },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          processCallback(progress);
+        }
+      },
     })
     .then(({ data }) => data);
 }
