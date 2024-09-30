@@ -9,7 +9,7 @@ import useGetAndSaveFcmTokenQuery from '@/queries/auth/useGetAndSaveFcmTokenQuer
 import useResetFcmTokenQuery from '@/queries/auth/useResetFcmTokenQuery';
 import useGetAlarmListQuery from '@/queries/alarms/useGetAlarmListQuery';
 import useResetAlarmListQuery from '@/queries/alarms/useResetAlarmListQuery';
-import useCreateAlarmTestQuery from '@/queries/alarms/useCreateAlarmTestQuery';
+// import useCreateAlarmTestQuery from '@/queries/alarms/useCreateAlarmTestQuery';
 import useReadAlarmQuery from '@/queries/alarms/useReadAlarmQuery';
 import useDeleteAlarmQuery from '@/queries/alarms/useDeleteAlarmQuery';
 import useDeleteAllAlarmQuery from '@/queries/alarms/useDeleteAllAlarmQuery';
@@ -19,14 +19,14 @@ export default function AlarmPopover() {
 
   const resetFcmToken = useResetFcmTokenQuery();
   const resetAlarmList = useResetAlarmListQuery();
-  const createAlarmTest = useCreateAlarmTestQuery();
+  // const createAlarmTest = useCreateAlarmTestQuery();
   const readAlarm = useReadAlarmQuery();
   const deleteAlarm = useDeleteAlarmQuery();
   const deleteAllAlarm = useDeleteAllAlarmQuery();
 
-  const handleCreateAlarmTest = () => {
-    createAlarmTest.mutate();
-  };
+  // const handleCreateAlarmTest = () => {
+  //   createAlarmTest.mutate();
+  // };
 
   const handleReadAlarm = (alarmId: number) => {
     readAlarm.mutate(alarmId);
@@ -84,7 +84,7 @@ export default function AlarmPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="flex items-center justify-center p-2">
+        <button className="flex items-center justify-center p-2 pr-0.5">
           <Bell className="h-4 w-4 cursor-pointer text-black sm:h-5 sm:w-5" />
           <div className={cn('mt-[14px] h-1.5 w-1.5 rounded-full', unread ? 'bg-orange-500' : 'bg-transparent')}></div>
         </button>
@@ -98,12 +98,12 @@ export default function AlarmPopover() {
       >
         <div className="flex w-full items-center p-3">
           <h2 className="body-strong flex-1">알림</h2>
-          <button
+          {/* <button
             className="body-small p-1 text-gray-400"
             onClick={handleCreateAlarmTest}
           >
             테스트
-          </button>
+          </button> */}
           {/* {unread ? (
             <button
               className="body-small p-1"
@@ -120,7 +120,7 @@ export default function AlarmPopover() {
             </button>
           )} */}
           <button
-            className="body-small p-1 text-red-500"
+            className="body-small-strong p-1 text-red-500"
             onClick={handleDeleteAllAlarm}
           >
             모두 삭제

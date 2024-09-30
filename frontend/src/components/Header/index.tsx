@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
 import { useLocation, Link } from 'react-router-dom';
-import UserProfileModal from './UserProfileModal';
 import WorkspaceNavigation from './WorkspaceNavigation';
 import useAuthStore from '@/stores/useAuthStore';
 import { Suspense } from 'react';
 import AlarmPopover from './AlarmPopover';
+import ProfilePopover from './ProfilePopover';
 
 export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -41,7 +41,7 @@ export default function Header({ className, ...props }: HeaderProps) {
       {!isHomePage && profile && (
         <div className="flex items-center gap-2">
           <AlarmPopover />
-          <UserProfileModal />
+          <ProfilePopover />
         </div>
       )}
     </header>
