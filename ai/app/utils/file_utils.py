@@ -3,7 +3,7 @@ import shutil
 import yaml
 from PIL import Image
 from schemas.train_request import TrainDataInfo
-from schemas.predict_response import LabelData
+from schemas.train_label_data import DetectionLabelData, SegmentationLabelData, Segment
 import urllib
 import json
 
@@ -67,28 +67,34 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
 def create_detection_train_label(label:dict, label_path:str, label_converter:dict[int, int]):
     with open(label_path, "w") as train_label_txt:
         for shape in label["shapes"]:
-            train_label = []
             x1 = shape["points"][0][0]
             y1 = shape["points"][0][1]
             x2 = shape["points"][1][0]
             y2 = shape["points"][1][1]
-            train_label.append(str(label_converter[shape["group_id"]]))    # label Id
-            train_label.append(str((x1 + x2) / 2 / label["imageWidth"]))   # 중심 x 좌표
-            train_label.append(str((y1 + y2) / 2 / label["imageHeight"]))  # 중심 y 좌표
-            train_label.append(str((x2 - x1) / label["imageWidth"]))       # 너비
-            train_label.append(str((y2 - y1) / label["imageHeight"] ))     # 높이
-            train_label_txt.write(" ".join(train_label)+"\n")
+            detection_label = DetectionLabelData(
+                label_id= label_converter[shape["group_id"]],     # 모델의 id  (converter : pjt category pk -> model category  id)
+                center_x= (x1 + x2) / 2 / label["imageWidth"],    # 중심 x 좌표
+                center_y= (y1 + y2) / 2 / label["imageHeight"],   # 중심 y 좌표
+                width= (x2 - x1) / label["imageWidth"],           # 너비
+                height= (y2 - y1) / label["imageHeight"]          # 높이
+            )
+            
+            train_label_txt.write(detection_label.to_string()+"\n") # str변환 후 txt에 쓰기
 
 def create_segmentation_train_label(label:dict, label_path:str, label_converter:dict[int, int]):
     with open(label_path, "w") as train_label_txt:
         for shape in label["shapes"]:
-            train_label = []
-            train_label.append(str(label_converter[shape["group_id"]])) # label Id
-            for x, y in shape["points"]:
-                train_label.append(str(x / label["imageWidth"]))
-                train_label.append(str(y / label["imageHeight"]))
-            train_label_txt.write(" ".join(train_label)+"\n")
-
+            segmentation_label = SegmentationLabelData(
+                label_id = label_converter[shape["group_id"]],      # label Id
+                segments = [
+                    Segment(
+                        x=x / label["imageWidth"],          # shapes의 points 갯수만큼 x, y 반복
+                        y=y / label["imageHeight"]
+                    ) for x, y in shape["points"]
+                ]
+            )
+            train_label_txt.write(segmentation_label.to_string()+"\n")
+            
 def join_path(path, *paths):
     """os.path.join()과 같은 기능, os import 하기 싫어서 만듦"""
     return os.path.join(path, *paths)
@@ -135,6 +141,10 @@ def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, ch
     # 레이블 객체 불러오기
     label = json.loads(urllib.request.urlopen(data.data_url).read())
 
+    if not label["shapes"]:
+        # assert label["shapes"], No Label. Failed Download" # AssertionError 발생
+        print("No Label. Failed Download")
+        return
     label_name = label["shapes"][0]["label"]
 
     label_path = os.path.join(dataset_root_path,child_path,label_name)
@@ -143,8 +153,8 @@ def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, ch
     if os.path.exists(label_path):
         urllib.request.urlretrieve(data.image_url, os.path.join(label_path, img_name))
     else:
-        # raise FileNotFoundError("failed download")
-        print("Not Found Label Category. Failed Download")
+        # raise FileNotFoundError("No Label Category. Failed Download")
+        print("No Label Category. Failed Download")
     # 레이블 데이터 중에서 프로젝트 카테고리에 해당되지않는 데이터가 있는 경우 처리 1. 에러 raise 2. 무시(+ warning)
 
     

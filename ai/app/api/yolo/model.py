@@ -32,9 +32,6 @@ def get_model_list(project_id:int):
 
 @router.post("/projects/{project_id}", status_code=201)
 def create_model(project_id: int, request: ModelCreateRequest):
-    if request.project_type not in ["segmentation", "detection", "classification"]:
-        raise HTTPException(status_code=400,
-                             detail= f"Invalid type '{request.type}'. Must be one of \"segmentation\", \"detection\", \"classification\".")
     model_key = create_new_model(project_id, request.project_type, request.pretrained)
     return {"model_key": model_key}
 
