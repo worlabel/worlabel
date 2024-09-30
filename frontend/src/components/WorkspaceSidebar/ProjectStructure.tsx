@@ -40,7 +40,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
           <WorkspaceDropdownMenu
             projectId={project.id}
             folderId={0}
-            refetch={refetch}
+            onRefetch={refetch}
           />
         </header>
         {folderData.children.length === 0 && folderData.images.length === 0 ? (
