@@ -20,6 +20,7 @@ export default function ImageUploadFolderForm({
   const memberId = profile?.id || 0;
 
   const [files, setFiles] = useState<File[]>([]);
+  const [inputKey, setInputKey] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
@@ -44,8 +45,6 @@ export default function ImageUploadFolderForm({
     if (newFiles) {
       setFiles((prevFiles) => [...prevFiles, ...Array.from(newFiles)]);
     }
-
-    event.target.value = '';
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -62,8 +61,9 @@ export default function ImageUploadFolderForm({
     setIsDragging(false);
   };
 
-  const handleRemoveFile = (index: number) => {
-    setFiles(files.filter((_, i) => i != index));
+  const handleRemoveFile = () => {
+    setFiles([]);
+    setInputKey((prevKey) => prevKey + 1);
   };
 
   const handleUpload = async () => {
@@ -101,6 +101,7 @@ export default function ImageUploadFolderForm({
           )}
         >
           <input
+            key={inputKey}
             type="file"
             webkitdirectory=""
             // multiple
@@ -122,50 +123,45 @@ export default function ImageUploadFolderForm({
         </div>
       )}
       {files.length > 0 && (
-        <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
-          {files.map((file, index) => (
-            <li
-              key={index}
-              className="flex items-center justify-between p-1"
-            >
-              <span className="truncate">{file.webkitRelativePath || file.name}</span>
-              {isUploading ? (
-                <div className="p-2">
-                  {isUploaded ? (
-                    <CircleCheckBig
-                      className="stroke-green-500"
-                      size={16}
-                      strokeWidth="2"
-                    />
-                  ) : isFailed ? (
-                    <CircleX
-                      className="stroke-red-500"
-                      size={16}
-                      strokeWidth="2"
-                    />
-                  ) : (
-                    <CircleDashed
-                      className="stroke-gray-500"
-                      size={16}
-                      strokeWidth="2"
-                    />
-                  )}
-                </div>
+        <div className={'flex items-center justify-between p-1'}>
+          <span className="truncate">
+            {files[0].webkitRelativePath.substring(0, files[0].webkitRelativePath.indexOf('/'))} {}
+          </span>
+          {isUploading ? (
+            <div className="p-2">
+              {isUploaded ? (
+                <CircleCheckBig
+                  className="stroke-green-500"
+                  size={16}
+                  strokeWidth="2"
+                />
+              ) : isFailed ? (
+                <CircleX
+                  className="stroke-red-500"
+                  size={16}
+                  strokeWidth="2"
+                />
               ) : (
-                <button
-                  className={'cursor-pointer p-2'}
-                  onClick={() => handleRemoveFile(index)}
-                >
-                  <X
-                    color="red"
-                    size={16}
-                    strokeWidth="2"
-                  />
-                </button>
+                <CircleDashed
+                  className="stroke-gray-500"
+                  size={16}
+                  strokeWidth="2"
+                />
               )}
-            </li>
-          ))}
-        </ul>
+            </div>
+          ) : (
+            <button
+              className={'cursor-pointer p-2'}
+              onClick={handleRemoveFile}
+            >
+              <X
+                color="red"
+                size={16}
+                strokeWidth="2"
+              />
+            </button>
+          )}
+        </div>
       )}
       {isUploading ? (
         <Button
