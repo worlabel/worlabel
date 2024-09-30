@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -43,27 +42,34 @@ public class ProgressCacheRepository {
     }
 
     /**
+     * 현재 프로젝트 등록
+     */
+    public void registerTrainProject(final int projectId, final int modelId) {
+        String key = CacheKey.trainProgressKey();
+        redisTemplate.opsForHash().put(key, String.valueOf(projectId), String.valueOf(modelId));
+    }
+
+    /**
+     * 현재 오토레이블링중인지 확인하는 메서드
+     */
+    public boolean trainProgressCheck(final int projectId) {
+        String key = CacheKey.trainProgressKey();
+        return redisTemplate.opsForHash().hasKey(key, String.valueOf(projectId));
+    }
+
+    public void removeTrainProgress(final int projectId){
+        String key = CacheKey.trainProgressKey();
+        redisTemplate.opsForHash().delete(key, String.valueOf(projectId));
+    }
+
+    /**
      * 현재 학습 진행 여부 확인 메서드 (단일 키 사용)
      */
-    public boolean trainProgressCheck(final int projectId, final int modelId) {
+    public boolean trainModelProgressCheck(final int projectId, final int modelId) {
         String key = CacheKey.trainKey(projectId, modelId);
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
-    }
+        Long listSize = redisTemplate.opsForList().size(key);
 
-    /**
-     * 학습 진행 등록 메서드 (단일 키 사용)
-     */
-    public void registerTrainProgress(final int projectId, final int modelId) {
-        String key = CacheKey.trainKey(projectId, modelId);
-        redisTemplate.opsForValue().set(key, String.valueOf(modelId));
-    }
-
-    /**
-     * 학습 진행 제거 메서드 (단일 키 사용)
-     */
-    public void removeTrainProgress(final int projectId, final int modelId) {
-        String key = CacheKey.trainKey(projectId, modelId);
-        redisTemplate.delete(key);
+        return listSize != null && listSize > 0;
     }
 
     /**
@@ -72,7 +78,7 @@ public class ProgressCacheRepository {
     public void addProgressModel(final int projectId, final int modelId, final ReportResponse data) {
         String jsonData = gson.toJson(data);
         String key = CacheKey.trainKey(projectId, modelId);
-        log.debug("key{} : data {}",key, jsonData);
+        log.debug("key{} : data {}", key, jsonData);
         redisTemplate.opsForList().rightPush(key, jsonData);
     }
 

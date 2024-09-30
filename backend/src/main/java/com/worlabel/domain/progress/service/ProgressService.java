@@ -22,7 +22,6 @@ public class ProgressService {
             throw new CustomException(ErrorCode.AI_IN_PROGRESS, "해당 프로젝트 오토레이블링 진행 중");
         }
     }
-
     public void registerPredictProgress(final int projectId) {
         progressCacheRepository.registerPredictProgress(projectId);
     }
@@ -31,18 +30,22 @@ public class ProgressService {
         progressCacheRepository.removePredictProgress(projectId);
     }
 
-    public void trainProgressCheck(final int projectId, final int modelId) {
-        if (progressCacheRepository.trainProgressCheck(projectId, modelId)) {
+    public void registerTrainProcess(final int projectId, final int modelId) {
+        progressCacheRepository.registerTrainProject(projectId, modelId);
+    }
+
+    public void removeTrainProgress(final int projectId){
+        progressCacheRepository.removeTrainProgress(projectId);
+    }
+
+    public void trainProgressCheck(final int projectId) {
+        if (progressCacheRepository.trainProgressCheck(projectId)) {
             throw new CustomException(ErrorCode.AI_IN_PROGRESS);
         }
     }
 
-    public void registerTrainProgress(final int projectId, final int modelId) {
-        progressCacheRepository.registerTrainProgress(projectId, modelId);
-    }
-
     public boolean isProgressTrain(final int projectId, final int modelId) {
-        return progressCacheRepository.trainProgressCheck(projectId, modelId);
+        return progressCacheRepository.trainModelProgressCheck(projectId, modelId);
     }
 
     public void addProgressModel(final int projectId, final int modelId, final ReportResponse data) {
@@ -53,11 +56,8 @@ public class ProgressService {
         return progressCacheRepository.getProgressModelByProjectId(projectId);
     }
 
-    public void removeTrainProgress(final int projectId, final int modelId) {
-        progressCacheRepository.removeTrainProgress(projectId, modelId);
-    }
-
     public List<ReportResponse> getProgressResponse(final int projectId, final int modelId) {
         return progressCacheRepository.getProgressModel(projectId, modelId);
     }
+
 }

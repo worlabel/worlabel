@@ -33,21 +33,13 @@ public class ReportService {
 
     public void addReportByModelId(final Integer projectId, final Integer modelId, final ReportRequest reportRequest) {
         ReportResponse reportResponse = ReportResponse.of(reportRequest, modelId);
-
-        boolean result = progressService.isProgressTrain(projectId, modelId);
-//        log.debug("result {}" ,result);
-//        if (result) { // 이미 존재하면 뒤에 추가
-//        }
         progressService.addProgressModel(projectId, modelId, reportResponse);
-//        progressService.registerTrainProgress(projectId, modelId);
-
     }
 
     public List<ReportResponse> getReportsProgressByModelId(final Integer projectId, final Integer modelId) {
         if (progressService.isProgressTrain(projectId, modelId)) {
             return progressService.getProgressResponse(projectId, modelId);
         }
-
         return List.of();
     }
 
@@ -70,6 +62,5 @@ public class ReportService {
             reports.add(report);
         }
         reportRepository.saveAll(reports);
-        progressService.removeTrainProgress(projectId, modelId);
     }
 }

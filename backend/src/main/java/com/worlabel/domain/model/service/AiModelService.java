@@ -88,13 +88,15 @@ public class AiModelService {
 
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void train(final Integer memberId, final Integer projectId, final ModelTrainRequest trainRequest) {
-        progressService.trainProgressCheck(projectId, trainRequest.getModelId());
+        progressService.trainProgressCheck(projectId);
 
         try {
-            progressService.registerTrainProgress(projectId, trainRequest.getModelId());
+            // 학습 상황 등록
+            progressService.registerTrainProcess(projectId, trainRequest.getModelId());
 
             Project project = getProject(projectId);
             AiModel model = getModel(trainRequest.getModelId());
+
             TrainRequest aiRequest = getTrainRequest(trainRequest, project, model);
 
             // FastAPI 서버로 POST 요청 전송
@@ -121,7 +123,7 @@ public class AiModelService {
             // 알람 전송
             alarmService.save(memberId, Alarm.AlarmType.TRAIN);
         } finally {
-            progressService.removeTrainProgress(projectId, trainRequest.getModelId());
+            progressService.removeTrainProgress(projectId);
         }
     }
 
