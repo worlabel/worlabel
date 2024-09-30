@@ -29,10 +29,9 @@ import java.util.List;
 public class AiModelController {
 
     private final AiModelService aiModelService;
-    private final ProgressService progressService;
 
     @Operation(summary = "프로젝트 모델 조회", description = "프로젝트에 있는 모델을 조회합니다.")
-    @SwaggerApiSuccess(description = "프로젝트 멤버를 성공적으로 조회합니다.")
+    @SwaggerApiSuccess(description = "프로젝트 모델을 성공적으로 조회합니다.")
     @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
     @GetMapping("/projects/{project_id}/models")
     public List<AiModelResponse> getModelList(

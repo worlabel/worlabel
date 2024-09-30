@@ -53,7 +53,7 @@ public class ProgressService {
     }
 
     public int getProgressModelByProjectId(final int projectId) {
-        return progressCacheRepository.getProgressModelByProjectId(projectId);
+        return progressCacheRepository.getProgressModelId(projectId);
     }
 
     public List<ReportResponse> getProgressResponse(final int projectId, final int modelId) {
