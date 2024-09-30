@@ -10,5 +10,11 @@ export const Default = () => (
   <CanvasControlBar
     saveJson={() => {}}
     projectType="segmentation"
+    categories={[
+      {
+        id: 1,
+        labelName: 'label',
+      },
+    ]}
   />
 );

@@ -461,6 +461,7 @@ export default function ImageCanvas() {
       <CanvasControlBar
         saveJson={saveJson}
         projectType={project!.type}
+        categories={categories}
       />
     </div>
   ) : (
