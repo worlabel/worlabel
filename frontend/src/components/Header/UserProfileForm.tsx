@@ -35,7 +35,7 @@ export default function UserProfileForm({ onClose }: { onClose: () => void }) {
 
       <Button
         onClick={handleLogout}
-        variant="outlinePrimary"
+        variant="blue"
         className="mt-4"
         disabled={isLoggingOut}
       >

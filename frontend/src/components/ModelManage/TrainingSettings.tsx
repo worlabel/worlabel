@@ -127,7 +127,7 @@ export default function TrainingSettings({
             />
           </div>
           <Button
-            variant="outlinePrimary"
+            variant="blue"
             size="lg"
             onClick={handleSubmit}
             disabled={!selectedModel || isPolling}
@@ -138,7 +138,7 @@ export default function TrainingSettings({
       )}
       {selectedModel?.isTrain && (
         <Button
-          variant="secondary"
+          variant="red"
           size="lg"
           onClick={handleTrainingStop}
         >

@@ -38,7 +38,7 @@ export default function WorkspaceMemberAddModal({
     >
       <DialogTrigger asChild>
         <Button
-          variant="outlinePrimary"
+          variant="blue"
           className={`${buttonClass}`}
           onClick={handleOpen}
         >

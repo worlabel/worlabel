@@ -70,7 +70,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
 
       <div className="flex">
         <Button
-          variant="outlinePrimary"
+          variant="blue"
           className="w-full overflow-hidden"
           disabled={requestAutoLabel.isPending}
           onClick={() => {

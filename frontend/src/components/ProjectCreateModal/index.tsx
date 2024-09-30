@@ -22,8 +22,8 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
     >
       <DialogTrigger asChild>
         <Button
-          variant="outlinePrimary"
-          className={`${buttonClass}`}
+          variant="blue"
+          className={buttonClass}
           size={'xs'}
           onClick={handleOpen}
         >

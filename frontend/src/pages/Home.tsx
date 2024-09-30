@@ -44,7 +44,7 @@ export default function Home() {
         <>
           <Button
             asChild
-            variant="outlinePrimary"
+            variant="blue"
             size="lg"
           >
             <Link to="/browse">시작하기</Link>

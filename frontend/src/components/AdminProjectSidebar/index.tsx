@@ -65,7 +65,7 @@ export default function AdminProjectSidebar(): JSX.Element {
             <SquarePen size={16} />
           </button>
           <ProjectCreateModal
-            buttonClass="caption bg-gray-100"
+            buttonClass="caption"
             onSubmit={handleCreateProject}
           />
         </header>

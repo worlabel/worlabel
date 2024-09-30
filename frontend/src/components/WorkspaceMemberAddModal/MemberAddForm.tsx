@@ -86,7 +86,7 @@ export default function MemberAddForm({ onSubmit }: { onSubmit: (data: MemberAdd
 
         <Button
           type="submit"
-          variant="outlinePrimary"
+          variant="blue"
           disabled={form.watch('memberId') === 0}
         >
           멤버 초대하기

@@ -182,12 +182,7 @@ export default function ImageUploadFileForm({
       {isUploading ? (
         <Button
           onClick={handleClose}
-          variant="outlinePrimary"
-          className={
-            isFailed
-              ? 'border-red-500 text-red-500 hover:bg-red-500 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-500'
-              : ''
-          }
+          variant={isFailed ? 'red' : 'blue'}
           disabled={!isUploaded && !isFailed}
         >
           {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : `업로드 중... ${progress}%`}
@@ -195,7 +190,7 @@ export default function ImageUploadFileForm({
       ) : (
         <Button
           onClick={handleUpload}
-          variant="outlinePrimary"
+          variant="blue"
           disabled={files.length === 0}
         >
           업로드
