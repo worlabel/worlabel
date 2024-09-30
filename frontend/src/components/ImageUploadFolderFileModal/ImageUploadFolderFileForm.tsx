@@ -3,9 +3,9 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
-import useUploadImageFolderQuery from '@/queries/projects/useUploadImageFolderQuery';
+import useUploadImageFolderFileQuery from '@/queries/projects/useUploadImageFolderFileQuery';
 
-export default function ImageUploadFolderForm({
+export default function ImageUploadFolderFileForm({
   onClose,
   onRefetch,
   projectId,
@@ -27,7 +27,7 @@ export default function ImageUploadFolderForm({
   const [isFailed, setIsFailed] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
-  const uploadImageFolder = useUploadImageFolderQuery();
+  const uploadImageFolderFile = useUploadImageFolderFileQuery();
 
   const handleClose = () => {
     onClose();
@@ -69,7 +69,7 @@ export default function ImageUploadFolderForm({
   const handleUpload = async () => {
     setIsUploading(true);
 
-    uploadImageFolder.mutate(
+    uploadImageFolderFile.mutate(
       {
         memberId,
         projectId,
