@@ -56,7 +56,7 @@ export async function uploadImageFile(
     .then(({ data }) => data);
 }
 
-export async function uploadImageFolder(
+export async function uploadImageFolderFile(
   memberId: number,
   projectId: number,
   folderId: number,
@@ -70,6 +70,31 @@ export async function uploadImageFolder(
 
   return api
     .post(`/projects/${projectId}/folders/${folderId}/images/file`, formData, {
+      params: { memberId },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          processCallback(progress);
+        }
+      },
+    })
+    .then(({ data }) => data);
+}
+
+export async function uploadImageFolder(
+  memberId: number,
+  projectId: number,
+  folderId: number,
+  files: File[],
+  processCallback: (progress: number) => void
+) {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('imageList', file);
+  });
+
+  return api
+    .post(`/projects/${projectId}/folders/${folderId}/images/folder`, formData, {
       params: { memberId },
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {

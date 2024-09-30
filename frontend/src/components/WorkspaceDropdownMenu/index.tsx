@@ -9,6 +9,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import ImageUploadFileForm from '../ImageUploadFileModal/ImageUploadFileForm';
 import React from 'react';
+import ImageUploadFolderFileForm from '../ImageUploadFolderFileModal/ImageUploadFolderFileForm';
 import ImageUploadFolderForm from '../ImageUploadFolderModal/ImageUploadFolderForm';
 import ImageUploadZipForm from '../ImageUploadZipModal/ImageUploadZipForm';
 
@@ -23,6 +24,7 @@ export default function WorkspaceDropdownMenu({
 }) {
   const [isOpenUploadFile, setIsOpenUploadFile] = React.useState<boolean>(false);
   const [fileCount, setFileCount] = React.useState<number>(0);
+  const [isOpenUploadFolderFile, setIsOpenUploadFolderFile] = React.useState<boolean>(false);
   const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState<boolean>(false);
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
 
@@ -30,6 +32,12 @@ export default function WorkspaceDropdownMenu({
 
   const handleCloseUploadFile = () => {
     setIsOpenUploadFile(false);
+  };
+
+  const handleOpenUploadFolderFile = () => setIsOpenUploadFolderFile(true);
+
+  const handleCloseUploadFolderFile = () => {
+    setIsOpenUploadFolderFile(false);
   };
 
   const handleOpenUploadFolder = () => setIsOpenUploadFolder(true);
@@ -67,7 +75,8 @@ export default function WorkspaceDropdownMenu({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleOpenUploadFile}>파일 업로드</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드 (임시)</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenUploadFolderFile}>폴더 업로드 (파일 업로드 API 이용)</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드 (백엔드 구현 필요)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadZip}>폴더 압축파일 업로드</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -90,12 +99,28 @@ export default function WorkspaceDropdownMenu({
       </Dialog>
 
       <Dialog
+        open={isOpenUploadFolderFile}
+        onOpenChange={setIsOpenUploadFolderFile}
+      >
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader title="폴더 업로드 (파일 업로드 API 이용)" />
+          <ImageUploadFolderFileForm
+            onClose={handleCloseUploadFolderFile}
+            onRefetch={onRefetch}
+            projectId={projectId}
+            folderId={folderId}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
         open={isOpenUploadFolder}
         onOpenChange={setIsOpenUploadFolder}
       >
         <DialogTrigger asChild></DialogTrigger>
         <DialogContent className="max-w-2xl">
-          <DialogHeader title="폴더 업로드 (임시)" />
+          <DialogHeader title="폴더 업로드 (백엔드 구현 필요)" />
           <ImageUploadFolderForm
             onClose={handleCloseUploadFolder}
             onRefetch={onRefetch}

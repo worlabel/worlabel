@@ -1,9 +1,9 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Plus } from 'lucide-react';
-import ImageUploadFolderForm from './ImageUploadFolderForm';
+import ImageUploadFolderFileForm from './ImageUploadFolderFileForm';
 
-export default function ImageUploadFolderModal({ projectId, folderId }: { projectId: number; folderId: number }) {
+export default function ImageUploadFolderFileModal({ projectId, folderId }: { projectId: number; folderId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleOpen = () => setIsOpen(true);
@@ -23,8 +23,8 @@ export default function ImageUploadFolderModal({ projectId, folderId }: { projec
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogHeader title="폴더 업로드 (백엔드 구현 필요)" />
-        <ImageUploadFolderForm
+        <DialogHeader title="폴더 업로드 (파일 업로드 API 이용)" />
+        <ImageUploadFolderFileForm
           onClose={handleClose}
           projectId={projectId}
           folderId={folderId}
