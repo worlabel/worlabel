@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
@@ -7,10 +7,12 @@ import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery'
 
 export default function ImageUploadFileForm({
   onClose,
+  onFileCount,
   projectId,
   folderId,
 }: {
   onClose: () => void;
+  onFileCount: (fileCount: number) => void;
   projectId: number;
   folderId: number;
 }) {
@@ -86,6 +88,10 @@ export default function ImageUploadFileForm({
       }
     );
   };
+
+  useEffect(() => {
+    onFileCount(files.length);
+  }, [files, onFileCount]);
 
   return (
     <div className="flex flex-col gap-5">

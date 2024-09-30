@@ -21,9 +21,10 @@ export default function WorkspaceDropdownMenu({
   folderId: number;
   refetch: () => void;
 }) {
-  const [isOpenUploadFile, setIsOpenUploadFile] = React.useState(false);
-  const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState(false);
-  const [isOpenUploadZip, setIsOpenUploadZip] = React.useState(false);
+  const [isOpenUploadFile, setIsOpenUploadFile] = React.useState<boolean>(false);
+  const [fileCount, setFileCount] = React.useState<number>(0);
+  const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState<boolean>(false);
+  const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
 
   const handleOpenUploadFile = () => setIsOpenUploadFile(true);
   const handleCloseUploadFile = () => {
@@ -39,6 +40,10 @@ export default function WorkspaceDropdownMenu({
   const handleCloseUploadZip = () => {
     refetch();
     setIsOpenUploadZip(false);
+  };
+  const handleFileCount = (fileCount: number) => {
+    console.log(fileCount);
+    setFileCount(fileCount);
   };
 
   return (
@@ -71,9 +76,10 @@ export default function WorkspaceDropdownMenu({
       >
         <DialogTrigger asChild></DialogTrigger>
         <DialogContent className="max-w-2xl">
-          <DialogHeader title="파일 업로드" />
+          <DialogHeader title={fileCount > 0 ? `파일 업로드 (${fileCount})` : '파일 업로드'} />
           <ImageUploadFileForm
             onClose={handleCloseUploadFile}
+            onFileCount={handleFileCount}
             projectId={projectId}
             folderId={folderId}
           />

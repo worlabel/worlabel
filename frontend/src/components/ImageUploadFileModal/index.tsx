@@ -4,10 +4,14 @@ import { Plus } from 'lucide-react';
 import ImageUploadFileForm from './ImageUploadFileForm';
 
 export default function ImageUploadFileModal({ projectId, folderId }: { projectId: number; folderId: number }) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [fileCount, setFileCount] = React.useState<number>(0);
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
+  const handleFileCount = (fileCount: number) => {
+    setFileCount(fileCount);
+  };
 
   return (
     <Dialog
@@ -23,9 +27,10 @@ export default function ImageUploadFileModal({ projectId, folderId }: { projectI
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogHeader title="파일 업로드" />
+        <DialogHeader title={fileCount > 0 ? `파일 업로드 (${fileCount})` : '파일 업로드'} />
         <ImageUploadFileForm
           onClose={handleClose}
+          onFileCount={handleFileCount}
           projectId={projectId}
           folderId={folderId}
         />
