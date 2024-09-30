@@ -153,7 +153,7 @@ export default function TrainingSettings({
 
       {isTraining && (
         <Button
-          variant="secondary"
+          variant="red"
           size="lg"
           onClick={handleTrainingStop}
         >
