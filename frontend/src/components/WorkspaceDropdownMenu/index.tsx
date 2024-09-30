@@ -15,11 +15,11 @@ import ImageUploadZipForm from '../ImageUploadZipModal/ImageUploadZipForm';
 export default function WorkspaceDropdownMenu({
   projectId,
   folderId,
-  refetch,
+  onRefetch,
 }: {
   projectId: number;
   folderId: number;
-  refetch: () => void;
+  onRefetch: () => void;
 }) {
   const [isOpenUploadFile, setIsOpenUploadFile] = React.useState<boolean>(false);
   const [fileCount, setFileCount] = React.useState<number>(0);
@@ -27,20 +27,23 @@ export default function WorkspaceDropdownMenu({
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
 
   const handleOpenUploadFile = () => setIsOpenUploadFile(true);
+
   const handleCloseUploadFile = () => {
-    refetch();
     setIsOpenUploadFile(false);
   };
+
   const handleOpenUploadFolder = () => setIsOpenUploadFolder(true);
+
   const handleCloseUploadFolder = () => {
-    refetch();
     setIsOpenUploadFolder(false);
   };
+
   const handleOpenUploadZip = () => setIsOpenUploadZip(true);
+
   const handleCloseUploadZip = () => {
-    refetch();
     setIsOpenUploadZip(false);
   };
+
   const handleFileCount = (fileCount: number) => {
     console.log(fileCount);
     setFileCount(fileCount);
@@ -79,6 +82,7 @@ export default function WorkspaceDropdownMenu({
           <DialogHeader title={fileCount > 0 ? `파일 업로드 (${fileCount})` : '파일 업로드'} />
           <ImageUploadFileForm
             onClose={handleCloseUploadFile}
+            onRefetch={onRefetch}
             onFileCount={handleFileCount}
             projectId={projectId}
             folderId={folderId}
@@ -95,6 +99,7 @@ export default function WorkspaceDropdownMenu({
           <DialogHeader title="폴더 업로드 (임시)" />
           <ImageUploadFolderForm
             onClose={handleCloseUploadFolder}
+            onRefetch={onRefetch}
             projectId={projectId}
             folderId={folderId}
           />
@@ -110,6 +115,7 @@ export default function WorkspaceDropdownMenu({
           <DialogHeader title="폴더 압축파일 업로드" />
           <ImageUploadZipForm
             onClose={handleCloseUploadZip}
+            onRefetch={onRefetch}
             projectId={projectId}
             folderId={folderId}
           />

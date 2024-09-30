@@ -7,10 +7,12 @@ import useUploadImageZipQuery from '@/queries/projects/useUploadImageZipQuery';
 
 export default function ImageUploadZipForm({
   onClose,
+  onRefetch,
   projectId,
   folderId,
 }: {
   onClose: () => void;
+  onRefetch: () => void;
   projectId: number;
   folderId: number;
 }) {
@@ -74,6 +76,7 @@ export default function ImageUploadZipForm({
         },
         {
           onSuccess: () => {
+            onRefetch();
             setIsUploaded(true);
           },
           onError: () => {

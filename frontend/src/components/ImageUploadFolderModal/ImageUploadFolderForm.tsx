@@ -7,10 +7,12 @@ import useUploadImageFolderQuery from '@/queries/projects/useUploadImageFolderQu
 
 export default function ImageUploadFolderForm({
   onClose,
+  onRefetch,
   projectId,
   folderId,
 }: {
   onClose: () => void;
+  onRefetch: () => void;
   projectId: number;
   folderId: number;
 }) {
@@ -73,6 +75,7 @@ export default function ImageUploadFolderForm({
       },
       {
         onSuccess: () => {
+          onRefetch;
           setIsUploaded(true);
         },
         onError: () => {
