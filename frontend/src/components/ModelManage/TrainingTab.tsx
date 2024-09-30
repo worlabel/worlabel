@@ -1,24 +1,57 @@
-import useTrainModelQuery from '@/queries/models/useTrainModelQuery';
+import { useState, useEffect } from 'react';
 import TrainingSettings from './TrainingSettings';
 import TrainingGraph from './TrainingGraph';
+import useTrainModelQuery from '@/queries/models/useTrainModelQuery';
 import { ModelTrainRequest, ModelResponse } from '@/types';
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TrainingTabProps {
   projectId: number | null;
 }
 
 export default function TrainingTab({ projectId }: TrainingTabProps) {
-  const numericProjectId = projectId ? parseInt(projectId.toString(), 10) : null;
+  const numericProjectId = projectId !== null ? Number(projectId) : null;
   const [selectedModel, setSelectedModel] = useState<ModelResponse | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const queryClient = useQueryClient();
 
-  const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number);
+  const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number, {
+    onSuccess: () => {
+      setIsPolling(true);
+    },
+    onError: () => {
+      alert('학습 요청 실패');
+      setIsPolling(false);
+    },
+  });
 
   const handleTrainingStart = (trainData: ModelTrainRequest) => {
-    startTraining(trainData);
+    if (numericProjectId !== null) {
+      startTraining(trainData);
+    }
   };
 
-  const handleTrainingStop = () => {};
+  useEffect(() => {
+    if (!selectedModel || !numericProjectId || !isPolling) return;
+
+    const intervalId = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['projectModels', numericProjectId] });
+    }, 2000);
+
+    const timeoutId = setTimeout(() => {
+      clearInterval(intervalId);
+      setIsPolling(false);
+    }, 30000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [selectedModel, numericProjectId, queryClient, isPolling]);
+
+  const handleTrainingStop = () => {
+    setIsPolling(false);
+  };
 
   return (
     <div className="grid grid-rows-[auto_1fr] gap-8 md:grid-cols-2">
@@ -28,9 +61,9 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         setSelectedModel={setSelectedModel}
         handleTrainingStart={handleTrainingStart}
         handleTrainingStop={handleTrainingStop}
+        isPolling={isPolling}
         className="h-full"
       />
-
       <TrainingGraph
         projectId={numericProjectId}
         selectedModel={selectedModel}
