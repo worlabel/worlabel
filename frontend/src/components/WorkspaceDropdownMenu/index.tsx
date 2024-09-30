@@ -45,7 +45,6 @@ export default function WorkspaceDropdownMenu({
   };
 
   const handleFileCount = (fileCount: number) => {
-    console.log(fileCount);
     setFileCount(fileCount);
   };
 
