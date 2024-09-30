@@ -57,9 +57,15 @@ public class ProgressCacheRepository {
         return redisTemplate.opsForHash().hasKey(key, String.valueOf(projectId));
     }
 
-    public void removeTrainProgress(final int projectId){
+    public void removeTrainProgress(final int projectId) {
         String key = CacheKey.trainProgressKey();
         redisTemplate.opsForHash().delete(key, String.valueOf(projectId));
+    }
+
+    public int getProgressModelId(final int projectId) {
+        String key = CacheKey.autoLabelingProgressKey();
+        Object modelId = redisTemplate.opsForHash().get(key, String.valueOf(projectId));
+        return modelId == null ? 0 : (int) modelId;
     }
 
     /**
@@ -90,26 +96,6 @@ public class ProgressCacheRepository {
         return progressList.stream()
                 .map(this::convert)
                 .toList();
-    }
-
-    public int getProgressModelByProjectId(final int projectId) {
-        String key = CacheKey.trainModelKey(projectId);
-        log.debug("key : {}", key);
-        // train:<projectId>:* 형태의 첫 번째 키를 가져옴
-        Set<String> keys = redisTemplate.keys(key);
-
-        // 모델 ID를 추출하여 반환
-        if (keys != null && !keys.isEmpty()) {
-            String firstKey = keys.iterator().next(); // 첫 번째 키 가져오기
-            String[] parts = firstKey.split(":");
-            return Integer.parseInt(parts[2]); // modelId가 세 번째 위치
-        }
-
-        return 0;
-    }
-
-    public void clearProgressModel(final int modelId) {
-        redisTemplate.delete(CacheKey.progressStatusKey(modelId));
     }
 
     private ReportResponse convert(String data) {
