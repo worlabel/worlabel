@@ -237,6 +237,7 @@ export default function ImageCanvas() {
       }
       return;
     }
+    if (selectedLabelId === null) return;
     if (e.target === e.target.getStage() || e.target.getClassName() === 'Image') {
       setSelectedLabelId(null);
     }
