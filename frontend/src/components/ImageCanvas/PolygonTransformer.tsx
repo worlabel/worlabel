@@ -1,3 +1,4 @@
+import { TRANSFORM_CHANGE_STR } from '@/constants';
 import Konva from 'konva';
 import { Vector2d } from 'konva/lib/types';
 import { useEffect, useRef } from 'react';
@@ -9,19 +10,6 @@ interface PolygonTransformerProps {
   stage: Konva.Stage;
   dragLayer: Konva.Layer;
 }
-
-const TRANSFORM_CHANGE_STR = [
-  'widthChange',
-  'heightChange',
-  'scaleXChange',
-  'skewXChange',
-  'skewYChange',
-  'rotationChange',
-  'offsetXChange',
-  'offsetYChange',
-  'transformsEnabledChange',
-  'strokeWidthChange',
-];
 
 export default function PolygonTransformer({ coordinates, setCoordinates, stage, dragLayer }: PolygonTransformerProps) {
   const anchorsRef = useRef<Konva.Group>(null);
@@ -99,7 +87,10 @@ export default function PolygonTransformer({ coordinates, setCoordinates, stage,
         shadowForStrokeEnabled={false}
         listening={false}
       />
-      <Group ref={anchorsRef}>
+      <Group
+        ref={anchorsRef}
+        // scale={scale}
+      >
         {coordinates.map((point, index) => {
           return (
             <Circle

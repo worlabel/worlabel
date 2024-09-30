@@ -1,6 +1,6 @@
 import { updateComment } from '@/api/commentAPi';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CommentRequest } from '@/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function useUpdateCommentQuery(projectId: number) {
   const queryClient = useQueryClient();

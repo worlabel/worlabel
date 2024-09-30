@@ -19,7 +19,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import useSaveImageLabelsQuery from '@/queries/projects/useSaveImageLabelsQuery';
 import { useToast } from '@/hooks/use-toast';
 import CommentLabel from './CommentLabel';
-import useAuthStore from '@/stores/useAuthStore';
 
 export default function ImageCanvas() {
   const { project, folderId, categories } = useProjectStore();
@@ -40,7 +39,6 @@ export default function ImageCanvas() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { profile } = useAuthStore();
   const { comments, setComments } = useCommentStore();
   const { data: commentList } = useCommentListQuery(project!.id, imageId);
   const createCommentMutation = useCreateCommentQuery(project!.id, imageId);
@@ -208,6 +206,16 @@ export default function ImageCanvas() {
     setDrawState('pointer');
     setSelectedLabelId(id);
   };
+  const addComment = () => {
+    const { x, y } = stageRef.current!.getRelativePointerPosition()!;
+
+    createCommentMutation.mutate({
+      content: '',
+      positionX: x,
+      positionY: y,
+    });
+    setDrawState('pointer');
+  };
 
   const handleClick = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
     e.evt.preventDefault();
@@ -216,37 +224,7 @@ export default function ImageCanvas() {
     const isRightClicked = e.evt.type === 'mousedown' && (e.evt as MouseEvent).button === 2;
 
     if (drawState === 'comment' && isLeftClicked) {
-      const stage = stageRef.current;
-      if (!stage) return;
-
-      const pointerPosition = stage.getRelativePointerPosition();
-      if (!pointerPosition) return;
-
-      if (!profile) {
-        console.error('User profile is not available');
-        return;
-      }
-
-      const x = pointerPosition.x;
-      const y = pointerPosition.y;
-
-      createCommentMutation.mutate({
-        id: 0,
-        content: '',
-        positionX: x,
-        positionY: y,
-        memberId: profile.id,
-        memberNickname: profile.nickname,
-        memberProfileImage: profile.profileImage,
-        createTime: new Date().toISOString(),
-        author: {
-          id: profile.id,
-          nickname: profile.nickname,
-          profileImage: profile.profileImage,
-          email: profile.email,
-        },
-      });
-      return;
+      addComment();
     }
 
     if (drawState !== 'pointer' && (isLeftClicked || isRightClicked)) {
@@ -436,6 +414,7 @@ export default function ImageCanvas() {
           {comments.map((comment) => (
             <CommentLabel
               key={comment.id}
+              stage={stageRef.current as Konva.Stage}
               comment={comment}
               updateComment={(updatedComment) => {
                 updateCommentMutation.mutate({
