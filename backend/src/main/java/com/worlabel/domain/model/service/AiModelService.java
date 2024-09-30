@@ -103,6 +103,7 @@ public class AiModelService {
             log.debug("요청 DTO :{}", aiRequest);
             String endPoint = project.getProjectType().getValue() + "/train";
             TrainResponse trainResponse = aiRequestService.postRequest(endPoint, aiRequest, TrainResponse.class, this::converterTrain);
+            log.debug("결과 {}",trainResponse);
 
             // 가져온 modelKey -> version 업된 모델 다시 새롭게 저장
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"));
