@@ -60,4 +60,7 @@ public class ProgressService {
         return progressCacheRepository.getProgressModel(projectId, modelId);
     }
 
+    public void clearProgress(final int projectId, final int modelId) {
+        progressCacheRepository.clearProgressModel(projectId, modelId);
+    }
 }

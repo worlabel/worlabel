@@ -62,5 +62,6 @@ public class ReportService {
             reports.add(report);
         }
         reportRepository.saveAll(reports);
+        progressService.clearProgress(projectId, modelId);
     }
 }

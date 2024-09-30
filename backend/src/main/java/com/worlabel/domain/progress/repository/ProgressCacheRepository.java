@@ -98,6 +98,11 @@ public class ProgressCacheRepository {
                 .toList();
     }
 
+    public void clearProgressModel(final int projectId, final int modelId) {
+        String key = CacheKey.trainKey(projectId, modelId);
+        redisTemplate.delete(key);
+    }
+
     private ReportResponse convert(String data) {
         return gson.fromJson(data, ReportResponse.class);
     }
