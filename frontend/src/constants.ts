@@ -80,3 +80,16 @@ export const LABEL_CATEGORY = [
   'hair drier',
   'toothbrush',
 ];
+
+export const TRANSFORM_CHANGE_STR = [
+  'widthChange',
+  'heightChange',
+  'scaleXChange',
+  'skewXChange',
+  'skewYChange',
+  'rotationChange',
+  'offsetXChange',
+  'offsetYChange',
+  'transformsEnabledChange',
+  'strokeWidthChange',
+];
