@@ -56,6 +56,7 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
   return (
     <div className="grid grid-rows-[auto_1fr] gap-8 md:grid-cols-2">
       <TrainingSettings
+        key={selectedModel?.isTrain ? 'training' : 'settings'}
         projectId={numericProjectId}
         selectedModel={selectedModel}
         setSelectedModel={setSelectedModel}
@@ -65,6 +66,7 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         className="h-full"
       />
       <TrainingGraph
+        key={selectedModel?.isTrain ? 'training' : 'graph'}
         projectId={numericProjectId}
         selectedModel={selectedModel}
         className="h-full"
