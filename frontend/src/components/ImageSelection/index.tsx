@@ -35,7 +35,7 @@ export default function ImageSelection({ projectId, selectedImages, setSelectedI
       <div className="mb-2 flex items-center justify-between">
         <Label>이미지 선택 (파일 목록)</Label>
         <Button
-          variant="blue"
+          variant={allSavedImages && selectedImages.length === allSavedImages.length ? 'blue' : 'black'}
           size="sm"
           onClick={handleSelectAll}
           type="button"
@@ -57,7 +57,7 @@ export default function ImageSelection({ projectId, selectedImages, setSelectedI
                 <span className="truncate">{image.imageTitle}</span>
                 <div className="flex items-center space-x-2">
                   <Button
-                    variant={selectedImages.includes(image.id) ? 'red' : 'blue'}
+                    variant={selectedImages.includes(image.id) ? 'blue' : 'black'}
                     size="sm"
                     onClick={() => handleImageSelect(image.id)}
                     className="px-3 py-1"

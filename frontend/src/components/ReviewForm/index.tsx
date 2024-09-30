@@ -99,6 +99,7 @@ export default function ReviewForm({ projects, onSubmit }: ReviewFormProps): JSX
         <Textarea
           id="content"
           placeholder="리뷰 내용을 입력하세요"
+          className="ring-black"
           {...register('content')}
         />
         {errors.content && <p className="text-red-500">{errors.content.message}</p>}
