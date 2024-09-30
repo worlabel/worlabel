@@ -15,12 +15,7 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
   const [isPolling, setIsPolling] = useState(false);
   const queryClient = useQueryClient();
 
-  const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number, {
-    onError: () => {
-      alert('학습 요청 실패');
-      setIsPolling(false);
-    },
-  });
+  const { mutate: startTraining } = useTrainModelQuery(numericProjectId as number);
 
   const handleTrainingStart = (trainData: ModelTrainRequest) => {
     if (numericProjectId !== null) {
