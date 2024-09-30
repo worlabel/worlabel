@@ -141,6 +141,10 @@ def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, ch
     # 레이블 객체 불러오기
     label = json.loads(urllib.request.urlopen(data.data_url).read())
 
+    if not label["shapes"]:
+        # assert label["shapes"], No Label. Failed Download" # AssertionError 발생
+        print("No Label. Failed Download")
+        return
     label_name = label["shapes"][0]["label"]
 
     label_path = os.path.join(dataset_root_path,child_path,label_name)
@@ -149,8 +153,8 @@ def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, ch
     if os.path.exists(label_path):
         urllib.request.urlretrieve(data.image_url, os.path.join(label_path, img_name))
     else:
-        # raise FileNotFoundError("failed download")
-        print("Not Found Label Category. Failed Download")
+        # raise FileNotFoundError("No Label Category. Failed Download")
+        print("No Label Category. Failed Download")
     # 레이블 데이터 중에서 프로젝트 카테고리에 해당되지않는 데이터가 있는 경우 처리 1. 에러 raise 2. 무시(+ warning)
 
     
