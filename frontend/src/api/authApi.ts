@@ -16,7 +16,7 @@ export async function logout() {
 
 export async function getAndSaveFcmToken() {
   const fcmToken = await getFcmToken();
-  return api.post('/auth/fcm', { token: fcmToken }).then(({ data }) => ({ data, fcmToken }));
+  return api.post('/auth/fcm', { token: fcmToken }).then(() => fcmToken);
 }
 
 export async function createFcmNotification() {
