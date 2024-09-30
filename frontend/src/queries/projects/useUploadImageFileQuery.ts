@@ -8,11 +8,13 @@ export default function useUploadImageFileQuery() {
       projectId,
       folderId,
       files,
+      progressCallback,
     }: {
       memberId: number;
       projectId: number;
       folderId: number;
       files: File[];
-    }) => uploadImageFile(memberId, projectId, folderId, files),
+      progressCallback: (progress: number) => void;
+    }) => uploadImageFile(memberId, projectId, folderId, files, progressCallback),
   });
 }

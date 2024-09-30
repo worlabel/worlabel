@@ -5,7 +5,17 @@ import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import useUploadImageFolderQuery from '@/queries/projects/useUploadImageFolderQuery';
 
-export default function ImageUploadFolderForm({ onClose, projectId }: { onClose: () => void; projectId: number }) {
+export default function ImageUploadFolderForm({
+  onClose,
+  onRefetch,
+  projectId,
+  folderId,
+}: {
+  onClose: () => void;
+  onRefetch: () => void;
+  projectId: number;
+  folderId: number;
+}) {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
@@ -14,6 +24,7 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
   const uploadImageFolder = useUploadImageFolderQuery();
 
@@ -56,10 +67,15 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
       {
         memberId,
         projectId,
+        folderId,
         files,
+        progressCallback: (progress: number) => {
+          setProgress(progress);
+        },
       },
       {
         onSuccess: () => {
+          onRefetch;
           setIsUploaded(true);
         },
         onError: () => {
@@ -100,11 +116,11 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
         </div>
       )}
       {files.length > 0 && (
-        <ul className="m-0 max-h-[200px] list-none overflow-y-auto p-0">
+        <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
           {files.map((file, index) => (
             <li
               key={index}
-              className={cn('flex items-center justify-between p-1')}
+              className="flex items-center justify-between p-1"
             >
               <span className="truncate">{file.webkitRelativePath || file.name}</span>
               {isUploading ? (
@@ -112,19 +128,19 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
                   {isUploaded ? (
                     <CircleCheckBig
                       className="stroke-green-500"
-                      size={20}
+                      size={16}
                       strokeWidth="2"
                     />
                   ) : isFailed ? (
                     <CircleX
                       className="stroke-red-500"
-                      size={20}
+                      size={16}
                       strokeWidth="2"
                     />
                   ) : (
                     <CircleDashed
                       className="stroke-gray-500"
-                      size={20}
+                      size={16}
                       strokeWidth="2"
                     />
                   )}
@@ -156,7 +172,7 @@ export default function ImageUploadFolderForm({ onClose, projectId }: { onClose:
           }
           disabled={!isUploaded && !isFailed}
         >
-          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : '업로드 중...'}
+          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : `업로드 중... ${progress}%`}
         </Button>
       ) : (
         <Button
