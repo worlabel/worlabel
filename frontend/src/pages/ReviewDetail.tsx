@@ -95,6 +95,8 @@ export default function ReviewDetail(): JSX.Element {
                     <ImageWithLabels
                       imagePath={image.imagePath}
                       labelData={image.dataPath}
+                      projectId={Number(projectId)}
+                      imageId={image.id}
                     />
                   </div>
                 ))}
