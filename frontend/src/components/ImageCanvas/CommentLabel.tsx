@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Group, Rect, Text, Image } from 'react-konva';
 import { CommentResponse } from '@/types';
 import useImage from 'use-image';
@@ -7,6 +7,7 @@ import deleteIconSrc from '@/assets/icons/delete.svg';
 import toggleUpIconSrc from '@/assets/icons/chevron-up.svg';
 import toggleDownIconSrc from '@/assets/icons/chevron-down.svg';
 import Konva from 'konva';
+import { TRANSFORM_CHANGE_STR } from '@/constants';
 
 interface CommentLabelProps {
   stage: Konva.Stage;
@@ -47,6 +48,23 @@ export default function CommentLabel({
     e.cancelBubble = true;
     toggleComment(comment.id);
   };
+
+  useEffect(() => {
+    const transformEvents = TRANSFORM_CHANGE_STR.join(' ');
+
+    stage?.on(transformEvents, () => {
+      if (!groupRef.current) return;
+
+      groupRef.current?.scale({
+        x: 1 / stage.getAbsoluteScale().x,
+        y: 1 / stage.getAbsoluteScale().y,
+      });
+    });
+
+    return () => {
+      stage?.off(transformEvents);
+    };
+  }, [stage]);
 
   return (
     stage && (
