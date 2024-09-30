@@ -67,17 +67,23 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
 def create_detection_train_label(label:dict, label_path:str, label_converter:dict[int, int]):
     with open(label_path, "w") as train_label_txt:
         for shape in label["shapes"]:
-            train_label = []
             x1 = shape["points"][0][0]
             y1 = shape["points"][0][1]
             x2 = shape["points"][1][0]
             y2 = shape["points"][1][1]
-            train_label.append(str(label_converter[shape["group_id"]]))    # label Id
-            train_label.append(str((x1 + x2) / 2 / label["imageWidth"]))   # 중심 x 좌표
-            train_label.append(str((y1 + y2) / 2 / label["imageHeight"]))  # 중심 y 좌표
-            train_label.append(str((x2 - x1) / label["imageWidth"]))       # 너비
-            train_label.append(str((y2 - y1) / label["imageHeight"] ))     # 높이
-            train_label_txt.write(" ".join(train_label)+"\n")
+            train_label = {
+                'label_id': label_converter[shape["group_id"]],     # 모델의 id  (converter : pjt category pk -> model category id)
+                'center_x': (x1 + x2) / 2 / label["imageWidth"],    # 중심 x 좌표
+                'center_y': (y1 + y2) / 2 / label["imageHeight"],   # 중심 y 좌표
+                'width': (x2 - x1) / label["imageWidth"],           # 너비
+                'height': (y2 - y1) / label["imageHeight"]          # 높이
+            }
+
+            for key, value in train_label[1:].items():  # label_id를 제외한 다른 key에 대해
+                if value<0 or value >1:                 # 0과 1사이가 아니라면 에러
+                    raise ValueError(f"Improper value in {label_path}: {key} = {value}")
+            
+            train_label_txt.write(" ".join(map(str, train_label.values()))+"\n") # str변환 후 txt에 쓰기
 
 def create_segmentation_train_label(label:dict, label_path:str, label_converter:dict[int, int]):
     with open(label_path, "w") as train_label_txt:
