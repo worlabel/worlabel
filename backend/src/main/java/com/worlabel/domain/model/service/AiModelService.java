@@ -60,6 +60,7 @@ public class AiModelService {
     public List<AiModelResponse> getModelList(final Integer projectId) {
         Project project = getProject(projectId);
         int progressModelId = progressService.getProgressModelByProjectId(projectId);
+        log.debug("진행 중 modelId{} {} ",progressModelId, projectId);
         return aiModelRepository.findAllByProjectId(projectId)
                 .stream()
                 .map(o -> AiModelResponse.of(o, progressModelId, project.getProjectType()))

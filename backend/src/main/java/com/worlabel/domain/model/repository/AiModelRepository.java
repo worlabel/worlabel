@@ -12,7 +12,8 @@ public interface AiModelRepository extends JpaRepository<AiModel, Integer> {
 
     @Query("SELECT a FROM AiModel a " +
             "WHERE a.project IS NULL " +
-            "OR a.project.id = :projectId ")
+            "OR a.project.id = :projectId " +
+            "ORDER BY a.id DESC ")
     List<AiModel> findAllByProjectId(@Param("projectId") Integer projectId);
 
     @Query("SELECT a FROM AiModel a " +

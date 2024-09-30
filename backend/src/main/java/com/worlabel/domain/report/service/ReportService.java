@@ -8,6 +8,8 @@ import com.worlabel.domain.report.entity.Report;
 import com.worlabel.domain.report.entity.dto.ReportRequest;
 import com.worlabel.domain.report.entity.dto.ReportResponse;
 import com.worlabel.domain.report.repository.ReportRepository;
+import com.worlabel.global.exception.CustomException;
+import com.worlabel.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,10 +27,10 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ProgressService progressService;
 
-    public List<ReportResponse> getReportsByModelId(final Integer projectId, final Integer modelId) {
-        return reportRepository.findByAiModelId(modelId).stream()
-                .map(ReportResponse::from)
-                .toList();
+    public ReportResponse getReportsByModelId(final Integer modelId) {
+        Report report = reportRepository.findByAiModelId(modelId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
+        return ReportResponse.from(report);
     }
 
     public void addReportByModelId(final Integer projectId, final Integer modelId, final ReportRequest reportRequest) {

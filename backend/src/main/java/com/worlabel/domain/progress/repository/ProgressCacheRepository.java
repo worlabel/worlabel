@@ -65,8 +65,11 @@ public class ProgressCacheRepository {
     public int getProgressModelId(final int projectId) {
         String key = CacheKey.autoLabelingProgressKey();
         Object modelId = redisTemplate.opsForHash().get(key, String.valueOf(projectId));
-        log.debug("projectId {} {}", projectId, modelId);
-        return modelId == null ? 0 : (int) modelId;
+        log.debug("projectId {} key {}", projectId, modelId);
+        if (modelId == null) {
+            return 0;
+        }
+        return Integer.parseInt((String) modelId);
     }
 
     /**
