@@ -167,6 +167,7 @@ public class ProjectService {
     /**
      * 프로젝트별 오토 레이블링
      */
+    @Transactional
     @CheckPrivilege(PrivilegeType.EDITOR)
     public void autoLabeling(final Integer memberId, final Integer projectId, final AutoModelRequest request) {
         progressService.predictProgressCheck(projectId);
