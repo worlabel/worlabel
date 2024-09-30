@@ -1,14 +1,17 @@
 import useCanvasStore from '@/stores/useCanvasStore';
-import { LucideIcon, MousePointer2, PenTool, Plus, Save, Square } from 'lucide-react';
+import { BookmarkPlus, LucideIcon, MousePointer2, PenTool, Save, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MessageSquare } from 'lucide-react';
+import { LabelCategoryResponse } from '@/types';
 
 export default function CanvasControlBar({
   saveJson,
   projectType,
+  categories,
 }: {
   saveJson: () => void;
   projectType: 'classification' | 'detection' | 'segmentation';
+  categories: LabelCategoryResponse[];
 }) {
   const { drawState, setDrawState, setLabels, labels } = useCanvasStore();
   const buttonBaseClassName = 'rounded-lg p-2 transition-colors';
@@ -22,7 +25,7 @@ export default function CanvasControlBar({
   };
 
   return (
-    <div className="fixed bottom-14 left-[50%] flex translate-x-[-50%] items-center gap-2 rounded-xl bg-white p-1 shadow-xl">
+    <div className="fixed bottom-10 left-[50%] flex translate-x-[-50%] items-center gap-2 rounded-xl bg-white p-1 shadow-xl">
       {Object.keys(controls).map((control) => {
         const Icon = controls[control];
         return (
@@ -39,24 +42,25 @@ export default function CanvasControlBar({
         );
       })}
 
-      {projectType === 'classification' && labels.length === 0 && (
+      {projectType === 'classification' && (
         <button
-          className={cn(buttonClassName, buttonBaseClassName)}
+          className={cn(labels.length === 0 ? buttonClassName : '', buttonBaseClassName)}
           onClick={() => {
             setLabels([
               {
                 id: 0,
-                categoryId: 0,
+                categoryId: categories[0]!.id,
                 color: '#1177ff',
                 type: 'point',
                 coordinates: [[0, 0]],
               },
             ]);
           }}
+          disabled={labels.length !== 0}
         >
-          <Plus
+          <BookmarkPlus
             size={20}
-            color="black"
+            color={labels.length === 0 ? 'black' : 'gray'}
           />
         </button>
       )}
