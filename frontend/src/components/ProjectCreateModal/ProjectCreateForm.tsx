@@ -126,9 +126,9 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
                     {categories.map((category: string, index: number) => (
                       <div
                         key={index}
-                        className="flex items-center gap-1 rounded-full border-2 border-gray-700 px-2 py-1 text-gray-700"
+                        className="flex items-center gap-1 rounded-full bg-blue-500 py-1 pl-3 pr-2 text-white"
                       >
-                        <span>{category}</span>
+                        <span className="body-small">{category}</span>
                         <X
                           size={16}
                           className="cursor-pointer"
