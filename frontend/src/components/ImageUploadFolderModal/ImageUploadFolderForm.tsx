@@ -12,7 +12,7 @@ export default function ImageUploadFolderForm({
   folderId,
 }: {
   onClose: () => void;
-  onRefetch: () => void;
+  onRefetch?: () => void;
   projectId: number;
   folderId: number;
 }) {
@@ -30,6 +30,12 @@ export default function ImageUploadFolderForm({
 
   const handleClose = () => {
     onClose();
+  };
+
+  const handleRefetch = () => {
+    if (onRefetch) {
+      onRefetch();
+    }
   };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +81,7 @@ export default function ImageUploadFolderForm({
       },
       {
         onSuccess: () => {
-          onRefetch;
+          handleRefetch();
           setIsUploaded(true);
         },
         onError: () => {
