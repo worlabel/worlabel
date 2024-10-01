@@ -3,7 +3,7 @@ import { Image, Layer, Stage, Line, Rect, Text, Group } from 'react-konva';
 import useImage from 'use-image';
 import { Label, Shape } from '@/types';
 import useCommentListQuery from '@/queries/comments/useCommentListQuery';
-import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
 
 interface ImageWithLabelsProps {
   imagePath: string;
@@ -63,14 +63,15 @@ export default function ImageWithLabels({ imagePath, labelData, projectId, image
 
   return (
     <div>
-      <Button
-        variant="outline"
+      <Toggle
+        variant="default"
         size="sm"
-        onClick={() => setShowComments((prev) => !prev)}
+        pressed={showComments}
+        onPressedChange={(pressed) => setShowComments(pressed)}
         className="mb-4"
       >
         {showComments ? '댓글 숨기기' : '댓글 보기'}
-      </Button>
+      </Toggle>
       <Stage
         width={stageDimensions.width}
         height={stageDimensions.height}
