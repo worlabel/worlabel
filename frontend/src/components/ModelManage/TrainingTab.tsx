@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import TrainingSettings from './TrainingSettings';
 import TrainingGraph from './TrainingGraph';
 import useTrainModelQuery from '@/queries/models/useTrainModelQuery';
+import usePollingTrainingModelReport from '@/hooks/usePollingTrainingModelReport';
 import { ModelTrainRequest, ModelResponse } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -24,6 +25,11 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
     }
   };
 
+  const handleTrainingEnd = () => {
+    setIsPolling(false);
+    setSelectedModel((prevModel) => (prevModel ? { ...prevModel, isTrain: false } : null));
+  };
+
   useEffect(() => {
     if (!selectedModel || !numericProjectId || !isPolling) return;
 
@@ -38,10 +44,10 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         setSelectedModel(updatedModel);
 
         if (updatedModel.isTrain) {
-          setIsPolling(true);
-        } else if (!updatedModel.isTrain && selectedModel.isTrain) {
           setIsPolling(false);
-          setSelectedModel(null);
+        } else {
+          setIsPolling(false);
+          setSelectedModel({ ...updatedModel, isTrain: false });
         }
       }
     }, 2000);
@@ -51,14 +57,22 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
     };
   }, [selectedModel, numericProjectId, queryClient, isPolling]);
 
+  usePollingTrainingModelReport({
+    projectId: numericProjectId as number,
+    modelId: selectedModel?.id as number,
+    enabled: selectedModel?.isTrain || false,
+    onTrainingEnd: handleTrainingEnd,
+  });
+
   const handleTrainingStop = () => {
     setIsPolling(false);
+    setSelectedModel((prevModel) => (prevModel ? { ...prevModel, isTrain: false } : null));
+    //todo: 중단 함수 연결
   };
 
   return (
     <div className="grid grid-rows-[auto_1fr] gap-8 md:grid-cols-2">
       <TrainingSettings
-        key={`${selectedModel?.isTrain ? 'training' : 'settings'}-${isPolling}`}
         projectId={numericProjectId}
         selectedModel={selectedModel}
         setSelectedModel={setSelectedModel}
@@ -68,7 +82,6 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
         className="h-full"
       />
       <TrainingGraph
-        key={`${selectedModel?.isTrain ? 'training' : 'graph'}-${isPolling}`}
         projectId={numericProjectId}
         selectedModel={selectedModel}
         className="h-full"
