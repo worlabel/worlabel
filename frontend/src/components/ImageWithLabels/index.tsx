@@ -64,7 +64,7 @@ export default function ImageWithLabels({ imagePath, labelData, projectId, image
   return (
     <div>
       <Toggle
-        variant="default"
+        variant="outline"
         size="sm"
         pressed={showComments}
         onPressedChange={(pressed) => setShowComments(pressed)}
