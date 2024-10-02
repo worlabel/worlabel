@@ -207,7 +207,7 @@ public class ProjectService {
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
         for (AutoLabelingResult result : resultList) {
             Image image = getImage(result.getImageId());
-            if (image.getStatus() == LabelStatus.SAVE || image.getStatus() == LabelStatus.IN_PROGRESS) continue;
+            if (image.getStatus() == LabelStatus.SAVE || image.getStatus() == LabelStatus.REVIEW_REQUEST || image.getStatus() == LabelStatus.REVIEW_REJECT) continue;
             String dataPath = image.getDataPath();
             s3UploadService.uploadJson(result.getData(), dataPath);
             image.updateStatus(LabelStatus.IN_PROGRESS);
