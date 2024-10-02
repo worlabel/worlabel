@@ -8,10 +8,10 @@ import {
   ReviewStatus,
 } from '@/types';
 
-export async function getWorkspaceList(memberId: number, lastWorkspaceId?: number, limit?: number) {
+export async function getWorkspaceList(memberId: number, lastWorkspaceId?: number, limitPage: number = 30) {
   return api
     .get<WorkspaceListResponse>('/workspaces', {
-      params: { memberId, lastWorkspaceId, limit },
+      params: { memberId, lastWorkspaceId, limitPage },
     })
     .then(({ data }) => data);
 }

@@ -32,28 +32,28 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
         defaultSize={15}
         onResize={(size) => setSidebarSize(size)}
       >
-        <div className="box-border flex h-full flex-col gap-2 bg-gray-50 p-3">
-          <header className="body flex w-full items-center gap-2">
+        <div className="box-border flex h-full flex-col gap-2 bg-gray-100 p-2">
+          <header className="body flex w-full flex-col items-center gap-2 p-2">
             <h1 className="subheading w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>
+            <Select
+              onValueChange={handleSelectProject}
+              defaultValue={selectedProjectId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="프로젝트를 선택해주세요" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem
+                    key={project.id}
+                    value={project.id.toString()}
+                  >
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </header>
-          <Select
-            onValueChange={handleSelectProject}
-            defaultValue={selectedProjectId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="프로젝트를 선택해주세요" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((project) => (
-                <SelectItem
-                  key={project.id}
-                  value={project.id.toString()}
-                >
-                  {project.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Suspense fallback={<div></div>}>
             {selectedProject && <ProjectStructure project={selectedProject} />}
           </Suspense>

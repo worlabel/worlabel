@@ -30,6 +30,7 @@ export default function WorkspaceBrowseLayout() {
   };
 
   const workspaces = workspacesResponse?.workspaceResponses ?? [];
+  console.log(workspaces);
 
   return (
     <>
@@ -39,7 +40,9 @@ export default function WorkspaceBrowseLayout() {
         <div className="mt-16 flex flex-1">
           <div className="flex w-[280px] flex-col border-r border-gray-200 bg-gray-100 p-2">
             <div className="flex items-center justify-center gap-5 p-2">
-              <h1 className="heading mr-2.5 w-full overflow-hidden text-ellipsis whitespace-nowrap">내 워크스페이스</h1>
+              <h1 className="subheading mr-2.5 w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                내 워크스페이스
+              </h1>
               <WorkSpaceCreateModal onSubmit={handleCreateWorkspace} />
             </div>
             {workspaces.length > 0 ? (

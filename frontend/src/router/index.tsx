@@ -3,7 +3,6 @@ import PageLayout from '@/components/PageLayout';
 import WorkspaceBrowseDetail from '@/pages/WorkspaceBrowseDetail';
 import WorkspaceBrowseLayout from '@/components/WorkspaceBrowseLayout';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
-import AdminLayout from '@/components/AdminLayout';
 import WorkspaceReviewList from '@/pages/WorkspaceReviewList';
 import ProjectReviewList from '@/pages/ProjectReviewList';
 import WorkspaceMemberManage from '@/pages/WorkspaceMemberManage';
@@ -13,21 +12,21 @@ import { createBrowserRouter } from 'react-router-dom';
 import { Suspense } from 'react';
 import Home from '@/pages/Home';
 import WorkspaceBrowseIndex from '@/pages/WorkspaceBrowseIndex';
-import AdminIndex from '@/pages/AdminIndex';
 import LabelCanvas from '@/pages/LabelCanvas';
 import ReviewDetail from '@/pages/ReviewDetail';
 import NotFound from '@/pages/NotFound';
 import ReviewRequest from '@/pages/ReviewRequest';
 import ModelIndex from '@/pages/ModelIndex';
 import ModelDetail from '@/pages/ModelDetail';
-import ReviewLayout from '@/components/ReviewLayout';
+import ManageLayout from '@/components/ManageLayout';
 
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
   workspace: () => '/workspace',
   review: () => '/review',
-  admin: () => `/admin`,
+  model: () => '/model',
+  member: () => '/member',
   oauthCallback: () => '/redirect/oauth2',
 };
 
@@ -86,7 +85,7 @@ const router = createBrowserRouter([
     path: `${webPath.review()}/:workspaceId`,
     element: (
       <Suspense fallback={<div></div>}>
-        <ReviewLayout />
+        <ManageLayout tabTitle="review" />
       </Suspense>
     ),
     children: [
@@ -109,42 +108,38 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: `${webPath.admin()}/:workspaceId`,
+    path: `${webPath.model()}/:workspaceId`,
     element: (
       <Suspense fallback={<div></div>}>
-        <AdminLayout />
+        <ManageLayout tabTitle="model" />
       </Suspense>
     ),
     children: [
       {
         index: true,
-        element: <AdminIndex />,
+        element: <ModelIndex />,
       },
       {
-        path: 'members',
-        children: [
-          {
-            index: true,
-            element: <WorkspaceMemberManage />,
-          },
-          {
-            path: ':projectId',
-            element: <ProjectMemberManage />,
-          },
-        ],
+        path: ':projectId',
+        element: <ModelDetail />,
+      },
+    ],
+  },
+  {
+    path: `${webPath.member()}/:workspaceId`,
+    element: (
+      <Suspense fallback={<div></div>}>
+        <ManageLayout tabTitle="member" />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: <WorkspaceMemberManage />,
       },
       {
-        path: 'models',
-        children: [
-          {
-            index: true,
-            element: <ModelIndex />,
-          },
-          {
-            path: ':projectId',
-            element: <ModelDetail />,
-          },
-        ],
+        path: ':projectId',
+        element: <ProjectMemberManage />,
       },
     ],
   },

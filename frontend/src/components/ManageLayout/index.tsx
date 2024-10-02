@@ -6,7 +6,7 @@ import useProjectListQuery from '@/queries/projects/useProjectListQuery';
 import { cn } from '@/lib/utils';
 import { ProjectResponse } from '@/types';
 
-export default function ReviewLayout() {
+export default function ManageLayout({ tabTitle }: { tabTitle: string }) {
   const { workspaceId, projectId } = useParams<{ workspaceId: string; projectId?: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
@@ -25,8 +25,8 @@ export default function ReviewLayout() {
           <div className="flex w-[280px] flex-col border-r border-gray-200 bg-gray-100 p-2">
             <div className="flex items-center justify-center gap-5 p-2">
               <Link
-                to={`/review/${workspaceId}`}
-                className="heading w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                to={`/${tabTitle}/${workspaceId}`}
+                className="subheading w-full overflow-hidden text-ellipsis whitespace-nowrap"
               >
                 {workspaceTitle}
               </Link>
@@ -34,7 +34,7 @@ export default function ReviewLayout() {
             {projects.map((project: ProjectResponse) => (
               <Link
                 key={project.id}
-                to={`/review/${workspaceId}/${project.id}`}
+                to={`/${tabTitle}/${workspaceId}/${project.id}`}
                 className={cn(
                   'cursor-pointer rounded-lg p-3 hover:bg-gray-200',
                   projectId === String(project.id) ? 'body-strong bg-gray-300' : 'body'

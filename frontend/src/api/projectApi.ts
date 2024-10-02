@@ -5,14 +5,14 @@ export async function getProjectList(
   workspaceId: number,
   memberId: number,
   lastProjectId?: number,
-  limit: number = 50
+  limitPage: number = 50
 ) {
   return api
     .get<ProjectResponse[]>(`/workspaces/${workspaceId}/projects`, {
       params: {
         memberId,
         lastProjectId,
-        limit,
+        limitPage,
       },
     })
     .then(({ data }) => data);
