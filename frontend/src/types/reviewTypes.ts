@@ -37,8 +37,8 @@ export interface ReviewDetailResponse {
   content: string;
   reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED';
   images: ReviewImageResponse[];
-  createAt: string;
-  updateAt: string;
+  createdAt: string;
+  updatedAt: string;
   author: MemberResponse;
   reviewer: MemberResponse;
 }
