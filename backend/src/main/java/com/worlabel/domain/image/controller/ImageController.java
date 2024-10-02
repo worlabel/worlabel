@@ -52,8 +52,8 @@ public class ImageController {
     }
 
     @PostMapping("/folders/{folder_id}/images/presigned")
-    @SwaggerApiSuccess(description = "압축폴더를 성공적으로 업로드합니다.")
-    @Operation(summary = "압축 폴더 업로드", description = "압축 폴더 내 폴더와 이미지 파일을 업로드합니다.")
+    @SwaggerApiSuccess(description = "이미지에 대한 presigned 주소를 받아옵니다..")
+    @Operation(summary = "이미지에 대한 Presigned ", description = "이미지에 대한 Presigned 주소를 받아옵니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public List<ImagePresignedUrlResponse> uploadFolderByPresignedImage(
             @CurrentUser final Integer memberId,
