@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.concurrency import run_in_threadpool
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest, TrainDataInfo
 from schemas.predict_response import PredictResponse, LabelData, Shape
@@ -10,14 +9,13 @@ from services.create_model import save_model
 from utils.file_utils import get_dataset_root_path, process_directories, join_path, process_image_and_label
 from utils.slackMessage import send_slack_message
 from utils.api_utils import send_data_call_api
-import random
+import random, torch
 
 
 router = APIRouter()
 
 @router.post("/predict")
 async def detection_predict(request: PredictRequest):
-
     send_slack_message(f"predict 요청: {request}", status="success")
 
     # 모델 로드
@@ -30,7 +28,7 @@ async def detection_predict(request: PredictRequest):
     classes = get_classes(request.label_map, model.names)
 
     # 추론
-    results = await run_predictions(model, url_list, request, classes)
+    results = run_predictions(model, url_list, request, classes)
 
     # 추론 결과 변환
     response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
@@ -52,19 +50,18 @@ def get_classes(label_map:dict[str: int], model_names: dict[int, str]):
         raise HTTPException(status_code=500, detail="exception in get_classes(): " + str(e))
 
 # 추론 실행 함수
-async def run_predictions(model, image, request, classes):
+def run_predictions(model, image, request, classes):
     try:
-        result = await run_in_threadpool(
-            model.predict, 
-            source=image,
-            iou=request.iou_threshold,
-            conf=request.conf_threshold,
-            classes=classes
-        )
-        return result
+        with torch.no_grad():
+            result = model.predict(
+                source=image,
+                iou=request.iou_threshold,
+                conf=request.conf_threshold,
+                classes=classes
+            )
+            return result
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in run_predictions: " + str(e))
-    
 
 # 추론 결과 처리 함수
 def process_prediction_result(result, image, label_map):
@@ -135,7 +132,7 @@ async def detection_train(request: TrainRequest):
     download_data(train_data, val_data, dataset_root_path, label_converter)
 
     # 학습
-    results = await run_train(request, model,dataset_root_path)
+    results = run_train(request, model,dataset_root_path)
 
     # best 모델 저장
     model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
@@ -178,9 +175,9 @@ def download_data(train_data:list[TrainDataInfo], val_data:list[TrainDataInfo], 
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in download_data(): " + str(e))
     
-async def run_train(request, model, dataset_root_path):
+def run_train(request, model, dataset_root_path):
     try:
-        # 데이터 전송 콜백함수
+        # 콜백 함수 정의
         def send_data(trainer):
             try:
                 # 첫번째 epoch는 스킵
@@ -207,31 +204,33 @@ async def run_train(request, model, dataset_root_path):
                 # 데이터 전송
                 send_data_call_api(request.project_id, request.m_id, data)
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"exception in send_data(): {e}")
+                # 예외 처리
+                print(f"Exception in send_data(): {e}")
 
         # 콜백 등록
         model.add_callback("on_train_epoch_start", send_data)
 
-        # 학습 실행
-        results =  await run_in_threadpool(model.train,
-            data=join_path(dataset_root_path, "dataset.yaml"),
-            name=join_path(dataset_root_path, "result"),
-            epochs=request.epochs,
-            batch=request.batch,
-            lr0=request.lr0,
-            lrf=request.lrf,
-            optimizer=request.optimizer
-        )
+        try:
+            # 비동기 함수로 학습 실행
+            results = model.train(
+                data=join_path(dataset_root_path, "dataset.yaml"),
+                name=join_path(dataset_root_path, "result"),
+                epochs=request.epochs,
+                batch=request.batch,
+                lr0=request.lr0,
+                lrf=request.lrf,
+                optimizer=request.optimizer
+            )
+        finally:
+            # 콜백 해제 및 자원 해제
+            model.reset_callbacks()
+            torch.cuda.empty_cache()
         
         # 마지막 에포크 전송
         model.trainer.epoch += 1
         send_data(model.trainer)
         return results
-
-
     except HTTPException as e:
-        raise e # HTTP 예외를 다시 발생
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"exception in run_train(): {e}")
-
-
