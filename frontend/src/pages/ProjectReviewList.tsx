@@ -11,12 +11,12 @@ export default function ProjectReviewList() {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const [activeTab, setActiveTab] = useState<ReviewStatus | 'all'>('REQUESTED');
+  const [activeTab, setActiveTab] = useState<ReviewStatus | 'ALL'>('REQUESTED');
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
   const sortDirection = sortValue === 'latest' ? 0 : 1;
-  const reviewStatus = activeTab !== 'all' ? activeTab : undefined;
+  const reviewStatus = activeTab !== 'ALL' ? activeTab : undefined;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } = useReviewByStatusQuery(
     Number(projectId),

@@ -1,4 +1,4 @@
-export type ImageStatus = 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'REVIEW_REJECTED' | 'COMPLETED';
+export type ImageStatus = 'PENDING' | 'IN_PROGRESS' | 'SAVE' | 'REVIEW_REQUEST' | 'REVIEW_REJECT' | 'COMPLETED';
 
 export interface ImageResponse {
   id: number;

@@ -2,6 +2,8 @@ import { Briefcase, Tag, Box, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useProjectQuery from '@/queries/projects/useProjectQuery';
 import useAuthStore from '@/stores/useAuthStore';
+import { cn } from '@/lib/utils';
+import formatDateTime from '@/utils/formatDateTime';
 import { ReviewStatus } from '@/types';
 
 interface ReviewItemProps {
@@ -43,11 +45,11 @@ export default function ReviewItem({
     >
       <div className="flex h-[100px] w-full items-center justify-between border-b-[0.67px] border-[#ececef] bg-[#fbfafd] p-4">
         <div className="flex flex-col">
-          <p className="text-sm font-semibold text-[#333238]">{title}</p>
-          <p className="mt-1 text-xs text-[#737278]">by {creatorName}</p>
+          <p className="text-sm font-semibold text-black">{title}</p>
+          <p className="mt-1 text-xs text-gray-500">by {creatorName}</p>
           <div className="mt-1 flex items-center">
-            <Briefcase className="h-3 w-3 text-[#737278]" />
-            <p className="ml-1 text-xs text-[#737278]">{projectData?.title}</p>
+            <Briefcase className="h-3 w-3 text-gray-500" />
+            <p className="ml-1 text-xs text-gray-500">{projectData?.title}</p>
           </div>
           {type && (
             <div
@@ -60,8 +62,19 @@ export default function ReviewItem({
           )}
         </div>
         <div className="flex flex-col items-end gap-1">
-          <div className="rounded-full bg-[#cbe2f9] px-3 py-0.5 text-center text-xs text-[#0b5cad]">{status}</div>
-          <p className="text-xs text-[#737278]">Created at {createdTime}</p>
+          <div
+            className={cn(
+              'rounded-full px-3 py-0.5 text-center text-xs',
+              status === 'APPROVED'
+                ? 'bg-green-100 text-green-600'
+                : status === 'REJECTED'
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-blue-100 text-blue-600'
+            )}
+          >
+            {status}
+          </div>
+          <p className="text-xs text-gray-500">Created at {formatDateTime(createdTime)}</p>
         </div>
       </div>
     </Link>

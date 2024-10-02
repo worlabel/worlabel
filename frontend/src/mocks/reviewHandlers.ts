@@ -25,8 +25,8 @@ export const reviewHandlers = [
           dataPath: 'https://example.com/data1.json',
         },
       ],
-      createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
       reviewer: { id: 2, nickname: 'Reviewer', profileImage: '', email: 'reviewer@example.com' },
     };
@@ -49,8 +49,8 @@ export const reviewHandlers = [
       title: reviewData.title,
       content: reviewData.content,
       status: 'REQUESTED',
-      createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
     };
 
@@ -75,8 +75,8 @@ export const reviewHandlers = [
       title: reviewData.title,
       content: reviewData.content,
       status: 'REQUESTED',
-      createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
     };
 
@@ -112,8 +112,8 @@ export const reviewHandlers = [
       title: `Updated Review ${reviewId}`,
       content: 'Updated content',
       status: statusRequest.reviewStatus,
-      createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
     };
 
@@ -145,9 +145,9 @@ export const reviewHandlers = [
       reviewId: index + 1,
       title: `Review ${index + 1}`,
       content: `Review content ${index + 1}`,
-      status: (reviewStatus || 'REQUESTED') as ReviewStatus,
-      createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString(),
+      status: reviewStatus as ReviewStatus,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },
     }));
 

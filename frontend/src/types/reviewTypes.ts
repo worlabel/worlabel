@@ -1,7 +1,7 @@
 import { ImageStatus } from './imageTypes';
 import { MemberResponse } from './memberTypes';
 
-export type ReviewStatus = 'REQUESTED' | 'APPROVED' | 'REJECT';
+export type ReviewStatus = 'REQUESTED' | 'APPROVED' | 'REJECTED';
 
 // 리뷰 관련 DTO
 export interface ReviewRequest {
@@ -17,8 +17,8 @@ export interface ReviewResponse {
   content: string;
   status: ReviewStatus;
   author: MemberResponse;
-  createAt: string;
-  updateAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ReviewStatusRequest {
@@ -39,8 +39,8 @@ export interface ReviewDetailResponse {
   content: string;
   reviewStatus: ReviewStatus;
   images: ReviewImageResponse[];
-  createAt: string;
-  updateAt: string;
+  createdAt: string;
+  updatedAt: string;
   author: MemberResponse;
   reviewer: MemberResponse;
 }

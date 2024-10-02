@@ -141,8 +141,8 @@ export const workspaceHandlers = [
           profileImage: 'reviewer1.jpg',
           email: 'reviewer1@example.com',
         },
-        createAt: new Date().toISOString(),
-        updateAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
         reviewId: 2,
@@ -156,8 +156,8 @@ export const workspaceHandlers = [
           profileImage: 'reviewer2.jpg',
           email: 'reviewer2@example.com',
         },
-        createAt: new Date().toISOString(),
-        updateAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ];
 

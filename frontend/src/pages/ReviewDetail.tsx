@@ -60,25 +60,25 @@ export default function ReviewDetail(): JSX.Element {
   return (
     <div className="review-detail-container p-4">
       <div className="header mb-4">
-        <h1 className="text-2xl font-bold">{reviewDetail.title}</h1>
-        <p className="text-sm text-gray-500">
-          작성자: {reviewDetail.author.nickname} ({reviewDetail.author.email})
+        <h1 className="heading mb-2">{reviewDetail.title}</h1>
+        <p className="body-small text-gray-500">
+          작성자 : {reviewDetail.author.nickname} ({reviewDetail.author.email})
         </p>
-        <p className="text-sm text-gray-500">작성일: {new Date(reviewDetail.createAt).toLocaleDateString()}</p>
-        <p className="text-sm text-gray-500">수정일: {new Date(reviewDetail.updateAt).toLocaleDateString()}</p>
+        <p className="body-small text-gray-500">작성일 : {new Date(reviewDetail.createdAt).toLocaleDateString()}</p>
+        <p className="body-small text-gray-500">수정일 : {new Date(reviewDetail.updatedAt).toLocaleDateString()}</p>
       </div>
 
-      <div className="relative w-full px-4">
-        <div className="flex w-full items-center border-b-[0.67px] border-solid border-[#dcdcde]">
+      <div className="relative w-full">
+        <div className="flex w-full items-center border-b-[1px] border-solid border-gray-300">
           {['content', 'images'].map((tab) => (
             <button
               key={tab}
               className={`flex h-12 w-[100px] items-center justify-center px-3 ${
-                activeTab === tab ? 'shadow-[inset_0px_-2px_0px_#1f75cb]' : ''
+                activeTab === tab ? 'border-b-[3px] border-blue-500' : 'border-b-[3px] border-transparent'
               }`}
               onClick={() => setActiveTab(tab as 'content' | 'images')}
             >
-              <span className={`text-sm ${activeTab === tab ? 'font-semibold' : 'font-normal'} text-[#333238]`}>
+              <span className={`text-sm ${activeTab === tab ? 'font-semibold' : 'font-normal'} text-black`}>
                 {tab === 'content' ? '내용' : '이미지'}
               </span>
             </button>
@@ -111,7 +111,7 @@ export default function ReviewDetail(): JSX.Element {
         )}
       </div>
 
-      {(reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECT') && (
+      {(reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED') && (
         <div className="reviewer-info mt-6">
           <h2 className="text-lg font-semibold">
             리뷰 상태: {reviewDetail.reviewStatus === 'APPROVED' ? '승인됨' : '거부됨'}
@@ -126,7 +126,7 @@ export default function ReviewDetail(): JSX.Element {
               <p className="font-bold">{reviewDetail.reviewer.nickname}</p>
               <p className="text-gray-500">{reviewDetail.reviewer.email}</p>
               <p className="text-gray-500">
-                {reviewDetail.reviewStatus === 'APPROVED' ? '승인한 사람:' : '거부한 사람:'}{' '}
+                {reviewDetail.reviewStatus === 'APPROVED' ? '승인한 사람 : ' : '거부한 사람 : '}
                 {reviewDetail.reviewer.nickname}
               </p>
             </div>
@@ -137,7 +137,7 @@ export default function ReviewDetail(): JSX.Element {
         <Link to={`/admin/${workspaceId}/reviews`}>
           <Button variant="black">목록으로 돌아가기</Button>
         </Link>
-        {isAdminOrManager && reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECT' && (
+        {isAdminOrManager && reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (
           <>
             <Button
               variant="red"
