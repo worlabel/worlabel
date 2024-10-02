@@ -63,7 +63,7 @@ export default function WorkspaceReviewList() {
         <header className="sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b bg-white px-4">
           <h1 className="text-xl font-semibold">워크스페이스 리뷰</h1>
           <Link
-            to={`/admin/${workspaceId}/reviews/request`}
+            to={`/review/${workspaceId}/request`}
             className="ml-auto"
           >
             <Button variant="blue">리뷰 요청</Button>
@@ -80,9 +80,7 @@ export default function WorkspaceReviewList() {
           setSortValue={setSortValue}
           workspaceId={Number(workspaceId)}
         />
-
         {isFetchingNextPage}
-
         <div
           ref={loadMoreRef}
           className="h-1"

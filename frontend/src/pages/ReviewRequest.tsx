@@ -28,7 +28,7 @@ export default function ReviewRequest(): JSX.Element {
         reviewData,
       },
       {
-        onSuccess: () => navigate(`/admin/${workspaceId}/reviews`),
+        onSuccess: () => navigate(`/review/${workspaceId}`),
       }
     );
   };

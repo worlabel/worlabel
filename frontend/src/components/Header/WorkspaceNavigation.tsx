@@ -1,9 +1,15 @@
 import { cn } from '@/lib/utils';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import useAuthStore from '@/stores/useAuthStore';
 import useWorkspaceListQuery from '@/queries/workspaces/useWorkspaceListQuery';
 
 export default function WorkspaceNavigation() {
+  const location = useLocation();
+  const isBrowsePage = location.pathname.startsWith('/browse');
+  const isWorkspacePage = location.pathname.startsWith('/workspace');
+  const isReviewPage = location.pathname.startsWith('/review');
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id;
@@ -21,7 +27,7 @@ export default function WorkspaceNavigation() {
     <nav className="hidden items-center gap-5 md:flex">
       <Link
         to={activeWorkspaceId ? `/browse/${activeWorkspaceId}` : '/browse'}
-        className={cn('text-color-text-default-default', 'font-body-strong', 'text-sm sm:text-base md:text-lg')}
+        className={cn('', isBrowsePage ? 'body-strong' : 'body')}
       >
         workspace
       </Link>
@@ -29,13 +35,19 @@ export default function WorkspaceNavigation() {
         <>
           <Link
             to={`/workspace/${activeWorkspaceId}`}
-            className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
+            className={cn('', isWorkspacePage ? 'body-strong' : 'body')}
           >
             labeling
           </Link>
           <Link
+            to={`/review/${activeWorkspaceId}`}
+            className={cn('', isReviewPage ? 'body-strong' : 'body')}
+          >
+            review
+          </Link>
+          <Link
             to={`/admin/${activeWorkspaceId}`}
-            className={cn('text-color-text-default-default', 'font-body', 'text-sm sm:text-base md:text-lg')}
+            className={cn('', isAdminPage ? 'body-strong' : 'body')}
           >
             admin
           </Link>

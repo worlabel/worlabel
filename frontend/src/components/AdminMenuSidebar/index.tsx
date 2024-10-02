@@ -7,10 +7,6 @@ export default function AdminMenuSidebar() {
 
   const menuItems = [
     {
-      label: '리뷰',
-      path: projectId ? `/admin/${workspaceId}/reviews/${projectId}` : `/admin/${workspaceId}/reviews`,
-    },
-    {
       label: '멤버 관리',
       path: projectId ? `/admin/${workspaceId}/members/${projectId}` : `/admin/${workspaceId}/members`,
     },

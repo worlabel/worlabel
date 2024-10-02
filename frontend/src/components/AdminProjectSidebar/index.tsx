@@ -2,11 +2,8 @@ import { ResizablePanel, ResizableHandle } from '../ui/resizable';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { SquarePen } from 'lucide-react';
 import useProjectListQuery from '@/queries/projects/useProjectListQuery';
-import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
 import useWorkspaceQuery from '@/queries/workspaces/useWorkspaceQuery';
-import { ProjectRequest } from '@/types';
 import useAuthStore from '@/stores/useAuthStore';
-import ProjectCreateModal from '../ProjectCreateModal';
 import { cn } from '@/lib/utils';
 
 export default function AdminProjectSidebar(): JSX.Element {
@@ -20,20 +17,7 @@ export default function AdminProjectSidebar(): JSX.Element {
 
   const { data: projects } = useProjectListQuery(Number(workspaceId), memberId);
 
-  const createProject = useCreateProjectQuery();
-
-  const handleCreateProject = (data: ProjectRequest) => {
-    createProject.mutate({
-      workspaceId: Number(workspaceId),
-      memberId,
-      data,
-    });
-  };
-
   const getNewPath = (newProjectId: string) => {
-    if (location.pathname.includes('reviews')) {
-      return `/admin/${workspaceId}/reviews/${newProjectId}`;
-    }
     if (location.pathname.includes('members')) {
       return `/admin/${workspaceId}/members/${newProjectId}`;
     }
@@ -64,10 +48,6 @@ export default function AdminProjectSidebar(): JSX.Element {
           <button className="p-2">
             <SquarePen size={16} />
           </button>
-          <ProjectCreateModal
-            buttonClass="caption"
-            onSubmit={handleCreateProject}
-          />
         </header>
         <div className="flex flex-col gap-2 p-4">
           {projects.map((project) => {

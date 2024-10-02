@@ -6,6 +6,7 @@ import WorkSpaceCreateModal from '../WorkSpaceCreateModal';
 import { WorkspaceRequest, WorkspaceResponse } from '@/types';
 import useWorkspaceListQuery from '@/queries/workspaces/useWorkspaceListQuery';
 import useCreateWorkspaceQuery from '@/queries/workspaces/useCreateWorkspaceQuery';
+import { cn } from '@/lib/utils';
 
 export default function WorkspaceBrowseLayout() {
   const { profile } = useAuthStore();
@@ -33,19 +34,22 @@ export default function WorkspaceBrowseLayout() {
   return (
     <>
       <Header className="fixed left-0 top-0 w-full" />
+
       <div className="flex min-h-screen flex-col justify-between">
         <div className="mt-16 flex flex-1">
-          <div className="flex w-[280px] flex-col gap-4 border-r border-gray-200 bg-gray-100 px-6 py-4">
-            <div className="flex items-center justify-center gap-5">
-              <h1 className="heading mr-2.5 w-full">내 워크스페이스</h1>
+          <div className="flex w-[280px] flex-col border-r border-gray-200 bg-gray-100 p-2">
+            <div className="flex items-center justify-center gap-5 p-2">
+              <h1 className="heading mr-2.5 w-full overflow-hidden text-ellipsis whitespace-nowrap">내 워크스페이스</h1>
               <WorkSpaceCreateModal onSubmit={handleCreateWorkspace} />
             </div>
             {workspaces.length > 0 ? (
               workspaces.map((workspace: WorkspaceResponse) => (
                 <NavLink
-                  to={`/browse/${workspace.id}`}
                   key={workspace.id}
-                  className={({ isActive }) => (isActive ? 'body-strong' : 'body') + ' cursor-pointer'}
+                  to={`/browse/${workspace.id}`}
+                  className={({ isActive }) =>
+                    cn('cursor-pointer rounded-lg p-3 hover:bg-gray-200', isActive ? 'body-strong bg-gray-300' : 'body')
+                  }
                 >
                   {workspace.title}
                 </NavLink>

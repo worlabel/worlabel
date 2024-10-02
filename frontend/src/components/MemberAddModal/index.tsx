@@ -2,7 +2,6 @@ import React from 'react';
 import MemberAddForm, { MemberAddFormValues } from './MemberAddForm';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import useAddProjectMemberQuery from '@/queries/projects/useAddProjectMemberQuery';
 import { ProjectMemberRequest } from '@/types';
 
@@ -42,12 +41,11 @@ export default function MemberAddModal({ projectId, buttonClass = '' }: MemberAd
           className={`${buttonClass}`}
           onClick={handleOpen}
         >
-          <Plus size={16} />
-          <span>프로젝트 멤버 초대하기</span>
+          <span>프로젝트에 새 멤버 초대</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader title="새 멤버 초대" />
+        <DialogHeader title="프로젝트에 새 멤버 초대" />
         <MemberAddForm onSubmit={handleMemberAdd} />
       </DialogContent>
     </Dialog>
