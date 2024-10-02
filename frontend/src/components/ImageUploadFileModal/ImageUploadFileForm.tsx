@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery';
+import { FixedSizeList } from 'react-window';
 
 export default function ImageUploadFileForm({
   onClose,
@@ -135,48 +136,56 @@ export default function ImageUploadFileForm({
       )}
       {files.length > 0 && (
         <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
-          {files.map((file, index) => (
-            <li
-              key={index}
-              className="flex items-center justify-between p-1"
-            >
-              <span className="truncate">{file.webkitRelativePath || file.name}</span>
-              {isUploading ? (
-                <div className="p-2">
-                  {isUploaded ? (
-                    <CircleCheckBig
-                      className="stroke-green-500"
+          <FixedSizeList
+            height={260}
+            itemCount={files.length}
+            itemSize={40}
+            width="100%"
+          >
+            {({ index, style }) => (
+              <li
+                key={index}
+                className="flex items-center justify-between p-1"
+                style={style}
+              >
+                <span className="truncate">{files[index].webkitRelativePath || files[index].name}</span>
+                {isUploading ? (
+                  <div className="p-2">
+                    {isUploaded ? (
+                      <CircleCheckBig
+                        className="stroke-green-500"
+                        size={16}
+                        strokeWidth="2"
+                      />
+                    ) : isFailed ? (
+                      <CircleX
+                        className="stroke-red-500"
+                        size={16}
+                        strokeWidth="2"
+                      />
+                    ) : (
+                      <CircleDashed
+                        className="stroke-gray-500"
+                        size={16}
+                        strokeWidth="2"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    className={'cursor-pointer p-2'}
+                    onClick={() => handleRemoveFile(index)}
+                  >
+                    <X
+                      color="red"
                       size={16}
                       strokeWidth="2"
                     />
-                  ) : isFailed ? (
-                    <CircleX
-                      className="stroke-red-500"
-                      size={16}
-                      strokeWidth="2"
-                    />
-                  ) : (
-                    <CircleDashed
-                      className="stroke-gray-500"
-                      size={16}
-                      strokeWidth="2"
-                    />
-                  )}
-                </div>
-              ) : (
-                <button
-                  className={'cursor-pointer p-2'}
-                  onClick={() => handleRemoveFile(index)}
-                >
-                  <X
-                    color="red"
-                    size={16}
-                    strokeWidth="2"
-                  />
-                </button>
-              )}
-            </li>
-          ))}
+                  </button>
+                )}
+              </li>
+            )}
+          </FixedSizeList>
         </ul>
       )}
       {isUploading ? (
