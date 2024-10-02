@@ -2,13 +2,14 @@ import { Briefcase, Tag, Box, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useProjectQuery from '@/queries/projects/useProjectQuery';
 import useAuthStore from '@/stores/useAuthStore';
+import { ReviewStatus } from '@/types';
 
 interface ReviewItemProps {
   title: string;
   createdTime: string;
   creatorName: string;
   projectId: number;
-  status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  status: ReviewStatus;
   type?: { text: 'classification' | 'detection' | 'segmentation'; color: string };
   workspaceId: number;
   reviewId: number;

@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { ReviewDetailResponse, ReviewRequest, ReviewResponse, ReviewStatusRequest } from '@/types';
+import { ReviewDetailResponse, ReviewRequest, ReviewResponse, ReviewStatus, ReviewStatusRequest } from '@/types';
 
 export const reviewHandlers = [
   // 리뷰 단건 조회 핸들러
@@ -145,7 +145,7 @@ export const reviewHandlers = [
       reviewId: index + 1,
       title: `Review ${index + 1}`,
       content: `Review content ${index + 1}`,
-      status: (reviewStatus || 'REQUESTED') as 'REQUESTED' | 'APPROVED' | 'REJECTED',
+      status: (reviewStatus || 'REQUESTED') as ReviewStatus,
       createAt: new Date().toISOString(),
       updateAt: new Date().toISOString(),
       author: { id: 1, nickname: 'Author', profileImage: '', email: 'author@example.com' },

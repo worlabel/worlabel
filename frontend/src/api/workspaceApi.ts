@@ -5,6 +5,7 @@ import {
   WorkspaceResponse,
   ReviewResponse,
   WorkspaceMemberResponse,
+  ReviewStatus,
 } from '@/types';
 
 export async function getWorkspaceList(memberId: number, lastWorkspaceId?: number, limit?: number) {
@@ -59,7 +60,7 @@ export async function getWorkspaceReviews(
   workspaceId: number,
   memberId: number,
   sortDirection: number,
-  reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
+  reviewStatus?: ReviewStatus,
   lastReviewId?: number,
   limitPage: number = 10
 ) {

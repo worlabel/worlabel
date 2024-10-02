@@ -1,5 +1,5 @@
 import api from '@/api/axiosConfig';
-import { ReviewDetailResponse, ReviewRequest, ReviewResponse } from '@/types';
+import { ReviewDetailResponse, ReviewRequest, ReviewResponse, ReviewStatus } from '@/types';
 
 // 리뷰 단건 조회
 export async function getReviewDetail(projectId: number, reviewId: number, memberId: number) {
@@ -49,7 +49,7 @@ export async function getReviewByStatus(
   projectId: number,
   memberId: number,
   sortDirection: number,
-  reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
+  reviewStatus?: ReviewStatus,
   lastReviewId?: number,
   limitPage: number = 10
 ) {

@@ -1,12 +1,12 @@
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { getWorkspaceReviews } from '@/api/workspaceApi';
-import { ReviewResponse } from '@/types';
+import { ReviewResponse, ReviewStatus } from '@/types';
 
 export default function useWorkspaceReviewsQuery(
   workspaceId: number,
   memberId: number,
   sortDirection: number,
-  reviewStatus?: 'REQUESTED' | 'APPROVED' | 'REJECTED',
+  reviewStatus?: ReviewStatus,
   limitPage: number = 10
 ) {
   return useSuspenseInfiniteQuery<ReviewResponse[]>({
