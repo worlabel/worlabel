@@ -5,71 +5,37 @@ import { Project } from '@/types';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '../ui/select';
 import useCanvasStore from '@/stores/useCanvasStore';
 import { webPath } from '@/router';
-import { useState } from 'react';
-import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery';
-import useAuthStore from '@/stores/useAuthStore';
+import { Suspense, useEffect } from 'react';
 
 export default function WorkspaceSidebar({ workspaceName, projects }: { workspaceName: string; projects: Project[] }) {
-  const { projectId: selectedProjectId } = useParams<{ projectId: string }>();
-  const selectedProject = projects.find((project) => project.id.toString() === selectedProjectId);
+  const { setImage } = useCanvasStore();
+  const { projectId: selectedProjectId, workspaceId } = useParams<{ projectId: string; workspaceId: string }>();
+  const selectedProject = projects.find((project) => project.id.toString() === selectedProjectId) || null;
   const setSidebarSize = useCanvasStore((state) => state.setSidebarSize);
   const navigate = useNavigate();
-  const { workspaceId } = useParams<{ workspaceId: string }>();
-  const [isDragging, setIsDragging] = useState(false);
-  const uploadImageFileMutation = useUploadImageFileQuery();
-  const { profile } = useAuthStore();
-
   const handleSelectProject = (projectId: string) => {
-    navigate(`${webPath.workspace()}/${workspaceId}/project/${projectId}`);
+    setImage(null);
+    navigate(`${webPath.workspace()}/${workspaceId}/${projectId}`);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    if (!selectedProjectId || !profile) return;
-
-    const files = Array.from(e.dataTransfer.files);
-    const memberId = profile.id;
-    const projectId = parseInt(selectedProjectId);
-    const folderId = 0;
-
-    uploadImageFileMutation.mutate({
-      memberId,
-      projectId,
-      folderId,
-      files,
-      progressCallback: (progress) => {
-        console.log(`업로드 진행률: ${progress}%`);
-      },
-    });
-  };
+  useEffect(() => {
+    if (!selectedProject) {
+      setImage(null);
+    }
+  }, [selectedProject, setImage]);
 
   return (
     <>
       <ResizablePanel
         minSize={10}
         maxSize={35}
-        defaultSize={20}
-        className={`flex h-full flex-col bg-gray-50 ${isDragging ? 'bg-blue-100' : ''}`}
+        defaultSize={15}
         onResize={(size) => setSidebarSize(size)}
-        onDragOver={(e) => handleDragOver(e as unknown as React.DragEvent<Element>)}
-        onDragLeave={handleDragLeave}
-        onDrop={(e) => handleDrop(e as unknown as React.DragEvent<Element>)}
       >
-        <header className="body flex w-full items-center gap-2 p-2">
-          <h1 className="w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>
-        </header>
-        <div className="p-2">
+        <div className="box-border flex h-full flex-col gap-2 bg-gray-50 p-3">
+          <header className="body flex w-full items-center gap-2">
+            <h1 className="subheading w-full overflow-hidden text-ellipsis whitespace-nowrap">{workspaceName}</h1>
+          </header>
           <Select
             onValueChange={handleSelectProject}
             defaultValue={selectedProjectId}
@@ -88,8 +54,10 @@ export default function WorkspaceSidebar({ workspaceName, projects }: { workspac
               ))}
             </SelectContent>
           </Select>
+          <Suspense fallback={<div></div>}>
+            {selectedProject && <ProjectStructure project={selectedProject} />}
+          </Suspense>
         </div>
-        {selectedProject && <ProjectStructure project={selectedProject} />}
       </ResizablePanel>
       <ResizableHandle className="bg-gray-300" />
     </>
