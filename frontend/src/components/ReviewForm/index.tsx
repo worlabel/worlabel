@@ -18,7 +18,7 @@ const reviewFormSchema = z.object({
   projectId: z.string().min(1, '프로젝트를 선택해주세요.'),
   title: z.string().min(1, '제목을 입력해주세요.'),
   content: z.string().min(1, '내용을 입력해주세요.'),
-  imageIds: z.array(z.number()),
+  imageIds: z.array(z.number()).min(1, '최소 한 개의 이미지를 선택해주세요.'),
 });
 
 type ReviewFormData = z.infer<typeof reviewFormSchema>;
