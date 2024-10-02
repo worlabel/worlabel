@@ -8,7 +8,8 @@ export default function WorkspaceNavigation() {
   const isBrowsePage = location.pathname.startsWith('/browse');
   const isWorkspacePage = location.pathname.startsWith('/workspace');
   const isReviewPage = location.pathname.startsWith('/review');
-  const isAdminPage = location.pathname.startsWith('/admin');
+  const isModelPage = location.pathname.startsWith('/model');
+  const isMemberPage = location.pathname.startsWith('/member');
 
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
@@ -35,21 +36,27 @@ export default function WorkspaceNavigation() {
         <>
           <Link
             to={`/workspace/${activeWorkspaceId}`}
-            className={cn('', isWorkspacePage ? 'body-strong' : 'body')}
+            className={isWorkspacePage ? 'body-strong' : 'body'}
           >
             labeling
           </Link>
           <Link
             to={`/review/${activeWorkspaceId}`}
-            className={cn('', isReviewPage ? 'body-strong' : 'body')}
+            className={isReviewPage ? 'body-strong' : 'body'}
           >
             review
           </Link>
           <Link
-            to={`/admin/${activeWorkspaceId}`}
-            className={cn('', isAdminPage ? 'body-strong' : 'body')}
+            to={`/model/${activeWorkspaceId}`}
+            className={isModelPage ? 'body-strong' : 'body'}
           >
-            admin
+            model
+          </Link>
+          <Link
+            to={`/member/${activeWorkspaceId}`}
+            className={isMemberPage ? 'body-strong' : 'body'}
+          >
+            member
           </Link>
         </>
       )}
