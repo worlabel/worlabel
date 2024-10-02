@@ -7,6 +7,8 @@ import { Button } from '../ui/button';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   projectName: z.string().max(50).min(1, {
@@ -27,11 +29,14 @@ const defaultValues: Partial<ProjectCreateFormValues> = {
 
 export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: ProjectCreateFormValues) => void }) {
   const [categories, setCategories] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const form = useForm<ProjectCreateFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { ...defaultValues, categories },
   });
   const categoryRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleAddCategory = (event: React.MouseEvent<HTMLButtonElement>, onChange: (value: string[]) => void) => {
     event.preventDefault();
 
@@ -45,6 +50,63 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
       setCategories(newCategories);
     }
     categoryRef.current!.value = '';
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, onChange: (value: string[]) => void) => {
+    event.preventDefault();
+
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const newCategories = text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+      if (newCategories.length > 0) {
+        const uniqueCategories = Array.from(new Set([...categories, ...newCategories]));
+        onChange(uniqueCategories);
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('파일을 읽는 중 오류가 발생했습니다:', error);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>, onChange: (value: string[]) => void) => {
+    event.preventDefault();
+    setIsDragging(false);
+
+    const file = event.dataTransfer.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const newCategories = text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+      if (newCategories.length > 0) {
+        const uniqueCategories = Array.from(new Set([...categories, ...newCategories]));
+        onChange(uniqueCategories);
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('파일을 읽는 중 오류가 발생했습니다:', error);
+    }
   };
 
   return (
@@ -106,20 +168,51 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
           render={({ field }) => (
             <div className="mb-1 flex w-full flex-col gap-2">
               <div className="body-strong">카테고리</div>
-              <div className="flex gap-2">
-                <FormControl>
-                  <Input
-                    ref={categoryRef}
-                    placeholder="카테고리를 추가해주세요."
-                  />
-                </FormControl>
-                <Button
-                  variant="blue"
-                  onClick={(event) => handleAddCategory(event, field.onChange)}
-                >
-                  추가
-                </Button>
-              </div>
+              <Tabs defaultValue="manual">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="manual">직접 입력</TabsTrigger>
+                  <TabsTrigger value="file">파일로 입력</TabsTrigger>
+                </TabsList>
+                <TabsContent value="manual">
+                  <div className="mt-2 flex gap-2">
+                    <FormControl>
+                      <Input
+                        ref={categoryRef}
+                        placeholder="카테고리를 추가해주세요."
+                      />
+                    </FormControl>
+                    <Button
+                      variant="blue"
+                      onClick={(event) => handleAddCategory(event, field.onChange)}
+                    >
+                      추가
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="file">
+                  <div
+                    className={cn(
+                      'mt-2 flex w-full items-center justify-center rounded-lg border-2 border-dashed p-5 text-center transition-colors',
+                      isDragging ? 'border-blue-500 bg-blue-100' : 'border-gray-300 bg-gray-100'
+                    )}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(event) => handleDrop(event, field.onChange)}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <p className="text-gray-500">
+                      파일을 업로드하려면 여기를 클릭하거나 파일을 드래그하여 여기에 놓으세요.
+                    </p>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept=".txt"
+                      onChange={(event) => handleFileUpload(event, field.onChange)}
+                      className="hidden"
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
               {categories.length > 0 && (
                 <div className="flex w-full flex-col overflow-x-auto">
                   <div className="flex gap-2 py-1">
