@@ -12,7 +12,8 @@ interface TrainingSettingsProps {
   setSelectedModel: (model: ModelResponse | null) => void;
   handleTrainingStart: (trainData: ModelTrainRequest) => void;
   handleTrainingStop: () => void;
-  isPolling: boolean;
+  isWaiting: boolean;
+  isTraining: boolean;
   className?: string;
 }
 
@@ -22,7 +23,8 @@ export default function TrainingSettings({
   setSelectedModel,
   handleTrainingStart,
   handleTrainingStop,
-  isPolling,
+  isWaiting,
+  isTraining,
   className,
 }: TrainingSettingsProps) {
   const { data: models } = useProjectModelsQuery(projectId ?? 0);
@@ -48,9 +50,6 @@ export default function TrainingSettings({
     }
   };
 
-  const isTraining = selectedModel?.isTrain;
-  const isWaiting = isPolling && !isTraining;
-
   return (
     <fieldset className={cn('grid gap-6 rounded-lg border p-4', className)}>
       <legend className="-ml-1 px-1 text-sm font-medium">모델 설정</legend>
@@ -73,7 +72,8 @@ export default function TrainingSettings({
           }}
         />
       </div>
-      {!isPolling && !isTraining && (
+
+      {!isWaiting && !isTraining && (
         <>
           <div className="grid grid-cols-2 gap-4">
             <InputWithLabel
