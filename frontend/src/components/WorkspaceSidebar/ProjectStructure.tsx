@@ -1,26 +1,19 @@
 import { Project } from '@/types';
-import { LoaderCircle, Play } from 'lucide-react';
 import ProjectFileItem from './ProjectFileItem';
 import ProjectDirectoryItem from './ProjectDirectoryItem';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
 import useCanvasStore from '@/stores/useCanvasStore';
-import { Button } from '../ui/button';
 import { useEffect } from 'react';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
-import useAutoLabelQuery from '@/queries/projects/useAutoLabelQuery';
 import useProjectStore from '@/stores/useProjectStore';
-import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
 import useProjectCategoriesQuery from '@/queries/category/useProjectCategoriesQuery';
+import AutoLabelButton from './AutoLabelButton';
 
 export default function ProjectStructure({ project }: { project: Project }) {
   const { setProject, setCategories } = useProjectStore();
   const { data: categories } = useProjectCategoriesQuery(project.id);
   const image = useCanvasStore((state) => state.image);
   const { data: folderData, refetch } = useFolderQuery(project.id.toString(), 0);
-  const queryClient = useQueryClient();
-  const requestAutoLabel = useAutoLabelQuery();
-  const { toast } = useToast();
 
   useEffect(() => {
     setCategories(categories);
@@ -69,47 +62,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
       </div>
 
       <div className="flex">
-        <Button
-          variant="blue"
-          className="w-full overflow-hidden"
-          disabled={requestAutoLabel.isPending}
-          onClick={() => {
-            requestAutoLabel.mutate(
-              { projectId: project.id },
-              {
-                onSuccess: () => {
-                  queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString()] });
-                  queryClient.invalidateQueries({ queryKey: ['labelJson'] });
-                  toast({
-                    title: '레이블링 성공',
-                  });
-                },
-                onError: () => {
-                  toast({
-                    title: '레이블링 중 오류가 발생했습니다.',
-                  });
-                },
-              }
-            );
-          }}
-        >
-          {requestAutoLabel.isPending ? (
-            <>
-              <LoaderCircle
-                size={16}
-                className="animate-spin"
-              />
-            </>
-          ) : (
-            <>
-              <Play
-                size={16}
-                className="mr-1"
-              />
-              <span>자동 레이블링</span>
-            </>
-          )}
-        </Button>
+        <AutoLabelButton projectId={project.id} />
       </div>
     </div>
   );
