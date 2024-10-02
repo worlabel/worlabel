@@ -1,5 +1,6 @@
 package com.worlabel.global.service;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
@@ -19,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,7 +70,7 @@ public class S3UploadService {
         try (InputStream inputStream = file.getInputStream()) {
             return uploadImageToS3(inputStream, extension, projectId);
         } catch (IOException e) {
-            log.debug("MultipartFile 업로드 에러 발생 {}",file.getOriginalFilename(), e);
+            log.debug("MultipartFile 업로드 에러 발생 {}", file.getOriginalFilename(), e);
             throw new CustomException(ErrorCode.FAIL_TO_CREATE_FILE);
         }
     }
@@ -151,5 +153,22 @@ public class S3UploadService {
         } catch (MalformedURLException e) {
             throw new CustomException(ErrorCode.INVALID_FILE_PATH);
         }
+    }
+
+    /**
+     * Presigned URL 생성
+     */
+    public String generatePresignedUrl(String s3Key) {
+        Date expiration = new Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000 * 60 * 10; // 10분간 유효
+        expiration.setTime(expTimeMillis);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, s3Key)
+                .withMethod(HttpMethod.PUT)  // PUT 방식
+                .withExpiration(expiration);
+
+        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+        return url.toString();
     }
 }
