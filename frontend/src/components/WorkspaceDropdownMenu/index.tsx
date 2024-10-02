@@ -7,11 +7,12 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
-import ImageUploadFileForm from '../ImageUploadFileModal/ImageUploadFileForm';
 import React from 'react';
+import ImageUploadFileForm from '../ImageUploadFileModal/ImageUploadFileForm';
 import ImageUploadFolderFileForm from '../ImageUploadFolderFileModal/ImageUploadFolderFileForm';
 import ImageUploadFolderForm from '../ImageUploadFolderModal/ImageUploadFolderForm';
 import ImageUploadZipForm from '../ImageUploadZipModal/ImageUploadZipForm';
+import ImageUploadPresignedForm from '../ImageUploadPresignedModal/ImageUploadPresignedForm.tsx'
 
 export default function WorkspaceDropdownMenu({
   projectId,
@@ -26,6 +27,7 @@ export default function WorkspaceDropdownMenu({
   const [fileCount, setFileCount] = React.useState<number>(0);
   const [isOpenUploadFolderFile, setIsOpenUploadFolderFile] = React.useState<boolean>(false);
   const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState<boolean>(false);
+  const [isOpenUploadPresigned, setIsOpenUploadPresigned] = React.useState<boolean>(false);
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
 
   const handleOpenUploadFile = () => setIsOpenUploadFile(true);
@@ -44,6 +46,12 @@ export default function WorkspaceDropdownMenu({
 
   const handleCloseUploadFolder = () => {
     setIsOpenUploadFolder(false);
+  };
+
+  const handleOpenUploadPresigned = () => setIsOpenUploadPresigned(true);
+
+  const handleCloseUploadPresigned = () => {
+    setIsOpenUploadPresigned(false);
   };
 
   const handleOpenUploadZip = () => setIsOpenUploadZip(true);
@@ -77,6 +85,7 @@ export default function WorkspaceDropdownMenu({
           <DropdownMenuItem onClick={handleOpenUploadFile}>파일 업로드</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadFolderFile}>폴더 업로드 (파일 업로드 API 이용)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드 (백엔드 구현 필요)</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenUploadPresigned}>폴더 업로드 (PresignedUrl 이용)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadZip}>폴더 압축파일 업로드</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -124,6 +133,23 @@ export default function WorkspaceDropdownMenu({
           <ImageUploadFolderForm
             onClose={handleCloseUploadFolder}
             onRefetch={onRefetch}
+            projectId={projectId}
+            folderId={folderId}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isOpenUploadPresigned}
+        onOpenChange={setIsOpenUploadPresigned}
+      >
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader title='파일 업로드' />
+          <ImageUploadPresignedForm
+            onClose={handleCloseUploadPresigned}
+            onRefetch={onRefetch}
+            onFileCount={handleFileCount}
             projectId={projectId}
             folderId={folderId}
           />
