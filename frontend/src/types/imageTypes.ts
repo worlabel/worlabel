@@ -31,3 +31,8 @@ export interface ImageFolderRequest {
   parentId: number;
   files: File[];
 }
+
+export interface ImagePresignedUrlResponse{
+  id: number;
+  presignedUrl: string;
+}

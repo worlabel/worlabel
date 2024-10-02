@@ -3,16 +3,15 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
-import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery';
-import { FixedSizeList } from 'react-window';
+import useUploadImagePresignedQuery from '@/queries/projects/useUploadImagePresignedQuery.ts';
 
-export default function ImageUploadFileForm({
-  onClose,
-  onRefetch,
-  onFileCount,
-  projectId,
-  folderId,
-}: {
+export default function ImageUploadPresignedForm({
+                                                   onClose,
+                                                   onRefetch,
+                                                   onFileCount,
+                                                   projectId,
+                                                   folderId,
+                                                 }: {
   onClose: () => void;
   onRefetch?: () => void;
   onFileCount: (fileCount: number) => void;
@@ -27,9 +26,10 @@ export default function ImageUploadFileForm({
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
+  const [uploadStatus, setUploadStatus] = useState<(boolean | null)[]>([]); // 각 파일의 성공/실패 여부 관리
 
-  const uploadImageFile = useUploadImageFileQuery();
+  const uploadImageFile = useUploadImagePresignedQuery();
+
 
   const handleClose = () => {
     onClose();
@@ -51,6 +51,7 @@ export default function ImageUploadFileForm({
       });
 
       setFiles((prevFiles) => [...prevFiles, ...newImages]);
+      setUploadStatus((prevState) => [...prevState, ...newImages.map(()=> null)]);
     }
 
     event.target.value = '';
@@ -83,8 +84,13 @@ export default function ImageUploadFileForm({
         projectId,
         folderId,
         files,
-        progressCallback: (progress: number) => {
-          setProgress(progress);
+        progressCallback: (index: number) => {
+          // 업로드 성공하면 상태 업데이트
+          setUploadStatus((prevStatus) => {
+            const newStatus = [...prevStatus];
+            newStatus[index] = true; // 업로드 성공 시 true
+            return newStatus;
+          });
         },
       },
       {
@@ -94,10 +100,18 @@ export default function ImageUploadFileForm({
         },
         onError: () => {
           setIsFailed(true);
+          setUploadStatus((prevStatus) =>
+            prevStatus.map((status) => (status === null ? false : status))
+          ); // 실패 시 처리
         },
-      }
+      },
     );
   };
+
+  // 전체 진행 상황 계산
+  const totalProgress = Math.round(
+    (uploadStatus.filter((status) => status !== null).length / files.length) * 100
+  );
 
   useEffect(() => {
     onFileCount(files.length);
@@ -109,7 +123,7 @@ export default function ImageUploadFileForm({
         <div
           className={cn(
             'relative flex h-[200px] w-full cursor-pointer items-center justify-center rounded-lg border-2 text-center',
-            isDragging ? 'border-solid border-primary bg-blue-200' : 'border-dashed border-gray-500 bg-gray-100'
+            isDragging ? 'border-solid border-primary bg-blue-200' : 'border-dashed border-gray-500 bg-gray-100',
           )}
         >
           <input
@@ -136,65 +150,37 @@ export default function ImageUploadFileForm({
       )}
       {files.length > 0 && (
         <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
-          <FixedSizeList
-            height={260}
-            itemCount={files.length}
-            itemSize={40}
-            width="100%"
-          >
-            {({ index, style }) => (
-              <li
-                key={index}
-                className="flex items-center justify-between p-1"
-                style={style}
-              >
-                <span className="truncate">{files[index].webkitRelativePath || files[index].name}</span>
-                {isUploading ? (
-                  <div className="p-2">
-                    {isUploaded ? (
-                      <CircleCheckBig
-                        className="stroke-green-500"
-                        size={16}
-                        strokeWidth="2"
-                      />
-                    ) : isFailed ? (
-                      <CircleX
-                        className="stroke-red-500"
-                        size={16}
-                        strokeWidth="2"
-                      />
-                    ) : (
-                      <CircleDashed
-                        className="stroke-gray-500"
-                        size={16}
-                        strokeWidth="2"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    className={'cursor-pointer p-2'}
-                    onClick={() => handleRemoveFile(index)}
-                  >
-                    <X
-                      color="red"
-                      size={16}
-                      strokeWidth="2"
-                    />
-                  </button>
-                )}
-              </li>
-            )}
-          </FixedSizeList>
+          {files.map((file, index) => (
+            <li key={index} className="flex items-center justify-between p-1">
+              <span className="truncate">{file.name}</span>
+              {isUploading ? (
+                <div className="p-2">
+                  {uploadStatus[index] === true ? (
+                    <CircleCheckBig className="stroke-green-500" size={16} strokeWidth="2" />
+                  ) : uploadStatus[index] === false ? (
+                    <CircleX className="stroke-red-500" size={16} strokeWidth="2" />
+                  ) : (
+                    <CircleDashed className="stroke-gray-500" size={16} strokeWidth="2" />
+                  )}
+                </div>
+              ) : (
+                <button className={'cursor-pointer p-2'} onClick={() => handleRemoveFile(index)}>
+                  <X color="red" size={16} strokeWidth="2" />
+                </button>
+              )}
+            </li>
+          ))}
         </ul>
       )}
       {isUploading ? (
-        <Button
-          onClick={handleClose}
-          variant={isFailed ? 'red' : 'blue'}
-          disabled={!isUploaded && !isFailed}
-        >
-          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : `업로드 중... ${progress}%`}
+        <Button onClick={handleClose} variant={isFailed ? 'red' : 'blue'}>
+          {isFailed
+            ? '업로드 실패 (닫기)'
+            : isUploaded
+              ? '업로드 완료 (닫기)'
+              : totalProgress === 0
+                ? '업로드 준비 중...'
+                : `업로드 중... ${totalProgress}%`}
         </Button>
       ) : (
         <Button

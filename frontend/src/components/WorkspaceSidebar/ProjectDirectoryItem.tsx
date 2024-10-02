@@ -56,7 +56,6 @@ export default function ProjectDirectoryItem({
               key={`${projectId}-${item.imageTitle}`}
               item={item}
               depth={depth + 1}
-              folderId={folderData.id}
               selected={image?.id === item.id}
             />
           ))}
