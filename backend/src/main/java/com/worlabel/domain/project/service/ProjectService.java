@@ -191,10 +191,12 @@ public class ProjectService {
             AiModel aiModel = getAiModel(request);
             AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
-            log.debug("요청 {}", autoLabelingRequest);
+            log.debug("요청 이미지 개수 :{}", imageRequestList.size());
 
             List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
+
             saveAutoLabelList(list);
+            log.debug("응답 이미지 개수 :{}", list.size());
 
             alarmService.save(memberId, Alarm.AlarmType.PREDICT);
         } finally {
