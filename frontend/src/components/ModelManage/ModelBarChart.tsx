@@ -1,7 +1,6 @@
 'use client';
 
-import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from 'recharts';
-
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Rectangle } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
@@ -19,23 +18,23 @@ interface ModelBarChartProps {
 const chartConfig = {
   precision: {
     label: 'Precision',
-    color: 'hsl(var(--chart-1))',
+    color: '#FF6347',
   },
   recall: {
     label: 'Recall',
-    color: 'hsl(var(--chart-2))',
+    color: '#1E90FF',
   },
   mAP50: {
     label: 'mAP50',
-    color: 'hsl(var(--chart-3))',
+    color: '#32CD3',
   },
   mAP50_95: {
     label: 'mAP50-95',
-    color: 'hsl(var(--chart-4))',
+    color: '#BA55D3',
   },
   fitness: {
     label: 'Fitness',
-    color: 'hsl(var(--chart-5))',
+    color: '#FF1493',
   },
 } satisfies ChartConfig;
 
@@ -60,6 +59,7 @@ export default function ModelBarChart({ data, className }: ModelBarChartProps) {
               axisLine={false}
               tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig]?.label}
             />
+            <YAxis />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
