@@ -68,11 +68,11 @@ public class ImageService {
         int batchSize;
 
         if (totalImages <= 100) {
-            batchSize = 25;  // 작은 이미지 수는 작은 배치 크기
+            batchSize = 10;  // 작은 이미지 수는 작은 배치 크기
         } else if (totalImages <= 3000) {
-            batchSize = 50;  // 중간 이미지 수는 중간 배치 크기
+            batchSize = 25;  // 중간 이미지 수는 중간 배치 크기
         } else {
-            batchSize = 100; // 큰 이미지 수는 큰 배치 크기
+            batchSize = 50; // 큰 이미지 수는 큰 배치 크기
         }
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();

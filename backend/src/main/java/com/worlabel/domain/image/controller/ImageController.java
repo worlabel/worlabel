@@ -51,6 +51,20 @@ public class ImageController {
         imageService.uploadFolderWithImages(folderZip, projectId, folderId, memberId);
     }
 
+    @PostMapping("/folders/{folder_id}/images/presigned")
+    @SwaggerApiSuccess(description = "압축폴더를 성공적으로 업로드합니다.")
+    @Operation(summary = "압축 폴더 업로드", description = "압축 폴더 내 폴더와 이미지 파일을 업로드합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
+    public List<ImagePresignedUrlResponse> uploadFolderByPresignedImage(
+            @CurrentUser final Integer memberId,
+            @RequestBody final List<ImageMetaRequest> imageMetaList,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("folder_id") final Integer folderId) {
+        log.debug("requestImageList {}", imageMetaList);
+        // TODO: 변경
+        return imageMetaList.stream().map(o -> ImagePresignedUrlResponse.of(o.getId(), o.getFileName())).toList();
+    }
+
     @GetMapping("/folders/{folder_id}/images/{image_id}")
     @SwaggerApiSuccess(description = "이미지를 단일 조회합니다.")
     @Operation(summary = "이미지 단일 조회", description = "이미지 정보를 단일 조회합니다.")
