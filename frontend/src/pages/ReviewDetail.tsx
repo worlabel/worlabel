@@ -111,7 +111,7 @@ export default function ReviewDetail(): JSX.Element {
         )}
       </div>
 
-      {(reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED') && (
+      {(reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECT') && (
         <div className="reviewer-info mt-6">
           <h2 className="text-lg font-semibold">
             리뷰 상태: {reviewDetail.reviewStatus === 'APPROVED' ? '승인됨' : '거부됨'}
@@ -137,7 +137,7 @@ export default function ReviewDetail(): JSX.Element {
         <Link to={`/admin/${workspaceId}/reviews`}>
           <Button variant="black">목록으로 돌아가기</Button>
         </Link>
-        {isAdminOrManager && reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (
+        {isAdminOrManager && reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECT' && (
           <>
             <Button
               variant="red"

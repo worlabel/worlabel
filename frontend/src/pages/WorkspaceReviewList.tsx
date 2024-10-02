@@ -4,13 +4,14 @@ import useWorkspaceReviewsQuery from '@/queries/workspaces/useWorkspaceReviewsQu
 import useAuthStore from '@/stores/useAuthStore';
 import ReviewList from '@/components/ReviewList';
 import { Button } from '@/components/ui/button';
+import { ReviewStatus } from '@/types';
 
 export default function WorkspaceReviewList() {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const [activeTab, setActiveTab] = useState<'REQUESTED' | 'APPROVED' | 'REJECTED' | 'all'>('REQUESTED');
+  const [activeTab, setActiveTab] = useState<ReviewStatus | 'all'>('REQUESTED');
   const [, setSearchQuery] = useState('');
   const [sortValue, setSortValue] = useState('latest');
 
