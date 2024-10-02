@@ -27,6 +27,7 @@ export default function TrainingGraph({
   return (
     <ModelLineChart
       data={trainingDataList || []}
+      isTraining={isTraining}
       className={className}
     />
   );

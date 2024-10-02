@@ -4,9 +4,11 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip, Legend } from 'r
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer } from '@/components/ui/chart';
 import { ReportResponse } from '@/types';
+import { Spinner } from '@/components/ui/spinner';
 
 interface ModelLineChartProps {
   data: ReportResponse[];
+  isTraining: boolean;
   className?: string;
 }
 
@@ -33,7 +35,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function ModelLineChart({ data, className }: ModelLineChartProps) {
+export default function ModelLineChart({ data, isTraining, className }: ModelLineChartProps) {
   const latestData = data.length > 0 ? data[data.length - 1] : undefined;
 
   const totalEpochs = latestData?.totalEpochs || 0;
@@ -55,6 +57,7 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
     const hasNonZeroData = filledData.some((d) => d[dataKey] !== 0);
     return hasNonZeroData ? (
       <Line
+        key={dataKey}
         dataKey={dataKey}
         type="monotone"
         stroke={color}
@@ -63,6 +66,7 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
       />
     ) : null;
   };
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -73,7 +77,7 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
           <div className="mb-4 flex justify-between">
             <p>현재 에포크: {latestData.epoch}</p>
             <p>총 에포크: {latestData.totalEpochs}</p>
-            <p>예상 남은시간: {latestData.leftSecond}초</p>
+            <p>예상 남은시간: {latestData.leftSecond.toFixed(2)}초</p>
           </div>
         )}
         <ChartContainer config={chartConfig}>
@@ -101,6 +105,37 @@ export default function ModelLineChart({ data, className }: ModelLineChartProps)
             {renderLine('dflLoss', chartConfig.dflLoss.color)}
             {renderLine('fitness', chartConfig.fitness.color)}
             {renderLine('segLoss', chartConfig.segLoss.color)}
+
+            {isTraining && data.length === 0 && (
+              <foreignObject
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+              >
+                <div className="flex h-full w-full items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <Spinner
+                      size="large"
+                      show={true}
+                    />
+                    <p className="mt-4 text-lg font-semibold">대기 중...</p>
+                  </div>
+                </div>
+              </foreignObject>
+            )}
+            {!isTraining && data.length === 0 && (
+              <foreignObject
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+              >
+                <div className="flex h-full w-full items-center justify-center text-lg font-semibold text-gray-500">
+                  학습 중이 아닙니다.
+                </div>
+              </foreignObject>
+            )}
           </LineChart>
         </ChartContainer>
       </CardContent>

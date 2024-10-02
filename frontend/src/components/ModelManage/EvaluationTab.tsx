@@ -123,6 +123,7 @@ function ModelEvaluation({ projectId, selectedModel }: ModelEvaluationProps) {
           {/* 차트의 높이를 100%로 맞춤 */}
           <ModelLineChart
             data={reportData}
+            isTraining={false}
             className="h-full"
           />
         </div>
