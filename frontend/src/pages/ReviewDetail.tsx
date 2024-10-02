@@ -10,6 +10,10 @@ import { Button } from '@/components/ui/button';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import ImageWithLabels from '@/components/ImageWithLabels';
+import { cn } from '@/lib/utils';
+import { Check, X } from 'lucide-react';
+import formatDateTime from '@/utils/formatDateTime';
+import timeAgo from '@/utils/timeAgo';
 
 export default function ReviewDetail(): JSX.Element {
   const { workspaceId, projectId, reviewId } = useParams<{
@@ -59,13 +63,50 @@ export default function ReviewDetail(): JSX.Element {
 
   return (
     <div className="review-detail-container p-4">
-      <div className="header mb-4">
+      <div className="header mb-4 flex flex-col gap-1">
         <h1 className="heading mb-2">{reviewDetail.title}</h1>
-        <p className="body-small text-gray-500">
-          작성자 : {reviewDetail.author.nickname} ({reviewDetail.author.email})
-        </p>
-        <p className="body-small text-gray-500">작성일 : {new Date(reviewDetail.createdAt).toLocaleDateString()}</p>
-        <p className="body-small text-gray-500">수정일 : {new Date(reviewDetail.updatedAt).toLocaleDateString()}</p>
+        <div className="mb-1 flex gap-1">
+          <div
+            className={cn(
+              'caption mr-1 flex items-center gap-1 rounded-full px-3 py-0.5',
+              reviewDetail.reviewStatus === 'APPROVED'
+                ? 'bg-green-100 text-green-600'
+                : reviewDetail.reviewStatus === 'REJECTED'
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-blue-100 text-blue-600'
+            )}
+          >
+            {reviewDetail.reviewStatus === 'APPROVED' ? (
+              <Check size={12} />
+            ) : reviewDetail.reviewStatus === 'REJECTED' ? (
+              <X size={12} />
+            ) : (
+              <></>
+            )}
+            {reviewDetail.reviewStatus}
+          </div>
+          {reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED' ? (
+            <>
+              <p className="body-small text-gray-500">by</p>
+              <p className="body-small-strong text-gray-500">
+                {reviewDetail.reviewer.nickname} ({reviewDetail.reviewer.email})
+              </p>
+            </>
+          ) : (
+            <p className="body-small text-gray-500">updated</p>
+          )}
+
+          <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.updatedAt)}</p>
+          <p className="body-small text-gray-500">({formatDateTime(reviewDetail.updatedAt)})</p>
+        </div>
+        <div className="flex gap-1">
+          <p className="body-small-strong text-gray-500">
+            {reviewDetail.author.nickname} ({reviewDetail.author.email})
+          </p>
+          <p className="body-small text-gray-500">requested a review</p>
+          <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.createdAt)}</p>
+          <p className="body-small text-gray-500">({formatDateTime(reviewDetail.createdAt)})</p>
+        </div>
       </div>
 
       <div className="relative w-full">
@@ -111,28 +152,6 @@ export default function ReviewDetail(): JSX.Element {
         )}
       </div>
 
-      {(reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED') && (
-        <div className="reviewer-info mt-6">
-          <h2 className="text-lg font-semibold">
-            리뷰 상태: {reviewDetail.reviewStatus === 'APPROVED' ? '승인됨' : '거부됨'}
-          </h2>
-          <div className="flex items-center">
-            <img
-              src={reviewDetail.reviewer.profileImage}
-              alt="리뷰어 프로필"
-              className="h-10 w-10 rounded-full"
-            />
-            <div className="ml-4">
-              <p className="font-bold">{reviewDetail.reviewer.nickname}</p>
-              <p className="text-gray-500">{reviewDetail.reviewer.email}</p>
-              <p className="text-gray-500">
-                {reviewDetail.reviewStatus === 'APPROVED' ? '승인한 사람 : ' : '거부한 사람 : '}
-                {reviewDetail.reviewer.nickname}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
       <div className="mt-6 flex justify-end gap-2">
         <Link to={`/admin/${workspaceId}/reviews`}>
           <Button variant="black">목록으로 돌아가기</Button>

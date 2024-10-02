@@ -1,6 +1,7 @@
 export default function formatDateTime(dateTimeString: string): string {
   const [date, time] = dateTimeString.split('T');
-  const [hours, minutes] = time.split(':');
+  const [year, month, day] = date.split('-');
+  const [hours, minutes, seconds] = time.split(':');
 
-  return `${date} ${hours}:${minutes}`;
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }

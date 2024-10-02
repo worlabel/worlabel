@@ -1,14 +1,15 @@
-import { Briefcase, Tag, Box, Layers } from 'lucide-react';
+import { Briefcase, Tag, Box, Layers, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useProjectQuery from '@/queries/projects/useProjectQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import { cn } from '@/lib/utils';
-import formatDateTime from '@/utils/formatDateTime';
 import { ReviewStatus } from '@/types';
+import timeAgo from '@/utils/timeAgo';
 
 interface ReviewItemProps {
   title: string;
   createdTime: string;
+  updatedTime: string;
   creatorName: string;
   projectId: number;
   status: ReviewStatus;
@@ -26,6 +27,7 @@ const typeIcons: Record<'classification' | 'detection' | 'segmentation', JSX.Ele
 export default function ReviewItem({
   title,
   createdTime,
+  updatedTime,
   creatorName,
   projectId,
   status,
@@ -45,15 +47,17 @@ export default function ReviewItem({
     >
       <div className="flex h-[100px] w-full items-center justify-between border-b-[0.67px] border-[#ececef] bg-[#fbfafd] p-4">
         <div className="flex flex-col">
-          <p className="text-sm font-semibold text-black">{title}</p>
-          <p className="mt-1 text-xs text-gray-500">by {creatorName}</p>
+          <p className="body-small-strong text-black">{title}</p>
+          <p className="caption mt-1 text-gray-500">
+            Created {timeAgo(createdTime)} by {creatorName}
+          </p>
           <div className="mt-1 flex items-center">
             <Briefcase className="h-3 w-3 text-gray-500" />
-            <p className="ml-1 text-xs text-gray-500">{projectData?.title}</p>
+            <p className="caption ml-1 text-gray-500">{projectData?.title}</p>
           </div>
           {type && (
             <div
-              className="mt-1 inline-flex max-w-fit items-center gap-1 rounded-full px-3 py-1 text-xs text-white"
+              className="caption mt-1 inline-flex max-w-fit items-center gap-1 rounded-full px-3 py-1 text-white"
               style={{ backgroundColor: type.color, padding: '1px 5px' }}
             >
               {icon}
@@ -64,7 +68,7 @@ export default function ReviewItem({
         <div className="flex flex-col items-end gap-1">
           <div
             className={cn(
-              'rounded-full px-3 py-0.5 text-center text-xs',
+              'caption flex items-center gap-1 rounded-full px-3 py-0.5',
               status === 'APPROVED'
                 ? 'bg-green-100 text-green-600'
                 : status === 'REJECTED'
@@ -72,9 +76,10 @@ export default function ReviewItem({
                   : 'bg-blue-100 text-blue-600'
             )}
           >
+            {status === 'APPROVED' ? <Check size={12} /> : status === 'REJECTED' ? <X size={12} /> : <></>}
             {status}
           </div>
-          <p className="text-xs text-gray-500">Created at {formatDateTime(createdTime)}</p>
+          <p className="caption text-gray-500">Updated {timeAgo(updatedTime)}</p>
         </div>
       </div>
     </Link>
