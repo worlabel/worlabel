@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getTrainingModelReport } from '@/api/reportApi';
-import { ReportResponse } from '@/types';
+import { getProjectModels } from '@/api/modelApi';
+import { ReportResponse, ProjectModelsResponse } from '@/types';
 
 interface UsePollingTrainingModelReportProps {
   projectId: number;
@@ -16,7 +17,7 @@ export default function usePollingTrainingModelReport({
   enabled,
   onTrainingEnd,
 }: UsePollingTrainingModelReportProps) {
-  const query = useQuery<ReportResponse[]>({
+  const reportQuery = useQuery<ReportResponse[]>({
     queryKey: ['modelReports', projectId, modelId],
     queryFn: () => getTrainingModelReport(projectId, modelId),
     enabled,
@@ -30,14 +31,30 @@ export default function usePollingTrainingModelReport({
     },
   });
 
+  const modelQuery = useQuery<ProjectModelsResponse>({
+    queryKey: ['projectModels', projectId],
+    queryFn: () => getProjectModels(projectId),
+    enabled,
+    refetchInterval: 2000,
+  });
+
+  const prevIsTrainRef = useRef<boolean | null>(null);
+
   useEffect(() => {
-    if (query.data && query.data.length > 0) {
-      const lastReport = query.data[query.data.length - 1];
-      if (lastReport.epoch >= lastReport.totalEpochs) {
-        onTrainingEnd();
+    if (modelQuery.data) {
+      const model = modelQuery.data.find((m) => m.id === modelId);
+      if (model) {
+        const currentIsTrain = model.isTrain;
+        const prevIsTrain = prevIsTrainRef.current;
+
+        if (prevIsTrain === true && currentIsTrain === false) {
+          onTrainingEnd();
+        }
+
+        prevIsTrainRef.current = currentIsTrain;
       }
     }
-  }, [query.data, onTrainingEnd]);
+  }, [modelQuery.data, modelId, onTrainingEnd]);
 
-  return query;
+  return { reportData: reportQuery.data, modelData: modelQuery.data };
 }
