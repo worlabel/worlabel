@@ -330,16 +330,16 @@ public class ImageService {
 
         for (ImageMetaRequest meta : imageMetaList) {
             // UUID 생성 및 이미지 Key 지정
-            String uuid = UUID.randomUUID().toString();
+            String key = UUID.randomUUID().toString().substring(0,13);
             String fileName = meta.getFileName();
             String extension = getExtension(fileName);
-            String s3Key = uuid + "." + extension;
 
             // Presigned URL 생성
-            String presignedUrl = s3UploadService.generatePresignedUrl(s3Key);
+            String presignedUrl = s3UploadService.generatePresignedUrl(key, extension);
+            log.debug("presignedUrl {}", presignedUrl);
 
             // DB에 이미지 메타데이터 저장
-            Image image = Image.of(fileName, s3Key, extension, folder);
+            Image image = Image.of(fileName, s3UploadService.addBucketPrefix(key), extension, folder);
             imageRepository.save(image);
 
             // Presigned URL과 함께 응답 데이터 생성

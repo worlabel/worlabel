@@ -90,7 +90,7 @@ public class S3UploadService {
         PutObjectRequest putRequest = new PutObjectRequest(bucket, s3FileName, inputStream, metadata);
         amazonS3.putObject(putRequest);
 
-        return url + "/" + s3Key;
+        return addBucketPrefix(s3Key);
     }
 
     /**
@@ -137,7 +137,7 @@ public class S3UploadService {
         }
     }
 
-    private static String getS3FileName(final Integer projectId) {
+    public static String getS3FileName(final Integer projectId) {
         return projectId + "/" + UUID.randomUUID().toString().substring(0, 13);
     }
 
@@ -158,17 +158,21 @@ public class S3UploadService {
     /**
      * Presigned URL 생성
      */
-    public String generatePresignedUrl(String s3Key) {
+    public String generatePresignedUrl(String key, String extension) {
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime();
         expTimeMillis += 1000 * 60 * 10; // 10분간 유효
         expiration.setTime(expTimeMillis);
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, s3Key)
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, key + "." + extension)
                 .withMethod(HttpMethod.PUT)  // PUT 방식
                 .withExpiration(expiration);
 
         URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
         return url.toString();
+    }
+
+    public String addBucketPrefix(String key){
+        return url + "/" + key;
     }
 }
