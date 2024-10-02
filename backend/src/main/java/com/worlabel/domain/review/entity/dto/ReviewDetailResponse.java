@@ -35,10 +35,10 @@ public class ReviewDetailResponse {
     private List<ImageResponse> images;
 
     @Schema(description = "생성 시간", example = "")
-    private LocalDateTime creatAt;
+    private LocalDateTime createdAt;
 
     @Schema(description = "수정 시간", example = "")
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
     @Schema(description = "작성자 정보", example = "")
     private MemberDetailResponse author;
@@ -60,6 +60,5 @@ public class ReviewDetailResponse {
                 MemberDetailResponse.of(writer),
                 Optional.ofNullable(reviewer).map(MemberDetailResponse::of).orElse(null)
         );
-
     }
 }
