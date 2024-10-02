@@ -20,11 +20,13 @@ import NotFound from '@/pages/NotFound';
 import ReviewRequest from '@/pages/ReviewRequest';
 import ModelIndex from '@/pages/ModelIndex';
 import ModelDetail from '@/pages/ModelDetail';
+import ReviewLayout from '@/components/ReviewLayout';
 
 export const webPath = {
   home: () => '/',
   browse: () => '/browse',
   workspace: () => '/workspace',
+  review: () => '/review',
   admin: () => `/admin`,
   oauthCallback: () => '/redirect/oauth2',
 };
@@ -81,6 +83,32 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: `${webPath.review()}/:workspaceId`,
+    element: (
+      <Suspense fallback={<div></div>}>
+        <ReviewLayout />
+      </Suspense>
+    ),
+    children: [
+      {
+        index: true,
+        element: <WorkspaceReviewList />,
+      },
+      {
+        path: 'request',
+        element: <ReviewRequest />,
+      },
+      {
+        path: ':projectId',
+        element: <ProjectReviewList />,
+      },
+      {
+        path: ':projectId/:reviewId',
+        element: <ReviewDetail />,
+      },
+    ],
+  },
+  {
     path: `${webPath.admin()}/:workspaceId`,
     element: (
       <Suspense fallback={<div></div>}>
@@ -91,27 +119,6 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <AdminIndex />,
-      },
-      {
-        path: 'reviews',
-        children: [
-          {
-            index: true,
-            element: <WorkspaceReviewList />,
-          },
-          {
-            path: 'request',
-            element: <ReviewRequest />,
-          },
-          {
-            path: ':projectId',
-            element: <ProjectReviewList />,
-          },
-          {
-            path: ':projectId/:reviewId',
-            element: <ReviewDetail />,
-          },
-        ],
       },
       {
         path: 'members',

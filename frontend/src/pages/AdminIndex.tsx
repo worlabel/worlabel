@@ -7,7 +7,7 @@ export default function AdminIndex() {
 
   useEffect(() => {
     if (workspaceId) {
-      navigate(`/admin/${workspaceId}/reviews`);
+      navigate(`/admin/${workspaceId}/members`);
     }
   }, [navigate, workspaceId]);
 

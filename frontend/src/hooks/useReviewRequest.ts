@@ -39,7 +39,7 @@ export default function useReviewRequest() {
       },
       {
         onSuccess: () => {
-          navigate(`/admin/${workspaceId}/reviews`);
+          navigate(`/review/${workspaceId}`);
         },
       }
     );

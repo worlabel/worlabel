@@ -153,7 +153,7 @@ export default function ReviewDetail(): JSX.Element {
       </div>
 
       <div className="mt-6 flex justify-end gap-2">
-        <Link to={`/admin/${workspaceId}/reviews`}>
+        <Link to={`/review/${workspaceId}`}>
           <Button variant="black">목록으로 돌아가기</Button>
         </Link>
         {isAdminOrManager && reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (

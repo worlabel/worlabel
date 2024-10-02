@@ -42,7 +42,7 @@ export default function ReviewItem({
 
   return (
     <Link
-      to={`/admin/${workspaceId}/reviews/${projectId}/${reviewId}`}
+      to={`/review/${workspaceId}/${projectId}/${reviewId}`}
       className="block hover:bg-gray-100"
     >
       <div className="flex h-[100px] w-full items-center justify-between border-b-[0.67px] border-[#ececef] bg-[#fbfafd] p-4">

@@ -63,12 +63,13 @@ export default function ProjectReviewList() {
         <header className="sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b bg-white px-4">
           <h1 className="text-xl font-semibold">프로젝트 리뷰</h1>
           <Link
-            to={`/admin/${workspaceId}/reviews/request`}
+            to={`/review/${workspaceId}/request`}
             className="ml-auto"
           >
             <Button variant="blue">리뷰 요청</Button>
           </Link>
         </header>
+
         <ReviewList
           key={`${sortValue}-${activeTab}`}
           reviews={projectReviews}

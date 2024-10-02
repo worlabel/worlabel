@@ -2,7 +2,6 @@ import React from 'react';
 import MemberAddForm, { MemberAddFormValues } from './MemberAddForm';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import useAddWorkspaceMemberQuery from '@/queries/workspaces/useAddWorkspaceMemberQuery';
 
 interface WorkspaceMemberAddModalProps {
@@ -42,12 +41,11 @@ export default function WorkspaceMemberAddModal({
           className={`${buttonClass}`}
           onClick={handleOpen}
         >
-          <Plus size={16} />
-          <span>워크스페이스 멤버 초대하기</span>
+          <span>워크스페이스에 새 멤버 초대</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader title="새 워크스페이스 멤버 초대" />
+        <DialogHeader title="워크스페이스에 새 멤버 초대" />
         <MemberAddForm onSubmit={handleSubmit} />
       </DialogContent>
     </Dialog>
