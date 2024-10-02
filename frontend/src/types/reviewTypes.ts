@@ -17,8 +17,8 @@ export interface ReviewResponse {
   content: string;
   status: ReviewStatus;
   author: MemberResponse;
-  createAt: string;
-  updateAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ReviewStatusRequest {
