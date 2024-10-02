@@ -64,7 +64,7 @@ export default function ProjectFileItem({
           size={12}
           className="shrink-0 stroke-blue-400"
         />
-      ) : item.status === 'REVIEW_REJECTED' ? (
+      ) : item.status === 'REVIEW_REJECT' ? (
         <CircleSlash
           size={12}
           className="shrink-0 stroke-red-400"

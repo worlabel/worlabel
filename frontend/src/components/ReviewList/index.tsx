@@ -1,11 +1,11 @@
 import ReviewItem from './ReviewItem';
 import ReviewSearchInput from './ReviewSearchInput';
-import { ReviewResponse } from '@/types';
+import { ReviewResponse, ReviewStatus } from '@/types';
 
 interface ReviewListProps {
   reviews: ReviewResponse[];
-  activeTab: 'REQUESTED' | 'APPROVED' | 'REJECTED' | 'ALL';
-  setActiveTab: React.Dispatch<React.SetStateAction<'REQUESTED' | 'APPROVED' | 'REJECTED' | 'ALL'>>;
+  activeTab: ReviewStatus | 'ALL';
+  setActiveTab: React.Dispatch<React.SetStateAction<ReviewStatus | 'ALL'>>;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   sortValue: string;
   setSortValue: React.Dispatch<React.SetStateAction<string>>;

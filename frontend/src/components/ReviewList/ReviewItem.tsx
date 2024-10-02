@@ -4,13 +4,14 @@ import useProjectQuery from '@/queries/projects/useProjectQuery';
 import useAuthStore from '@/stores/useAuthStore';
 import { cn } from '@/lib/utils';
 import formatDateTime from '@/utils/formatDateTime';
+import { ReviewStatus } from '@/types';
 
 interface ReviewItemProps {
   title: string;
   createdTime: string;
   creatorName: string;
   projectId: number;
-  status: 'REQUESTED' | 'APPROVED' | 'REJECTED';
+  status: ReviewStatus;
   type?: { text: 'classification' | 'detection' | 'segmentation'; color: string };
   workspaceId: number;
   reviewId: number;

@@ -1,11 +1,11 @@
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { getReviewByStatus } from '@/api/reviewApi';
-import { ReviewResponse } from '@/types';
+import { ReviewResponse, ReviewStatus } from '@/types';
 
 export default function useReviewByStatusQuery(
   projectId: number,
   memberId: number,
-  reviewStatus: 'REQUESTED' | 'APPROVED' | 'REJECTED' | undefined,
+  reviewStatus: ReviewStatus | undefined,
   sortDirection: number
 ) {
   return useSuspenseInfiniteQuery<ReviewResponse[]>({
