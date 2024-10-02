@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -318,7 +319,38 @@ public class ImageService {
         }
     }
 
+    @Transactional
+    @CheckPrivilege(PrivilegeType.EDITOR)
+    public List<ImagePresignedUrlResponse> uploadFolderByPresignedImage(final Integer memberId,
+                                                                        final List<ImageMetaRequest> imageMetaList,
+                                                                        final Integer projectId,
+                                                                        final Integer folderId) {
+        Folder folder = getOrCreateFolder(folderId, projectId);
+        List<ImagePresignedUrlResponse> presignedUrls = new ArrayList<>();
+
+        for (ImageMetaRequest meta : imageMetaList) {
+            // UUID 생성 및 이미지 Key 지정
+            String uuid = UUID.randomUUID().toString();
+            String fileName = meta.getFileName();
+            String extension = getExtension(fileName);
+            String s3Key = uuid + "." + extension;
+
+            // Presigned URL 생성
+            String presignedUrl = s3UploadService.generatePresignedUrl(s3Key);
+
+            // DB에 이미지 메타데이터 저장
+            Image image = Image.of(fileName, s3Key, extension, folder);
+            imageRepository.save(image);
+
+            // Presigned URL과 함께 응답 데이터 생성
+            ImagePresignedUrlResponse response = ImagePresignedUrlResponse.of(meta.getId(), presignedUrl);
+            presignedUrls.add(response);
+        }
+
+        return presignedUrls;
+    }
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
+
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));

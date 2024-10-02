@@ -61,8 +61,7 @@ public class ImageController {
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) {
         log.debug("requestImageList {}", imageMetaList);
-        // TODO: 변경
-        return imageMetaList.stream().map(o -> ImagePresignedUrlResponse.of(o.getId(), o.getFileName())).toList();
+        return imageService.uploadFolderByPresignedImage(memberId, imageMetaList, projectId, folderId);
     }
 
     @GetMapping("/folders/{folder_id}/images/{image_id}")

@@ -34,10 +34,10 @@ public class ReviewResponse {
     private MemberDetailResponse author;
 
     @Schema(description = "리뷰 작성일", example = "")
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @Schema(description = "리뷰 수정일", example = "")
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 
     public static ReviewResponse from(final Review review) {
         return new ReviewResponse(
