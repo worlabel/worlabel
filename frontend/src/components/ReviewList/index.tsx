@@ -60,6 +60,7 @@ export default function ReviewList({
               reviewId={item.reviewId}
               title={item.title}
               createdTime={item.createdAt}
+              updatedTime={item.updatedAt}
               creatorName={item.author.nickname}
               projectId={item.projectId}
               status={item.status}
