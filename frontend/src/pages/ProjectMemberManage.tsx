@@ -102,7 +102,7 @@ export default function ProjectMemberManage() {
             <div className="flex flex-col gap-2">
               {sortedMembers.map((member) => (
                 <div
-                  key={`${member.memberId}-${member.nickname}`}
+                  key={`${member.memberId}-${member.privilegeType}`}
                   className="flex items-center gap-4 rounded-lg border p-4"
                 >
                   <img

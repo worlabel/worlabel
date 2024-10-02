@@ -5,6 +5,7 @@ import useReviewDetailQuery from '@/queries/reviews/useReviewDetailQuery';
 import useApproveReviewQuery from '@/queries/reviews/useApproveReviewQuery';
 import useRejectReviewQuery from '@/queries/reviews/useRejectReviewQuery';
 import useAuthStore from '@/stores/useAuthStore';
+import useIsAdminOrManager from '@/hooks/useIsAdminOrManager';
 import { Button } from '@/components/ui/button';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -33,6 +34,8 @@ export default function ReviewDetail(): JSX.Element {
   });
 
   const [activeTab, setActiveTab] = useState<'content' | 'images'>('content');
+
+  const isAdminOrManager = useIsAdminOrManager(Number(projectId));
 
   const handleApprove = () => {
     approveReviewMutation.mutate(undefined, {
@@ -134,7 +137,7 @@ export default function ReviewDetail(): JSX.Element {
         <Link to={`/admin/${workspaceId}/reviews`}>
           <Button variant="black">목록으로 돌아가기</Button>
         </Link>
-        {reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (
+        {isAdminOrManager && reviewDetail.reviewStatus !== 'APPROVED' && reviewDetail.reviewStatus !== 'REJECTED' && (
           <>
             <Button
               variant="red"
