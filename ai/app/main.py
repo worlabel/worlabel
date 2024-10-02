@@ -7,6 +7,7 @@ from api.yolo.segmentation import router as yolo_segmentation_router
 from api.yolo.classfication import router as yolo_classification_router
 from api.yolo.model import router as yolo_model_router
 from utils.slackMessage import send_slack_message
+import time, torch, gc
 
 app = FastAPI()
 
@@ -16,6 +17,24 @@ app.include_router(yolo_segmentation_router, prefix="/api/segmentation", tags=["
 app.include_router(yolo_classification_router, prefix="/api/classification", tags=["Classification"])
 app.include_router(yolo_model_router, prefix="/api/model", tags=["Model"])
 
+
+
+@app.middleware("http")
+async def resource_cleaner_middleware(request: Request, call_next):
+    start_time = time.time()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        raise exc
+    finally:
+        process_time = time.time() - start_time
+        send_slack_message(f"처리 시간: {process_time}초")
+        for obj in gc.get_objects():
+            if torch.is_tensor(obj):
+                del obj
+        gc.collect()
+        torch.cuda.empty_cache()
+    return response
 
 # 예외 처리기
 @app.exception_handler(HTTPException)

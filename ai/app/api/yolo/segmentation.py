@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from fastapi.concurrency import run_in_threadpool
 from api.yolo.detection import get_classes, run_predictions, get_random_color, split_data, download_data
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest
@@ -28,7 +27,7 @@ async def segmentation_predict(request: PredictRequest):
     classes = get_classes(request.label_map, model.names)
 
     # 추론
-    results = await run_predictions(model, url_list, request, classes)
+    results = run_predictions(model, url_list, request, classes)
 
     # 추론 결과 변환
     response = [process_prediction_result(result, image, request.label_map) for result, image in zip(results,request.image_list)]
@@ -102,7 +101,7 @@ async def segmentation_train(request: TrainRequest):
     download_data(train_data, val_data, dataset_root_path, label_converter)
 
     # 학습
-    results = await run_train(request, model,dataset_root_path)
+    results = run_train(request, model,dataset_root_path)
 
     # best 모델 저장
     model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
@@ -122,7 +121,7 @@ async def segmentation_train(request: TrainRequest):
             
     return response
     
-async def run_train(request, model, dataset_root_path):
+def run_train(request, model, dataset_root_path):
     try:
         # 데이터 전송 콜백함수
         def send_data(trainer):
@@ -151,23 +150,26 @@ async def run_train(request, model, dataset_root_path):
                 # 데이터 전송
                 send_data_call_api(request.project_id, request.m_id, data)
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"send_data exception: {e}")
+                print(f"Exception in send_data(): {e}")
 
         # 콜백 등록
         model.add_callback("on_train_epoch_start", send_data)
 
+        try:
+            # 비동기 함수로 학습 실행
+            results = model.train(
+                data=join_path(dataset_root_path, "dataset.yaml"),
+                name=join_path(dataset_root_path, "result"),
+                epochs=request.epochs,
+                batch=request.batch,
+                lr0=request.lr0,
+                lrf=request.lrf,
+                optimizer=request.optimizer
+            )
+        finally:
+            # 콜백 해제 및 자원 해제
+            model.reset_callbacks()
 
-        # 학습 실행
-        results = await run_in_threadpool(model.train,
-            data=join_path(dataset_root_path, "dataset.yaml"),
-            name=join_path(dataset_root_path, "result"),
-            epochs=request.epochs,
-            batch=request.batch,
-            lr0=request.lr0,
-            lrf=request.lrf,
-            optimizer=request.optimizer
-        )
-        
         # 마지막 에포크 전송
         model.trainer.epoch += 1
         send_data(model.trainer)
