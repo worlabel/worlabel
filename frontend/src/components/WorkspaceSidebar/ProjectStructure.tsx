@@ -3,7 +3,6 @@ import { TreeNode } from 'react-treebeard';
 import useProjectStore from '@/stores/useProjectStore';
 import useCanvasStore from '@/stores/useCanvasStore';
 import useTreeData from '@/hooks/useTreeData';
-import useFolderQuery from '@/queries/folders/useFolderQuery';
 import useProjectCategoriesQuery from '@/queries/category/useProjectCategoriesQuery';
 import useMoveImageQuery from '@/queries/images/useMoveImageQuery';
 import { Project, ImageResponse } from '@/types';
@@ -13,9 +12,9 @@ import { Folder, Image as ImageIcon, Minus, Loader, ArrowDownToLine, Send, Circl
 import { Spinner } from '../ui/spinner';
 import { ImageStatus } from '@/types';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
-
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import useFolderQuery from '@/queries/folders/useFolderQuery';
 
 interface FlatNode extends TreeNode {
   depth: number;
@@ -29,11 +28,12 @@ const ItemTypes = {
 };
 
 export default function ProjectStructure({ project }: { project: Project }) {
-  const { setProject, setCategories } = useProjectStore();
+  const { setProject, setCategories, folderId, setFolderId } = useProjectStore();
   const { image: selectedImage, setImage } = useCanvasStore();
-  const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString());
+  const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString(), folderId || 0);
   const { data: categories } = useProjectCategoriesQuery(project.id);
-  const { data: rootFolder, isLoading, refetch } = useFolderQuery(project.id.toString(), 0);
+  const { isLoading, refetch } = useFolderQuery(project.id.toString(), 0);
+
   const moveImageMutation = useMoveImageQuery();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,32 +48,10 @@ export default function ProjectStructure({ project }: { project: Project }) {
   }, [project, setProject]);
 
   useEffect(() => {
-    if (rootFolder) {
-      const childFolders: TreeNode[] =
-        rootFolder.children?.map((child) => ({
-          id: child.id.toString(),
-          name: child.title,
-          children: [],
-        })) || [];
-
-      const images: TreeNode[] =
-        rootFolder.images?.map((image: ImageResponse) => ({
-          id: image.id.toString(),
-          name: image.imageTitle,
-          imageData: image,
-          children: [],
-        })) || [];
-
-      const rootNode: TreeNode = {
-        id: rootFolder.id.toString(),
-        name: rootFolder.title,
-        children: [...childFolders, ...images],
-        toggled: true,
-      };
-
-      setTreeData(rootNode);
+    if (treeData) {
+      setFolderId(Number(treeData.id));
     }
-  }, [rootFolder, setTreeData]);
+  }, [treeData, setFolderId]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -108,10 +86,13 @@ export default function ProjectStructure({ project }: { project: Project }) {
   );
 
   const handleImageClick = useCallback(
-    (image: ImageResponse) => {
+    (image: ImageResponse, parent?: FlatNode) => {
       setImage(image);
+      if (parent) {
+        setFolderId(Number(parent.id));
+      }
     },
-    [setImage]
+    [setImage, setFolderId]
   );
 
   const renderStatusIcon = (status: ImageStatus) => {
@@ -278,7 +259,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
         }}
         onClick={() => {
           if (node.imageData) {
-            handleImageClick(node.imageData as ImageResponse);
+            handleImageClick(node.imageData as ImageResponse, node.parent);
           } else {
             onToggle(node, !node.toggled);
           }
