@@ -111,8 +111,8 @@ function ModelEvaluation({ projectId, selectedModel }: ModelEvaluationProps) {
             data={[
               { name: 'precision', value: resultData[0]?.precision, fill: 'var(--color-precision)' },
               { name: 'recall', value: resultData[0]?.recall, fill: 'var(--color-recall)' },
-              { name: 'mAP50', value: resultData[0]?.map50, fill: 'var(--color-map50)' },
-              { name: 'mAP50_95', value: resultData[0]?.map5095, fill: 'var(--color-map50-95)' },
+              { name: 'map50', value: resultData[0]?.map50, fill: 'var(--color-map50)' },
+              { name: 'map5095', value: resultData[0]?.map5095, fill: 'var(--color-map5095)' },
               { name: 'fitness', value: resultData[0]?.fitness, fill: 'var(--color-fitness)' },
             ]}
             className="h-full"

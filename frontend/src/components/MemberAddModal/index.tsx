@@ -38,7 +38,7 @@ export default function MemberAddModal({ projectId, buttonClass = '' }: MemberAd
       <DialogTrigger asChild>
         <Button
           variant="blue"
-          className={`${buttonClass}`}
+          className={buttonClass}
           onClick={handleOpen}
         >
           <span>프로젝트에 새 멤버 초대</span>

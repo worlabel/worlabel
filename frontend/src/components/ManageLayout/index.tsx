@@ -22,27 +22,29 @@ export default function ManageLayout({ tabTitle }: { tabTitle: string }) {
 
       <div className="flex min-h-screen flex-col justify-between">
         <div className="mt-16 flex flex-1">
-          <div className="flex w-[280px] flex-col border-r border-gray-200 bg-gray-100 p-2">
-            <div className="flex items-center justify-center gap-5 p-2">
+          <div className="flex w-[280px] flex-col gap-1 border-r border-gray-200 bg-gray-100 p-2">
+            <div className="flex items-center justify-center gap-5">
               <Link
                 to={`/${tabTitle}/${workspaceId}`}
-                className="subheading w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                className="subheading w-full overflow-hidden text-ellipsis whitespace-nowrap p-2"
               >
                 {workspaceTitle}
               </Link>
             </div>
-            {projects.map((project: ProjectResponse) => (
-              <Link
-                key={project.id}
-                to={`/${tabTitle}/${workspaceId}/${project.id}`}
-                className={cn(
-                  'cursor-pointer rounded-lg p-3 hover:bg-gray-200',
-                  projectId === String(project.id) ? 'body-strong bg-gray-300' : 'body'
-                )}
-              >
-                {project.title}
-              </Link>
-            ))}
+            <div className="flex flex-col">
+              {projects.map((project: ProjectResponse) => (
+                <Link
+                  key={project.id}
+                  to={`/${tabTitle}/${workspaceId}/${project.id}`}
+                  className={cn(
+                    'cursor-pointer rounded-lg p-3 hover:bg-gray-200',
+                    projectId === String(project.id) ? 'body-strong bg-gray-300' : 'body'
+                  )}
+                >
+                  {project.title}
+                </Link>
+              ))}
+            </div>
           </div>
 
           <div className="flex w-[calc(100%-280px)] flex-col gap-24">

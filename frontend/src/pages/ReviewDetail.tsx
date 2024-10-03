@@ -68,7 +68,7 @@ export default function ReviewDetail(): JSX.Element {
         <div className="mb-1 flex gap-1">
           <div
             className={cn(
-              'caption mr-1 flex items-center gap-1 rounded-full px-3 py-0.5',
+              'caption mr-1 flex items-center gap-1 rounded-md px-2 py-0.5',
               reviewDetail.reviewStatus === 'APPROVED'
                 ? 'bg-green-100 text-green-600'
                 : reviewDetail.reviewStatus === 'REJECTED'
@@ -88,25 +88,31 @@ export default function ReviewDetail(): JSX.Element {
           {reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED' ? (
             <>
               <p className="body-small text-gray-500">by</p>
-              <p className="body-small-strong text-gray-500">
-                {reviewDetail.reviewer.nickname} ({reviewDetail.reviewer.email})
-              </p>
+              <p className="body-small-strong text-gray-500">{reviewDetail.reviewer.nickname}</p>
+              <p className="body-small text-gray-500">({reviewDetail.reviewer.email})</p>
+              <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.updatedAt)}</p>
+              <p className="body-small text-gray-500">({formatDateTime(reviewDetail.updatedAt)})</p>
             </>
           ) : (
-            <p className="body-small text-gray-500">updated</p>
+            <>
+              <p className="body-small text-gray-500">by</p>
+              <p className="body-small-strong text-gray-500">{reviewDetail.author.nickname}</p>
+              <p className="body-small text-gray-500">({reviewDetail.author.email})</p>
+              <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.createdAt)}</p>
+              <p className="body-small text-gray-500">({formatDateTime(reviewDetail.createdAt)})</p>
+            </>
           )}
-
-          <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.updatedAt)}</p>
-          <p className="body-small text-gray-500">({formatDateTime(reviewDetail.updatedAt)})</p>
         </div>
-        <div className="flex gap-1">
-          <p className="body-small-strong text-gray-500">
-            {reviewDetail.author.nickname} ({reviewDetail.author.email})
-          </p>
-          <p className="body-small text-gray-500">requested a review</p>
-          <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.createdAt)}</p>
-          <p className="body-small text-gray-500">({formatDateTime(reviewDetail.createdAt)})</p>
-        </div>
+        {reviewDetail.reviewStatus === 'APPROVED' || reviewDetail.reviewStatus === 'REJECTED' ? (
+          <div className="flex gap-1">
+            <p className="body-small-strong text-gray-500">{reviewDetail.author.nickname}</p>
+            <p className="body-small text-gray-500">({reviewDetail.author.email}) requested a review</p>
+            <p className="body-small-strong text-gray-500">{timeAgo(reviewDetail.createdAt)}</p>
+            <p className="body-small text-gray-500">({formatDateTime(reviewDetail.createdAt)})</p>
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
 
       <div className="relative w-full">

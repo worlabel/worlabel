@@ -60,8 +60,8 @@ export default function WorkspaceReviewList() {
   return (
     <Suspense fallback={<div></div>}>
       <div>
-        <header className="sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b bg-white px-4">
-          <h1 className="text-xl font-semibold">워크스페이스 리뷰</h1>
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-1 border-b border-gray-200 bg-white px-4">
+          <h1 className="heading">워크스페이스 리뷰</h1>
           <Link
             to={`/review/${workspaceId}/request`}
             className="ml-auto"

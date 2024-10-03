@@ -24,11 +24,11 @@ const chartConfig = {
     label: 'Recall',
     color: '#1E90FF',
   },
-  mAP50: {
+  map50: {
     label: 'mAP50',
-    color: '#32CD3',
+    color: '#32CD30',
   },
-  mAP50_95: {
+  map5095: {
     label: 'mAP50-95',
     color: '#BA55D3',
   },
@@ -62,21 +62,26 @@ export default function ModelBarChart({ data, className }: ModelBarChartProps) {
             <YAxis />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  className="bg-white"
+                />
+              }
             />
             <Bar
               dataKey="value"
-              strokeWidth={2}
+              strokeWidth={0}
               radius={8}
               activeIndex={2}
               activeBar={({ ...props }) => {
                 return (
                   <Rectangle
                     {...props}
-                    fillOpacity={0.8}
+                    fillOpacity={1}
                     stroke={props.payload.fill}
-                    strokeDasharray={4}
-                    strokeDashoffset={4}
+                    strokeDasharray={0}
+                    strokeDashoffset={0}
                   />
                 );
               }}

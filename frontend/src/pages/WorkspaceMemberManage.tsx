@@ -11,10 +11,10 @@ export default function WorkspaceMemberManage() {
   const { data: members = [] } = useWorkspaceMembersQuery(Number(workspaceId));
 
   return (
-    <div className="grid h-screen w-full">
+    <div className="grid w-full">
       <div className="flex flex-col">
-        <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-4 border-b px-4">
-          <h1 className="flex-1 text-xl font-semibold">워크스페이스 멤버 관리</h1>
+        <header className="bg-background flex h-16 items-center gap-4 px-4">
+          <h1 className="heading flex-1">워크스페이스 멤버 관리</h1>
 
           <WorkspaceMemberAddModal
             workspaceId={Number(workspaceId)}
@@ -22,7 +22,7 @@ export default function WorkspaceMemberManage() {
           />
         </header>
 
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto px-4 pb-4">
           {members.length === 0 ? (
             <div className="py-4 text-center">워크스페이스에 멤버가 없습니다.</div>
           ) : (
