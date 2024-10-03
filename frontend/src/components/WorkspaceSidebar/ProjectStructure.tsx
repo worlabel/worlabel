@@ -30,7 +30,7 @@ const ItemTypes = {
 export default function ProjectStructure({ project }: { project: Project }) {
   const { setProject, setCategories, folderId, setFolderId } = useProjectStore();
   const { image: selectedImage, setImage } = useCanvasStore();
-  const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString(), folderId || 0);
+  const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString());
   const { data: categories } = useProjectCategoriesQuery(project.id);
   const { isLoading, refetch } = useFolderQuery(project.id.toString(), 0);
 
@@ -49,9 +49,9 @@ export default function ProjectStructure({ project }: { project: Project }) {
 
   useEffect(() => {
     if (treeData) {
-      setFolderId(Number(treeData.id));
+      setFolderId(folderId);
     }
-  }, [treeData, setFolderId]);
+  }, [treeData, setFolderId, folderId]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -89,7 +89,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
     (image: ImageResponse, parent?: FlatNode) => {
       setImage(image);
       if (parent) {
-        setFolderId(Number(parent.id));
+        setFolderId(Number(parent.id)); // 클릭된 이미지의 상위 폴더 ID 설정
       }
     },
     [setImage, setFolderId]

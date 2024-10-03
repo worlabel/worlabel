@@ -1,10 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { TreeNode } from 'react-treebeard';
-import { getFolder } from '@/api/folderApi';
 import { ImageResponse, ChildFolder } from '@/types';
 import { useQuery } from '@tanstack/react-query';
+import { getFolder } from '@/api/folderApi';
 
-export function useFolder(projectId: string, folderId: number, enabled: boolean) {
+export function useFolder(projectId: string, folderId: number) {
+  return useQuery({
+    queryKey: ['folder', projectId, folderId],
+    queryFn: () => getFolder(projectId, folderId),
+    enabled: folderId === 0,
+  });
+}
+
+export function useChildFolder(projectId: string, folderId: number, enabled: boolean) {
   return useQuery({
     queryKey: ['folder', projectId, folderId],
     queryFn: () => getFolder(projectId, folderId),
@@ -12,22 +20,29 @@ export function useFolder(projectId: string, folderId: number, enabled: boolean)
   });
 }
 
-export default function useTreeData(projectId: string, folderId: number) {
+export default function useTreeData(projectId: string) {
   const [treeData, setTreeData] = useState<TreeNode | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
 
-  const { data: folder, isLoading } = useFolder(projectId, folderId, true);
+  const { data: rootFolder, isLoading: isRootLoading } = useFolder(projectId, 0);
+
+  const { data: childFolder, isFetching: isChildLoading } = useChildFolder(
+    projectId,
+    currentFolderId || 0,
+    currentFolderId !== null
+  );
 
   useEffect(() => {
-    if (folder) {
+    if (rootFolder) {
       const childFolders: TreeNode[] =
-        folder.children?.map((child: ChildFolder) => ({
+        rootFolder.children?.map((child: ChildFolder) => ({
           id: child.id.toString(),
           name: child.title,
           children: [],
         })) || [];
 
       const images: TreeNode[] =
-        folder.images?.map((image: ImageResponse) => ({
+        rootFolder.images?.map((image: ImageResponse) => ({
           id: image.id.toString(),
           name: image.imageTitle,
           imageData: image,
@@ -35,70 +50,66 @@ export default function useTreeData(projectId: string, folderId: number) {
         })) || [];
 
       const rootNode: TreeNode = {
-        id: folder.id.toString(),
-        name: folder.title,
+        id: rootFolder.id.toString(),
+        name: rootFolder.title,
         children: [...childFolders, ...images],
         toggled: true,
       };
 
       setTreeData(rootNode);
     }
-  }, [folder]);
+  }, [rootFolder]);
 
-  const fetchNodeData = useCallback(
-    async (node: TreeNode) => {
-      node.loading = true;
+  useEffect(() => {
+    if (childFolder && currentFolderId !== null) {
+      const childFolders: TreeNode[] =
+        childFolder.children?.map((child: ChildFolder) => ({
+          id: child.id.toString(),
+          name: child.title,
+          children: [],
+        })) || [];
 
-      try {
-        const folder = await getFolder(projectId, Number(node.id));
-        const childFolders: TreeNode[] =
-          folder.children?.map((child: ChildFolder) => ({
-            id: child.id.toString(),
-            name: child.title,
-            children: [],
-          })) || [];
+      const images: TreeNode[] =
+        childFolder.images?.map((image: ImageResponse) => ({
+          id: image.id.toString(),
+          name: image.imageTitle,
+          imageData: image,
+          children: [],
+        })) || [];
 
-        const images: TreeNode[] =
-          folder.images?.map((image: ImageResponse) => ({
-            id: image.id.toString(),
-            name: image.imageTitle,
-            imageData: image,
-            children: [],
-          })) || [];
+      setTreeData((prevData) => {
+        if (!prevData) return null;
 
-        node.children = [...childFolders, ...images];
-        node.loading = false;
-        node.toggled = true;
+        const updateNode = (currentNode: TreeNode): TreeNode => {
+          if (currentNode.id === currentFolderId.toString()) {
+            return {
+              ...currentNode,
+              children: [...childFolders, ...images],
+              toggled: true,
+            };
+          }
+          if (currentNode.children) {
+            return {
+              ...currentNode,
+              children: currentNode.children.map(updateNode),
+            };
+          }
+          return currentNode;
+        };
 
-        setTreeData((prevData) => {
-          if (!prevData) return null;
+        return updateNode(prevData);
+      });
+    }
+  }, [childFolder, currentFolderId]);
 
-          const updateNode = (currentNode: TreeNode): TreeNode => {
-            if (currentNode.id === node.id) {
-              return { ...node };
-            }
-            if (currentNode.children) {
-              return {
-                ...currentNode,
-                children: currentNode.children.map(updateNode),
-              };
-            }
-            return currentNode;
-          };
-
-          return updateNode(prevData);
-        });
-      } catch (error) {
-        node.loading = false;
-      }
-    },
-    [projectId]
-  );
+  const fetchNodeData = useCallback((node: TreeNode) => {
+    setCurrentFolderId(Number(node.id));
+  }, []);
 
   return {
     treeData,
     fetchNodeData,
     setTreeData,
-    isLoading,
+    isLoading: isRootLoading || isChildLoading,
   };
 }
