@@ -3,13 +3,15 @@ import { TreeNode } from 'react-treebeard';
 import useProjectStore from '@/stores/useProjectStore';
 import useCanvasStore from '@/stores/useCanvasStore';
 import useTreeData from '@/hooks/useTreeData';
-import { Project, ImageResponse, ImageStatus } from '@/types';
+import useFolderQuery from '@/queries/folders/useFolderQuery';
+import useProjectCategoriesQuery from '@/queries/category/useProjectCategoriesQuery';
+import useImage from '@/hooks/useImage';
+import { Project, ImageResponse } from '@/types';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 import AutoLabelButton from './AutoLabelButton';
-import useMoveImageQuery from '@/queries/images/useMoveImageQuery';
 import { Folder, Image as ImageIcon, Minus, Loader, ArrowDownToLine, Send, CircleSlash, Check } from 'lucide-react';
 import { Spinner } from '../ui/spinner';
-
+import { ImageStatus } from '@/types';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
@@ -27,19 +29,52 @@ const ItemTypes = {
 };
 
 export default function ProjectStructure({ project }: { project: Project }) {
-  const { setProject } = useProjectStore();
-  const { setImage } = useCanvasStore();
-  const { treeData, fetchNodeData, initializeTree, setTreeData, isLoading } = useTreeData(project.id.toString(), 0);
-  const [cursor, setCursor] = useState<TreeNode | null>(null);
-  const moveImageMutation = useMoveImageQuery();
+  const { setProject, setCategories } = useProjectStore();
+  const { image: selectedImage, setImage } = useCanvasStore();
+  const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString());
+  const { data: categories } = useProjectCategoriesQuery(project.id);
+  const { data: rootFolder, isLoading, refetch } = useFolderQuery(project.id.toString(), 0);
+
+  const { data: updatedImage } = useImage(project.id, rootFolder?.id || 0, selectedImage?.id || 0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState<number>(400);
 
   useEffect(() => {
+    setCategories(categories);
+  }, [categories, setCategories]);
+
+  useEffect(() => {
     setProject(project);
-    initializeTree();
-  }, [project, setProject, initializeTree]);
+  }, [project, setProject]);
+
+  useEffect(() => {
+    if (rootFolder) {
+      const childFolders: TreeNode[] =
+        rootFolder.children?.map((child) => ({
+          id: child.id.toString(),
+          name: child.title,
+          children: [],
+        })) || [];
+
+      const images: TreeNode[] =
+        rootFolder.images?.map((image: ImageResponse) => ({
+          id: image.id.toString(),
+          name: image.imageTitle,
+          imageData: image,
+          children: [],
+        })) || [];
+
+      const rootNode: TreeNode = {
+        id: rootFolder.id.toString(),
+        name: rootFolder.title,
+        children: [...childFolders, ...images],
+        toggled: true,
+      };
+
+      setTreeData(rootNode);
+    }
+  }, [rootFolder, setTreeData]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -47,17 +82,28 @@ export default function ProjectStructure({ project }: { project: Project }) {
     }
   }, [containerRef, treeData, isLoading]);
 
+  useEffect(() => {
+    if (updatedImage?.data) {
+      const updateNodeStatus = (currentNode: TreeNode): TreeNode => {
+        if (currentNode.imageData?.id === updatedImage.data.id) {
+          return { ...currentNode, imageData: { ...currentNode.imageData, status: updatedImage.data.status } };
+        }
+        if (currentNode.children) {
+          return {
+            ...currentNode,
+            children: currentNode.children.map(updateNodeStatus),
+          };
+        }
+        return currentNode;
+      };
+
+      setTreeData((prevData) => prevData && updateNodeStatus(prevData));
+    }
+  }, [updatedImage, setTreeData]);
+
   const onToggle = useCallback(
     async (node: TreeNode, toggled: boolean) => {
-      if (cursor) {
-        cursor.active = false;
-      }
-      node.active = true;
-      setCursor(node);
-
-      if (node.imageData) {
-        setImage(node.imageData as ImageResponse);
-      } else {
+      if (!node.imageData) {
         if (toggled && (!node.children || node.children.length === 0)) {
           await fetchNodeData(node);
         }
@@ -78,56 +124,68 @@ export default function ProjectStructure({ project }: { project: Project }) {
         setTreeData((prevData) => prevData && updateNode(prevData));
       }
     },
-    [cursor, fetchNodeData, setImage, setTreeData]
+    [fetchNodeData, setTreeData]
   );
 
-  const renderStatusIcon = useCallback((status: ImageStatus) => {
-    switch (status) {
-      case 'PENDING':
-        return (
-          <Minus
-            size={12}
-            className="shrink-0 stroke-gray-400"
-          />
-        );
-      case 'IN_PROGRESS':
-        return (
-          <Loader
-            size={12}
-            className="shrink-0 animate-spin stroke-yellow-400"
-          />
-        );
-      case 'SAVE':
-        return (
-          <ArrowDownToLine
-            size={12}
-            className="shrink-0 stroke-gray-400"
-          />
-        );
-      case 'REVIEW_REQUEST':
-        return (
-          <Send
-            size={12}
-            className="shrink-0 stroke-blue-400"
-          />
-        );
-      case 'REVIEW_REJECT':
-        return (
-          <CircleSlash
-            size={12}
-            className="shrink-0 stroke-red-400"
-          />
-        );
-      case 'COMPLETED':
-      default:
-        return (
-          <Check
-            size={12}
-            className="shrink-0 stroke-green-400"
-          />
-        );
-    }
-  }, []);
+  const handleImageClick = useCallback(
+    (image: ImageResponse) => {
+      setImage(image);
+    },
+    [setImage]
+  );
+
+  const renderStatusIcon = (status: ImageStatus) => {
+    const iconProps = { size: 12, className: 'shrink-0' };
+    const iconColor = {
+      PENDING: 'stroke-gray-400',
+      IN_PROGRESS: 'animate-spin stroke-yellow-400',
+      SAVE: 'stroke-gray-400',
+      REVIEW_REQUEST: 'stroke-blue-400',
+      REVIEW_REJECT: 'stroke-red-400',
+      COMPLETED: 'stroke-green-400',
+    };
+
+    const iconMapping = {
+      PENDING: (
+        <Minus
+          {...iconProps}
+          className={`${iconProps.className} ${iconColor.PENDING}`}
+        />
+      ),
+      IN_PROGRESS: (
+        <Loader
+          {...iconProps}
+          className={`${iconProps.className} ${iconColor.IN_PROGRESS}`}
+        />
+      ),
+      SAVE: (
+        <ArrowDownToLine
+          {...iconProps}
+          className={`${iconProps.className} ${iconColor.SAVE}`}
+        />
+      ),
+      REVIEW_REQUEST: (
+        <Send
+          {...iconProps}
+          className={`${iconProps.className} ${iconColor.REVIEW_REQUEST}`}
+        />
+      ),
+      REVIEW_REJECT: (
+        <CircleSlash
+          {...iconProps}
+          className={`${iconProps.className} ${iconColor.REVIEW_REJECT}`}
+        />
+      ),
+      COMPLETED: (
+        <Check
+          {...iconProps}
+          className={`${iconProps.className} ${iconColor.COMPLETED}`}
+        />
+      ),
+    };
+
+    return iconMapping[status] || null;
+  };
 
   const flattenTree = useCallback((nodes: TreeNode[], depth: number = 0, parent?: FlatNode): FlatNode[] => {
     let flatList: FlatNode[] = [];
@@ -183,23 +241,8 @@ export default function ProjectStructure({ project }: { project: Project }) {
       })(treeData!);
 
       setTreeData(updatedTreeData);
-
-      if (dragItem.imageData) {
-        const moveFolderId = Number(hoverItem.parent?.id) || 0;
-        const folderId = Number(dragItem.parent?.id) || 0;
-        const projectId = Number(project.id);
-
-        moveImageMutation.mutate({
-          projectId,
-          folderId,
-          imageId: dragItem.imageData.id,
-          moveRequest: {
-            moveFolderId,
-          },
-        });
-      }
     },
-    [treeData, setTreeData, moveImageMutation, project.id]
+    [treeData, setTreeData]
   );
 
   const Row = ({ index, style, data }: ListChildComponentProps<FlatNode[]>) => {
@@ -240,8 +283,15 @@ export default function ProjectStructure({ project }: { project: Project }) {
           alignItems: 'center',
           paddingLeft: `${node.depth * 20}px`,
           cursor: 'pointer',
+          backgroundColor: node.imageData && selectedImage?.id === node.imageData.id ? '#e5e7eb' : 'transparent',
         }}
-        onClick={() => onToggle(node, !node.toggled)}
+        onClick={() => {
+          if (node.imageData) {
+            handleImageClick(node.imageData as ImageResponse);
+          } else {
+            onToggle(node, !node.toggled);
+          }
+        }}
       >
         <div style={{ marginRight: '5px' }}>
           {!node.imageData ? (
@@ -277,7 +327,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
             <WorkspaceDropdownMenu
               projectId={project.id}
               folderId={0}
-              onRefetch={() => {}}
+              onRefetch={refetch}
             />
           </header>
           {isLoading ? (
