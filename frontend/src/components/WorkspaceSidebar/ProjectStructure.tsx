@@ -216,7 +216,6 @@ export default function ProjectStructure({ project }: { project: Project }) {
           return;
         }
 
-        // 드래그가 끝났을 때 노드 이동 처리
         moveNode(dragItem, hoverItem);
       },
     });
@@ -258,7 +257,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
           )}
         </div>
         <span style={{ color: '#4a4a4a', flexGrow: 1 }}>{node.name}</span>
-        {node.imageData && <div style={{ marginLeft: '10px' }}>{renderStatusIcon(node.imageData.status)}</div>}
+        {node.imageData && <div style={{ marginRight: '20px' }}>{renderStatusIcon(node.imageData.status)}</div>}
       </div>
     );
   };
