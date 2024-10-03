@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { TreeNode } from 'react-treebeard';
 import useProjectStore from '@/stores/useProjectStore';
 import useCanvasStore from '@/stores/useCanvasStore';
 import useTreeData from '@/hooks/useTreeData';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
 import useProjectCategoriesQuery from '@/queries/category/useProjectCategoriesQuery';
-import useImage from '@/hooks/useImage';
+import useMoveImageQuery from '@/queries/images/useMoveImageQuery';
 import { Project, ImageResponse } from '@/types';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 import AutoLabelButton from './AutoLabelButton';
@@ -34,8 +34,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
   const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString());
   const { data: categories } = useProjectCategoriesQuery(project.id);
   const { data: rootFolder, isLoading, refetch } = useFolderQuery(project.id.toString(), 0);
-
-  const { data: updatedImage } = useImage(project.id, rootFolder?.id || 0, selectedImage?.id || 0);
+  const moveImageMutation = useMoveImageQuery();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState<number>(400);
@@ -81,25 +80,6 @@ export default function ProjectStructure({ project }: { project: Project }) {
       setContainerHeight(containerRef.current.clientHeight);
     }
   }, [containerRef, treeData, isLoading]);
-
-  useEffect(() => {
-    if (updatedImage?.data) {
-      const updateNodeStatus = (currentNode: TreeNode): TreeNode => {
-        if (currentNode.imageData?.id === updatedImage.data.id) {
-          return { ...currentNode, imageData: { ...currentNode.imageData, status: updatedImage.data.status } };
-        }
-        if (currentNode.children) {
-          return {
-            ...currentNode,
-            children: currentNode.children.map(updateNodeStatus),
-          };
-        }
-        return currentNode;
-      };
-
-      setTreeData((prevData) => prevData && updateNodeStatus(prevData));
-    }
-  }, [updatedImage, setTreeData]);
 
   const onToggle = useCallback(
     async (node: TreeNode, toggled: boolean) => {
@@ -241,8 +221,19 @@ export default function ProjectStructure({ project }: { project: Project }) {
       })(treeData!);
 
       setTreeData(updatedTreeData);
+
+      if (dragItem.imageData) {
+        moveImageMutation.mutate({
+          projectId: project.id,
+          folderId: Number(dragItem.parent?.id),
+          imageId: dragItem.imageData.id,
+          moveRequest: {
+            moveFolderId: Number(hoverItem.parent?.id),
+          },
+        });
+      }
     },
-    [treeData, setTreeData]
+    [treeData, setTreeData, moveImageMutation, project.id]
   );
 
   const Row = ({ index, style, data }: ListChildComponentProps<FlatNode[]>) => {
