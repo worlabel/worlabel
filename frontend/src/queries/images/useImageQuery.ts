@@ -1,9 +1,9 @@
 import { getImage } from '@/api/imageApi';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
-export default function useImageQuery(imageId: number, memberId: number) {
+export default function useImageQuery(projectId: number, folderId: number, imageId: number) {
   return useSuspenseQuery({
-    queryKey: ['image', imageId, memberId],
-    queryFn: () => getImage(imageId, memberId),
+    queryKey: ['image', projectId, folderId, imageId],
+    queryFn: () => getImage(projectId, folderId, imageId),
   });
 }

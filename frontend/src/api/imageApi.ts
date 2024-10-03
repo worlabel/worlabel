@@ -2,10 +2,8 @@ import api from '@/api/axiosConfig';
 import { ImageMoveRequest, ImageStatusChangeRequest, ImagePresignedUrlResponse } from '@/types';
 import axios from 'axios';
 
-export async function getImage(imageId: number, memberId: number) {
-  return api.get(`/images/${imageId}`, {
-    params: { memberId },
-  });
+export async function getImage(projectId: number, folderId: number, imageId: number) {
+  return api.get(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`);
 }
 
 export async function moveImage(projectId: number, folderId: number, imageId: number, moveRequest: ImageMoveRequest) {
