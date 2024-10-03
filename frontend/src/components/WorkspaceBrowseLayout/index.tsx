@@ -38,28 +38,33 @@ export default function WorkspaceBrowseLayout() {
 
       <div className="flex min-h-screen flex-col justify-between">
         <div className="mt-16 flex flex-1">
-          <div className="flex w-[280px] flex-col border-r border-gray-200 bg-gray-100 p-2">
-            <div className="flex items-center justify-center gap-5 p-2">
-              <h1 className="subheading mr-2.5 w-full overflow-hidden text-ellipsis whitespace-nowrap">
+          <div className="flex w-[280px] flex-col gap-1 border-r border-gray-200 bg-gray-100 p-2">
+            <div className="flex items-center justify-center gap-5">
+              <h1 className="subheading mr-2.5 w-full overflow-hidden text-ellipsis whitespace-nowrap p-2">
                 내 워크스페이스
               </h1>
               <WorkSpaceCreateModal onSubmit={handleCreateWorkspace} />
             </div>
-            {workspaces.length > 0 ? (
-              workspaces.map((workspace: WorkspaceResponse) => (
-                <NavLink
-                  key={workspace.id}
-                  to={`/browse/${workspace.id}`}
-                  className={({ isActive }) =>
-                    cn('cursor-pointer rounded-lg p-3 hover:bg-gray-200', isActive ? 'body-strong bg-gray-300' : 'body')
-                  }
-                >
-                  {workspace.title}
-                </NavLink>
-              ))
-            ) : (
-              <p className="text-gray-500">워크스페이스가 없습니다.</p>
-            )}
+            <div className="flex flex-col">
+              {workspaces.length > 0 ? (
+                workspaces.map((workspace: WorkspaceResponse) => (
+                  <NavLink
+                    key={workspace.id}
+                    to={`/browse/${workspace.id}`}
+                    className={({ isActive }) =>
+                      cn(
+                        'cursor-pointer rounded-lg p-3 hover:bg-gray-200',
+                        isActive ? 'body-strong bg-gray-300' : 'body'
+                      )
+                    }
+                  >
+                    {workspace.title}
+                  </NavLink>
+                ))
+              ) : (
+                <p className="text-gray-500">워크스페이스가 없습니다.</p>
+              )}
+            </div>
           </div>
           <div className="flex w-[calc(100%-280px)] flex-col gap-24">
             <main className="grow">

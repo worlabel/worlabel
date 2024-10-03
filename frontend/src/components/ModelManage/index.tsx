@@ -10,8 +10,8 @@ export default function ModelManage() {
   return (
     <div className="grid h-screen w-full">
       <div className="flex flex-col">
-        <header className="bg-background sticky top-0 z-10 flex h-[57px] items-center gap-1 border-b px-4">
-          <h1 className="text-xl font-semibold">모델 관리</h1>
+        <header className="bg-background flex h-16 items-center gap-1 border-b border-gray-200 px-4">
+          <h1 className="heading">모델 관리</h1>
         </header>
 
         <main className="grid flex-1 gap-4 overflow-auto p-4">
@@ -19,9 +19,20 @@ export default function ModelManage() {
             defaultValue="train"
             className="w-full"
           >
-            <TabsList>
-              <TabsTrigger value="train">모델 학습</TabsTrigger>
-              <TabsTrigger value="results">모델 평가</TabsTrigger>
+            {/* TabsList랑 TabsTrigger 디자인이 shadcn 문서에서 본 것과 많이 다르고 이상함.. 그래서 일단 className을 일일이 지정함.. */}
+            <TabsList className="rounded-none border-transparent bg-transparent shadow-none">
+              <TabsTrigger
+                value="train"
+                className="rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:border-blue-500 data-[state=active]:shadow-none"
+              >
+                모델 학습
+              </TabsTrigger>
+              <TabsTrigger
+                value="results"
+                className="rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:border-blue-500 data-[state=active]:shadow-none"
+              >
+                모델 평가
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="train">

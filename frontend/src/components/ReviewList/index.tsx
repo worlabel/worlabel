@@ -28,12 +28,12 @@ export default function ReviewList({
           {['REQUESTED', 'APPROVED', 'REJECTED', 'ALL'].map((tab) => (
             <button
               key={tab}
-              className={`flex h-12 w-[100px] items-center justify-center px-3 ${
+              className={`mt-[3px] flex h-12 w-[100px] items-center justify-center px-3 ${
                 activeTab === tab ? 'border-b-[3px] border-blue-500' : 'border-b-[3px] border-transparent'
               }`}
               onClick={() => setActiveTab(tab as typeof activeTab)}
             >
-              <span className={`text-sm ${activeTab === tab ? 'font-semibold' : 'font-normal'} text-black`}>
+              <span className={`${activeTab === tab ? 'body-small-strong' : 'body-small'} text-black`}>
                 {tab === 'REQUESTED' ? '요청' : tab === 'APPROVED' ? '승인' : tab === 'REJECTED' ? '거부' : '전체'}
               </span>
             </button>

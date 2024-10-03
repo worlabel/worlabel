@@ -29,7 +29,7 @@ export default function WorkspaceBrowseDetail() {
   };
 
   return (
-    <div className="flex h-full w-full flex-col gap-8 px-6 py-4">
+    <div className="flex h-full w-full flex-col">
       <HeaderSection
         workspaceName={workspaceData?.title ?? `Workspace-${workspaceId}`}
         onCreateProject={handleCreateProject}
@@ -54,15 +54,13 @@ function HeaderSection({
   onCreateProject: (data: ProjectRequest) => void;
 }) {
   return (
-    <div className="flex items-center justify-center">
-      <h1 className="small-title flex grow">{workspaceName}</h1>
+    <div className="flex h-16 items-center justify-center px-4">
+      <h1 className="heading flex grow">{workspaceName}</h1>
       <div className="flex flex-col">
-        <div className="flex gap-3">
-          <ProjectCreateModal
-            buttonClass="flex items-center gap-2 body-small-strong h-10 px-4 py-2"
-            onSubmit={onCreateProject}
-          />
-        </div>
+        <ProjectCreateModal
+          buttonClass="flex items-center gap-2 h-10 px-4 py-2"
+          onSubmit={onCreateProject}
+        />
       </div>
     </div>
   );
@@ -96,7 +94,7 @@ function ProjectList({ projects, workspaceId }: { projects: ProjectResponse[]; w
   }
 
   return (
-    <div className="flex flex-wrap gap-6">
+    <div className="flex flex-wrap gap-6 px-4 pb-4">
       {projects.map((project: ProjectResponse) => (
         <ProjectCard
           key={project.id}
