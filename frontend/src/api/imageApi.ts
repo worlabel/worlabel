@@ -2,16 +2,12 @@ import api from '@/api/axiosConfig';
 import { ImageMoveRequest, ImageStatusChangeRequest, ImagePresignedUrlResponse } from '@/types';
 import axios from 'axios';
 
-export async function getImage(imageId: number, memberId: number) {
-  return api.get(`/images/${imageId}`, {
-    params: { memberId },
-  });
+export async function getImage(projectId: number, folderId: number, imageId: number) {
+  return api.get(`/api/projects/${projectId}/folders/${folderId}/images/${imageId}`);
 }
 
-export async function moveImage(imageId: number, memberId: number, moveRequest: ImageMoveRequest) {
-  return api.put(`/images/${imageId}`, moveRequest, {
-    params: { memberId },
-  });
+export async function moveImage(projectId: number, folderId: number, imageId: number, moveRequest: ImageMoveRequest) {
+  return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, moveRequest);
 }
 
 export async function deleteImage(imageId: number, memberId: number) {
@@ -23,7 +19,7 @@ export async function deleteImage(imageId: number, memberId: number) {
 export async function changeImageStatus(
   imageId: number,
   memberId: number,
-  statusChangeRequest: ImageStatusChangeRequest,
+  statusChangeRequest: ImageStatusChangeRequest
 ) {
   return api
     .put(`/images/${imageId}/status`, statusChangeRequest, {
@@ -37,7 +33,7 @@ export async function uploadImageFile(
   projectId: number,
   folderId: number,
   files: File[],
-  processCallback: (progress: number) => void,
+  processCallback: (progress: number) => void
 ) {
   const formData = new FormData();
   files.forEach((file) => {
@@ -62,7 +58,7 @@ export async function uploadImageFolderFile(
   projectId: number,
   folderId: number,
   files: File[],
-  processCallback: (progress: number) => void,
+  processCallback: (progress: number) => void
 ) {
   const formData = new FormData();
   files.forEach((file) => {
@@ -87,7 +83,7 @@ export async function uploadImageFolder(
   projectId: number,
   folderId: number,
   files: File[],
-  processCallback: (progress: number) => void,
+  processCallback: (progress: number) => void
 ) {
   const formData = new FormData();
   files.forEach((file) => {
@@ -112,7 +108,7 @@ export async function uploadImageZip(
   projectId: number,
   folderId: number,
   file: File,
-  processCallback: (progress: number) => void,
+  processCallback: (progress: number) => void
 ) {
   const formData = new FormData();
   formData.append('folderZip', file);
@@ -135,7 +131,7 @@ export async function uploadImagePresigned(
   projectId: number,
   folderId: number,
   files: File[],
-  processCallback: (index: number) => void,
+  processCallback: (index: number) => void
 ) {
   // 업로드 시작 시간 기록
   const startTime = new Date().getTime();
@@ -152,11 +148,10 @@ export async function uploadImagePresigned(
     imageMetaList,
     {
       params: { memberId },
-    },
+    }
   );
 
-
-// 각 파일을 presigned URL에 맞춰서 업로드 (axios 직접 사용)
+  // 각 파일을 presigned URL에 맞춰서 업로드 (axios 직접 사용)
   for (const presignedUrlInfo of presignedUrlList) {
     const file = files[presignedUrlInfo.id];
 
