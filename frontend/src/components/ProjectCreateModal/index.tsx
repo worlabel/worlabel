@@ -24,7 +24,7 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
         <Button
           variant="blue"
           className={buttonClass}
-          size={'xs'}
+          size="xs"
           onClick={handleOpen}
         >
           <span>새 프로젝트</span>

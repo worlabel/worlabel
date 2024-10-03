@@ -45,7 +45,7 @@ export default function ReviewItem({
       to={`/review/${workspaceId}/${projectId}/${reviewId}`}
       className="block hover:bg-gray-100"
     >
-      <div className="flex h-[100px] w-full items-center justify-between border-b-[0.67px] border-[#ececef] bg-[#fbfafd] p-4">
+      <div className="flex h-[100px] w-full items-center justify-between border-b border-gray-200 bg-white p-4 hover:bg-gray-100">
         <div className="flex flex-col">
           <p className="body-small-strong text-black">{title}</p>
           <p className="caption mt-1 text-gray-500">
@@ -68,7 +68,7 @@ export default function ReviewItem({
         <div className="flex flex-col items-end gap-1">
           <div
             className={cn(
-              'caption flex items-center gap-1 rounded-full px-3 py-0.5',
+              'caption flex items-center gap-1 rounded-md px-2 py-0.5',
               status === 'APPROVED'
                 ? 'bg-green-100 text-green-600'
                 : status === 'REJECTED'
