@@ -31,7 +31,25 @@ export default function useTreeData(projectId: string, initialFolderId: number) 
         node.children = [...childFolders, ...images];
         node.loading = false;
         node.toggled = true;
-        setTreeData((prevData) => ({ ...prevData! }));
+
+        setTreeData((prevData) => {
+          if (!prevData) return null;
+
+          const updateNode = (currentNode: TreeNode): TreeNode => {
+            if (currentNode.id === node.id) {
+              return { ...node };
+            }
+            if (currentNode.children) {
+              return {
+                ...currentNode,
+                children: currentNode.children.map(updateNode),
+              };
+            }
+            return currentNode;
+          };
+
+          return updateNode(prevData);
+        });
       } catch (error) {
         node.loading = false;
         console.error(`Error fetching data for node ${node.id}:`, error);
