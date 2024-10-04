@@ -28,10 +28,8 @@ async def resource_cleaner_middleware(request: Request, call_next):
         raise exc
     finally:
         process_time = time.time() - start_time
-        send_slack_message(f"처리 시간: {process_time}초")
-        for obj in gc.get_objects():
-            if torch.is_tensor(obj):
-                del obj
+        if request.method != "GET":
+            send_slack_message(f"처리 시간: {process_time}초")
         gc.collect()
         torch.cuda.empty_cache()
     return response
