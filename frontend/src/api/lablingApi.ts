@@ -11,5 +11,5 @@ export async function saveImageLabels(
 }
 
 export async function runAutoLabel(projectId: number, modelId = 1) {
-  return api.post(`/projects/${projectId}/auto`, { modelId }).then(({ data }) => data);
+  return api.post(`/projects/${projectId}/auto`, { modelId }, { timeout: 0 }).then(({ data }) => data);
 }

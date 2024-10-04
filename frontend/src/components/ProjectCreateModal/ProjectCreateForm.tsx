@@ -169,9 +169,19 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
             <div className="mb-1 flex w-full flex-col gap-2">
               <div className="body-strong">카테고리</div>
               <Tabs defaultValue="manual">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="manual">직접 입력</TabsTrigger>
-                  <TabsTrigger value="file">파일로 입력</TabsTrigger>
+                <TabsList className="mb-4 rounded-none border-transparent bg-transparent shadow-none">
+                  <TabsTrigger
+                    value="manual"
+                    className="rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:border-blue-500 data-[state=active]:shadow-none"
+                  >
+                    직접 입력
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="file"
+                    className="rounded-none border-b-2 border-transparent bg-transparent shadow-none data-[state=active]:border-blue-500 data-[state=active]:shadow-none"
+                  >
+                    파일로 입력
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="manual">
                   <div className="mt-2 flex gap-2">
@@ -192,7 +202,7 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
                 <TabsContent value="file">
                   <div
                     className={cn(
-                      'mt-2 flex w-full items-center justify-center rounded-lg border-2 border-dashed p-5 text-center transition-colors',
+                      'mt-2 flex h-40 w-full items-center justify-center rounded-lg border-2 border-dashed p-5 text-center transition-colors',
                       isDragging ? 'border-blue-500 bg-blue-100' : 'border-gray-300 bg-gray-100'
                     )}
                     onDragOver={handleDragOver}
@@ -200,9 +210,15 @@ export default function ProjectCreateForm({ onSubmit }: { onSubmit: (data: Proje
                     onDrop={(event) => handleDrop(event, field.onChange)}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <p className="text-gray-500">
-                      파일을 업로드하려면 여기를 클릭하거나 파일을 드래그하여 여기에 놓으세요.
-                    </p>
+                    {isDragging ? (
+                      <p className="text-primary">드래그한 파일을 여기에 놓으세요</p>
+                    ) : (
+                      <p className="text-gray-500">
+                        파일을 업로드하려면 여기를 클릭하거나
+                        <br />
+                        파일을 드래그하여 여기에 놓으세요.
+                      </p>
+                    )}
                     <input
                       type="file"
                       ref={fileInputRef}

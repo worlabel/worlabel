@@ -19,6 +19,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import useSaveImageLabelsQuery from '@/queries/projects/useSaveImageLabelsQuery';
 import { useToast } from '@/hooks/use-toast';
 import CommentLabel from './CommentLabel';
+import rectSort from '@/utils/rectSort';
 
 export default function ImageCanvas() {
   const { project, folderId, categories } = useProjectStore();
@@ -188,11 +189,11 @@ export default function ImageCanvas() {
 
   const endDrawRect = () => {
     if (drawState !== 'rect' || rectPoints.length === 0) return;
+    setRectPoints([]);
     if (rectPoints[0][0] === rectPoints[1][0] && rectPoints[0][1] === rectPoints[1][1]) {
-      setRectPoints([]);
       return;
     }
-    setRectPoints([]);
+    const sortedPoints = rectSort(rectPoints as [[number, number], [number, number]]);
 
     const color = Math.floor(Math.random() * 0xffffff)
       .toString(16)
@@ -203,7 +204,7 @@ export default function ImageCanvas() {
       categoryId: categories[0]!.id,
       type: 'rectangle',
       color: `#${color}`,
-      coordinates: rectPoints,
+      coordinates: sortedPoints,
     });
     setDrawState('pointer');
     setSelectedLabelId(id);
