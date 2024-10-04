@@ -144,7 +144,7 @@ public class ProjectService {
         participantRepository.save(participant);
     }
 
-    @CheckPrivilege(PrivilegeType.ADMIN)
+    @CheckPrivilege(PrivilegeType.MANAGER)
     public void changeProjectMember(final Integer projectId, final ParticipantRequest participantRequest) {
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
