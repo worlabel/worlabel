@@ -89,13 +89,13 @@ export default function ProjectMemberManage() {
 
   return (
     <div className="grid w-full">
-      <div className="flex flex-col">
-        <header className="bg-background flex h-16 items-center gap-4 px-4">
+      <div className="flex flex-col gap-4 p-4">
+        <header className="bg-background flex items-center">
           <h1 className="heading flex-1">프로젝트 멤버 관리</h1>
           {isAdminOrManager && <MemberAddModal projectId={projectId ? Number(projectId) : 0} />}
         </header>
 
-        <main className="grid flex-1 gap-4 overflow-auto px-4 pb-4">
+        <main className="grid flex-1 gap-4 overflow-auto">
           {sortedMembers.length === 0 ? (
             <div className="py-4 text-center">프로젝트에 멤버가 없습니다.</div>
           ) : (

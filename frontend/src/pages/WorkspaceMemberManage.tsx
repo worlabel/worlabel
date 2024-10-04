@@ -12,8 +12,8 @@ export default function WorkspaceMemberManage() {
 
   return (
     <div className="grid w-full">
-      <div className="flex flex-col">
-        <header className="bg-background flex h-16 items-center gap-4 px-4">
+      <div className="flex flex-col gap-4 p-4">
+        <header className="bg-background flex items-center">
           <h1 className="heading flex-1">워크스페이스 멤버 관리</h1>
 
           <WorkspaceMemberAddModal
@@ -22,7 +22,7 @@ export default function WorkspaceMemberManage() {
           />
         </header>
 
-        <main className="flex-1 overflow-auto px-4 pb-4">
+        <main className="flex-1 overflow-auto">
           {members.length === 0 ? (
             <div className="py-4 text-center">워크스페이스에 멤버가 없습니다.</div>
           ) : (

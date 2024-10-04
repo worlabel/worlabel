@@ -19,6 +19,7 @@ export default function WorkspaceNavigation() {
   const workspaces = workspacesResponse?.workspaceResponses || [];
 
   const activeWorkspaceId = workspaceId ?? workspaces[0]?.id;
+  const activeProjectId: number = Number(location.pathname.split('/')[3] || '0');
 
   if (workspaces.length === 0) {
     return <div></div>;
@@ -35,25 +36,35 @@ export default function WorkspaceNavigation() {
       {activeWorkspaceId && (
         <>
           <Link
-            to={`/workspace/${activeWorkspaceId}`}
+            to={
+              activeProjectId === 0
+                ? `/workspace/${activeWorkspaceId}`
+                : `/workspace/${activeWorkspaceId}/${activeProjectId}`
+            }
             className={isWorkspacePage ? 'body-strong' : 'body'}
           >
             labeling
           </Link>
           <Link
-            to={`/review/${activeWorkspaceId}`}
+            to={
+              activeProjectId === 0 ? `/review/${activeWorkspaceId}` : `/review/${activeWorkspaceId}/${activeProjectId}`
+            }
             className={isReviewPage ? 'body-strong' : 'body'}
           >
             review
           </Link>
           <Link
-            to={`/model/${activeWorkspaceId}`}
+            to={
+              activeProjectId === 0 ? `/model/${activeWorkspaceId}` : `/model/${activeWorkspaceId}/${activeProjectId}`
+            }
             className={isModelPage ? 'body-strong' : 'body'}
           >
             model
           </Link>
           <Link
-            to={`/member/${activeWorkspaceId}`}
+            to={
+              activeProjectId === 0 ? `/member/${activeWorkspaceId}` : `/member/${activeWorkspaceId}/${activeProjectId}`
+            }
             className={isMemberPage ? 'body-strong' : 'body'}
           >
             member
