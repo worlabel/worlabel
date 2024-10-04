@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { LabelCategoryResponse, Project } from '@/types';
+import { FolderResponse, LabelCategoryResponse, Project } from '@/types';
 
 interface ProjectState {
   project: Project | null;
@@ -8,6 +8,7 @@ interface ProjectState {
   setFolderId: (folderId: number) => void;
   categories: LabelCategoryResponse[];
   setCategories: (categories: LabelCategoryResponse[]) => void;
+  projectFolder: FolderResponse;
 }
 
 const useProjectStore = create<ProjectState>((set) => ({
@@ -16,6 +17,12 @@ const useProjectStore = create<ProjectState>((set) => ({
   folderId: 0,
   setFolderId: (folderId) => set({ folderId }),
   categories: [],
+  projectFolder: {
+    id: 0,
+    title: '',
+    children: [],
+    images: [],
+  },
   setCategories: (categories) => set({ categories }),
 }));
 
