@@ -109,7 +109,7 @@ def get_random_color():
 @router.post("/train")
 async def detection_train(request: TrainRequest):
 
-    send_slack_message(f"train 요청{request}", status="success")
+    send_slack_message(f"train 요청 projectId : {request.project_id}, 이미지 개수:{len(request.data)}", status="success")
 
     # 데이터셋 루트 경로 얻기 (프로젝트 id 기반)
     
@@ -117,9 +117,9 @@ async def detection_train(request: TrainRequest):
     
     # 모델 로드
     start_time = time.time()
-    print("모델 로드")
+    send_slack_message("모델 로드 중...", status="success")
     model = get_model(request.project_id, request.m_key)
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    send_slack_message(f"모델 로드 완료. 걸린 시간: {time.time() - start_time:.2f} 초", status="success")
 
     # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
     names = list(request.label_map)
@@ -131,27 +131,27 @@ async def detection_train(request: TrainRequest):
     
     # 데이터 전처리: 학습할 디렉토리 & 데이터셋 설정 파일을 생성
     start_time = time.time()
-    print("데이터 전처리 : 학습할 디렉토리 및 데이터셋 설정 파일 생성")
+    send_slack_message("데이터 전처리 시작: 학습 디렉토리 및 설정 파일 생성 중...", status="success")
     process_directories(dataset_root_path, names)
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    send_slack_message(f"데이터 전처리 완료. 걸린 시간: {time.time() - start_time:.2f} 초", status="success")
 
     # 데이터 전처리: 데이터를 학습데이터와 검증데이터로 분류
     start_time = time.time()
-    print("데이터 전처리 : 데이터 분류")
+    send_slack_message("데이터 분류 중...", status="success")
     train_data, val_data = split_data(request.data, request.ratio)
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    send_slack_message(f"데이터 분류 완료. 걸린 시간: {time.time() - start_time:.2f} 초", status="success")
 
     # 데이터 전처리: 데이터 이미지 및 레이블 다운로드
     start_time = time.time()
-    print("데이터 전처리 : 데이터 다운로드")
+    send_slack_message("데이터 다운로드 중...", status="success")
     download_data(train_data, val_data, dataset_root_path, label_converter)
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
-    
-    # 학습
+    send_slack_message(f"데이터 다운로드 완료. 걸린 시간: {time.time() - start_time:.2f} 초", status="success")
+
+    # 학습 시작
     start_time = time.time()
-    print("학습 시작")
-    results = run_train(request, model,dataset_root_path)
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    send_slack_message("학습 시작...", status="success")
+    results = run_train(request, model, dataset_root_path)
+    send_slack_message(f"학습 완료. 걸린 시간: {time.time() - start_time:.2f} 초", status="success")
 
     # 학습 후 GPU 메모리 상태 확인
     if torch.cuda.is_available():
@@ -165,14 +165,13 @@ async def detection_train(request: TrainRequest):
 
     # best 모델 저장
     start_time = time.time()
-    print("모델 저장")
-    model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    send_slack_message("모델 저장 중...", status="success")
+    model_key = save_model(project_id=request.project_id,
+                           path=join_path(dataset_root_path, "result", "weights", "best.pt"))
+    send_slack_message(f"모델 저장 완료. 걸린 시간: {time.time() - start_time:.2f} 초", status="success")
 
-    print("변환")
     result = results.results_dict
-    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
-    
+
     response = TrainResponse(
         modelKey=model_key,
         precision= result["metrics/precision(B)"],
@@ -184,7 +183,6 @@ async def detection_train(request: TrainRequest):
     )
     send_slack_message(f"train 성공{response}", status="success")
 
-    print(response)
     return response
 
 def split_data(data:list[TrainDataInfo], ratio:float):
