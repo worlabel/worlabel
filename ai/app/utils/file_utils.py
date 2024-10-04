@@ -56,7 +56,8 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
     label_path = os.path.join(dataset_root_path, child_path, f"{img_title}.txt")
 
     # 레이블 객체 불러오기
-    label = json.loads(urllib.request.urlopen(data.data_url).read())
+    with urllib.request.urlopen(data.data_url) as response:
+        label = json.loads(response.read())
 
     # 레이블 -> 학습용 레이블 데이터 파싱 후 생성
     if label['task_type'] == "det":
@@ -139,7 +140,8 @@ def process_image_and_label_in_cls(data:TrainDataInfo, dataset_root_path:str, ch
     img_name = data.image_url.split('/')[-1]
 
     # 레이블 객체 불러오기
-    label = json.loads(urllib.request.urlopen(data.data_url).read())
+    with urllib.request.urlopen(data.data_url) as response:
+        label = json.loads(response.read())
 
     if not label["shapes"]:
         # assert label["shapes"], No Label. Failed Download" # AssertionError 발생
