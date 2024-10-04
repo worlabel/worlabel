@@ -18,6 +18,7 @@ export default function useCreateReviewQuery() {
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reviewDetail', variables.projectId] });
+      queryClient.invalidateQueries({ queryKey: ['reviewByStatus', variables.projectId] });
     },
   });
 }
