@@ -4,7 +4,7 @@ import { ImageResponse, ChildFolder } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { getFolder } from '@/api/folderApi';
 
-export function useFolder(projectId: string, folderId: number) {
+function useFolder(projectId: string, folderId: number) {
   return useQuery({
     queryKey: ['folder', projectId, folderId],
     queryFn: () => getFolder(projectId, folderId),
@@ -12,7 +12,7 @@ export function useFolder(projectId: string, folderId: number) {
   });
 }
 
-export function useChildFolder(projectId: string, folderId: number, enabled: boolean) {
+function useChildFolder(projectId: string, folderId: number, enabled: boolean) {
   return useQuery({
     queryKey: ['folder', projectId, folderId],
     queryFn: () => getFolder(projectId, folderId),
@@ -33,6 +33,7 @@ export default function useTreeData(projectId: string) {
   );
 
   useEffect(() => {
+    console.log('root changed');
     if (rootFolder) {
       const childFolders: TreeNode[] =
         rootFolder.children?.map((child: ChildFolder) => ({

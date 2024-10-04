@@ -50,10 +50,10 @@ export default function AutoLabelButton({ projectId }: { projectId: number }) {
               onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['folder', projectId.toString()] });
                 queryClient.invalidateQueries({ queryKey: ['labelJson'] });
-                toast({ title: '레이블링 성공' });
+                toast({ title: '레이블링 성공', duration: 1500 });
               },
               onError: () => {
-                toast({ title: '레이블링 중 오류가 발생했습니다.' });
+                toast({ title: '레이블링 중 오류가 발생했습니다.', duration: 1500 });
               },
             }
           );

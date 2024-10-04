@@ -8,13 +8,13 @@ import useMoveImageQuery from '@/queries/images/useMoveImageQuery';
 import { Project, ImageResponse } from '@/types';
 import WorkspaceDropdownMenu from '../WorkspaceDropdownMenu';
 import AutoLabelButton from './AutoLabelButton';
-import { Folder, Image as ImageIcon, Minus, Loader, ArrowDownToLine, Send, CircleSlash, Check } from 'lucide-react';
+import { Folder, Image as ImageIcon } from 'lucide-react';
 import { Spinner } from '../ui/spinner';
-import { ImageStatus } from '@/types';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
+import MemoFileStatusIcon from './FileStatusIcon';
 
 interface FlatNode extends TreeNode {
   depth: number;
@@ -57,26 +57,19 @@ export default function ProjectStructure({ project }: { project: Project }) {
 
   const onToggle = useCallback(
     async (node: TreeNode, toggled: boolean) => {
-      if (!node.imageData) {
-        if (toggled && (!node.children || node.children.length === 0)) {
-          await fetchNodeData(node);
-        }
-
-        const updateNode = (currentNode: TreeNode): TreeNode => {
-          if (currentNode.id === node.id) {
-            return { ...currentNode, toggled };
-          }
-          if (currentNode.children) {
-            return {
-              ...currentNode,
-              children: currentNode.children.map(updateNode),
-            };
-          }
-          return currentNode;
-        };
-
-        setTreeData((prevData) => prevData && updateNode(prevData));
+      if (node.imageData) return;
+      if (toggled && (!node.children || node.children.length === 0)) {
+        await fetchNodeData(node);
       }
+
+      const updateNode = (currentNode: TreeNode): TreeNode => {
+        if (currentNode.id === node.id) {
+          return { ...currentNode, toggled };
+        }
+        return currentNode.children ? { ...currentNode, children: currentNode.children.map(updateNode) } : currentNode;
+      };
+
+      setTreeData((prevData) => prevData && updateNode(prevData));
     },
     [fetchNodeData, setTreeData]
   );
@@ -90,59 +83,6 @@ export default function ProjectStructure({ project }: { project: Project }) {
     },
     [setImage, setFolderId]
   );
-
-  const renderStatusIcon = (status: ImageStatus) => {
-    const iconProps = { size: 12, className: 'shrink-0' };
-    const iconColor = {
-      PENDING: 'stroke-gray-400',
-      IN_PROGRESS: 'animate-spin stroke-yellow-400',
-      SAVE: 'stroke-gray-400',
-      REVIEW_REQUEST: 'stroke-blue-400',
-      REVIEW_REJECT: 'stroke-red-400',
-      COMPLETED: 'stroke-green-400',
-    };
-
-    const iconMapping = {
-      PENDING: (
-        <Minus
-          {...iconProps}
-          className={`${iconProps.className} ${iconColor.PENDING}`}
-        />
-      ),
-      IN_PROGRESS: (
-        <Loader
-          {...iconProps}
-          className={`${iconProps.className} ${iconColor.IN_PROGRESS}`}
-        />
-      ),
-      SAVE: (
-        <ArrowDownToLine
-          {...iconProps}
-          className={`${iconProps.className} ${iconColor.SAVE}`}
-        />
-      ),
-      REVIEW_REQUEST: (
-        <Send
-          {...iconProps}
-          className={`${iconProps.className} ${iconColor.REVIEW_REQUEST}`}
-        />
-      ),
-      REVIEW_REJECT: (
-        <CircleSlash
-          {...iconProps}
-          className={`${iconProps.className} ${iconColor.REVIEW_REJECT}`}
-        />
-      ),
-      COMPLETED: (
-        <Check
-          {...iconProps}
-          className={`${iconProps.className} ${iconColor.COMPLETED}`}
-        />
-      ),
-    };
-
-    return iconMapping[status] || null;
-  };
 
   const flattenTree = useCallback((nodes: TreeNode[], depth: number = 0, parent?: FlatNode): FlatNode[] => {
     let flatList: FlatNode[] = [];
@@ -187,47 +127,34 @@ export default function ProjectStructure({ project }: { project: Project }) {
           return { ...node, children: newChildren };
         }
 
-        if (node.children) {
-          return {
-            ...node,
-            children: node.children.map(moveNodeInTree),
-          };
-        }
-
-        return node;
+        return node.children ? { ...node, children: node.children.map(moveNodeInTree) } : node;
       })(treeData!);
 
       setTreeData(updatedTreeData);
 
-      if (dragItem.imageData) {
-        moveImageMutation.mutate({
-          projectId: project.id,
-          folderId: Number(dragItem.parent?.id),
-          imageId: dragItem.imageData.id,
-          moveRequest: {
-            moveFolderId: Number(hoverItem.parent?.id),
-          },
-        });
-      }
+      if (!dragItem.imageData) return;
+      moveImageMutation.mutate({
+        projectId: project.id,
+        folderId: Number(dragItem.parent?.id),
+        imageId: dragItem.imageData.id,
+        moveRequest: {
+          moveFolderId: Number(hoverItem.parent?.id),
+        },
+      });
     },
     [treeData, setTreeData, moveImageMutation, project.id]
   );
 
   const Row = ({ index, style, data }: ListChildComponentProps<FlatNode[]>) => {
     const node = data[index];
-    const ref = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLButtonElement>(null);
 
     const [, drop] = useDrop({
       accept: ItemTypes.NODE,
       drop(item: FlatNode) {
-        const dragItem = item;
-        const hoverItem = node;
+        if (item.id === node.id) return;
 
-        if (dragItem.id === hoverItem.id) {
-          return;
-        }
-
-        moveNode(dragItem, hoverItem);
+        moveNode(item, node);
       },
     });
 
@@ -242,17 +169,13 @@ export default function ProjectStructure({ project }: { project: Project }) {
     drag(drop(ref));
 
     return (
-      <div
+      <button
         ref={ref}
         style={{
           ...style,
-          opacity: isDragging ? 0.5 : 1,
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: `${node.depth * 20}px`,
-          cursor: 'pointer',
-          backgroundColor: node.imageData && selectedImage?.id === node.imageData.id ? '#e5e7eb' : 'transparent',
+          paddingLeft: `${node.depth * 12}px`,
         }}
+        className={`caption } flex w-full items-center gap-2 rounded-md py-0.5 pr-1 ${node.imageData && selectedImage?.id === node.imageData?.id ? 'bg-gray-200' : 'hover:bg-gray-100'} ${isDragging ? 'opacity-50' : ''}`}
         onClick={() => {
           if (node.imageData) {
             handleImageClick(node.imageData as ImageResponse, node.parent);
@@ -261,7 +184,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
           }
         }}
       >
-        <div style={{ marginRight: '5px' }}>
+        <div className="flex items-center">
           {!node.imageData ? (
             <Folder
               size={16}
@@ -274,17 +197,18 @@ export default function ProjectStructure({ project }: { project: Project }) {
             />
           )}
         </div>
-        <span style={{ color: '#4a4a4a', flexGrow: 1 }}>{node.name}</span>
-        {node.imageData && <div style={{ marginRight: '20px' }}>{renderStatusIcon(node.imageData.status)}</div>}
-      </div>
+        <span className="grow overflow-hidden text-ellipsis whitespace-nowrap text-left text-gray-900">
+          {node.name}
+        </span>
+        {node.imageData && <MemoFileStatusIcon imageStatus={node.imageData.status} />}
+      </button>
     );
   };
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div
-        className="box-border flex h-full min-h-0 flex-col bg-gray-50 p-2"
-        style={{ overflowX: 'hidden' }}
+        className="box-border flex h-full min-h-0 flex-col overflow-x-hidden bg-gray-50"
         ref={containerRef}
       >
         <div className="flex h-full flex-col gap-2 overflow-hidden px-1 pb-2">
@@ -308,14 +232,13 @@ export default function ProjectStructure({ project }: { project: Project }) {
             </div>
           ) : (
             <List
-              height={Math.min(flatData.length * 40, containerHeight)}
+              height={Math.min(flatData.length * 20, containerHeight)}
               itemCount={flatData.length}
-              itemSize={40}
+              itemSize={20}
               width={'100%'}
               itemData={flatData}
               itemKey={getItemKey}
-              className="flex-1 overflow-auto"
-              style={{ overflowX: 'hidden' }}
+              className="flex-1 overflow-x-hidden"
             >
               {Row}
             </List>
