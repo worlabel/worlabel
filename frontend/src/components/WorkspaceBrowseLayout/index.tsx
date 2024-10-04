@@ -2,7 +2,7 @@ import { useEffect, Suspense, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Header from '../Header';
 import useAuthStore from '@/stores/useAuthStore';
-import { WorkspaceRequest, WorkspaceResponse } from '@/types';
+import { ProjectRequest, WorkspaceRequest, WorkspaceResponse } from '@/types';
 import useWorkspaceListQuery from '@/queries/workspaces/useWorkspaceListQuery';
 import useCreateWorkspaceQuery from '@/queries/workspaces/useCreateWorkspaceQuery';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,8 @@ import { Ellipsis } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import WorkSpaceCreateForm, { WorkSpaceCreateFormValues } from '../WorkSpaceCreateModal/WorkSpaceCreateForm';
+import ProjectCreateForm, { ProjectCreateFormValues } from '../ProjectCreateModal/ProjectCreateForm';
+import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
 
 export default function WorkspaceBrowseLayout() {
   const location = useLocation();
@@ -19,6 +21,7 @@ export default function WorkspaceBrowseLayout() {
 
   const [isOpenWorkspaceCreate, setIsOpenWorkspaceCreate] = useState<boolean>(false);
   const [isOpenWorkspaceUpdate, setIsOpenWorkspaceUpdate] = useState<boolean>(false);
+  const [isOpenProjectCreate, setIsOpenProjectCreate] = useState<boolean>(false);
 
   useEffect(() => {
     if (memberId == 0) {
@@ -27,6 +30,7 @@ export default function WorkspaceBrowseLayout() {
   }, [memberId, navigate]);
 
   const createWorkspace = useCreateWorkspaceQuery();
+  const createProject = useCreateProjectQuery();
   const { data: workspacesResponse } = useWorkspaceListQuery(memberId ?? 0);
   const workspaces = workspacesResponse?.workspaceResponses ?? [];
   const activeWorkspaceId: number = Number(location.pathname.split('/')[2] || '-1');
@@ -43,6 +47,22 @@ export default function WorkspaceBrowseLayout() {
     });
 
     setIsOpenWorkspaceCreate(false);
+  };
+
+  const handleCreateProject = (values: ProjectCreateFormValues) => {
+    const data: ProjectRequest = {
+      title: values.projectName,
+      projectType: values.labelType.toLowerCase() as ProjectRequest['projectType'],
+      categories: values.categories,
+    };
+
+    createProject.mutate({
+      workspaceId: activeWorkspaceId,
+      memberId,
+      data,
+    });
+
+    setIsOpenProjectCreate(false);
   };
 
   return (
@@ -92,7 +112,9 @@ export default function WorkspaceBrowseLayout() {
                             <DropdownMenuItem onClick={() => setIsOpenWorkspaceUpdate(true)}>
                               워크스페이스 이름 변경
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {}}>워크스페이스에 새 프로젝트 추가</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsOpenProjectCreate(true)}>
+                              워크스페이스에 새 프로젝트 추가
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
@@ -133,6 +155,17 @@ export default function WorkspaceBrowseLayout() {
         <DialogContent>
           <DialogHeader title="워크스페이스 이름 변경" />
           <WorkSpaceCreateForm onSubmit={() => console.log('hello')} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isOpenProjectCreate}
+        onOpenChange={setIsOpenProjectCreate}
+      >
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent>
+          <DialogHeader title="새 프로젝트 추가" />
+          <ProjectCreateForm onSubmit={handleCreateProject} />
         </DialogContent>
       </Dialog>
     </>

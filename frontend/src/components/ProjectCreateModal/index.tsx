@@ -31,7 +31,7 @@ export default function ProjectCreateModal({ onSubmit, buttonClass = '' }: Proje
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader title="새 프로젝트" />
+        <DialogHeader title="새 프로젝트 추가" />
         <ProjectCreateForm
           onSubmit={(data: ProjectCreateFormValues) => {
             const formattedData: ProjectRequest = {
