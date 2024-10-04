@@ -100,11 +100,13 @@ export default function ImageCanvas() {
           queryClient.invalidateQueries({ queryKey: ['folder', project!.id.toString(), folderId] });
           toast({
             title: '저장 성공',
+            duration: 1500,
           });
         },
         onError: () => {
           toast({
             title: '저장 실패',
+            duration: 1500,
           });
         },
       }

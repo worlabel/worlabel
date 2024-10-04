@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils';
 import { ImageResponse } from '@/types';
-import { ArrowDownToLine, Check, CircleSlash, Image, Loader, Minus, Send } from 'lucide-react';
+import { Image } from 'lucide-react';
 import useCanvasStore from '@/stores/useCanvasStore';
+import MemoFileStatusIcon from './FileStatusIcon';
 
 export default function ProjectFileItem({
   className = '',
@@ -40,37 +41,7 @@ export default function ProjectFileItem({
         />
       </div>
       <span className="grow overflow-hidden text-ellipsis whitespace-nowrap text-left">{item.imageTitle}</span>
-      {item.status === 'PENDING' ? (
-        <Minus
-          size={12}
-          className="shrink-0 stroke-gray-400"
-        />
-      ) : item.status === 'IN_PROGRESS' ? (
-        <Loader
-          size={12}
-          className="shrink-0 stroke-yellow-400"
-        />
-      ) : item.status === 'SAVE' ? (
-        <ArrowDownToLine
-          size={12}
-          className="shrink-0 stroke-gray-400"
-        />
-      ) : item.status === 'REVIEW_REQUEST' ? (
-        <Send
-          size={12}
-          className="shrink-0 stroke-blue-400"
-        />
-      ) : item.status === 'REVIEW_REJECT' ? (
-        <CircleSlash
-          size={12}
-          className="shrink-0 stroke-red-400"
-        />
-      ) : (
-        <Check
-          size={12}
-          className="shrink-0 stroke-green-400"
-        />
-      )}
+      <MemoFileStatusIcon imageStatus={item.status} />
     </button>
   );
 }
