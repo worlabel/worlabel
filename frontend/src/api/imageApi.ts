@@ -151,30 +151,7 @@ export async function uploadImagePresigned(
     }
   );
 
-  // // 각 파일을 presigned URL에 맞춰서 업로드 (axios 직접 사용)
-  // for (const presignedUrlInfo of presignedUrlList) {
-  //   const file = files[presignedUrlInfo.id];
-  //
-  //   try {
-  //     // S3 presigned URL로 개별 파일 업로드
-  //     await axios.put(presignedUrlInfo.presignedUrl, file, {
-  //       headers: {
-  //         'Content-Type': file.type, // 파일의 타입 설정
-  //       },
-  //       onUploadProgress: (progressEvent) => {
-  //         if (progressEvent.total) {
-  //           processCallback(presignedUrlInfo.id); // 성공 시 진행 상황 업데이트
-  //         }
-  //       },
-  //     });
-  //   } catch (error) {
-  //     // 업로드 실패 시 로그 출력
-  //     console.error(`업로드 실패: ${file.name}`, error);
-  //   }
-  // }
-
-  // 모든 파일을 병렬로 presigned URL에 맞춰서 업로드
-  const uploadPromises = presignedUrlList.map(async (presignedUrlInfo) => {
+  for (const presignedUrlInfo of presignedUrlList) {
     const file = files[presignedUrlInfo.id];
 
     try {
@@ -193,17 +170,12 @@ export async function uploadImagePresigned(
       // 업로드 실패 시 로그 출력
       console.error(`업로드 실패: ${file.name}`, error);
     }
-  });
-
-  // 모든 업로드가 병렬로 완료될 때까지 기다림
-  await Promise.all(uploadPromises);
+  }
 
   // 업로드 완료 시간 기록
   const endTime = new Date().getTime();
-
   // 소요 시간 계산 (초 단위로 변환)
   const durationInSeconds = (endTime - startTime) / 1000;
-
   // 소요 시간 콘솔 출력
   console.log(`모든 파일 업로드 완료. 총 소요 시간: ${durationInSeconds}초`);
 }
