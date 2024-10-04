@@ -37,7 +37,7 @@ def create_model(project_id: int, request: ModelCreateRequest):
 
 @router.delete("/projects/{project_id}/models/{model_key}", status_code=204)
 def delete_model(project_id:int, model_key:str):
-    model_path = join_path("resources", "projects", project_id, "models", model_key)
+    model_path = join_path("resources", "projects", str(project_id), "models", model_key)
     try:
         delete_file(model_path)
     except FileNotFoundError:
@@ -71,7 +71,7 @@ def upload_model(project_id:int, file: UploadFile = File(...)):
 
 @router.get("/download/projects/{project_id}/models/{model_key}")
 def download_model(project_id:int, model_key:str):
-    model_path = join_path("resources", "projects", project_id, "models", model_key)
+    model_path = join_path("resources", "projects", str(project_id), "models", model_key)
     try:
         filename = get_file_name(model_path)
         # 파일 응답 반환
