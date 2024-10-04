@@ -261,7 +261,8 @@ def run_train(request, model, dataset_root_path):
                 batch=request.batch,
                 lr0=request.lr0,
                 lrf=request.lrf,
-                optimizer=request.optimizer
+                optimizer=request.optimizer,
+                patience=0
             )
         finally:
             # 콜백 해제 및 자원 해제
