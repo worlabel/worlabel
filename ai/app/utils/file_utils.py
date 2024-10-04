@@ -43,7 +43,6 @@ def process_image_and_label(data:TrainDataInfo, dataset_root_path:str, child_pat
     """이미지 저장 및 레이블 파일 생성"""
     # 이미지 url로부터 파일명 분리
     img_name = data.image_url.split('/')[-1]
-
     img_path = os.path.join(dataset_root_path,child_path,img_name)
 
     # url로부터 이미지 다운로드

@@ -1,3 +1,7 @@
+import os
+import time
+
+import psutil
 from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest, TrainDataInfo
@@ -108,10 +112,14 @@ async def detection_train(request: TrainRequest):
     send_slack_message(f"train 요청{request}", status="success")
 
     # 데이터셋 루트 경로 얻기 (프로젝트 id 기반)
+    
     dataset_root_path = get_dataset_root_path(request.project_id)
-
+    
     # 모델 로드
+    start_time = time.time()
+    print("모델 로드")
     model = get_model(request.project_id, request.m_key)
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
 
     # 이 값을 학습할때 넣으면 이 카테고리들이 학습됨
     names = list(request.label_map)
@@ -122,23 +130,49 @@ async def detection_train(request: TrainRequest):
     # value : 모델에 저장될 카테고리 id (모델에는 key의 idx 순서대로 저장될 것임)
     
     # 데이터 전처리: 학습할 디렉토리 & 데이터셋 설정 파일을 생성
+    start_time = time.time()
+    print("데이터 전처리 : 학습할 디렉토리 및 데이터셋 설정 파일 생성")
     process_directories(dataset_root_path, names)
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
 
     # 데이터 전처리: 데이터를 학습데이터와 검증데이터로 분류
+    start_time = time.time()
+    print("데이터 전처리 : 데이터 분류")
     train_data, val_data = split_data(request.data, request.ratio)
-    
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
 
     # 데이터 전처리: 데이터 이미지 및 레이블 다운로드
+    start_time = time.time()
+    print("데이터 전처리 : 데이터 다운로드")
     download_data(train_data, val_data, dataset_root_path, label_converter)
-
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    
     # 학습
+    start_time = time.time()
+    print("학습 시작")
     results = run_train(request, model,dataset_root_path)
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+
+    # 학습 후 GPU 메모리 상태 확인
+    if torch.cuda.is_available():
+        allocated_memory = torch.cuda.memory_allocated() / (1024 ** 2)  # MB 단위
+        reserved_memory = torch.cuda.memory_reserved() / (1024 ** 2)  # MB 단위
+        print(f"현재 할당된 GPU 메모리: {allocated_memory:.2f} MB")
+        print(f"현재 예약된 GPU 메모리: {reserved_memory:.2f} MB")
+    else:
+        print("GPU 사용 불가능")
+    torch.cuda.empty_cache()
 
     # best 모델 저장
+    start_time = time.time()
+    print("모델 저장")
     model_key = save_model(project_id=request.project_id, path=join_path(dataset_root_path, "result", "weights", "best.pt"))
-    
-    result = results.results_dict
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
 
+    print("변환")
+    result = results.results_dict
+    print(f'걸린 시간 {time.time() - start_time:.2f} 초')
+    
     response = TrainResponse(
         modelKey=model_key,
         precision= result["metrics/precision(B)"],
@@ -149,7 +183,8 @@ async def detection_train(request: TrainRequest):
         fitness= result["fitness"]
     )
     send_slack_message(f"train 성공{response}", status="success")
-        
+
+    print(response)
     return response
 
 def split_data(data:list[TrainDataInfo], ratio:float):
@@ -234,3 +269,25 @@ def run_train(request, model, dataset_root_path):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"exception in run_train(): {e}")
+
+@router.get("/memory")
+async def get_memory_status():
+    # GPU 메모리 정보 가져오기 (torch.cuda 사용)
+    if torch.cuda.is_available():
+        # 현재 활성화된 CUDA 디바이스 번호 확인
+        current_device = torch.cuda.current_device()
+
+        total_gpu_memory = torch.cuda.get_device_properties(current_device).total_memory
+        allocated_gpu_memory = torch.cuda.memory_allocated(current_device)
+        reserved_gpu_memory = torch.cuda.memory_reserved(current_device)
+
+        gpu_memory = {
+            "current_device" : current_device,
+            "total": total_gpu_memory / (1024 ** 3),  # 전체 GPU 메모리 (GB 단위)
+            "allocated": allocated_gpu_memory / (1024 ** 3),  # 현재 사용 중인 GPU 메모리 (GB 단위)
+            "reserved": reserved_gpu_memory / (1024 ** 3),  # 예약된 GPU 메모리 (GB 단위)
+            "free": (total_gpu_memory - reserved_gpu_memory) / (1024 ** 3)  # 사용 가능한 GPU 메모리 (GB 단위)
+        }
+        return gpu_memory
+    else:
+        raise HTTPException(status_code=404, detail="GPU가 사용 가능하지 않습니다.")
