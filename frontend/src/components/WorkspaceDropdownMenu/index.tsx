@@ -12,7 +12,7 @@ import ImageUploadFileForm from '../ImageUploadFileModal/ImageUploadFileForm';
 import ImageUploadFolderFileForm from '../ImageUploadFolderFileModal/ImageUploadFolderFileForm';
 import ImageUploadFolderForm from '../ImageUploadFolderModal/ImageUploadFolderForm';
 import ImageUploadZipForm from '../ImageUploadZipModal/ImageUploadZipForm';
-import ImageUploadPresignedForm from '../ImageUploadPresignedModal/ImageUploadPresignedForm.tsx'
+import ImageUploadPresignedForm from '../ImageUploadPresignedModal/ImageUploadPresignedForm.tsx';
 
 export default function WorkspaceDropdownMenu({
   projectId,
@@ -25,15 +25,30 @@ export default function WorkspaceDropdownMenu({
 }) {
   const [isOpenUploadFile, setIsOpenUploadFile] = React.useState<boolean>(false);
   const [fileCount, setFileCount] = React.useState<number>(0);
+  const [isOpenUploadPresigned, setIsOpenUploadPresigned] = React.useState<boolean>(false);
+  const [presignedCount, setPresignedCount] = React.useState<number>(0);
   const [isOpenUploadFolderFile, setIsOpenUploadFolderFile] = React.useState<boolean>(false);
   const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState<boolean>(false);
-  const [isOpenUploadPresigned, setIsOpenUploadPresigned] = React.useState<boolean>(false);
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
 
   const handleOpenUploadFile = () => setIsOpenUploadFile(true);
 
   const handleCloseUploadFile = () => {
     setIsOpenUploadFile(false);
+  };
+
+  const handleFileCount = (fileCount: number) => {
+    setFileCount(fileCount);
+  };
+
+  const handleOpenUploadPresigned = () => setIsOpenUploadPresigned(true);
+
+  const handleCloseUploadPresigned = () => {
+    setIsOpenUploadPresigned(false);
+  };
+
+  const handlePresignedCount = (fileCount: number) => {
+    setPresignedCount(fileCount);
   };
 
   const handleOpenUploadFolderFile = () => setIsOpenUploadFolderFile(true);
@@ -48,20 +63,10 @@ export default function WorkspaceDropdownMenu({
     setIsOpenUploadFolder(false);
   };
 
-  const handleOpenUploadPresigned = () => setIsOpenUploadPresigned(true);
-
-  const handleCloseUploadPresigned = () => {
-    setIsOpenUploadPresigned(false);
-  };
-
   const handleOpenUploadZip = () => setIsOpenUploadZip(true);
 
   const handleCloseUploadZip = () => {
     setIsOpenUploadZip(false);
-  };
-
-  const handleFileCount = (fileCount: number) => {
-    setFileCount(fileCount);
   };
 
   return (
@@ -83,9 +88,9 @@ export default function WorkspaceDropdownMenu({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleOpenUploadFile}>파일 업로드</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleOpenUploadPresigned}>파일 업로드 (PresignedUrl 이용)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadFolderFile}>폴더 업로드 (파일 업로드 API 이용)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드 (백엔드 구현 필요)</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadPresigned}>폴더 업로드 (PresignedUrl 이용)</DropdownMenuItem>
           <DropdownMenuItem onClick={handleOpenUploadZip}>폴더 압축파일 업로드</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -101,6 +106,25 @@ export default function WorkspaceDropdownMenu({
             onClose={handleCloseUploadFile}
             onRefetch={onRefetch}
             onFileCount={handleFileCount}
+            projectId={projectId}
+            folderId={folderId}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isOpenUploadPresigned}
+        onOpenChange={setIsOpenUploadPresigned}
+      >
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader
+            title={presignedCount > 0 ? `파일 업로드 PreSigned (${presignedCount})` : '파일 업로드 PreSigned'}
+          />
+          <ImageUploadPresignedForm
+            onClose={handleCloseUploadPresigned}
+            onRefetch={onRefetch}
+            onFileCount={handlePresignedCount}
             projectId={projectId}
             folderId={folderId}
           />
@@ -133,23 +157,6 @@ export default function WorkspaceDropdownMenu({
           <ImageUploadFolderForm
             onClose={handleCloseUploadFolder}
             onRefetch={onRefetch}
-            projectId={projectId}
-            folderId={folderId}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={isOpenUploadPresigned}
-        onOpenChange={setIsOpenUploadPresigned}
-      >
-        <DialogTrigger asChild></DialogTrigger>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader title='파일 업로드' />
-          <ImageUploadPresignedForm
-            onClose={handleCloseUploadPresigned}
-            onRefetch={onRefetch}
-            onFileCount={handleFileCount}
             projectId={projectId}
             folderId={folderId}
           />

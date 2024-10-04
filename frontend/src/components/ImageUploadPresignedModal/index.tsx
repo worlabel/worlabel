@@ -6,7 +6,7 @@ import ImageUploadPresingedForm from '@/components/ImageUploadPresignedModal/Ima
 export default function ImageUploadPresignedModal({ projectId, folderId }: { projectId: number; folderId: number }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [fileCount, setFileCount] = React.useState<number>(0);
-  
+
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
   const handleFileCount = (fileCount: number) => {
@@ -27,7 +27,7 @@ export default function ImageUploadPresignedModal({ projectId, folderId }: { pro
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogHeader title={fileCount > 0 ? `파일 업로드 (${fileCount}) PreSigned` : '파일 업로드 PreSigned'} />
+        <DialogHeader title={fileCount > 0 ? `파일 업로드 PreSigned (${fileCount})` : '파일 업로드 PreSigned'} />
         <ImageUploadPresingedForm
           onClose={handleClose}
           onFileCount={handleFileCount}
