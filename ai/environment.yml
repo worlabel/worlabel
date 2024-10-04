@@ -19,3 +19,4 @@ dependencies:
   - locust
   - websockets
   - httpx
+  - psutil

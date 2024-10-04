@@ -1,3 +1,6 @@
+import os
+
+import psutil
 from fastapi import APIRouter, HTTPException
 from schemas.predict_request import PredictRequest
 from schemas.train_request import TrainRequest, TrainDataInfo
@@ -234,3 +237,25 @@ def run_train(request, model, dataset_root_path):
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"exception in run_train(): {e}")
+
+@router.get("/memory")
+async def get_memory_status():
+    # GPU 메모리 정보 가져오기 (torch.cuda 사용)
+    if torch.cuda.is_available():
+        # 현재 활성화된 CUDA 디바이스 번호 확인
+        current_device = torch.cuda.current_device()
+
+        total_gpu_memory = torch.cuda.get_device_properties(current_device).total_memory
+        allocated_gpu_memory = torch.cuda.memory_allocated(current_device)
+        reserved_gpu_memory = torch.cuda.memory_reserved(current_device)
+
+        gpu_memory = {
+            "current_device" : current_device,
+            "total": total_gpu_memory / (1024 ** 3),  # 전체 GPU 메모리 (GB 단위)
+            "allocated": allocated_gpu_memory / (1024 ** 3),  # 현재 사용 중인 GPU 메모리 (GB 단위)
+            "reserved": reserved_gpu_memory / (1024 ** 3),  # 예약된 GPU 메모리 (GB 단위)
+            "free": (total_gpu_memory - reserved_gpu_memory) / (1024 ** 3)  # 사용 가능한 GPU 메모리 (GB 단위)
+        }
+        return gpu_memory
+    else:
+        raise HTTPException(status_code=404, detail="GPU가 사용 가능하지 않습니다.")
