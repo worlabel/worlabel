@@ -51,7 +51,7 @@ async def detection_predict(request: PredictRequest):
     send_slack_message(f"추론 결과 변환 완료 (projectId: {project_id}). 걸린 시간: {time.time() - start_time:.2f} 초",
                        status="success")
 
-    send_slack_message(f"Detection predict 성공 (projectId: {project_id}) {response}", status="success")
+    send_slack_message(f"Detection predict 성공 (projectId: {project_id}) {len(response)}", status="success")
 
     return response
 

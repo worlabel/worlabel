@@ -18,7 +18,7 @@ router = APIRouter()
 @router.post("/predict")
 async def segmentation_predict(request: PredictRequest):
     project_id = request.project_id
-    send_slack_message(f"Segmentation predict 요청 (projectId: {project_id}, 이미지 개수: {len(request.data)})",
+    send_slack_message(f"Segmentation predict 요청 (projectId: {project_id}, 이미지 개수: {len(request.image_list)})",
                        status="success")
 
     # 모델 로드
