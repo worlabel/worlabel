@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialog
 import WorkSpaceCreateForm, { WorkSpaceCreateFormValues } from '../WorkSpaceCreateModal/WorkSpaceCreateForm';
 import ProjectCreateForm, { ProjectCreateFormValues } from '../ProjectCreateModal/ProjectCreateForm';
 import useCreateProjectQuery from '@/queries/projects/useCreateProjectQuery';
+import WorkspaceUpdateForm, { WorkspaceUpdateFormValues } from '../WorkspaceUpdateModal/WorkspaceUpdateForm';
+import useUpdateWorkspaceQuery from '@/queries/workspaces/useUpdateWorkspaceQuery';
 
 export default function WorkspaceBrowseLayout() {
   const location = useLocation();
@@ -30,10 +32,13 @@ export default function WorkspaceBrowseLayout() {
   }, [memberId, navigate]);
 
   const createWorkspace = useCreateWorkspaceQuery();
+  const updateWorkspace = useUpdateWorkspaceQuery();
   const createProject = useCreateProjectQuery();
-  const { data: workspacesResponse } = useWorkspaceListQuery(memberId ?? 0);
+
+  const { data: workspacesResponse, refetch } = useWorkspaceListQuery(memberId ?? 0);
   const workspaces = workspacesResponse?.workspaceResponses ?? [];
   const activeWorkspaceId: number = Number(location.pathname.split('/')[2] || '-1');
+  const activeWorkspace = workspaces.filter((workspace) => workspace.id === activeWorkspaceId)[0] ?? null;
 
   const handleCreateWorkspace = (values: WorkSpaceCreateFormValues) => {
     const data: WorkspaceRequest = {
@@ -47,6 +52,22 @@ export default function WorkspaceBrowseLayout() {
     });
 
     setIsOpenWorkspaceCreate(false);
+  };
+
+  const handleUpdateWorkspace = (values: WorkspaceUpdateFormValues) => {
+    const data: WorkspaceRequest = {
+      title: values.workspaceName,
+      content: values.workspaceDescription || '',
+    };
+
+    updateWorkspace.mutate({
+      workspaceId: activeWorkspaceId,
+      memberId,
+      data,
+    });
+
+    setIsOpenWorkspaceUpdate(false);
+    refetch();
   };
 
   const handleCreateProject = (values: ProjectCreateFormValues) => {
@@ -64,6 +85,10 @@ export default function WorkspaceBrowseLayout() {
 
     setIsOpenProjectCreate(false);
   };
+
+  useEffect(() => {
+    refetch();
+  }, [isOpenWorkspaceUpdate, refetch]);
 
   return (
     <>
@@ -154,7 +179,10 @@ export default function WorkspaceBrowseLayout() {
         <DialogTrigger asChild></DialogTrigger>
         <DialogContent>
           <DialogHeader title="워크스페이스 이름 변경" />
-          <WorkSpaceCreateForm onSubmit={() => console.log('hello')} />
+          <WorkspaceUpdateForm
+            workspace={activeWorkspace}
+            onSubmit={handleUpdateWorkspace}
+          />
         </DialogContent>
       </Dialog>
 
