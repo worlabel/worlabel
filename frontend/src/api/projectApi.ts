@@ -80,13 +80,14 @@ export async function addProjectMember(projectId: number, memberId: number, newM
 export async function updateProjectMemberPrivilege(
   projectId: number,
   memberId: number,
-  privilegeData: ProjectMemberRequest
+  privilegeType: ProjectMemberResponse['privilegeType'] // 수정 가능한 권한 타입으로 변경
 ) {
-  return api
-    .put<ProjectMemberResponse>(`/projects/${projectId}/members`, privilegeData, {
-      params: { memberId },
-    })
-    .then(({ data }) => data);
+  const privilegeData = {
+    memberId,
+    privilegeType,
+  };
+
+  return api.put<ProjectMemberResponse>(`/projects/${projectId}/members`, privilegeData).then(({ data }) => data);
 }
 
 // 프로젝트 멤버 삭제
