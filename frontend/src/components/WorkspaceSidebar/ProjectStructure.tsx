@@ -15,7 +15,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
 import MemoFileStatusIcon from './FileStatusIcon';
-
+import moveNodeInTree from '@/utils/moveNodeInTree';
 interface FlatNode extends TreeNode {
   depth: number;
   isLeaf: boolean;
@@ -114,25 +114,10 @@ export default function ProjectStructure({ project }: { project: Project }) {
 
   const moveNode = useCallback(
     (dragItem: FlatNode, hoverItem: FlatNode) => {
-      const updatedTreeData = (function moveNodeInTree(node: TreeNode): TreeNode {
-        if (node.id === dragItem.parent?.id) {
-          const newChildren = node.children?.filter((child) => child.id !== dragItem.id) || [];
-          return { ...node, children: newChildren };
-        }
-
-        if (node.id === hoverItem.parent?.id) {
-          const newChildren = [...(node.children || [])];
-          const hoverIndex = newChildren.findIndex((child) => child.id === hoverItem.id);
-          newChildren.splice(hoverIndex, 0, { ...dragItem, parent: hoverItem.parent } as FlatNode);
-          return { ...node, children: newChildren };
-        }
-
-        return node.children ? { ...node, children: node.children.map(moveNodeInTree) } : node;
-      })(treeData!);
-
-      setTreeData(updatedTreeData);
+      setTreeData(moveNodeInTree(treeData!, dragItem, hoverItem));
 
       if (!dragItem.imageData) return;
+
       moveImageMutation.mutate({
         projectId: project.id,
         folderId: Number(dragItem.parent?.id),
@@ -222,13 +207,12 @@ export default function ProjectStructure({ project }: { project: Project }) {
               onRefetch={refetch}
             />
           </header>
-          {isLoading ? (
+          {isLoading || !treeData ? (
             <div className="flex h-full items-center justify-center">
-              <Spinner />
-            </div>
-          ) : !treeData ? (
-            <div className="body-small flex h-full select-none items-center justify-center text-gray-400">
-              Loading...
+              <Spinner
+                show={true}
+                size={'large'}
+              />
             </div>
           ) : (
             <List
