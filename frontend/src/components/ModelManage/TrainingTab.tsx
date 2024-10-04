@@ -34,13 +34,13 @@ export default function TrainingTab({ projectId }: TrainingTabProps) {
       );
       setIsTraining(newIsTraining);
 
-      if (selectedModel && trainingModels.some((model) => model.id === selectedModel.id)) {
-        setSelectedModel(selectedModel);
+      if (trainingModels.length > 0) {
+        setSelectedModel(trainingModels[0]);
       } else {
         setSelectedModel(null);
       }
     }
-  }, [models, selectedModel]);
+  }, [models]);
 
   useEffect(() => {
     if (models && selectedModel) {

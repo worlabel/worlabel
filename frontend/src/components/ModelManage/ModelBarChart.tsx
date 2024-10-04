@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Rectangle } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -18,27 +19,29 @@ interface ModelBarChartProps {
 const chartConfig = {
   precision: {
     label: 'Precision',
-    color: '#FF6347',
+    color: 'hsl(var(--chart-1))',
   },
   recall: {
     label: 'Recall',
-    color: '#1E90FF',
+    color: 'hsl(var(--chart-2))',
   },
   map50: {
     label: 'mAP50',
-    color: '#32CD30',
+    color: 'hsl(var(--chart-3))',
   },
   map5095: {
     label: 'mAP50-95',
-    color: '#BA55D3',
+    color: 'hsl(var(--chart-4))',
   },
   fitness: {
     label: 'Fitness',
-    color: '#FF1493',
+    color: 'hsl(var(--chart-5))',
   },
 } satisfies ChartConfig;
 
 export default function ModelBarChart({ data, className }: ModelBarChartProps) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -73,15 +76,17 @@ export default function ModelBarChart({ data, className }: ModelBarChartProps) {
               dataKey="value"
               strokeWidth={0}
               radius={8}
-              activeIndex={2}
-              activeBar={({ ...props }) => {
+              fillOpacity={1}
+              onMouseEnter={(_, index) => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
+              shape={({ ...props }) => {
                 return (
                   <Rectangle
                     {...props}
-                    fillOpacity={1}
-                    stroke={props.payload.fill}
-                    strokeDasharray={0}
-                    strokeDashoffset={0}
+                    fill={props.fill}
+                    fillOpacity={activeIndex === props.index ? 0.8 : 1}
+                    stroke={activeIndex === props.index ? props.fill : 'none'}
+                    strokeWidth={activeIndex === props.index ? 2 : 0}
                   />
                 );
               }}
