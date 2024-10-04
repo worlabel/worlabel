@@ -31,52 +31,11 @@ export default function WorkspaceDropdownMenu({
   const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState<boolean>(false);
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
 
-  const handleOpenUploadFile = () => setIsOpenUploadFile(true);
-
-  const handleCloseUploadFile = () => {
-    setIsOpenUploadFile(false);
-  };
-
-  const handleFileCount = (fileCount: number) => {
-    setFileCount(fileCount);
-  };
-
-  const handleOpenUploadPresigned = () => setIsOpenUploadPresigned(true);
-
-  const handleCloseUploadPresigned = () => {
-    setIsOpenUploadPresigned(false);
-  };
-
-  const handlePresignedCount = (fileCount: number) => {
-    setPresignedCount(fileCount);
-  };
-
-  const handleOpenUploadFolderFile = () => setIsOpenUploadFolderFile(true);
-
-  const handleCloseUploadFolderFile = () => {
-    setIsOpenUploadFolderFile(false);
-  };
-
-  const handleOpenUploadFolder = () => setIsOpenUploadFolder(true);
-
-  const handleCloseUploadFolder = () => {
-    setIsOpenUploadFolder(false);
-  };
-
-  const handleOpenUploadZip = () => setIsOpenUploadZip(true);
-
-  const handleCloseUploadZip = () => {
-    setIsOpenUploadZip(false);
-  };
-
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Menu
-            size={16}
-            className="stroke-gray-900"
-          />
+          <Menu size={16} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuItem
@@ -87,11 +46,17 @@ export default function WorkspaceDropdownMenu({
             프로젝트 이름 수정
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleOpenUploadFile}>파일 업로드</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadPresigned}>파일 업로드 (PresignedUrl 이용)</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadFolderFile}>폴더 업로드 (파일 업로드 API 이용)</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadFolder}>폴더 업로드 (백엔드 구현 필요)</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleOpenUploadZip}>폴더 압축파일 업로드</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenUploadFile(true)}>파일 업로드</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenUploadPresigned(true)}>
+            파일 업로드 (PresignedUrl 이용)
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenUploadFolderFile(true)}>
+            폴더 업로드 (파일 업로드 API 이용)
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenUploadFolder(true)}>
+            폴더 업로드 (백엔드 구현 필요)
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenUploadZip(true)}>폴더 압축파일 업로드</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -103,9 +68,9 @@ export default function WorkspaceDropdownMenu({
         <DialogContent className="max-w-2xl">
           <DialogHeader title={fileCount > 0 ? `파일 업로드 (${fileCount})` : '파일 업로드'} />
           <ImageUploadFileForm
-            onClose={handleCloseUploadFile}
+            onClose={() => setIsOpenUploadFile(false)}
             onRefetch={onRefetch}
-            onFileCount={handleFileCount}
+            onFileCount={(fileCount: number) => setFileCount(fileCount)}
             projectId={projectId}
             folderId={folderId}
           />
@@ -122,9 +87,9 @@ export default function WorkspaceDropdownMenu({
             title={presignedCount > 0 ? `파일 업로드 PreSigned (${presignedCount})` : '파일 업로드 PreSigned'}
           />
           <ImageUploadPresignedForm
-            onClose={handleCloseUploadPresigned}
+            onClose={() => setIsOpenUploadPresigned(false)}
             onRefetch={onRefetch}
-            onFileCount={handlePresignedCount}
+            onFileCount={(fileCount: number) => setPresignedCount(fileCount)}
             projectId={projectId}
             folderId={folderId}
           />
@@ -139,7 +104,7 @@ export default function WorkspaceDropdownMenu({
         <DialogContent className="max-w-2xl">
           <DialogHeader title="폴더 업로드 (파일 업로드 API 이용)" />
           <ImageUploadFolderFileForm
-            onClose={handleCloseUploadFolderFile}
+            onClose={() => setIsOpenUploadFolderFile(false)}
             onRefetch={onRefetch}
             projectId={projectId}
             folderId={folderId}
@@ -155,7 +120,7 @@ export default function WorkspaceDropdownMenu({
         <DialogContent className="max-w-2xl">
           <DialogHeader title="폴더 업로드 (백엔드 구현 필요)" />
           <ImageUploadFolderForm
-            onClose={handleCloseUploadFolder}
+            onClose={() => setIsOpenUploadFolder(false)}
             onRefetch={onRefetch}
             projectId={projectId}
             folderId={folderId}
@@ -171,7 +136,7 @@ export default function WorkspaceDropdownMenu({
         <DialogContent className="max-w-2xl">
           <DialogHeader title="폴더 압축파일 업로드" />
           <ImageUploadZipForm
-            onClose={handleCloseUploadZip}
+            onClose={() => setIsOpenUploadZip(false)}
             onRefetch={onRefetch}
             projectId={projectId}
             folderId={folderId}

@@ -34,7 +34,7 @@ export default function WorkSpaceCreateModal({ onSubmit }: WorkSpaceCreateModalP
         </button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader title="새 워크스페이스" />
+        <DialogHeader title="새 워크스페이스 추가" />
         <WorkSpaceCreateForm onSubmit={handleFormSubmit} />
       </DialogContent>
     </Dialog>
