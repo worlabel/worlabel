@@ -2,10 +2,9 @@ package com.worlabel.domain.model.controller;
 
 import com.worlabel.domain.model.entity.dto.AiModelRequest;
 import com.worlabel.domain.model.entity.dto.AiModelResponse;
+import com.worlabel.domain.model.entity.dto.MemoryResponse;
 import com.worlabel.domain.model.entity.dto.ModelTrainRequest;
 import com.worlabel.domain.model.service.AiModelService;
-import com.worlabel.domain.progress.service.ProgressService;
-import com.worlabel.domain.project.entity.dto.ProjectRequest;
 import com.worlabel.global.annotation.CurrentUser;
 import com.worlabel.global.config.swagger.SwaggerApiError;
 import com.worlabel.global.config.swagger.SwaggerApiSuccess;
@@ -81,5 +80,13 @@ public class AiModelController {
             @PathVariable("model_id") final Integer modelId) {
         log.debug("다운로드 요청 projectId : {} modelId : {}", projectId, modelId);
         return aiModelService.modelDownload(projectId, modelId);
+    }
+
+    @Operation(summary = "GPU 서버 메모리 상태", description = "GPU 서버의 메모리 상태를 반환")
+    @SwaggerApiSuccess(description = "프로젝트 모델이 성공적으로 다운로드됩니다.")
+    @SwaggerApiError({ErrorCode.EMPTY_REQUEST_PARAMETER, ErrorCode.SERVER_ERROR})
+    @GetMapping("/gpu/memory")
+    public MemoryResponse getMemory() {
+        return aiModelService.getMemory();
     }
 }

@@ -60,7 +60,6 @@ public class ImageController {
             @RequestBody final List<ImageMetaRequest> imageMetaList,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) {
-        log.debug("requestImageList {}", imageMetaList);
         return imageService.uploadFolderByPresignedImage(memberId, imageMetaList, projectId, folderId);
     }
 

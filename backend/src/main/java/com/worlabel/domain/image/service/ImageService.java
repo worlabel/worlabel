@@ -336,17 +336,17 @@ public class ImageService {
 
             // Presigned URL 생성
             String presignedUrl = s3UploadService.generatePresignedUrl(key, extension);
-            log.debug("presignedUrl {}", presignedUrl);
 
-            // DB에 이미지 메타데이터 저장
-            Image image = Image.of(fileName, s3UploadService.addBucketPrefix(key), extension, folder);
-            imageRepository.save(image);
+//            // DB에 이미지 메타데이터 저장
+//            Image image = Image.of(fileName, s3UploadService.addBucketPrefix(key), extension, folder);
+//            imageRepository.save(image);
 
             // Presigned URL과 함께 응답 데이터 생성
             ImagePresignedUrlResponse response = ImagePresignedUrlResponse.of(meta.getId(), presignedUrl);
             presignedUrls.add(response);
         }
 
+        log.debug("이미지 개수 {}",presignedUrls.size());
         return presignedUrls;
     }
     // 이미지 가져오면서 프로젝트 소속 여부를 확인
