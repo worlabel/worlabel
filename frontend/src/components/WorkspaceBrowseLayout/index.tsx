@@ -30,7 +30,6 @@ export default function WorkspaceBrowseLayout() {
   };
 
   const workspaces = workspacesResponse?.workspaceResponses ?? [];
-  console.log(workspaces);
 
   return (
     <>
