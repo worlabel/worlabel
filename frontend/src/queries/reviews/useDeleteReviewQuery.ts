@@ -9,6 +9,7 @@ export default function useDeleteReviewQuery() {
       deleteReview(projectId, reviewId, memberId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reviewDetail', variables.projectId, variables.reviewId] });
+      queryClient.invalidateQueries({ queryKey: ['reviewByStatus', variables.projectId, variables.reviewId] });
     },
   });
 }

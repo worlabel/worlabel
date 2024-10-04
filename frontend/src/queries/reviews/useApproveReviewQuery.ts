@@ -14,6 +14,7 @@ export default function useApproveReviewQuery({ projectId, reviewId, memberId }:
     mutationFn: () => approveReview(projectId, reviewId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviewDetail', projectId, reviewId, memberId] });
+      queryClient.invalidateQueries({ queryKey: ['reviewByStatus', projectId, reviewId, memberId] });
     },
   });
 }
