@@ -109,11 +109,11 @@ function ModelEvaluation({ projectId, selectedModel }: ModelEvaluationProps) {
           {/* 차트의 높이를 100%로 맞춤 */}
           <ModelBarChart
             data={[
-              { name: 'precision', value: resultData[0]?.precision, fill: 'var(--color-precision)' },
-              { name: 'recall', value: resultData[0]?.recall, fill: 'var(--color-recall)' },
-              { name: 'map50', value: resultData[0]?.map50, fill: 'var(--color-map50)' },
-              { name: 'map5095', value: resultData[0]?.map5095, fill: 'var(--color-map5095)' },
-              { name: 'fitness', value: resultData[0]?.fitness, fill: 'var(--color-fitness)' },
+              { name: 'precision', value: resultData[0]?.precision, fill: 'hsl(0, 0%, 0%)' },
+              { name: 'recall', value: resultData[0]?.recall, fill: 'hsl(0, 0%, 30%)' },
+              { name: 'map50', value: resultData[0]?.map50, fill: 'hsl(0, 0%, 25%)' },
+              { name: 'map5095', value: resultData[0]?.map5095, fill: 'hsl(0, 0%, 35%)' },
+              { name: 'fitness', value: resultData[0]?.fitness, fill: 'hsl(0, 0%, 15%)' },
             ]}
             className="h-full"
           />
