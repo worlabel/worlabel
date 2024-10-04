@@ -28,7 +28,7 @@ const ItemTypes = {
 };
 
 export default function ProjectStructure({ project }: { project: Project }) {
-  const { setProject, setCategories, folderId, setFolderId } = useProjectStore();
+  const { setProject, setCategories, setFolderId } = useProjectStore();
   const { image: selectedImage, setImage } = useCanvasStore();
   const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString());
   const { data: categories } = useProjectCategoriesQuery(project.id);
@@ -40,7 +40,9 @@ export default function ProjectStructure({ project }: { project: Project }) {
   const [containerHeight, setContainerHeight] = useState<number>(400);
 
   useEffect(() => {
-    setCategories(categories);
+    if (categories) {
+      setCategories(categories);
+    }
   }, [categories, setCategories]);
 
   useEffect(() => {
@@ -48,16 +50,10 @@ export default function ProjectStructure({ project }: { project: Project }) {
   }, [project, setProject]);
 
   useEffect(() => {
-    if (treeData) {
-      setFolderId(folderId);
-    }
-  }, [treeData, setFolderId, folderId]);
-
-  useEffect(() => {
     if (containerRef.current) {
       setContainerHeight(containerRef.current.clientHeight);
     }
-  }, [containerRef, treeData, isLoading]);
+  }, [treeData, isLoading]);
 
   const onToggle = useCallback(
     async (node: TreeNode, toggled: boolean) => {
