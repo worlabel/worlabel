@@ -1,4 +1,5 @@
 import { Label } from '@/types';
+import rectSort from '@/utils/rectSort';
 import Konva from 'konva';
 import { useEffect, useRef } from 'react';
 import { Line, Transformer } from 'react-konva';
@@ -39,8 +40,9 @@ export default function LabelRect({
       [info.coordinates[0][0] * scale.x + rect.x, info.coordinates[0][1] * scale.y + rect.y],
       [info.coordinates[1][0] * scale.x + rect.x, info.coordinates[1][1] * scale.y + rect.y],
     ];
+    const sortedPoints = rectSort(points as [[number, number], [number, number]]);
 
-    setLabel(points);
+    setLabel(sortedPoints);
     rectRef.current?.setPosition({ x: 0, y: 0 });
     rectRef.current?.scale({ x: 1, y: 1 });
   };
