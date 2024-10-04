@@ -75,7 +75,7 @@ export default function ProjectMemberManage() {
         updatePrivilege.mutate({
           projectId: Number(projectId),
           memberId,
-          privilegeData: { memberId, privilegeType: role },
+          privilegeType: role, // 수정: privilegeData 대신 privilegeType만 전달
         });
       } else {
         addProjectMember.mutate({
