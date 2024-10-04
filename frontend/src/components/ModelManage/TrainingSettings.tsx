@@ -70,6 +70,7 @@ export default function TrainingSettings({
             const selected = models?.find((model) => model.id === parseInt(value, 10));
             setSelectedModel(selected || null);
           }}
+          disabled={isWaiting || isTraining}
         />
       </div>
 
