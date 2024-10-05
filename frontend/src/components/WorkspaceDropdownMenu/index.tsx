@@ -49,10 +49,7 @@ export default function WorkspaceDropdownMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Menu
-            size={16}
-            className="stroke-gray-900"
-          />
+          <Menu size={16} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuItem onClick={() => console.log('프로젝트 이름 수정')}>프로젝트 이름 수정</DropdownMenuItem>
