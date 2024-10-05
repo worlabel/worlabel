@@ -37,30 +37,22 @@ export default function WorkspaceDropdownMenu({
   const uploadImageFileMutation = useUploadImageFileQuery();
   const uploadImageFolderMutation = useUploadImageFolderQuery();
 
-  const handleOpenUploadFile = () => setIsOpenUploadFile(true);
   const handleCloseUploadFile = () => setIsOpenUploadFile(false);
-  const handleOpenUploadPresigned = () => setIsOpenUploadPresigned(true);
-  const handleCloseUploadPresigned = () => setIsOpenUploadPresigned(false);
-  const handleOpenUploadFolderFile = () => setIsOpenUploadFolderFile(true);
   const handleCloseUploadFolderFile = () => setIsOpenUploadFolderFile(false);
-  const handleOpenUploadFolder = () => setIsOpenUploadFolder(true);
   const handleCloseUploadFolder = () => setIsOpenUploadFolder(false);
-  const handleOpenUploadZip = () => setIsOpenUploadZip(true);
   const handleCloseUploadZip = () => setIsOpenUploadZip(false);
 
   const handleFileCount = (fileCount: number) => {
     setFileCount(fileCount);
   };
-
-  const handlePresignedCount = (fileCount: number) => {
-    setPresignedCount(fileCount);
-  };
-
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Menu size={16} />
+          <Menu
+            size={16}
+            className="stroke-gray-900"
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
           <DropdownMenuItem onClick={() => console.log('프로젝트 이름 수정')}>프로젝트 이름 수정</DropdownMenuItem>
