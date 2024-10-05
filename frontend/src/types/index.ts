@@ -11,3 +11,4 @@ export * from './projectTypes';
 export * from './labelTypes';
 export * from './fileTypes';
 export * from './reportTypes';
+export * from './uploadTypes';

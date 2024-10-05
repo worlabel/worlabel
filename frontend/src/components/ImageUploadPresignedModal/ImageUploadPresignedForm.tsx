@@ -6,12 +6,12 @@ import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import useUploadImagePresignedQuery from '@/queries/projects/useUploadImagePresignedQuery.ts';
 
 export default function ImageUploadPresignedForm({
-                                                   onClose,
-                                                   onRefetch,
-                                                   onFileCount,
-                                                   projectId,
-                                                   folderId,
-                                                 }: {
+  onClose,
+  onRefetch,
+  onFileCount,
+  projectId,
+  folderId,
+}: {
   onClose: () => void;
   onRefetch?: () => void;
   onFileCount: (fileCount: number) => void;
@@ -26,10 +26,9 @@ export default function ImageUploadPresignedForm({
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
-  const [uploadStatus, setUploadStatus] = useState<(boolean | null)[]>([]); // 각 파일의 성공/실패 여부 관리
+  const [uploadStatus, setUploadStatus] = useState<(boolean | null)[]>([]);
 
   const uploadImageFile = useUploadImagePresignedQuery();
-
 
   const handleClose = () => {
     onClose();
@@ -51,7 +50,7 @@ export default function ImageUploadPresignedForm({
       });
 
       setFiles((prevFiles) => [...prevFiles, ...newImages]);
-      setUploadStatus((prevState) => [...prevState, ...newImages.map(()=> null)]);
+      setUploadStatus((prevState) => [...prevState, ...newImages.map(() => null)]);
     }
 
     event.target.value = '';
@@ -59,20 +58,38 @@ export default function ImageUploadPresignedForm({
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
+
     setIsDragging(true);
   };
 
   const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
     setIsDragging(false);
   };
 
-  const handleDrop = () => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     setIsDragging(false);
+
+    const droppedFiles = event.dataTransfer.files;
+    if (droppedFiles) {
+      const newImages = Array.from(droppedFiles).filter((file) => {
+        const fileExtension = file.name.split('.').pop()?.toLowerCase() ?? '';
+        return ['jpg', 'png', 'jpeg'].includes(fileExtension);
+      });
+
+      setFiles((prevFiles) => [...prevFiles, ...newImages]);
+      setUploadStatus((prevState) => [...prevState, ...newImages.map(() => null)]);
+    }
   };
 
   const handleRemoveFile = (index: number) => {
-    setFiles(files.filter((_, i) => i != index));
+    setFiles(files.filter((_, i) => i !== index));
+    setUploadStatus((prevState) => prevState.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
@@ -85,7 +102,6 @@ export default function ImageUploadPresignedForm({
         folderId,
         files,
         progressCallback: (index: number) => {
-          // 업로드 성공하면 상태 업데이트
           setUploadStatus((prevStatus) => {
             const newStatus = [...prevStatus];
             newStatus[index] = true; // 업로드 성공 시 true
@@ -100,18 +116,14 @@ export default function ImageUploadPresignedForm({
         },
         onError: () => {
           setIsFailed(true);
-          setUploadStatus((prevStatus) =>
-            prevStatus.map((status) => (status === null ? false : status))
-          ); // 실패 시 처리
+          setUploadStatus((prevStatus) => prevStatus.map((status) => (status === null ? false : status))); // 실패 시 처리
         },
-      },
+      }
     );
   };
 
   // 전체 진행 상황 계산
-  const totalProgress = Math.round(
-    (uploadStatus.filter((status) => status !== null).length / files.length) * 100
-  );
+  const totalProgress = Math.round((uploadStatus.filter((status) => status !== null).length / files.length) * 100);
 
   useEffect(() => {
     onFileCount(files.length);
@@ -123,8 +135,11 @@ export default function ImageUploadPresignedForm({
         <div
           className={cn(
             'relative flex h-[200px] w-full cursor-pointer items-center justify-center rounded-lg border-2 text-center',
-            isDragging ? 'border-solid border-primary bg-blue-200' : 'border-dashed border-gray-500 bg-gray-100',
+            isDragging ? 'border-solid border-primary bg-blue-200' : 'border-dashed border-gray-500 bg-gray-100'
           )}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         >
           <input
             type="file"
@@ -133,9 +148,6 @@ export default function ImageUploadPresignedForm({
             multiple
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleChange}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
           />
           {isDragging ? (
             <p className="text-primary">드래그한 파일을 여기에 놓으세요</p>
@@ -151,21 +163,43 @@ export default function ImageUploadPresignedForm({
       {files.length > 0 && (
         <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
           {files.map((file, index) => (
-            <li key={index} className="flex items-center justify-between p-1">
+            <li
+              key={index}
+              className="flex items-center justify-between p-1"
+            >
               <span className="truncate">{file.name}</span>
               {isUploading ? (
                 <div className="p-2">
                   {uploadStatus[index] === true ? (
-                    <CircleCheckBig className="stroke-green-500" size={16} strokeWidth="2" />
+                    <CircleCheckBig
+                      className="stroke-green-500"
+                      size={16}
+                      strokeWidth="2"
+                    />
                   ) : uploadStatus[index] === false ? (
-                    <CircleX className="stroke-red-500" size={16} strokeWidth="2" />
+                    <CircleX
+                      className="stroke-red-500"
+                      size={16}
+                      strokeWidth="2"
+                    />
                   ) : (
-                    <CircleDashed className="stroke-gray-500" size={16} strokeWidth="2" />
+                    <CircleDashed
+                      className="stroke-gray-500"
+                      size={16}
+                      strokeWidth="2"
+                    />
                   )}
                 </div>
               ) : (
-                <button className={'cursor-pointer p-2'} onClick={() => handleRemoveFile(index)}>
-                  <X color="red" size={16} strokeWidth="2" />
+                <button
+                  className={'cursor-pointer p-2'}
+                  onClick={() => handleRemoveFile(index)}
+                >
+                  <X
+                    color="red"
+                    size={16}
+                    strokeWidth="2"
+                  />
                 </button>
               )}
             </li>
@@ -173,7 +207,10 @@ export default function ImageUploadPresignedForm({
         </ul>
       )}
       {isUploading ? (
-        <Button onClick={handleClose} variant={isFailed ? 'red' : 'blue'}>
+        <Button
+          onClick={handleClose}
+          variant={isFailed ? 'red' : 'blue'}
+        >
           {isFailed
             ? '업로드 실패 (닫기)'
             : isUploaded
