@@ -85,13 +85,47 @@ export default function ImageUploadForm({
     setIsDragging(false);
   };
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setIsDragging(false);
-    const droppedFiles = event.dataTransfer.files;
-    if (droppedFiles) {
-      setFiles((prevFiles) => [...prevFiles, ...Array.from(droppedFiles)]);
+
+    const droppedItems = event.dataTransfer.items;
+
+    if (droppedItems) {
+      const allFiles: File[] = [];
+
+      const traverseFileTree = async (item: FileSystemEntry) => {
+        if (item.isFile) {
+          const file = await new Promise<File>((resolve, reject) => {
+            (item as FileSystemFileEntry).file(resolve, reject);
+          });
+          allFiles.push(file);
+        } else if (item.isDirectory) {
+          const directoryReader = (item as FileSystemDirectoryEntry).createReader();
+          const readEntries = () =>
+            new Promise<FileSystemEntry[]>((resolve, reject) => {
+              directoryReader.readEntries(resolve, reject);
+            });
+
+          let entries = await readEntries();
+          while (entries.length > 0) {
+            for (const entry of entries) {
+              await traverseFileTree(entry);
+            }
+            entries = await readEntries();
+          }
+        }
+      };
+
+      for (let i = 0; i < droppedItems.length; i++) {
+        const item = droppedItems[i].webkitGetAsEntry();
+        if (item) {
+          await traverseFileTree(item);
+        }
+      }
+
+      setFiles((prevFiles) => [...prevFiles, ...allFiles]);
     }
   };
 
