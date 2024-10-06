@@ -16,6 +16,10 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
 import MemoFileStatusIcon from './FileStatusIcon';
 import moveNodeInTree from '@/utils/moveNodeInTree';
+import ProjectContextMenu from './ProjectContextMenu';
+import { useContextMenu } from 'react-contexify';
+import 'react-contexify/ReactContexify.css';
+
 interface FlatNode extends TreeNode {
   depth: number;
   isLeaf: boolean;
@@ -26,6 +30,8 @@ interface FlatNode extends TreeNode {
 const ItemTypes = {
   NODE: 'node',
 };
+
+const MENU_ID = 'project-menu';
 
 export default function ProjectStructure({ project }: { project: Project }) {
   const { setProject, setCategories, setFolderId } = useProjectStore();
@@ -38,6 +44,9 @@ export default function ProjectStructure({ project }: { project: Project }) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState<number>(400);
+
+  const { show } = useContextMenu({ id: MENU_ID });
+  const [contextNode, setContextNode] = useState<FlatNode | null>(null);
 
   useEffect(() => {
     if (categories) {
@@ -78,7 +87,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
     (image: ImageResponse, parent?: FlatNode) => {
       setImage(image);
       if (parent) {
-        setFolderId(Number(parent.id)); // 클릭된 이미지의 상위 폴더 ID 설정
+        setFolderId(Number(parent.id));
       }
     },
     [setImage, setFolderId]
@@ -130,6 +139,12 @@ export default function ProjectStructure({ project }: { project: Project }) {
     [treeData, setTreeData, moveImageMutation, project.id]
   );
 
+  const handleContextMenu = (event: React.MouseEvent, node: FlatNode) => {
+    event.preventDefault();
+    setContextNode(node);
+    show({ event });
+  };
+
   const Row = ({ index, style, data }: ListChildComponentProps<FlatNode[]>) => {
     const node = data[index];
     const ref = useRef<HTMLButtonElement>(null);
@@ -160,7 +175,9 @@ export default function ProjectStructure({ project }: { project: Project }) {
           ...style,
           paddingLeft: `${node.depth * 12}px`,
         }}
-        className={`caption } flex w-full items-center gap-2 rounded-md py-0.5 pr-1 ${node.imageData && selectedImage?.id === node.imageData?.id ? 'bg-gray-200' : 'hover:bg-gray-100'} ${isDragging ? 'opacity-50' : ''}`}
+        className={`caption flex w-full items-center gap-2 rounded-md py-0.5 pr-1 ${
+          node.imageData && selectedImage?.id === node.imageData?.id ? 'bg-gray-200' : 'hover:bg-gray-100'
+        } ${isDragging ? 'opacity-50' : ''}`}
         onClick={() => {
           if (node.imageData) {
             handleImageClick(node.imageData as ImageResponse, node.parent);
@@ -168,6 +185,7 @@ export default function ProjectStructure({ project }: { project: Project }) {
             onToggle(node, !node.toggled);
           }
         }}
+        onContextMenu={(event) => handleContextMenu(event, node)}
       >
         <div className="flex items-center">
           {!node.imageData ? (
@@ -232,6 +250,19 @@ export default function ProjectStructure({ project }: { project: Project }) {
           <AutoLabelButton projectId={project.id} />
         </div>
       </div>
+
+      <ProjectContextMenu
+        projectId={project.id}
+        folderId={contextNode?.parent?.id ? Number(contextNode.parent.id) : 0}
+        node={
+          contextNode && contextNode.imageData
+            ? { id: Number(contextNode.id), type: 'image', name: contextNode.name }
+            : contextNode
+              ? { id: Number(contextNode.id), type: 'folder', name: contextNode.name }
+              : undefined
+        }
+        onRefetch={refetch}
+      />
     </DndProvider>
   );
 }
