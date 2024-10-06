@@ -4,48 +4,38 @@ import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import { FixedSizeList } from 'react-window';
-import { UseMutationResult } from '@tanstack/react-query';
-import { UploadZipParams, UploadFolderParams } from '@/types/uploadTypes';
+import useUploadFiles from '@/hooks/useUploadFiles';
+import { unzipFilesWithPath, extractFilesRecursivelyWithPath } from '@/utils/fileUtils';
 
-interface UploadFormProps {
+interface ImagePreSignedFormProps {
   onClose: () => void;
   onRefetch?: () => void;
   onFileCount: (fileCount: number) => void;
   projectId: number;
   folderId: number;
-  isFolderUpload?: boolean;
-  isZipUpload?: boolean;
-  isFolderBackendUpload?: boolean;
-  uploadImageZipMutation: UseMutationResult<unknown, Error, UploadZipParams, unknown>;
-  uploadImageFolderFileMutation: UseMutationResult<unknown, Error, UploadFolderParams, unknown>;
-  uploadImageFileMutation: UseMutationResult<unknown, Error, UploadFolderParams, unknown>;
-  uploadImageFolderMutation: UseMutationResult<unknown, Error, UploadFolderParams, unknown>;
+  uploadType: 'file' | 'folder' | 'zip';
 }
 
-export default function ImageUploadForm({
+export default function ImagePreSignedForm({
   onClose,
   onRefetch,
   onFileCount,
   projectId,
   folderId,
-  isFolderUpload = false,
-  isZipUpload = false,
-  isFolderBackendUpload = false,
-  uploadImageZipMutation,
-  uploadImageFolderFileMutation,
-  uploadImageFileMutation,
-  uploadImageFolderMutation,
-}: UploadFormProps) {
+  uploadType,
+}: ImagePreSignedFormProps) {
   const profile = useAuthStore((state) => state.profile);
   const memberId = profile?.id || 0;
 
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<{ path: string; file: File }[]>([]);
   const [inputKey, setInputKey] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+
+  const { uploadFiles } = useUploadFiles();
 
   const handleClose = () => {
     onClose();
@@ -67,7 +57,14 @@ export default function ImageUploadForm({
     const newFiles = event.target.files;
 
     if (newFiles) {
-      setFiles((prevFiles) => [...prevFiles, ...Array.from(newFiles)]);
+      const processedFiles: { path: string; file: File }[] = [];
+
+      for (const file of Array.from(newFiles)) {
+        const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+        processedFiles.push({ path, file });
+      }
+
+      setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
     }
 
     event.target.value = '';
@@ -90,104 +87,70 @@ export default function ImageUploadForm({
     event.stopPropagation();
     setIsDragging(false);
 
-    const droppedItems = event.dataTransfer.items;
-
-    if (droppedItems) {
-      const allFiles: File[] = [];
-
-      const traverseFileTree = async (item: FileSystemEntry) => {
-        if (item.isFile) {
-          const file = await new Promise<File>((resolve, reject) => {
-            (item as FileSystemFileEntry).file(resolve, reject);
-          });
-          allFiles.push(file);
-        } else if (item.isDirectory) {
-          const directoryReader = (item as FileSystemDirectoryEntry).createReader();
-          const readEntries = () =>
-            new Promise<FileSystemEntry[]>((resolve, reject) => {
-              directoryReader.readEntries(resolve, reject);
-            });
-
-          let entries = await readEntries();
-          while (entries.length > 0) {
-            for (const entry of entries) {
-              await traverseFileTree(entry);
-            }
-            entries = await readEntries();
-          }
-        }
-      };
+    if (uploadType === 'folder') {
+      const droppedItems = event.dataTransfer.items;
+      let processedFiles: { path: string; file: File }[] = [];
 
       for (let i = 0; i < droppedItems.length; i++) {
-        const item = droppedItems[i].webkitGetAsEntry();
-        if (item) {
-          await traverseFileTree(item);
+        const item = droppedItems[i];
+        if (item.kind === 'file') {
+          const entry = item.webkitGetAsEntry();
+          if (entry) {
+            const filesFromEntry = await extractFilesRecursivelyWithPath(entry, entry.name);
+            processedFiles = [...processedFiles, ...filesFromEntry];
+          }
         }
       }
 
-      setFiles((prevFiles) => [...prevFiles, ...allFiles]);
+      setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
+    } else {
+      const droppedFiles = event.dataTransfer.files;
+      if (droppedFiles) {
+        const processedFiles: { path: string; file: File }[] = [];
+        for (const file of Array.from(droppedFiles)) {
+          processedFiles.push({ path: file.name, file });
+        }
+        setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
+      }
     }
   };
 
   const handleRemoveFile = (index: number) => {
-    if (isFolderUpload) {
-      setFiles([]);
-      setInputKey((prevKey) => prevKey + 1);
-    } else {
-      setFiles(files.filter((_, i) => i !== index));
-    }
+    setFiles(files.filter((_, i) => i !== index));
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (files.length > 0) {
       setIsUploading(true);
       setIsUploaded(false);
       setIsFailed(false);
 
-      const progressCallback = (progress: number) => {
-        setProgress(progress);
-      };
+      let finalFiles: { path: string; file: File }[] = [];
 
-      if (isZipUpload) {
-        const variables: UploadZipParams = {
-          memberId,
+      for (const file of files) {
+        if (file.file.type === 'application/zip' || file.file.type === 'application/x-zip-compressed') {
+          console.log('업로드 전에 ZIP 파일 해제:', file.file.name);
+          const unzippedFiles = await unzipFilesWithPath(file.file);
+          console.log('해제된 파일:', unzippedFiles);
+          finalFiles = [...finalFiles, ...unzippedFiles];
+        } else {
+          finalFiles.push(file);
+        }
+      }
+
+      try {
+        await uploadFiles({
+          files: finalFiles,
           projectId,
           folderId,
-          file: files[0],
-          progressCallback,
-        };
-        uploadImageZipMutation.mutate(variables, {
-          onSuccess: () => {
-            handleRefetch();
-            setIsUploaded(true);
-          },
-          onError: () => {
-            setIsFailed(true);
-          },
-        });
-      } else {
-        const variables: UploadFolderParams = {
           memberId,
-          projectId,
-          folderId,
-          files,
-          progressCallback,
-        };
-        const mutation = isFolderBackendUpload
-          ? uploadImageFolderMutation
-          : isFolderUpload
-            ? uploadImageFolderFileMutation
-            : uploadImageFileMutation;
-
-        mutation.mutate(variables, {
-          onSuccess: () => {
-            handleRefetch();
-            setIsUploaded(true);
-          },
-          onError: () => {
-            setIsFailed(true);
-          },
+          onProgress: (progressValue) => setProgress(progressValue),
         });
+        setIsUploaded(true);
+        handleRefetch();
+      } catch (error) {
+        setIsFailed(true);
+        console.error('업로드 실패:', error);
       }
     }
   };
@@ -211,20 +174,23 @@ export default function ImageUploadForm({
           <input
             key={inputKey}
             type="file"
-            {...(isFolderUpload ? { webkitdirectory: '' } : { multiple: !isZipUpload })}
-            accept={isZipUpload ? '.zip' : undefined}
+            webkitdirectory={uploadType === 'folder' ? '' : undefined}
+            multiple={uploadType !== 'zip'}
+            accept={uploadType === 'zip' ? '.zip' : undefined}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleChange}
           />
           {isDragging ? (
             <p className="text-primary">
-              {isFolderUpload ? '드래그한 폴더를 여기에 놓으세요' : '드래그한 파일을 여기에 놓으세요'}
+              {uploadType === 'folder' ? '드래그한 폴더를 여기에 놓으세요' : '드래그한 파일을 여기에 놓으세요'}
             </p>
           ) : (
             <p className="text-gray-500">
-              {isFolderUpload
+              {uploadType === 'folder'
                 ? '폴더를 업로드하려면 여기를 클릭하거나 폴더를 드래그하여 여기에 놓으세요'
-                : '파일을 업로드하려면 여기를 클릭하거나 파일을 드래그하여 여기에 놓으세요'}
+                : uploadType === 'zip'
+                  ? 'ZIP 파일을 업로드하려면 여기를 클릭하거나 ZIP 파일을 드래그하여 여기에 놓으세요'
+                  : '파일을 업로드하려면 여기를 클릭하거나 파일을 드래그하여 여기에 놓으세요'}
             </p>
           )}
         </div>
@@ -243,7 +209,7 @@ export default function ImageUploadForm({
                 className="flex items-center justify-between p-1"
                 style={style}
               >
-                <span className="truncate">{files[index].webkitRelativePath || files[index].name}</span>
+                <span className="truncate">{files[index].path}</span>
                 {isUploading ? (
                   <div className="p-2">
                     {isUploaded ? (

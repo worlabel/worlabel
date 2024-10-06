@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
-import useUploadImagePresignedQuery from '@/queries/projects/useUploadImagePresignedQuery.ts';
+import useUploadImagePresignedQuery from '@/queries/images/useUploadImagePresignedQuery';
 
 export default function ImageUploadPresignedForm({
   onClose,
