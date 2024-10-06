@@ -14,6 +14,7 @@ import useUploadImageFileQuery from '@/queries/projects/useUploadImageFileQuery'
 import useUploadImageFolderFileQuery from '@/queries/projects/useUploadImageFolderFileQuery';
 import useUploadImageZipQuery from '@/queries/projects/useUploadImageZipQuery';
 import useUploadImageFolderQuery from '@/queries/projects/useUploadImageFolderQuery';
+import ImagePreSignedForm from '../ImagePreSignedForm';
 
 export default function WorkspaceDropdownMenu({
   projectId,
@@ -31,6 +32,7 @@ export default function WorkspaceDropdownMenu({
   const [isOpenUploadFolderFile, setIsOpenUploadFolderFile] = React.useState<boolean>(false);
   const [isOpenUploadFolder, setIsOpenUploadFolder] = React.useState<boolean>(false);
   const [isOpenUploadZip, setIsOpenUploadZip] = React.useState<boolean>(false);
+  const [isOpenTestUpload, setIsOpenTestUpload] = React.useState<boolean>(false);
 
   const uploadImageZipMutation = useUploadImageZipQuery();
   const uploadImageFolderFileMutation = useUploadImageFolderFileQuery();
@@ -41,10 +43,12 @@ export default function WorkspaceDropdownMenu({
   const handleCloseUploadFolderFile = () => setIsOpenUploadFolderFile(false);
   const handleCloseUploadFolder = () => setIsOpenUploadFolder(false);
   const handleCloseUploadZip = () => setIsOpenUploadZip(false);
+  const handleCloseTestUpload = () => setIsOpenTestUpload(false);
 
   const handleFileCount = (fileCount: number) => {
     setFileCount(fileCount);
   };
+
   return (
     <>
       <DropdownMenu>
@@ -65,9 +69,14 @@ export default function WorkspaceDropdownMenu({
             폴더 업로드 (백엔드 구현 필요)
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsOpenUploadZip(true)}>폴더 압축파일 업로드</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsOpenTestUpload(true)}>
+            테스트 업로드 (PresignedUrl 이용)
+          </DropdownMenuItem>{' '}
+          {/* 새로운 메뉴 항목 추가 */}
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* 기존 Dialogs */}
       <Dialog
         open={isOpenUploadFile}
         onOpenChange={setIsOpenUploadFile}
@@ -170,6 +179,25 @@ export default function WorkspaceDropdownMenu({
             uploadImageFolderFileMutation={uploadImageFolderFileMutation}
             uploadImageFileMutation={uploadImageFileMutation}
             uploadImageFolderMutation={uploadImageFolderMutation}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* 테스트 업로드 Dialog */}
+      <Dialog
+        open={isOpenTestUpload}
+        onOpenChange={setIsOpenTestUpload}
+      >
+        <DialogTrigger asChild></DialogTrigger>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader title="테스트 업로드 (PresignedUrl 이용)" />
+          <ImagePreSignedForm
+            onClose={handleCloseTestUpload}
+            onRefetch={onRefetch}
+            onFileCount={(fileCount: number) => setFileCount(fileCount)}
+            projectId={projectId}
+            folderId={folderId}
+            uploadType="folder" // zip flie 가능
           />
         </DialogContent>
       </Dialog>
