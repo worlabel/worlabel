@@ -10,10 +10,8 @@ export async function moveImage(projectId: number, folderId: number, imageId: nu
   return api.put(`/projects/${projectId}/folders/${folderId}/images/${imageId}`, moveRequest);
 }
 
-export async function deleteImage(imageId: number, memberId: number) {
-  return api.delete(`/images/${imageId}`, {
-    params: { memberId },
-  });
+export async function deleteImage(projectId: number, folderId: number, imageId: number) {
+  return api.delete(`/projects/${projectId}/folders/${folderId}/images/${imageId}`);
 }
 
 export async function changeImageStatus(

@@ -23,7 +23,6 @@ export default function useTreeData(projectId: string) {
     currentFolderId || 0,
     currentFolderId !== null
   );
-
   const updateTreeData = useCallback((folder: FolderResponse, isRoot: boolean = false) => {
     if (!folder) return;
 
@@ -42,7 +41,7 @@ export default function useTreeData(projectId: string) {
       const updateNode = (currentNode: TreeNode): TreeNode => {
         if (currentNode.id !== folder.id.toString()) {
           return currentNode.children
-            ? { ...currentNode, children: currentNode.children.map(updateNode) }
+            ? { ...currentNode, children: currentNode.children.map(updateNode).filter(Boolean) }
             : currentNode;
         }
 
