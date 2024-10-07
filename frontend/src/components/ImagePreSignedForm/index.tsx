@@ -5,6 +5,7 @@ import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import { FixedSizeList } from 'react-window';
 import useUploadFiles from '@/hooks/useUploadFiles';
+import useUploadImagePresignedQuery from '@/queries/images/useUploadImagePresignedQuery';
 import { unzipFilesWithPath, extractFilesRecursivelyWithPath } from '@/utils/fileUtils';
 
 interface ImagePreSignedFormProps {
@@ -34,9 +35,11 @@ export default function ImagePreSignedForm({
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [uploadStatus, setUploadStatus] = useState<(boolean | null)[]>([]);
 
+  // Ensure to destructure the uploadFiles function properly from the hook
   const { uploadFiles } = useUploadFiles();
-
+  const uploadImageFile = useUploadImagePresignedQuery();
   const handleClose = () => {
     onClose();
     setFiles([]);
@@ -45,6 +48,7 @@ export default function ImagePreSignedForm({
     setIsUploaded(false);
     setIsFailed(false);
     setProgress(0);
+    setUploadStatus([]);
   };
 
   const handleRefetch = () => {
@@ -65,6 +69,7 @@ export default function ImagePreSignedForm({
       }
 
       setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
+      setUploadStatus((prevStatus) => [...prevStatus, ...processedFiles.map(() => null)]);
     }
 
     event.target.value = '';
@@ -103,6 +108,7 @@ export default function ImagePreSignedForm({
       }
 
       setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
+      setUploadStatus((prevStatus) => [...prevStatus, ...processedFiles.map(() => null)]);
     } else {
       const droppedFiles = event.dataTransfer.files;
       if (droppedFiles) {
@@ -111,12 +117,14 @@ export default function ImagePreSignedForm({
           processedFiles.push({ path: file.name, file });
         }
         setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
+        setUploadStatus((prevStatus) => [...prevStatus, ...processedFiles.map(() => null)]);
       }
     }
   };
 
   const handleRemoveFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
+    setUploadStatus((prevStatus) => prevStatus.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
@@ -138,19 +146,52 @@ export default function ImagePreSignedForm({
         }
       }
 
-      try {
-        await uploadFiles({
-          files: finalFiles,
-          projectId,
-          folderId,
-          memberId,
-          onProgress: (progressValue) => setProgress(progressValue),
-        });
-        setIsUploaded(true);
-        handleRefetch();
-      } catch (error) {
-        setIsFailed(true);
-        console.error('업로드 실패:', error);
+      if (uploadType === 'file') {
+        uploadImageFile.mutate(
+          {
+            memberId,
+            projectId,
+            folderId,
+            files: finalFiles.map(({ file }) => file), // Extract only the file
+            progressCallback: (index: number) => {
+              setUploadStatus((prevStatus) => {
+                const newStatus = [...prevStatus];
+                newStatus[index] = true; // Mark as uploaded
+                return newStatus;
+              });
+            },
+          },
+          {
+            onSuccess: () => {
+              handleRefetch();
+              setIsUploaded(true);
+            },
+            onError: () => {
+              setIsFailed(true);
+              setUploadStatus((prevStatus) => prevStatus.map((status) => (status === null ? false : status)));
+            },
+          }
+        );
+      } else {
+        try {
+          await uploadFiles({
+            files: finalFiles,
+            projectId,
+            folderId,
+            memberId,
+            onProgress: (progressValue: number) => {
+              setProgress(progressValue);
+            },
+          });
+
+          setUploadStatus(finalFiles.map(() => true));
+          setIsUploaded(true);
+          handleRefetch();
+        } catch (error) {
+          setIsFailed(true);
+          setUploadStatus(finalFiles.map(() => false));
+          console.error('업로드 실패:', error);
+        }
       }
     }
   };
@@ -176,7 +217,7 @@ export default function ImagePreSignedForm({
             type="file"
             webkitdirectory={uploadType === 'folder' ? '' : undefined}
             multiple={uploadType !== 'zip'}
-            accept={uploadType === 'zip' ? '.zip' : undefined}
+            accept={uploadType === 'zip' ? '.zip' : uploadType === 'file' ? '.jpg,.jpeg,.png' : undefined}
             className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             onChange={handleChange}
           />
@@ -212,13 +253,13 @@ export default function ImagePreSignedForm({
                 <span className="truncate">{files[index].path}</span>
                 {isUploading ? (
                   <div className="p-2">
-                    {isUploaded ? (
+                    {uploadStatus[index] === true ? (
                       <CircleCheckBig
                         className="stroke-green-500"
                         size={16}
                         strokeWidth="2"
                       />
-                    ) : isFailed ? (
+                    ) : uploadStatus[index] === false ? (
                       <CircleX
                         className="stroke-red-500"
                         size={16}
