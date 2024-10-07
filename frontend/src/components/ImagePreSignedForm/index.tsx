@@ -175,7 +175,7 @@ export default function ImagePreSignedForm({
       } else {
         try {
           await uploadFiles({
-            files: finalFiles, // Pass the files with path and file
+            files: finalFiles,
             projectId,
             folderId,
             memberId,
