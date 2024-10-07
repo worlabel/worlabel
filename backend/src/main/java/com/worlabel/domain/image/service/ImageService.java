@@ -337,9 +337,9 @@ public class ImageService {
             // Presigned URL 생성
             String presignedUrl = s3UploadService.generatePresignedUrl(key, extension);
 
-//            // DB에 이미지 메타데이터 저장
-//            Image image = Image.of(fileName, s3UploadService.addBucketPrefix(key), extension, folder);
-//            imageRepository.save(image);
+            // DB에 이미지 메타데이터 저장
+            Image image = Image.of(fileName, s3UploadService.addBucketPrefix(key), extension, folder);
+            imageRepository.save(image);
 
             // Presigned URL과 함께 응답 데이터 생성
             ImagePresignedUrlResponse response = ImagePresignedUrlResponse.of(meta.getId(), presignedUrl);
