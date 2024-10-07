@@ -166,7 +166,6 @@ export default function ImagePreSignedForm({
     }
   };
 
-  // 전체 진행 상황 계산
   const totalProgress = Math.round((uploadStatus.filter((status) => status !== null).length / files.length) * 100);
 
   useEffect(() => {
