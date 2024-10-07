@@ -33,7 +33,6 @@ export default function useUploadFiles() {
 
         const newFolder = await createFolderMutation.mutateAsync({
           projectId,
-          memberId,
           folderData: {
             title: folderName,
             parentId: parentId,
