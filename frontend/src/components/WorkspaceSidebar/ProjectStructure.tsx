@@ -11,8 +11,7 @@ import AutoLabelButton from './AutoLabelButton';
 import { Folder, Image as ImageIcon } from 'lucide-react';
 import { Spinner } from '../ui/spinner';
 import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { useDrag, useDrop } from 'react-dnd';
 import useFolderQuery from '@/queries/folders/useFolderQuery';
 import MemoFileStatusIcon from './FileStatusIcon';
 import moveNodeInTree from '@/utils/moveNodeInTree';
@@ -36,7 +35,7 @@ const MENU_ID = 'project-menu';
 export default function ProjectStructure({ project }: { project: Project }) {
   const { setProject, setCategories, setFolderId } = useProjectStore();
   const { image: selectedImage, setImage } = useCanvasStore();
-  const { treeData, fetchNodeData, setTreeData } = useTreeData(project.id.toString());
+  const { treeData, fetchNodeData, fetchContextFolderData, setTreeData } = useTreeData(project.id.toString());
   const { data: categories } = useProjectCategoriesQuery(project.id);
   const { isLoading, refetch } = useFolderQuery(project.id.toString(), 0);
 
@@ -142,6 +141,8 @@ export default function ProjectStructure({ project }: { project: Project }) {
   const handleContextMenu = (event: React.MouseEvent, node: FlatNode) => {
     event.preventDefault();
     setContextNode(node);
+    const parentId = node.parent ? Number(node.parent.id) : null;
+    fetchContextFolderData(parentId);
     show({ event });
   };
 
@@ -209,46 +210,44 @@ export default function ProjectStructure({ project }: { project: Project }) {
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div
-        className="box-border flex h-full min-h-0 flex-col overflow-x-hidden bg-gray-50"
-        ref={containerRef}
-      >
-        <div className="flex h-full flex-col gap-2 overflow-hidden px-1 pb-2">
-          <header className="flex w-full items-center gap-2 rounded-md bg-white p-2 shadow-sm">
-            <div className="flex w-full min-w-0 items-center gap-1 pr-1">
-              <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap text-gray-600">{project.type}</h2>
-            </div>
-            <WorkspaceDropdownMenu
-              projectId={project.id}
-              folderId={0}
-              onRefetch={refetch}
+    <div
+      className="box-border flex h-full min-h-0 flex-col overflow-x-hidden bg-gray-50"
+      ref={containerRef}
+    >
+      <div className="flex h-full flex-col gap-2 overflow-hidden px-1 pb-2">
+        <header className="flex w-full items-center gap-2 rounded-md bg-white p-2 shadow-sm">
+          <div className="flex w-full min-w-0 items-center gap-1 pr-1">
+            <h2 className="caption overflow-hidden text-ellipsis whitespace-nowrap text-gray-600">{project.type}</h2>
+          </div>
+          <WorkspaceDropdownMenu
+            projectId={project.id}
+            folderId={0}
+            onRefetch={refetch}
+          />
+        </header>
+        {isLoading || !treeData ? (
+          <div className="flex h-full items-center justify-center">
+            <Spinner
+              show={true}
+              size={'large'}
             />
-          </header>
-          {isLoading || !treeData ? (
-            <div className="flex h-full items-center justify-center">
-              <Spinner
-                show={true}
-                size={'large'}
-              />
-            </div>
-          ) : (
-            <List
-              height={Math.min(flatData.length * 20, containerHeight)}
-              itemCount={flatData.length}
-              itemSize={20}
-              width={'100%'}
-              itemData={flatData}
-              itemKey={getItemKey}
-              className="flex-1 overflow-x-hidden"
-            >
-              {Row}
-            </List>
-          )}
-        </div>
-        <div className="flex">
-          <AutoLabelButton projectId={project.id} />
-        </div>
+          </div>
+        ) : (
+          <List
+            height={Math.min(flatData.length * 20, containerHeight)}
+            itemCount={flatData.length}
+            itemSize={20}
+            width={'100%'}
+            itemData={flatData}
+            itemKey={getItemKey}
+            className="flex-1 overflow-x-hidden"
+          >
+            {Row}
+          </List>
+        )}
+      </div>
+      <div className="flex">
+        <AutoLabelButton projectId={project.id} />
       </div>
 
       <ProjectContextMenu
@@ -263,6 +262,6 @@ export default function ProjectStructure({ project }: { project: Project }) {
         }
         onRefetch={refetch}
       />
-    </DndProvider>
+    </div>
   );
 }
