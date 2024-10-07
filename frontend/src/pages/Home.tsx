@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import GoogleLogo from '@/assets/icons/web_neutral_rd_ctn@1x.png';
+import GoogleLogo from '@/assets/icons/web_light_rd_ctn@1x.png';
 import useAuthStore from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 
