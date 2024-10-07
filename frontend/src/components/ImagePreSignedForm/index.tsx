@@ -5,7 +5,6 @@ import useAuthStore from '@/stores/useAuthStore';
 import { CircleCheckBig, CircleDashed, CircleX, X } from 'lucide-react';
 import { FixedSizeList } from 'react-window';
 import useUploadFiles from '@/hooks/useUploadFiles';
-import useUploadImagePresignedQuery from '@/queries/images/useUploadImagePresignedQuery';
 import { unzipFilesWithPath, extractFilesRecursivelyWithPath } from '@/utils/fileUtils';
 
 interface ImagePreSignedFormProps {
@@ -34,20 +33,16 @@ export default function ImagePreSignedForm({
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUploaded, setIsUploaded] = useState<boolean>(false);
   const [isFailed, setIsFailed] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
-  const [uploadStatus, setUploadStatus] = useState<(boolean | null)[]>([]);
+  const [uploadStatus, setUploadStatus] = useState<('uploading' | 'success' | 'failed' | null)[]>([]);
 
-  // Ensure to destructure the uploadFiles function properly from the hook
   const { uploadFiles } = useUploadFiles();
-  const uploadImageFile = useUploadImagePresignedQuery();
+
   const handleClose = () => {
     onClose();
     setFiles([]);
     setInputKey((prevKey) => prevKey + 1);
-    setIsUploading(false);
-    setIsUploaded(false);
     setIsFailed(false);
-    setProgress(0);
+    setIsUploaded(false);
     setUploadStatus([]);
   };
 
@@ -92,9 +87,10 @@ export default function ImagePreSignedForm({
     event.stopPropagation();
     setIsDragging(false);
 
+    let processedFiles: { path: string; file: File }[] = [];
+
     if (uploadType === 'folder') {
       const droppedItems = event.dataTransfer.items;
-      let processedFiles: { path: string; file: File }[] = [];
 
       for (let i = 0; i < droppedItems.length; i++) {
         const item = droppedItems[i];
@@ -106,20 +102,17 @@ export default function ImagePreSignedForm({
           }
         }
       }
-
-      setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
-      setUploadStatus((prevStatus) => [...prevStatus, ...processedFiles.map(() => null)]);
     } else {
       const droppedFiles = event.dataTransfer.files;
       if (droppedFiles) {
-        const processedFiles: { path: string; file: File }[] = [];
         for (const file of Array.from(droppedFiles)) {
           processedFiles.push({ path: file.name, file });
         }
-        setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
-        setUploadStatus((prevStatus) => [...prevStatus, ...processedFiles.map(() => null)]);
       }
     }
+
+    setFiles((prevFiles) => [...prevFiles, ...processedFiles]);
+    setUploadStatus((prevStatus) => [...prevStatus, ...processedFiles.map(() => null)]);
   };
 
   const handleRemoveFile = (index: number) => {
@@ -130,71 +123,51 @@ export default function ImagePreSignedForm({
   const handleUpload = async () => {
     if (files.length > 0) {
       setIsUploading(true);
-      setIsUploaded(false);
       setIsFailed(false);
+      setIsUploaded(false);
+
+      setUploadStatus(files.map(() => 'uploading'));
 
       let finalFiles: { path: string; file: File }[] = [];
 
       for (const file of files) {
         if (file.file.type === 'application/zip' || file.file.type === 'application/x-zip-compressed') {
-          console.log('업로드 전에 ZIP 파일 해제:', file.file.name);
           const unzippedFiles = await unzipFilesWithPath(file.file);
-          console.log('해제된 파일:', unzippedFiles);
           finalFiles = [...finalFiles, ...unzippedFiles];
         } else {
           finalFiles.push(file);
         }
       }
 
-      if (uploadType === 'file') {
-        uploadImageFile.mutate(
-          {
-            memberId,
-            projectId,
-            folderId,
-            files: finalFiles.map(({ file }) => file), // Extract only the file
-            progressCallback: (index: number) => {
-              setUploadStatus((prevStatus) => {
-                const newStatus = [...prevStatus];
-                newStatus[index] = true; // Mark as uploaded
-                return newStatus;
-              });
-            },
+      try {
+        await uploadFiles({
+          files: finalFiles,
+          projectId,
+          folderId,
+          memberId,
+          onProgress: (progress) => {
+            setUploadStatus((prevStatus) => {
+              const completedFiles = Math.round((progress / 100) * files.length);
+              const newStatus = prevStatus.map((status, index) => (index < completedFiles ? 'success' : status));
+              return newStatus;
+            });
           },
-          {
-            onSuccess: () => {
-              handleRefetch();
-              setIsUploaded(true);
-            },
-            onError: () => {
-              setIsFailed(true);
-              setUploadStatus((prevStatus) => prevStatus.map((status) => (status === null ? false : status)));
-            },
-          }
-        );
-      } else {
-        try {
-          await uploadFiles({
-            files: finalFiles,
-            projectId,
-            folderId,
-            memberId,
-            onProgress: (progressValue: number) => {
-              setProgress(progressValue);
-            },
-          });
+          useSingleUpload: uploadType === 'file',
+        });
 
-          setUploadStatus(finalFiles.map(() => true));
-          setIsUploaded(true);
-          handleRefetch();
-        } catch (error) {
-          setIsFailed(true);
-          setUploadStatus(finalFiles.map(() => false));
-          console.error('업로드 실패:', error);
-        }
+        setUploadStatus((prevStatus) => prevStatus.map(() => 'success'));
+        setIsUploaded(true);
+        handleRefetch();
+      } catch (error) {
+        setUploadStatus((prevStatus) => prevStatus.map((status) => (status === 'uploading' ? 'failed' : status)));
+        setIsFailed(true);
+        console.error('업로드 실패:', error);
       }
     }
   };
+
+  // 전체 진행 상황 계산
+  const totalProgress = Math.round((uploadStatus.filter((status) => status !== null).length / files.length) * 100);
 
   useEffect(() => {
     onFileCount(files.length);
@@ -237,46 +210,44 @@ export default function ImagePreSignedForm({
         </div>
       )}
       {files.length > 0 && (
-        <ul className="m-0 max-h-[260px] list-none overflow-y-auto p-0">
-          <FixedSizeList
-            height={260}
-            itemCount={files.length}
-            itemSize={40}
-            width="100%"
-          >
-            {({ index, style }) => (
-              <li
-                key={index}
-                className="flex items-center justify-between p-1"
-                style={style}
-              >
-                <span className="truncate">{files[index].path}</span>
-                {isUploading ? (
-                  <div className="p-2">
-                    {uploadStatus[index] === true ? (
-                      <CircleCheckBig
-                        className="stroke-green-500"
-                        size={16}
-                        strokeWidth="2"
-                      />
-                    ) : uploadStatus[index] === false ? (
-                      <CircleX
-                        className="stroke-red-500"
-                        size={16}
-                        strokeWidth="2"
-                      />
-                    ) : (
-                      <CircleDashed
-                        className="stroke-gray-500"
-                        size={16}
-                        strokeWidth="2"
-                      />
-                    )}
-                  </div>
-                ) : (
+        <FixedSizeList
+          height={260}
+          itemCount={files.length}
+          itemSize={40}
+          width="100%"
+        >
+          {({ index, style }) => (
+            <div
+              key={index}
+              className="flex items-center justify-between border-b border-gray-200 p-2"
+              style={style}
+            >
+              <span className="truncate">{files[index].path}</span>
+              <div className="flex items-center">
+                {uploadStatus[index] === 'success' ? (
+                  <CircleCheckBig
+                    className="stroke-green-500"
+                    size={16}
+                    strokeWidth="2"
+                  />
+                ) : uploadStatus[index] === 'failed' ? (
+                  <CircleX
+                    className="stroke-red-500"
+                    size={16}
+                    strokeWidth="2"
+                  />
+                ) : uploadStatus[index] === 'uploading' ? (
+                  <CircleDashed
+                    className="animate-spin stroke-gray-500"
+                    size={16}
+                    strokeWidth="2"
+                  />
+                ) : null}
+                {!isUploading && (
                   <button
-                    className="cursor-pointer p-2"
+                    className="ml-2 cursor-pointer p-1"
                     onClick={() => handleRemoveFile(index)}
+                    disabled={uploadStatus[index] === 'success'}
                   >
                     <X
                       color="red"
@@ -285,18 +256,23 @@ export default function ImagePreSignedForm({
                     />
                   </button>
                 )}
-              </li>
-            )}
-          </FixedSizeList>
-        </ul>
+              </div>
+            </div>
+          )}
+        </FixedSizeList>
       )}
       {isUploading ? (
         <Button
           onClick={handleClose}
           variant={isFailed ? 'red' : 'blue'}
-          disabled={!isUploaded && !isFailed}
         >
-          {isFailed ? '업로드 실패 (닫기)' : isUploaded ? '업로드 완료 (닫기)' : `업로드 중... ${progress}%`}
+          {isFailed
+            ? '업로드 실패 (닫기)'
+            : isUploaded
+              ? '업로드 완료 (닫기)'
+              : totalProgress === 0
+                ? '업로드 준비 중...'
+                : `업로드 중... ${totalProgress}%`}
         </Button>
       ) : (
         <Button
