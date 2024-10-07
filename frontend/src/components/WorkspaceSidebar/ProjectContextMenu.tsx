@@ -96,7 +96,6 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
       }
     }
   };
-
   const handleDelete = () => {
     if (node?.type === 'folder') {
       deleteFolderMutation.mutate(
@@ -104,7 +103,7 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
         {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['folder', projectId, folderId] });
-            queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+            queryClient.invalidateQueries({ queryKey: ['folder', projectId, node.id] });
             onRefetch();
           },
         }
@@ -116,7 +115,6 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['folder', projectId, folderId] });
             queryClient.invalidateQueries({ queryKey: ['image', node.id] });
-            queryClient.invalidateQueries({ queryKey: ['project', projectId] });
             onRefetch();
           },
         }
