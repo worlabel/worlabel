@@ -14,12 +14,12 @@ export default function Home() {
         <p className="text-5xl font-semibold leading-[60px] text-black">
           <span className="text-primary">웹 기반 오토 레이블링</span> 플랫폼
           <br />
-          <span className="text-primary">Worlabel</span>에 오신 것을 환영합니다
+          <span className="text-primary">WorLabel</span>에 오신 것을 환영합니다
         </p>
       </div>
       <div className="mt-4 text-center">
         <p className="text-xl font-light leading-[28px] text-black">
-          Worlabel로 레이블링 작업을 간소화하세요.
+          WorLabel 레이블링 작업을 간소화하세요.
           <br />
           브라우저에서 직접 레이블링을 자동화하여 빠르고 효율적인 워크플로우를 경험하세요.
         </p>
