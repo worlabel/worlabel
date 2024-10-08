@@ -199,10 +199,16 @@ export default function ImagePreSignedForm({
           ) : (
             <p className="text-gray-500">
               {uploadType === 'folder'
-                ? '폴더를 업로드하려면 여기를 클릭하거나 폴더를 드래그하여 여기에 놓으세요'
+                ? '폴더를 업로드하려면 여기를 클릭하거나'
                 : uploadType === 'zip'
-                  ? 'ZIP 파일을 업로드하려면 여기를 클릭하거나 ZIP 파일을 드래그하여 여기에 놓으세요'
-                  : '파일을 업로드하려면 여기를 클릭하거나 파일을 드래그하여 여기에 놓으세요'}
+                  ? '압축 파일을 업로드하려면 여기를 클릭하거나'
+                  : '파일을 업로드하려면 여기를 클릭하거나'}
+              <br />
+              {uploadType === 'folder'
+                ? '폴더를 드래그하여 여기에 놓으세요'
+                : uploadType === 'zip'
+                  ? '압축 파일을 드래그하여 여기에 놓으세요'
+                  : '파일을 드래그하여 여기에 놓으세요'}
             </p>
           )}
         </div>
@@ -217,7 +223,7 @@ export default function ImagePreSignedForm({
           {({ index, style }) => (
             <div
               key={index}
-              className="flex items-center justify-between border-b border-gray-200 p-2"
+              className="flex items-center justify-between border-gray-200 p-2"
               style={style}
             >
               <span className="truncate">{files[index].path}</span>
