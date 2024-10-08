@@ -102,8 +102,7 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
         { projectId, folderId: node.id, memberId },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['folder', projectId, folderId] });
-            queryClient.invalidateQueries({ queryKey: ['folder', projectId, node.id] });
+            queryClient.invalidateQueries({ queryKey: ['folder', projectId] });
             onRefetch();
           },
         }
@@ -113,7 +112,7 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
         { projectId, folderId, imageId: node.id },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['folder', projectId, folderId] });
+            queryClient.invalidateQueries({ queryKey: ['folder', projectId] });
             queryClient.invalidateQueries({ queryKey: ['image', node.id] });
             onRefetch();
           },
@@ -133,8 +132,7 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
         {
           onSuccess: () => {
             console.log(folderId, node?.id);
-            queryClient.invalidateQueries({ queryKey: ['folder', projectId, folderId] });
-            queryClient.invalidateQueries({ queryKey: ['folder', projectId, node?.id] });
+            queryClient.invalidateQueries({ queryKey: ['folder', projectId] });
 
             onRefetch();
           },
