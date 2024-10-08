@@ -1,42 +1,24 @@
 import * as React from 'react';
 import Modal from './Modal';
-import { cn } from '@/lib/utils';
-export interface FooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export default function Footer({ className, ...props }: FooterProps) {
-  const [isTermsOpen, setIsTermsOpen] = React.useState(false);
-  const [isPrivacyOpen, setIsPrivacyOpen] = React.useState(false);
+export default function Footer() {
+  const [modalState, setModalState] = React.useState<'terms' | 'privacy' | null>(null);
 
   return (
-    <footer
-      className={cn('mt-[100px] border-t border-gray-200 bg-gray-100', className)}
-      {...props}
-    >
-      {' '}
-      <div className="container py-10">
-        <div className="flex flex-col items-start gap-5">
-          <div className="relative">
-            <div className="font-heading text-lg text-gray-600 md:text-xl">WorLabel</div>
-            <p className="font-body-small mt-2 text-gray-500">Copyright © 2024 WorLabel All rights reserved</p>
+    <footer className="select-none bg-gray-100">
+      <div className="container py-8 text-gray-400">
+        <div className="body-small flex flex-col items-start gap-5">
+          <div>
+            <div className="heading">WorLabel</div>
+            <span>Copyright © 2024 WorLabel All rights reserved</span>
           </div>
-          <div className="inline-flex items-center gap-4">
-            <button
-              className="font-body-small text-gray-500 hover:text-primary"
-              onClick={() => setIsTermsOpen(true)}
-            >
-              서비스 이용약관
-            </button>
-            <div className="h-4 w-px bg-gray-400" />
-            <button
-              className="font-body-small text-gray-500 hover:text-primary"
-              onClick={() => setIsPrivacyOpen(true)}
-            >
-              개인정보 처리방침
-            </button>
+          <div className="inline-flex items-center gap-2">
+            <button onClick={() => setModalState('terms')}>서비스 이용약관</button>
+            <span className="h-3 w-px rounded bg-gray-400" />
+            <button onClick={() => setModalState('privacy')}>개인정보 처리방침</button>
           </div>
         </div>
       </div>
-      {/* Terms of Service Modal */}
       <Modal
         title="서비스 이용약관"
         content={
@@ -86,10 +68,9 @@ export default function Footer({ className, ...props }: FooterProps) {
             </p>
           </>
         }
-        open={isTermsOpen}
-        onClose={() => setIsTermsOpen(false)}
+        open={modalState === 'terms'}
+        onClose={() => setModalState(null)}
       />
-      {/* Privacy Policy Modal */}
       <Modal
         title="개인정보 처리방침"
         content={
@@ -142,8 +123,8 @@ export default function Footer({ className, ...props }: FooterProps) {
             </p>
           </>
         }
-        open={isPrivacyOpen}
-        onClose={() => setIsPrivacyOpen(false)}
+        open={modalState === 'privacy'}
+        onClose={() => setModalState(null)}
       />
     </footer>
   );
