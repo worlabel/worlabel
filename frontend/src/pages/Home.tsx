@@ -12,9 +12,9 @@ export default function Home() {
     <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50">
       <div className="text-center">
         <p className="text-5xl font-semibold leading-[60px] text-black">
-          <span className="text-primary">Worlabel</span>에 오신 것을 환영합니다
-          <br />
           <span className="text-primary">웹 기반 오토 레이블링</span> 플랫폼
+          <br />
+          <span className="text-primary">Worlabel</span>에 오신 것을 환영합니다
         </p>
       </div>
       <div className="mt-4 text-center">
