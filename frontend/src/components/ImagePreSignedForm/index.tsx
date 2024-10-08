@@ -148,8 +148,7 @@ export default function ImagePreSignedForm({
           onProgress: (progress) => {
             setUploadStatus((prevStatus) => {
               const completedFiles = Math.round((progress / 100) * files.length);
-              const newStatus = prevStatus.map((status, index) => (index < completedFiles ? 'success' : status));
-              return newStatus;
+              return prevStatus.map((status, index) => (index < completedFiles ? 'success' : status));
             });
           },
           useSingleUpload: uploadType === 'file',
@@ -166,7 +165,7 @@ export default function ImagePreSignedForm({
     }
   };
 
-  const totalProgress = Math.round((uploadStatus.filter((status) => status !== null).length / files.length) * 100);
+  const totalProgress = Math.round((uploadStatus.filter((status) => status === 'success').length / files.length) * 100);
 
   useEffect(() => {
     onFileCount(files.length);
