@@ -7,6 +7,7 @@ import com.worlabel.domain.folder.repository.FolderRepository;
 import com.worlabel.domain.image.entity.Image;
 import com.worlabel.domain.image.entity.LabelStatus;
 import com.worlabel.domain.image.entity.dto.*;
+import com.worlabel.domain.image.repository.ImageBulkRepository;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.domain.participant.entity.PrivilegeType;
 import com.worlabel.domain.project.entity.Project;
@@ -22,6 +23,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -321,13 +323,12 @@ public class ImageService {
 
     @Transactional
     @CheckPrivilege(PrivilegeType.EDITOR)
-    public List<ImagePresignedUrlResponse> uploadFolderByPresignedImage(final Integer memberId,
-                                                                        final List<ImageMetaRequest> imageMetaList,
+    public List<ImagePresignedUrlResponse> uploadFolderByPresignedImage(final List<ImageMetaRequest> imageMetaList,
                                                                         final Integer projectId,
                                                                         final Integer folderId) {
         Folder folder = getOrCreateFolder(folderId, projectId);
         List<ImagePresignedUrlResponse> presignedUrls = new ArrayList<>();
-
+        List<Image> imageList = new ArrayList<>();
         for (ImageMetaRequest meta : imageMetaList) {
             // UUID 생성 및 이미지 Key 지정
             String key = UUID.randomUUID().toString().substring(0,13);
@@ -336,21 +337,22 @@ public class ImageService {
 
             // Presigned URL 생성
             String presignedUrl = s3UploadService.generatePresignedUrl(key, extension);
-            log.debug("presignedUrl {}", presignedUrl);
 
             // DB에 이미지 메타데이터 저장
             Image image = Image.of(fileName, s3UploadService.addBucketPrefix(key), extension, folder);
-            imageRepository.save(image);
+            imageList.add(image);
 
             // Presigned URL과 함께 응답 데이터 생성
             ImagePresignedUrlResponse response = ImagePresignedUrlResponse.of(meta.getId(), presignedUrl);
             presignedUrls.add(response);
         }
 
+        imageAsyncService.saveImages(imageList);
+        log.debug("이미지 개수 {}",presignedUrls.size());
         return presignedUrls;
     }
-    // 이미지 가져오면서 프로젝트 소속 여부를 확인
 
+    // 이미지 가져오면서 프로젝트 소속 여부를 확인
     private Image getImageByIdAndFolderIdAndFolderProjectId(final Integer folderId, final Long imageId, final Integer projectId) {
         return imageRepository.findByIdAndFolderIdAndFolderProjectId(imageId, folderId, projectId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DATA_NOT_FOUND));
