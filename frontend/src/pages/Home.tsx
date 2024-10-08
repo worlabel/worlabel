@@ -9,16 +9,16 @@ export default function Home() {
   const { accessToken } = useAuthStore();
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50">
+    <div className="flex h-full w-full flex-col items-center justify-center break-keep bg-gray-50 px-10">
       <div className="text-center">
-        <p className="text-5xl font-semibold leading-[60px] text-black">
-          <span className="text-primary">웹 기반 오토 레이블링</span> 플랫폼
+        <p className="text-5xl font-semibold leading-[1.2] text-gray-900">
+          <span className="font-bold text-primary">웹 기반 오토 레이블링</span> 플랫폼
           <br />
-          <span className="text-primary">WorLabel</span>에 오신 것을 환영합니다
+          <span className="font-bold text-primary">WorLabel</span>에 오신 것을 환영합니다
         </p>
       </div>
       <div className="mt-4 text-center">
-        <p className="text-xl font-light leading-[28px] text-black">
+        <p className="body font-light leading-[28px] text-gray-500">
           WorLabel로 레이블링 작업을 간소화하세요.
           <br />
           브라우저에서 직접 레이블링을 자동화하여 빠르고 효율적인 워크플로우를 경험하세요.

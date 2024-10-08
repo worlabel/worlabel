@@ -15,7 +15,7 @@ export default function PageLayout() {
             </main>
           </Suspense>
         </div>
-        <Footer className="mt-0" />
+        <Footer />
       </div>
     </>
   );
