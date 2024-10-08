@@ -1,12 +1,6 @@
 import React from 'react';
 import { Menu } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../ui/dialogCustom';
 import ImagePreSignedForm from '../ImagePreSignedForm';
 
@@ -22,8 +16,6 @@ export default function WorkspaceDropdownMenu({
   const [isOpenUpload, setIsOpenUpload] = React.useState<boolean>(false);
   const [fileCount, setFileCount] = React.useState<number>(0);
   const [uploadType, setUploadType] = React.useState<'file' | 'folder' | 'zip'>('file');
-
-  const handleCloseUpload = () => setIsOpenUpload(false);
 
   const handleFileCount = (fileCount: number) => {
     setFileCount(fileCount);
@@ -44,7 +36,6 @@ export default function WorkspaceDropdownMenu({
           >
             파일 업로드
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
               setUploadType('folder');
@@ -53,7 +44,6 @@ export default function WorkspaceDropdownMenu({
           >
             폴더 업로드
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
               setUploadType('zip');
@@ -73,17 +63,17 @@ export default function WorkspaceDropdownMenu({
         <DialogContent className="max-w-2xl">
           <DialogHeader
             title={
-              fileCount > 0
-                ? `파일 업로드 (${fileCount})`
-                : uploadType === 'file'
-                  ? '파일 업로드'
-                  : uploadType === 'folder'
-                    ? '폴더 업로드'
-                    : '압축 파일 업로드'
+              uploadType === 'folder'
+                ? '폴더 업로드'
+                : uploadType === 'zip'
+                  ? '압축 파일 업로드'
+                  : fileCount > 0
+                    ? `파일 업로드 (${fileCount})`
+                    : '파일 업로드'
             }
           />
           <ImagePreSignedForm
-            onClose={handleCloseUpload}
+            onClose={() => setIsOpenUpload(false)}
             onRefetch={onRefetch}
             onFileCount={handleFileCount}
             projectId={projectId}

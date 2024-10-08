@@ -147,7 +147,7 @@ export default function WorkspaceBrowseLayout() {
                   </NavLink>
                 ))
               ) : (
-                <p className="text-gray-500">워크스페이스가 없습니다.</p>
+                <p className="p-2 text-gray-500">워크스페이스가 없습니다.</p>
               )}
             </div>
           </div>
