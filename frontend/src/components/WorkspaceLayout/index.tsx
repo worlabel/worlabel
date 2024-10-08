@@ -46,7 +46,7 @@ export default function WorkspaceLayout() {
 
   return (
     <>
-      <Header className="fixed left-0 top-0" />
+      <Header />
       <div className="mt-16 h-[calc(100vh-64px)] w-screen">
         <ResizablePanelGroup direction="horizontal">
           <WorkspaceSidebar

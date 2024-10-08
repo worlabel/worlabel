@@ -6,22 +6,14 @@ import { Suspense } from 'react';
 import AlarmPopover from './AlarmPopover';
 import ProfilePopover from './ProfilePopover';
 
-export interface HeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export default function Header({ className, ...props }: HeaderProps) {
+export default function Header() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
 
   const profile = useAuthStore((state) => state.profile);
 
   return (
-    <header
-      className={cn(
-        'flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 md:px-8 lg:px-10',
-        className
-      )}
-      {...props}
-    >
+    <header className="fixed left-0 top-0 z-40 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 md:px-8 lg:px-10">
       <div className="flex items-center gap-4 md:gap-10">
         <Link
           to="/"
