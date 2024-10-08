@@ -144,7 +144,7 @@ public class ProjectService {
         participantRepository.save(participant);
     }
 
-    @CheckPrivilege(PrivilegeType.ADMIN)
+    @CheckPrivilege(PrivilegeType.MANAGER)
     public void changeProjectMember(final Integer projectId, final ParticipantRequest participantRequest) {
         checkNotAdminParticipant(participantRequest.getMemberId(), projectId);
 
@@ -191,10 +191,12 @@ public class ProjectService {
             AiModel aiModel = getAiModel(request);
             AutoLabelingRequest autoLabelingRequest = AutoLabelingRequest.of(projectId, aiModel.getModelKey(), labelMap, imageRequestList);
 
-            log.debug("요청 {}", autoLabelingRequest);
+            log.debug("요청 이미지 개수 :{}", imageRequestList.size());
 
             List<AutoLabelingResult> list = aiService.postRequest(endPoint, autoLabelingRequest, List.class, this::converter);
+
             saveAutoLabelList(list);
+            log.debug("응답 이미지 개수 :{}", list.size());
 
             alarmService.save(memberId, Alarm.AlarmType.PREDICT);
         } finally {
@@ -207,7 +209,7 @@ public class ProjectService {
     public void saveAutoLabelList(final List<AutoLabelingResult> resultList) {
         for (AutoLabelingResult result : resultList) {
             Image image = getImage(result.getImageId());
-            if (image.getStatus() == LabelStatus.SAVE || image.getStatus() == LabelStatus.IN_PROGRESS) continue;
+            if (image.getStatus() == LabelStatus.SAVE || image.getStatus() == LabelStatus.REVIEW_REQUEST || image.getStatus() == LabelStatus.REVIEW_REJECT) continue;
             String dataPath = image.getDataPath();
             s3UploadService.uploadJson(result.getData(), dataPath);
             image.updateStatus(LabelStatus.IN_PROGRESS);

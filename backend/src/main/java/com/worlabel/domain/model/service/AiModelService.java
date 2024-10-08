@@ -191,4 +191,9 @@ public class AiModelService {
         }
     }
 
+    public MemoryResponse getMemory() {
+        String memoryResponse = aiRequestService.getRequest("/detection/memory", data -> data);
+        log.debug("memoryData {}", memoryResponse);
+        return gson.fromJson(memoryResponse, MemoryResponse.class);
+    }
 }
