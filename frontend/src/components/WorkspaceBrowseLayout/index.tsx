@@ -92,7 +92,7 @@ export default function WorkspaceBrowseLayout() {
 
   return (
     <>
-      <Header className="fixed left-0 top-0 w-full" />
+      <Header />
 
       <div className="flex min-h-screen flex-col justify-between">
         <div className="mt-16 flex flex-1">
