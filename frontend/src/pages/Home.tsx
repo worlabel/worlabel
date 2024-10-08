@@ -42,7 +42,6 @@ export default function Home() {
             asChild
             variant="blue"
             size="lg"
-            className="mt-8"
           >
             <Link to="/browse">시작하기</Link>
           </Button>
