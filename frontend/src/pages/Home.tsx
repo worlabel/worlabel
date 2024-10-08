@@ -19,7 +19,7 @@ export default function Home() {
       </div>
       <div className="mt-4 text-center">
         <p className="text-xl font-light leading-[28px] text-black">
-          WorLabel, 레이블링 작업을 간소화하세요.
+          WorLabel로 레이블링 작업을 간소화하세요.
           <br />
           브라우저에서 직접 레이블링을 자동화하여 빠르고 효율적인 워크플로우를 경험하세요.
         </p>
