@@ -28,7 +28,10 @@ export default function Header({ className, ...props }: HeaderProps) {
           className={cn('text-[20px] font-normal tracking-[-1.60px] text-black sm:text-[24px] md:text-[32px]')}
           style={{ fontFamily: "'Offside-Regular', Helvetica" }}
         >
-          WorLabel
+          <img
+            src="/worlabel.svg"
+            alt="WorLabel"
+          />
         </Link>
 
         {!isHomePage && profile && (
