@@ -2,6 +2,7 @@ package com.worlabel.domain.image.service;
 
 import com.worlabel.domain.folder.entity.Folder;
 import com.worlabel.domain.image.entity.Image;
+import com.worlabel.domain.image.repository.ImageBulkRepository;
 import com.worlabel.domain.image.repository.ImageRepository;
 import com.worlabel.global.exception.CustomException;
 import com.worlabel.global.exception.ErrorCode;
@@ -25,6 +26,7 @@ public class ImageAsyncService {
 
     private final S3UploadService s3UploadService;
     private final ImageRepository imageRepository;
+    private final ImageBulkRepository imageBulkRepository;
     private final ThreadPoolTaskExecutor imageUploadExecutor;
 
     @Async("imageUploadExecutor")
@@ -71,5 +73,11 @@ public class ImageAsyncService {
 
     private String getExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    @Transactional
+    @Async("imageUploadExecutor")
+    public void saveImages(final List<Image> imageList) {
+        imageBulkRepository.saveAll(imageList);
     }
 }

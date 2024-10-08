@@ -56,11 +56,10 @@ public class ImageController {
     @Operation(summary = "이미지에 대한 Presigned ", description = "이미지에 대한 Presigned 주소를 받아옵니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR})
     public List<ImagePresignedUrlResponse> uploadFolderByPresignedImage(
-            @CurrentUser final Integer memberId,
             @RequestBody final List<ImageMetaRequest> imageMetaList,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("folder_id") final Integer folderId) {
-        return imageService.uploadFolderByPresignedImage(memberId, imageMetaList, projectId, folderId);
+        return imageService.uploadFolderByPresignedImage(imageMetaList, projectId, folderId);
     }
 
     @GetMapping("/folders/{folder_id}/images/{image_id}")
@@ -80,7 +79,6 @@ public class ImageController {
     @Operation(summary = "이미지 폴더 이동", description = "이미지가 위치한 폴더를 변경합니다.")
     @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.NOT_AUTHOR, ErrorCode.SERVER_ERROR, ErrorCode.PARTICIPANT_EDITOR_UNAUTHORIZED})
     public void moveFolderImage(
-            @CurrentUser final Integer memberId,
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId,
@@ -97,7 +95,6 @@ public class ImageController {
             @PathVariable("folder_id") final Integer folderId,
             @PathVariable("project_id") final Integer projectId,
             @PathVariable("image_id") final Long imageId) {
-        log.debug("project: {} , folder: {}, 삭제하려는 이미지: {}, 현재 로그인 중인 사용자 : {}", projectId, folderId, imageId);
         imageService.deleteImage(projectId, folderId, imageId);
     }
 
