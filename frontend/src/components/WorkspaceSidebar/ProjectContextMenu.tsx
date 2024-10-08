@@ -182,7 +182,7 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
               id="uploadZip"
               onClick={handleItemClick}
             >
-              ZIP 파일 업로드
+              압축 파일 업로드
             </Item>
           </>
         )}
@@ -202,7 +202,17 @@ export default function ProjectContextMenu({ projectId, folderId, node, onRefetc
       >
         <DialogTrigger asChild></DialogTrigger>
         <DialogContent className="max-w-2xl">
-          <DialogHeader title={fileCount > 0 ? `업로드 (${fileCount})` : '업로드'} />
+          <DialogHeader
+            title={
+              uploadType === 'folder'
+                ? '폴더 업로드'
+                : uploadType === 'zip'
+                  ? '압축 파일 업로드'
+                  : fileCount > 0
+                    ? `파일 업로드 (${fileCount})`
+                    : '파일 업로드'
+            }
+          />
           <ImagePreSignedForm
             onClose={() => setIsOpenUpload(false)}
             onRefetch={onRefetch}
