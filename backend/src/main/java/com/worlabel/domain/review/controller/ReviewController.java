@@ -1,0 +1,112 @@
+package com.worlabel.domain.review.controller;
+
+import com.worlabel.domain.review.entity.dto.ReviewDetailResponse;
+import com.worlabel.domain.review.entity.dto.ReviewRequest;
+import com.worlabel.domain.review.entity.dto.ReviewResponse;
+import com.worlabel.domain.review.service.ReviewService;
+import com.worlabel.global.annotation.CurrentUser;
+import com.worlabel.global.config.swagger.SwaggerApiError;
+import com.worlabel.global.config.swagger.SwaggerApiSuccess;
+import com.worlabel.global.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/projects/{project_id}/reviews")
+@RequiredArgsConstructor
+@Tag(name = "리뷰 관련 API")
+public class ReviewController {
+
+    private final ReviewService reviewService;
+
+    @PostMapping
+    @SwaggerApiSuccess(description = "리뷰를 성공적으로 생성합니다.")
+    @Operation(summary = "리뷰 생성", description = "리뷰를 생성합니다..")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public ReviewResponse createReview(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @RequestBody @Validated final ReviewRequest reviewRequest) {
+        return reviewService.createReview(memberId, projectId, reviewRequest);
+    }
+
+    // 리뷰 조회(상태별로)
+    @GetMapping
+    @SwaggerApiSuccess(description = "리뷰를 상태별로 성공적으로 조회합니다.")
+    @Operation(summary = "리뷰를 상태별로 조회", description = "리뷰를 상태별로 조회합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public List<ReviewResponse> getReviewByProject(
+            @PathVariable("project_id") final Integer projectId,
+            @Parameter(name = "리뷰 상태", description = "리뷰 상태", example = "APPROVED") @RequestParam(value = "reviewStatus", required = false) final String reviewStatusRequest,
+            @Parameter(name = "마지막 리뷰 id", description = "마지막 리뷰 id를 넣으면 그 아래 부터 가져옴, 넣지않으면 가장 최신", example = "1") @RequestParam(required = false) Integer lastReviewId,
+            @Parameter(name = "가져올 리뷰 수", description = "가져올 리뷰 수 default = 10", example = "20") @RequestParam(defaultValue = "10") Integer limitPage,
+            @Parameter(name = "정렬방향", description = "0이면 역순(최신순), 1이면 정순(오래된순)", example = "0") @RequestParam(defaultValue = "0") Integer sort) {
+        return reviewService.getReviewByProjectId(projectId, reviewStatusRequest, lastReviewId, limitPage, sort);
+    }
+
+    // 리뷰 단건 조회
+    @GetMapping("/{review_id}")
+    @SwaggerApiSuccess(description = "리뷰 단건을 성공적으로 조회합니다.")
+    @Operation(summary = "리뷰 단건 조회", description = "리뷰 단건 조회합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public ReviewDetailResponse getReviewById(
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId) {
+        return reviewService.getReviewById(projectId, reviewId);
+    }
+
+    // 리뷰 수정
+    @PutMapping("/{review_id}")
+    @SwaggerApiSuccess(description = "리뷰를 성공적으로 수정합니다.")
+    @Operation(summary = "리뷰를 수정", description = "리뷰를 수정합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public ReviewResponse updateReview(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId,
+            @RequestBody ReviewRequest reviewUpdateRequest) {
+        return reviewService.updateReview(memberId, reviewId, reviewUpdateRequest);
+    }
+
+    // 리뷰 승낙
+    @PutMapping("/{review_id}/approve")
+    @SwaggerApiSuccess(description = "리뷰를 승낙합니다.")
+    @Operation(summary = "리뷰 요청 승낙", description = "리뷰 승낙합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public void approveReview(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId) {
+        reviewService.approveReview(memberId, projectId, reviewId);
+    }
+
+    // 리뷰 거절
+    @PutMapping("/{review_id}/reject")
+    @SwaggerApiSuccess(description = "리뷰를 거절합니다.")
+    @Operation(summary = "리뷰 요청 거절", description = "리뷰 거절합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public void rejectReview(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId) {
+        reviewService.rejectReview(memberId, projectId, reviewId);
+    }
+
+    // 리뷰 삭제
+    @DeleteMapping("/{review_id}")
+    @SwaggerApiSuccess(description = "리뷰를 성공적으로 삭제합니다.")
+    @Operation(summary = "리뷰를 삭제", description = "리뷰를 삭제합니다.")
+    @SwaggerApiError({ErrorCode.BAD_REQUEST, ErrorCode.PARTICIPANT_UNAUTHORIZED, ErrorCode.SERVER_ERROR})
+    public void deleteReview(
+            @CurrentUser final Integer memberId,
+            @PathVariable("project_id") final Integer projectId,
+            @PathVariable("review_id") final Integer reviewId) {
+        reviewService.deleteReview(memberId, reviewId);
+    }
+}
