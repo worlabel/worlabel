@@ -19,7 +19,9 @@ export default function WorkspaceNavigation() {
   const workspaces = workspacesResponse?.workspaceResponses || [];
 
   const activeWorkspaceId = workspaceId ?? workspaces[0]?.id;
-  const activeProjectId: number = Number(location.pathname.split('/')[3] || '0');
+  const activeProjectId: number = location.pathname.includes('/request')
+    ? 0
+    : Number(location.pathname.split('/')[3] || '0');
 
   if (workspaces.length === 0) {
     return <div></div>;
