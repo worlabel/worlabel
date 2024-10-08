@@ -11,55 +11,74 @@ export default function useUploadFiles() {
     folderId,
     memberId,
     onProgress,
+    useSingleUpload = false,
   }: {
     files: { path: string; file: File }[];
     projectId: number;
     folderId: number;
     memberId: number;
     onProgress: (progress: number) => void;
+    useSingleUpload?: boolean;
   }) => {
     const folderIdMap: { [path: string]: number } = { '': folderId };
 
-    const foldersToCreate = Array.from(new Set(files.map(({ path }) => path.split('/').slice(0, -1).join('/'))));
-    foldersToCreate.sort();
+    if (!useSingleUpload) {
+      const foldersToCreate = Array.from(new Set(files.map(({ path }) => path.split('/').slice(0, -1).join('/'))));
+      foldersToCreate.sort();
 
-    for (const folderPath of foldersToCreate) {
-      if (folderPath) {
-        const pathSegments = folderPath.split('/');
-        const parentPath = pathSegments.slice(0, -1).join('/');
-        const folderName = pathSegments[pathSegments.length - 1];
+      for (const folderPath of foldersToCreate) {
+        if (folderPath) {
+          const pathSegments = folderPath.split('/');
+          const parentPath = pathSegments.slice(0, -1).join('/');
+          const folderName = pathSegments[pathSegments.length - 1];
 
-        const parentId = folderIdMap[parentPath] || folderId;
+          const parentId = folderIdMap[parentPath] || folderId;
 
-        const newFolder = await createFolderMutation.mutateAsync({
-          projectId,
-          folderData: {
-            title: folderName,
-            parentId: parentId,
-          },
-        });
+          const newFolder = await createFolderMutation.mutateAsync({
+            projectId,
+            folderData: {
+              title: folderName,
+              parentId: parentId,
+            },
+          });
 
-        folderIdMap[folderPath] = newFolder.id;
+          folderIdMap[folderPath] = newFolder.id;
+        }
       }
     }
 
-    let progress = 0;
+    let completedFiles = 0;
     const totalFiles = files.length;
 
-    for (const { path, file } of files) {
-      const folderPath = path.split('/').slice(0, -1).join('/');
-      const targetFolderId = folderIdMap[folderPath] || folderId;
-
+    if (useSingleUpload) {
       await uploadImageMutation.mutateAsync({
         memberId,
         projectId,
-        folderId: targetFolderId,
-        files: [file],
-        progressCallback: (value) => {
-          progress += value / totalFiles;
+        folderId,
+        files: files.map(({ file }) => file),
+        progressCallback: (progressValue: number) => {
+          const progress = (progressValue / totalFiles) * 100;
           onProgress(Math.round(progress));
         },
       });
+    } else {
+      for (const { path, file } of files) {
+        const folderPath = path.split('/').slice(0, -1).join('/');
+        const targetFolderId = folderIdMap[folderPath] || folderId;
+
+        await uploadImageMutation.mutateAsync({
+          memberId,
+          projectId,
+          folderId: targetFolderId,
+          files: [file],
+          progressCallback: (progressValue: number) => {
+            const progress = ((completedFiles + progressValue / 100) / totalFiles) * 100;
+            onProgress(Math.round(progress));
+          },
+        });
+
+        completedFiles += 1;
+      }
     }
   };
 
