@@ -73,13 +73,16 @@ def get_classes(label_map:dict[str: int], model_names: dict[int, str]):
 def run_predictions(model, image, request, classes):
     try:
         with torch.no_grad():
-            result = model.predict(
-                source=image,
-                iou=request.iou_threshold,
-                conf=request.conf_threshold,
-                classes=classes
-            )
-            return result
+            results = []
+            for img in image:
+                result = model.predict(
+                    source=[img],
+                    iou=request.iou_threshold,
+                    conf=request.conf_threshold,
+                    classes=classes
+                )
+                results += result
+        return results
     except Exception as e:
         raise HTTPException(status_code=500, detail="exception in run_predictions: " + str(e))
 
@@ -122,7 +125,7 @@ def get_random_color():
     random_number = random.randint(0, 0xFFFFFF)
     return f"#{random_number:06X}"
 
-@router.post("/train")
+@router.post("/train", response_model=TrainResponse)
 async def detection_train(request: TrainRequest):
 
     send_slack_message(f"Detection train 요청 projectId : {request.project_id}, 이미지 개수:{len(request.data)}", status="success")

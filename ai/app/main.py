@@ -24,15 +24,16 @@ async def resource_cleaner_middleware(request: Request, call_next):
     start_time = time.time()
     try:
         response = await call_next(request)
+        return response
     except Exception as exc:
         raise exc
     finally:
         process_time = time.time() - start_time
         if request.method != "GET":
             send_slack_message(f"처리 시간: {process_time}초")
-        gc.collect()
+        # gc.collect()
         torch.cuda.empty_cache()
-    return response
+    
 
 # 예외 처리기
 @app.exception_handler(HTTPException)
