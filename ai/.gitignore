@@ -1,0 +1,42 @@
+# Python 기본
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# 환경 설정 파일
+.env
+*.env
+
+# 패키지 디렉토리
+.venv/
+venv/
+env/
+
+# 빌드 디렉토리
+build/
+dist/
+*.egg-info/
+
+# 로그 파일
+*.log
+
+# Jupyter Notebook 체크포인트
+.ipynb_checkpoints
+
+# IDE 관련 파일
+.vscode/
+.idea/
+
+# MacOS 관련 파일
+.DS_Store
+
+# 테스트 파일
+test-data/
+
+# 리소스
+resources/
+datasets/
+*.pt
+
+*.jpg
